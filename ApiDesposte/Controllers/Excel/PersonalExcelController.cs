@@ -2,7 +2,7 @@ using ClosedXML.Excel;
 using Microsoft.AspNetCore.Mvc;
 using System.IO;
 
-namespace ApiDesposte.Controllers
+namespace ApiDesposte.Controllers.Excel
 {
     [ApiController]
     [Route("api/[controller]")]
