@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Analítico Presupuesto 2027</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #1F4E78;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --border: #cbd5e1;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); color: var(--text); padding: 20px; }
+
+        .header { margin-bottom: 20px; border-bottom: 2px solid var(--border); padding-bottom: 10px; }
+        .header h1 { color: var(--primary); font-size: 22px; }
+
+        /* Tarjetas KPI */
+        .kpi-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .kpi-card {
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            border-left: 5px solid var(--primary);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .kpi-title { font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase; }
+        .kpi-value { font-size: 20px; font-weight: 700; color: var(--primary); margin-top: 5px; }
+
+        /* Grid del Dashboard */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        .full-width { grid-column: span 2; }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 18px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border);
+        }
+        .card h3 { font-size: 15px; margin-bottom: 15px; color: var(--primary); text-align: center; }
+
+        .chart-container { position: relative; height: 320px; width: 100%; }
+        .chart-container.large { height: 380px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>📊 Dashboard Analítico de Presupuesto 2027</h1>
+    </div>
+
+    <!-- Indicadores Clave de Desempeño (KPIs) -->
+    <div class="kpi-container">
+        <div class="kpi-card">
+            <div class="kpi-title">Presupuesto Total</div>
+            <div class="kpi-value" id="kpiTotal">S/ 0.00</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-title">Total Registros</div>
+            <div class="kpi-value" id="kpiRegistros">0</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-title">Centro Costo Mayor Monto</div>
+            <div class="kpi-value" id="kpiTopCeco" style="font-size: 14px;">-</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-title">Grupo Mayor Monto</div>
+            <div class="kpi-value" id="kpiTopGrupo" style="font-size: 14px;">-</div>
+        </div>
+    </div>
+
+    <!-- Visualizaciones Graficas -->
+    <div class="dashboard-grid">
+        <!-- Tendencia Mensual y Acumulada -->
+        <div class="card full-width">
+            <h3>Evolución Mensual del Presupuesto</h3>
+            <div class="chart-container large">
+                <canvas id="chartMes"></canvas>
+            </div>
+        </div>
+
+        <!-- Trimestres -->
+        <div class="card">
+            <h3>Distribución por Trimestre (Trim)</h3>
+            <div class="chart-container">
+                <canvas id="chartTrimestre"></canvas>
+            </div>
+        </div>
+
+        <!-- Grupos -->
+        <div class="card">
+            <h3>Análisis por Grupo (Ngrupo)</h3>
+            <div class="chart-container">
+                <canvas id="chartGrupo"></canvas>
+            </div>
+        </div>
+
+        <!-- Clases -->
+        <div class="card">
+            <h3>Distribución por Clase (Nclase)</h3>
+            <div class="chart-container">
+                <canvas id="chartClase"></canvas>
+            </div>
+        </div>
+
+        <!-- Centros de Costos -->
+        <div class="card">
+            <h3>Presupuesto por Centro de Costo (CentroCostos)</h3>
+            <div class="chart-container">
+                <canvas id="chartCentroCosto"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "http://localhost:5000/api/presupuesto/dashboard-data";
+
+        window.addEventListener('DOMContentLoaded', cargarDashboard);
+
+        async function cargarDashboard() {
+            try {
+                const res = await fetch(API_URL);
+                const data = await res.json();
+
+                if (!data || data.length === 0) return;
+
+                // Buscar la columna numérica principal (Presupuesto, Monto, Importe, etc.)
+                const campoMonto = obtenerCampoNumerico(data[0]);
+
+                // 1. Actualizar KPIs
+                calcularKPIs(data, campoMonto);
+
+                // 2. Agrupar datos por campos estándar de la tabla T_Cabecera
+                const datosMes = agrupar(data, obtenerNombreCampo(data[0], ['Mes', 'MES']), campoMonto);
+                const datosTrim = agrupar(data, obtenerNombreCampo(data[0], ['Trim', 'Trimestre', 'TRIM']), campoMonto);
+                const datosGrupo = agrupar(data, obtenerNombreCampo(data[0], ['Ngrupo', 'Grupo', 'GRUPO']), campoMonto);
+                const datosClase = agrupar(data, obtenerNombreCampo(data[0], ['Nclase', 'Clase', 'CLASE']), campoMonto);
+                const datosCeco = agrupar(data, obtenerNombreCampo(data[0], ['CentroCostos', 'CentroCosto', 'CECO']), campoMonto);
+
+                // 3. Renderizar Gráficos
+                crearGraficoBarras('chartMes', 'Presupuesto (S/)', datosMes.etiquetas, datosMes.valores, '#1F4E78');
+                crearGraficoDona('chartTrimestre', datosTrim.etiquetas, datosTrim.valores);
+                crearGraficoBarrasHorizontales('chartGrupo', datosGrupo.etiquetas, datosGrupo.valores, '#16a34a');
+                crearGraficoDona('chartClase', datosClase.etiquetas, datosClase.valores);
+                crearGraficoBarrasHorizontales('chartCentroCosto', datosCeco.etiquetas, datosCeco.valores, '#d97706');
+
+            } catch (err) {
+                console.error("Error al cargar dashboard:", err);
+            }
+        }
+
+        function obtenerCampoNumerico(objFila) {
+            const posibles = ['Presupuesto', 'Monto', 'Importe', 'Total', 'PRESUPUESTO'];
+            for (let p of posibles) {
+                if (p in objFila) return p;
+            }
+            // Retorna el primer campo que sea de tipo número
+            return Object.keys(objFila).find(k => typeof objFila[k] === 'number') || Object.keys(objFila)[0];
+        }
+
+        function obtenerNombreCampo(objFila, opciones) {
+            for (let op of opciones) {
+                if (op in objFila) return op;
+            }
+            return Object.keys(objFila)[0];
+        }
+
+        function agrupar(data, campoClave, campoMonto) {
+            const acc = data.reduce((r, i) => {
+                const k = i[campoClave] ? i[campoClave].toString().trim() : 'N/A';
+                r[k] = (r[k] || 0) + (parseFloat(i[campoMonto]) || 0);
+                return r;
+            }, {});
+            return { etiquetas: Object.keys(acc), valores: Object.values(acc) };
+        }
+
+        function calcularKPIs(data, campoMonto) {
+            const total = data.reduce((sum, item) => sum + (parseFloat(item[campoMonto]) || 0), 0);
+            document.getElementById('kpiTotal').innerText = 'S/ ' + total.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            document.getElementById('kpiRegistros').innerText = data.length;
+
+            const cecoCampo = obtenerNombreCampo(data[0], ['CentroCostos', 'CentroCosto', 'CECO']);
+            const grupoCampo = obtenerNombreCampo(data[0], ['Ngrupo', 'Grupo', 'GRUPO']);
+
+            const cecoAgrupado = agrupar(data, cecoCampo, campoMonto);
+            const grupoAgrupado = agrupar(data, grupoCampo, campoMonto);
+
+            document.getElementById('kpiTopCeco').innerText = obtenerMayor(cecoAgrupado);
+            document.getElementById('kpiTopGrupo').innerText = obtenerMayor(grupoAgrupado);
+        }
+
+        function obtenerMayor(objetoAgrupado) {
+            if (objetoAgrupado.etiquetas.length === 0) return '-';
+            let maxIdx = 0;
+            for (let i = 1; i < objetoAgrupado.valores.length; i++) {
+                if (objetoAgrupado.valores[i] > objetoAgrupado.valores[maxIdx]) maxIdx = i;
+            }
+            return objetoAgrupado.etiquetas[maxIdx];
+        }
+
+        function crearGraficoBarras(id, label, etiquetas, valores, color) {
+            new Chart(document.getElementById(id), {
+                type: 'bar',
+                data: { labels: etiquetas, datasets: [{ label: label, data: valores, backgroundColor: color }] },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+
+        function crearGraficoBarrasHorizontales(id, etiquetas, valores, color) {
+            new Chart(document.getElementById(id), {
+                type: 'bar',
+                data: { labels: etiquetas, datasets: [{ label: 'Presupuesto (S/)', data: valores, backgroundColor: color }] },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false }
+            });
+        }
+
+        function crearGraficoDona(id, etiquetas, valores) {
+            new Chart(document.getElementById(id), {
+                type: 'doughnut',
+                data: {
+                    labels: etiquetas,
+                    datasets: [{
+                        data: valores,
+                        backgroundColor: ['#1F4E78', '#16a34a', '#d97706', '#dc2626', '#9333ea', '#0891b2', '#475569']
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+    </script>
+</body>
+</html>

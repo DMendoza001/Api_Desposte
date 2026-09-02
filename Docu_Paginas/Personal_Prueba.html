@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Personal - Excel SharePoint</title>
+    <style>
+        :root {
+            --primary: #1F4E78;
+            --danger: #dc2626;
+            --success: #16a34a;
+            --bg: #f8fafc;
+            --border: #cbd5e1;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); padding: 20px; color: #1e293b; }
+
+        .container { display: grid; grid-template-columns: 320px 1fr; gap: 20px; }
+
+        .card { background: white; padding: 20px; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        h2 { font-size: 16px; margin-bottom: 15px; color: var(--primary); }
+
+        .form-group { margin-bottom: 12px; }
+        label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; color: #64748b; }
+        input { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 4px; outline: none; }
+
+        .btn-group { display: flex; gap: 8px; margin-top: 15px; }
+        button { flex: 1; padding: 9px; border: none; border-radius: 4px; font-weight: 600; cursor: pointer; color: white; }
+        .btn-save { background: var(--primary); }
+        .btn-clear { background: #64748b; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { background: var(--primary); color: white; padding: 10px; text-align: left; }
+        td { padding: 10px; border-bottom: 1px solid var(--border); }
+        tr:hover { background-color: #f1f5f9; }
+
+        .btn-action { padding: 4px 8px; font-size: 11px; margin-right: 4px; }
+        .btn-edit { background: #2563eb; }
+        .btn-delete { background: var(--danger); }
+    </style>
+</head>
+<body>
+
+    <h1 style="font-size: 20px; color: var(--primary); margin-bottom: 20px;">👤 Registro de Personal (Tabla T_Personal)</h1>
+
+    <div class="container">
+        <!-- Formulario CRUD -->
+        <div class="card">
+            <h2>Formulario Personal</h2>
+            <form id="formPersonal" onsubmit="guardarRegistro(event)">
+                <div class="form-group">
+                    <label>DNI</label>
+                    <input type="text" id="dni" required maxlength="8">
+                </div>
+                <div class="form-group">
+                    <label>Nombres y Apellidos</label>
+                    <input type="text" id="nombresApellidos" required>
+                </div>
+                <div class="form-group">
+                    <label>Teléfonos</label>
+                    <input type="text" id="telefonos">
+                </div>
+                <div class="btn-group">
+                    <button type="submit" class="btn-save">Guardar</button>
+                    <button type="button" class="btn-clear" onclick="limpiarFormulario()">Limpiar</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Informe / Tabla de Lectura -->
+        <div class="card">
+            <h2>Informe de Personal</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>DNI</th>
+                        <th>Nombres y Apellidos</th>
+                        <th>Teléfonos</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpoTabla">
+                    <tr><td colspan="4" style="text-align:center;">Cargando registros...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "http://localhost:5000/api/personalexcel";
+        let editando = false;
+
+        window.addEventListener('DOMContentLoaded', cargarInforme);
+
+        async function cargarInforme() {
+            const tbody = document.getElementById("cuerpoTabla");
+            try {
+                const res = await fetch(`${API_URL}/listar`);
+                const data = await res.json();
+
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No hay registros en la tabla.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = "";
+                data.forEach(item => {
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `
+                        <td><strong>${item.dni}</strong></td>
+                        <td>${item.nombresApellidos}</td>
+                        <td>${item.telefonos}</td>
+                        <td>
+                            <button class="btn-action btn-edit" onclick="cargarParaEditar('${item.dni}', '${item.nombresApellidos}', '${item.telefonos}')">Editar</button>
+                            <button class="btn-action btn-delete" onclick="eliminar('${item.dni}')">Eliminar</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:red;">Error al cargar datos.</td></tr>`;
+            }
+        }
+
+        async function guardarRegistro(e) {
+            e.preventDefault();
+            const dto = {
+                dni: document.getElementById("dni").value.trim(),
+                nombresApellidos: document.getElementById("nombresApellidos").value.trim(),
+                telefonos: document.getElementById("telefonos").value.trim()
+            };
+
+            const metodo = editando ? "PUT" : "POST";
+            const endpoint = editando ? `${API_URL}/actualizar` : `${API_URL}/crear`;
+
+            const res = await fetch(endpoint, {
+                method: metodo,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dto)
+            });
+
+            const data = await res.json();
+            alert(data.mensaje || data.error);
+
+            if (res.ok) {
+                limpiarFormulario();
+                cargarInforme();
+            }
+        }
+
+        function cargarParaEditar(dni, nombres, telefonos) {
+            document.getElementById("dni").value = dni;
+            document.getElementById("dni").readOnly = true;
+            document.getElementById("nombresApellidos").value = nombres;
+            document.getElementById("telefonos").value = telefonos;
+            editando = true;
+        }
+
+        async function eliminar(dni) {
+            if (!confirm(`¿Desea eliminar al DNI ${dni}?`)) return;
+
+            const res = await fetch(`${API_URL}/eliminar/${dni}`, { method: 'DELETE' });
+            const data = await res.json();
+            alert(data.mensaje || data.error);
+
+            if (res.ok) cargarInforme();
+        }
+
+        function limpiarFormulario() {
+            document.getElementById("formPersonal").reset();
+            document.getElementById("dni").readOnly = false;
+            editando = false;
+        }
+    </script>
+</body>
+</html>

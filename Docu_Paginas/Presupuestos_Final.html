@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Analítico Presupuesto 2027</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            /* Paleta de colores corporativa */
+            --primary: #1F4E78;
+            --primary-dark: #1B365D;
+            --secondary-blue: #34495E;
+            --green: #1E8449;
+            --orange: #D35400;
+            --red: #C0392B;
+            --purple: #8E44AD;
+            --cyan: #008B8B;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --border: #cbd5e1;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); color: var(--text); padding: 20px; }
+
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid var(--border); padding-bottom: 12px; }
+        .header h1 { color: var(--primary); font-size: 22px; }
+
+        /* Segmentador / Filtro */
+        .filter-container { display: flex; align-items: center; gap: 10px; background: var(--card-bg); padding: 8px 15px; border-radius: 6px; border: 1px solid var(--border); }
+        .filter-container label { font-size: 13px; font-weight: 700; color: var(--primary); }
+        .filter-container select { padding: 6px 12px; font-size: 13px; border-radius: 4px; border: 1px solid var(--border); outline: none; background-color: #fff; cursor: pointer; }
+
+        /* Tarjetas KPI */
+        .kpi-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .kpi-card {
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            border-left: 5px solid var(--primary);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .kpi-title { font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase; }
+        .kpi-value { font-size: 18px; font-weight: 700; color: var(--primary); margin-top: 5px; }
+
+        /* Grid del Dashboard */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        .full-width { grid-column: span 2; }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 18px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border);
+        }
+        .card h3 { font-size: 15px; margin-bottom: 15px; color: var(--primary); text-align: center; }
+
+        .chart-container { position: relative; height: 320px; width: 100%; }
+        .chart-container.large { height: 380px; }
+
+        /* Matriz / Tabla Dinámica */
+        .table-wrapper { max-height: 420px; overflow-y: auto; overflow-x: auto; border: 1px solid var(--border); border-radius: 6px; }
+        table.matrix-table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: left; }
+        table.matrix-table th { position: sticky; top: 0; background-color: var(--primary); color: #fff; padding: 10px; font-weight: 600; }
+        table.matrix-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); }
+        table.matrix-table tr:nth-child(even) { background-color: #f1f5f9; }
+        table.matrix-table tr:hover { background-color: #e2e8f0; }
+        .num-col { text-align: right; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>📊 Dashboard Analítico Presupuesto 2027</h1>
+        
+        <!-- Segmentador por Centro de Costo -->
+        <div class="filter-container">
+            <label for="cboCeco">Centro de Costo:</label>
+            <select id="cboCeco" onchange="filtrarPorCeco()">
+                <option value="TODOS">-- Todos los CECO --</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Tarjetas KPI -->
+    <div class="kpi-container">
+        <div class="kpi-card" style="border-left-color: var(--primary);">
+            <div class="kpi-title">Presupuesto Total</div>
+            <div class="kpi-value" id="kpiTotal">S/ 0.00</div>
+        </div>
+        <div class="kpi-card" style="border-left-color: var(--orange);">
+            <div class="kpi-title">Cantidad Total</div>
+            <div class="kpi-value" id="kpiCantidad">0</div>
+        </div>
+        <div class="kpi-card" style="border-left-color: var(--purple);">
+            <div class="kpi-title">Top Clase Presupuesto</div>
+            <div class="kpi-value" id="kpiTopClase" style="font-size: 13px;">-</div>
+        </div>
+        <div class="kpi-card" style="border-left-color: var(--green);">
+            <div class="kpi-title">Total Registros</div>
+            <div class="kpi-value" id="kpiRegistros">0</div>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- Gráficos Principales -->
+        <div class="card full-width">
+            <h3>Evolución Mensual del Presupuesto</h3>
+            <div class="chart-container large">
+                <canvas id="chartMes"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Distribución por Trimestre (Trim)</h3>
+            <div class="chart-container">
+                <canvas id="chartTrimestre"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Presupuesto por Grupo (Ngrupo)</h3>
+            <div class="chart-container">
+                <canvas id="chartGrupo"></canvas>
+            </div>
+        </div>
+
+        <div class="card full-width">
+            <h3>Distribución por Clase (Nclase)</h3>
+            <div class="chart-container large">
+                <canvas id="chartClase"></canvas>
+            </div>
+        </div>
+
+        <!-- Matriz / Tabla Dinámica de Detalle -->
+        <div class="card full-width">
+            <h3>Matriz de Detalle (Grupo ➔ Clase ➔ Artículo ➔ Cantidad & Presupuesto)</h3>
+            <div class="table-wrapper">
+                <table class="matrix-table">
+                    <thead>
+                        <tr>
+                            <th>Grupo (Ngrupo)</th>
+                            <th>Clase (Nclase)</th>
+                            <th>Código Artículo</th>
+                            <th>Nombre Artículo (NArticulo)</th>
+                            <th class="num-col">Cantidad</th>
+                            <th class="num-col">Presupuesto (S/)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbMatrizBody">
+                        <!-- Se llena dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+	const API_URL = "http://RAEVSALL001:8080/api/presupuesto/dashboard-data";       
+        const PALETA = ['#3A4758', '#89A5CC', '#647F93', '#0B6679', '#9EBEC3', '#98C7BB', '#76B1C7', '#CACDC3'];
+
+        let rawData = [];
+        let instGraficos = {};
+
+        window.addEventListener('DOMContentLoaded', inicializar);
+
+        async function inicializar() {
+            try {
+                const res = await fetch(API_URL);
+                rawData = await res.json();
+
+                if (!rawData || rawData.length === 0) return;
+
+                poblarSegmentadorCeco(rawData);
+                renderizarDashboard(rawData);
+            } catch (err) {
+                console.error("Error cargando los datos:", err);
+            }
+        }
+
+        // Poblar las opciones del filtro de CentroCostos
+        function poblarSegmentadorCeco(data) {
+            const campoCeco = obtenerNombreCampo(data[0], ['CentroCostos', 'CentroCosto', 'CECO']);
+            const cecos = [...new Set(data.map(i => i[campoCeco] ? i[campoCeco].toString().trim() : 'N/A'))].sort();
+            
+            const cbo = document.getElementById('cboCeco');
+            cecos.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c;
+                opt.innerText = c;
+                cbo.appendChild(opt);
+            });
+        }
+
+        // Evento de filtrado por segmentador
+        function filtrarPorCeco() {
+            const cecoSeleccionado = document.getElementById('cboCeco').value;
+            const campoCeco = obtenerNombreCampo(rawData[0], ['CentroCostos', 'CentroCosto', 'CECO']);
+
+            let datosFiltrados = rawData;
+            if (cecoSeleccionado !== 'TODOS') {
+                datosFiltrados = rawData.filter(i => (i[campoCeco] ? i[campoCeco].toString().trim() : 'N/A') === cecoSeleccionado);
+            }
+
+            renderizarDashboard(datosFiltrados);
+        }
+
+        function renderizarDashboard(data) {
+            const campoMonto = obtenerNombreCampo(data[0], ['Presupuesto', 'Monto', 'Importe', 'Total']);
+            const campoCant = obtenerNombreCampo(data[0], ['Cantidad', 'Cant', 'CANTIDAD']);
+
+            // 1. KPIs
+            calcularKPIs(data, campoMonto, campoCant);
+
+            // 2. Agrupaciones
+            const datosMes = agrupar(data, obtenerNombreCampo(data[0], ['Mes', 'MES']), campoMonto);
+            const datosTrim = agrupar(data, obtenerNombreCampo(data[0], ['Trim', 'Trimestre', 'TRIM']), campoMonto);
+            const datosGrupo = agrupar(data, obtenerNombreCampo(data[0], ['Ngrupo', 'Grupo', 'GRUPO']), campoMonto, true);
+            const datosClase = agrupar(data, obtenerNombreCampo(data[0], ['Nclase', 'Clase', 'CLASE']), campoMonto, true);
+
+            // 3. Render / Update de Gráficos
+            actualizarGrafico('chartMes', 'bar', datosMes.etiquetas, datosMes.valores, '#1F4E78');
+            actualizarGrafico('chartTrimestre', 'doughnut', datosTrim.etiquetas, datosTrim.valores, PALETA);
+            actualizarGrafico('chartGrupo', 'bar-h', datosGrupo.etiquetas, datosGrupo.valores, '#2A6F8A');
+            actualizarGrafico('chartClase', 'bar-h', datosClase.etiquetas, datosClase.valores, '#7E9FAA');
+
+            // 4. Matriz / Tabla Dinámica con Ordenamiento Jerárquico
+            renderizarMatriz(data, campoMonto, campoCant);
+        }
+
+        function renderizarMatriz(data, campoMonto, campoCant) {
+            const campoGrupo = obtenerNombreCampo(data[0], ['Ngrupo', 'Grupo', 'GRUPO']);
+            const campoClase = obtenerNombreCampo(data[0], ['Nclase', 'Clase', 'CLASE']);
+            const campoArtId = obtenerNombreCampo(data[0], ['Articulos', 'Articulo', 'Codigo']);
+            const campoArtNom = obtenerNombreCampo(data[0], ['NArticulo', 'NombreArticulo', 'Descripcion']);
+
+            const tbody = document.getElementById('tbMatrizBody');
+            tbody.innerHTML = '';
+
+            // Agrupar filas por Grupo + Clase + Código + Nombre
+            const matrizMap = {};
+
+            data.forEach(item => {
+                const g = item[campoGrupo] ? item[campoGrupo].toString().trim() : 'N/A';
+                const c = item[campoClase] ? item[campoClase].toString().trim() : 'N/A';
+                const idArt = item[campoArtId] ? item[campoArtId].toString().trim() : '-';
+                const nomArt = item[campoArtNom] ? item[campoArtNom].toString().trim() : '-';
+                const key = `${g}|${c}|${idArt}|${nomArt}`;
+
+                if (!matrizMap[key]) {
+                    matrizMap[key] = { grupo: g, clase: c, artId: idArt, artNom: nomArt, cant: 0, monto: 0 };
+                }
+
+                matrizMap[key].cant += (parseFloat(item[campoCant]) || 0);
+                matrizMap[key].monto += (parseFloat(item[campoMonto]) || 0);
+            });
+
+            // Ordenamiento jerárquico: 1. Grupo (A-Z) -> 2. Clase (A-Z) -> 3. Presupuesto (Mayor a Menor)
+            const filasOrdenadas = Object.values(matrizMap).sort((a, b) => {
+                const compGrupo = a.grupo.localeCompare(b.grupo, 'es', { numeric: true });
+                if (compGrupo !== 0) return compGrupo;
+
+                const compClase = a.clase.localeCompare(b.clase, 'es', { numeric: true });
+                if (compClase !== 0) return compClase;
+
+                return b.monto - a.monto; // Mayor a menor presupuesto dentro de la misma clase
+            });
+
+            // Inserción en la tabla
+            filasOrdenadas.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${row.grupo}</td>
+                    <td>${row.clase}</td>
+                    <td>${row.artId}</td>
+                    <td>${row.artNom}</td>
+                    <td class="num-col">${row.cant.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                    <td class="num-col">S/ ${row.monto.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function obtenerNombreCampo(obj, opciones) {
+            for (let op of opciones) if (op in obj) return op;
+            return Object.keys(obj)[0];
+        }
+
+        function agrupar(data, campoClave, campoMonto, ordenar = false) {
+            const acc = data.reduce((r, i) => {
+                const k = i[campoClave] ? i[campoClave].toString().trim() : 'N/A';
+                r[k] = (r[k] || 0) + (parseFloat(i[campoMonto]) || 0);
+                return r;
+            }, {});
+
+            let entradas = Object.entries(acc);
+            if (ordenar) entradas.sort((a, b) => b[1] - a[1]);
+
+            return { etiquetas: entradas.map(e => e[0]), valores: entradas.map(e => e[1]) };
+        }
+
+        function calcularKPIs(data, campoMonto, campoCant) {
+            const totalMonto = data.reduce((s, i) => s + (parseFloat(i[campoMonto]) || 0), 0);
+            const totalCant = data.reduce((s, i) => s + (parseFloat(i[campoCant]) || 0), 0);
+
+            document.getElementById('kpiTotal').innerText = 'S/ ' + totalMonto.toLocaleString('es-PE', { minimumFractionDigits: 2 });
+            document.getElementById('kpiCantidad').innerText = totalCant.toLocaleString('es-PE', { minimumFractionDigits: 2 });
+            document.getElementById('kpiRegistros').innerText = data.length;
+
+            const claseCampo = obtenerNombreCampo(data[0], ['Nclase', 'Clase', 'CLASE']);
+            document.getElementById('kpiTopClase').innerText = obtenerMayor(agrupar(data, claseCampo, campoMonto));
+        }
+
+        function obtenerMayor(objAgrupado) {
+            if (objAgrupado.etiquetas.length === 0) return '-';
+            let maxIdx = 0;
+            for (let i = 1; i < objAgrupado.valores.length; i++) {
+                if (objAgrupado.valores[i] > objAgrupado.valores[maxIdx]) maxIdx = i;
+            }
+            return objAgrupado.etiquetas[maxIdx];
+        }
+
+        function actualizarGrafico(idCanvas, tipo, etiquetas, valores, colores) {
+            if (instGraficos[idCanvas]) instGraficos[idCanvas].destroy();
+
+            const ctx = document.getElementById(idCanvas).getContext('2d');
+            let config = {
+                data: { labels: etiquetas, datasets: [{ label: 'Presupuesto (S/)', data: valores, backgroundColor: colores }] },
+                options: { responsive: true, maintainAspectRatio: false }
+            };
+
+            if (tipo === 'bar') {
+                config.type = 'bar';
+            } else if (tipo === 'bar-h') {
+                config.type = 'bar';
+                config.options.indexAxis = 'y';
+                config.options.plugins = { legend: { display: false } };
+            } else if (tipo === 'doughnut') {
+                config.type = 'doughnut';
+                config.options.plugins = { legend: { position: 'right' } };
+            }
+
+            instGraficos[idCanvas] = new Chart(ctx, config);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+@ApiDesposte_HostAddress = http://localhost:5101
+
+GET {{ApiDesposte_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

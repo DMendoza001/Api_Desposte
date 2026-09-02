@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Presupuesto 2027</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            /* Paleta extraída de tu gráfico */
+            --primary: #1F4E78;
+            --primary-dark: #1B365D;
+            --secondary-blue: #34495E;
+            --green: #1E8449;
+            --orange: #D35400;
+            --red: #C0392B;
+            --purple: #8E44AD;
+            --cyan: #008B8B;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --border: #cbd5e1;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); color: var(--text); padding: 20px; }
+
+        .header { margin-bottom: 20px; border-bottom: 2px solid var(--border); padding-bottom: 10px; }
+        .header h1 { color: var(--primary); font-size: 22px; }
+
+        /* Tarjetas KPI */
+        .kpi-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .kpi-card {
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            border-left: 5px solid var(--primary);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .kpi-title { font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase; }
+        .kpi-value { font-size: 18px; font-weight: 700; color: var(--primary); margin-top: 5px; }
+
+        /* Grid del Dashboard */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        .full-width { grid-column: span 2; }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 18px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border);
+        }
+        .card h3 { font-size: 15px; margin-bottom: 15px; color: var(--primary); text-align: center; }
+
+        .chart-container { position: relative; height: 350px; width: 100%; }
+        .chart-container.large { height: 380px; }
+        .chart-container.xlarge { height: 480px; } /* Más alto para ver bien la lista de clases */
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>📊 Dashboard Presupuesto 2027</h1>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-container">
+        <div class="kpi-card" style="border-left-color: var(--primary);">
+            <div class="kpi-title">Presupuesto Total</div>
+            <div class="kpi-value" id="kpiTotal">S/ 0.00</div>
+        </div>
+        <div class="kpi-card" style="border-left-color: var(--orange);">
+            <div class="kpi-title">Total Registros</div>
+            <div class="kpi-value" id="kpiRegistros">0</div>
+        </div>
+        <div class="kpi-card" style="border-left-color: var(--purple);">
+            <div class="kpi-title">Top Clase Presupuesto</div>
+            <div class="kpi-value" id="kpiTopClase" style="font-size: 13px;">-</div>
+        </div>
+        <div class="kpi-card" style="border-left-color: var(--green);">
+            <div class="kpi-title">Top Centro Costo</div>
+            <div class="kpi-value" id="kpiTopCeco" style="font-size: 13px;">-</div>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- Meses -->
+        <div class="card full-width">
+            <h3>Evolución Mensual del Presupuesto</h3>
+            <div class="chart-container large">
+                <canvas id="chartMes"></canvas>
+            </div>
+        </div>
+
+        <!-- Clases (Reemplazado Dona por Barras Horizontales) -->
+        <div class="card full-width">
+            <h3>Distribución por Clase (Nclase) - Top Registros</h3>
+            <div class="chart-container xlarge">
+                <canvas id="chartClase"></canvas>
+            </div>
+        </div>
+
+        <!-- Trimestres (Mantiene Dona porque solo son 4 ítems) -->
+        <div class="card">
+            <h3>Distribución por Trimestre (Trim)</h3>
+            <div class="chart-container">
+                <canvas id="chartTrimestre"></canvas>
+            </div>
+        </div>
+
+        <!-- Grupos -->
+        <div class="card">
+            <h3>Presupuesto por Grupo (Ngrupo)</h3>
+            <div class="chart-container">
+                <canvas id="chartGrupo"></canvas>
+            </div>
+        </div>
+
+        <!-- Centros de Costos -->
+        <div class="card full-width">
+            <h3>Presupuesto por Centro de Costo (CentroCostos)</h3>
+            <div class="chart-container large">
+                <canvas id="chartCentroCosto"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "http://localhost:5000/api/presupuesto/dashboard-data";
+        
+        // Colores de tu paleta
+        const PALETA = ['#1F4E78', '#D35400', '#8E44AD', '#1E8449', '#008B8B', '#C0392B', '#34495E', '#1B365D'];
+
+        window.addEventListener('DOMContentLoaded', cargarDashboard);
+
+        async function cargarDashboard() {
+            try {
+                const res = await fetch(API_URL);
+                const data = await res.json();
+                if (!data || data.length === 0) return;
+
+                const campoMonto = obtenerCampoNumerico(data[0]);
+
+                calcularKPIs(data, campoMonto);
+
+                const datosMes = agrupar(data, obtenerNombreCampo(data[0], ['Mes', 'MES']), campoMonto);
+                const datosTrim = agrupar(data, obtenerNombreCampo(data[0], ['Trim', 'Trimestre', 'TRIM']), campoMonto);
+                const datosGrupo = agrupar(data, obtenerNombreCampo(data[0], ['Ngrupo', 'Grupo', 'GRUPO']), campoMonto);
+                const datosClase = agrupar(data, obtenerNombreCampo(data[0], ['Nclase', 'Clase', 'CLASE']), campoMonto, true); // Ordenado
+                const datosCeco = agrupar(data, obtenerNombreCampo(data[0], ['CentroCostos', 'CentroCosto', 'CECO']), campoMonto, true);
+
+                // Graficar usando tu paleta corporativa
+                crearGraficoBarras('chartMes', 'Presupuesto (S/)', datosMes.etiquetas, datosMes.valores, '#1F4E78');
+                crearGraficoDona('chartTrimestre', datosTrim.etiquetas, datosTrim.valores);
+                crearGraficoBarrasHorizontales('chartGrupo', datosGrupo.etiquetas, datosGrupo.valores, '#1E8449');
+                crearGraficoBarrasHorizontales('chartClase', datosClase.etiquetas, datosClase.valores, '#8E44AD');
+                crearGraficoBarrasHorizontales('chartCentroCosto', datosCeco.etiquetas, datosCeco.valores, '#D35400');
+
+            } catch (err) {
+                console.error("Error cargando el dashboard:", err);
+            }
+        }
+
+        function obtenerCampoNumerico(obj) {
+            const pos = ['Presupuesto', 'Monto', 'Importe', 'Total', 'PRESUPUESTO'];
+            for (let p of pos) if (p in obj) return p;
+            return Object.keys(obj).find(k => typeof obj[k] === 'number') || Object.keys(obj)[0];
+        }
+
+        function obtenerNombreCampo(obj, opciones) {
+            for (let op of opciones) if (op in obj) return op;
+            return Object.keys(obj)[0];
+        }
+
+        function agrupar(data, campoClave, campoMonto, ordenar = false) {
+            const acc = data.reduce((r, i) => {
+                const k = i[campoClave] ? i[campoClave].toString().trim() : 'N/A';
+                r[k] = (r[k] || 0) + (parseFloat(i[campoMonto]) || 0);
+                return r;
+            }, {});
+
+            let entradas = Object.entries(acc);
+            if (ordenar) {
+                entradas.sort((a, b) => b[1] - a[1]); // Ordena de mayor a menor monto
+            }
+
+            return {
+                etiquetas: entradas.map(e => e[0]),
+                valores: entradas.map(e => e[1])
+            };
+        }
+
+        function calcularKPIs(data, campoMonto) {
+            const total = data.reduce((s, i) => s + (parseFloat(i[campoMonto]) || 0), 0);
+            document.getElementById('kpiTotal').innerText = 'S/ ' + total.toLocaleString('es-PE', { minimumFractionDigits: 2 });
+            document.getElementById('kpiRegistros').innerText = data.length;
+
+            const claseCampo = obtenerNombreCampo(data[0], ['Nclase', 'Clase', 'CLASE']);
+            const cecoCampo = obtenerNombreCampo(data[0], ['CentroCostos', 'CentroCosto', 'CECO']);
+
+            document.getElementById('kpiTopClase').innerText = obtenerMayor(agrupar(data, claseCampo, campoMonto));
+            document.getElementById('kpiTopCeco').innerText = obtenerMayor(agrupar(data, cecoCampo, campoMonto));
+        }
+
+        function obtenerMayor(objAgrupado) {
+            if (objAgrupado.etiquetas.length === 0) return '-';
+            let maxIdx = 0;
+            for (let i = 1; i < objAgrupado.valores.length; i++) {
+                if (objAgrupado.valores[i] > objAgrupado.valores[maxIdx]) maxIdx = i;
+            }
+            return objAgrupado.etiquetas[maxIdx];
+        }
+
+        function crearGraficoBarras(id, label, etiquetas, valores, color) {
+            new Chart(document.getElementById(id), {
+                type: 'bar',
+                data: { labels: etiquetas, datasets: [{ label: label, data: valores, backgroundColor: color }] },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+
+        function crearGraficoBarrasHorizontales(id, etiquetas, valores, color) {
+            new Chart(document.getElementById(id), {
+                type: 'bar',
+                data: { 
+                    labels: etiquetas, 
+                    datasets: [{ label: 'Presupuesto (S/)', data: valores, backgroundColor: color }] 
+                },
+                options: { 
+                    indexAxis: 'y', 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function crearGraficoDona(id, etiquetas, valores) {
+            new Chart(document.getElementById(id), {
+                type: 'doughnut',
+                data: {
+                    labels: etiquetas,
+                    datasets: [{
+                        data: valores,
+                        backgroundColor: PALETA
+                    }]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'right' } }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
