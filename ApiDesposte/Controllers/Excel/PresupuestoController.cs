@@ -41,8 +41,48 @@ namespace ApiDesposte.Controllers.Excel
                     fileBytes = ms.ToArray();
                 }
 
+                var msModificado = new MemoryStream();
+                msModificado.Write(fileBytes, 0, fileBytes.Length);
+                msModificado.Position = 0;
+
+                try
+                {
+                    using (var doc = DocumentFormat.OpenXml.Packaging.SpreadsheetDocument.Open(msModificado, true))
+                    {
+                        if (doc.WorkbookPart != null)
+                        {
+                            foreach (var wsPart in doc.WorkbookPart.WorksheetParts)
+                            {
+                                var pParts = wsPart.PivotTableParts.ToList();
+                                foreach (var p in pParts)
+                                {
+                                    wsPart.DeletePart(p);
+                                }
+                            }
+
+                            var pivotCaches = doc.WorkbookPart.PivotTableCacheDefinitionParts.ToList();
+                            foreach (var cache in pivotCaches)
+                            {
+                                doc.WorkbookPart.DeletePart(cache);
+                            }
+
+                            if (doc.WorkbookPart.Workbook != null)
+                            {
+                                doc.WorkbookPart.Workbook.PivotCaches?.Remove();
+                                doc.WorkbookPart.Workbook.Save();
+                            }
+                        }
+                    }
+                }
+                catch
+                {
+                    msModificado = new MemoryStream(fileBytes);
+                }
+
+                msModificado.Position = 0;
+
                 // Cargar el Excel desde la copia en memoria
-                using (var memoryStream = new MemoryStream(fileBytes))
+                using (var memoryStream = msModificado)
                 using (var workbook = new XLWorkbook(memoryStream))
                 {
                     var hoja = workbook.Worksheet(_nombreHoja);

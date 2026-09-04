@@ -1,6 +1,25 @@
-@ApiDesposte_HostAddress = http://localhost:5101
+@ApiDesposte_HostAddress = http://localhost:8080
 
-GET {{ApiDesposte_HostAddress}}/weatherforecast/
+### 1. Obtener Cabecera (T_Cabecera)
+GET {{ApiDesposte_HostAddress}}/api/presupuesto/cabecera
 Accept: application/json
 
-###
+### 2. Obtener ForeCast (T_ForeCast)
+GET {{ApiDesposte_HostAddress}}/api/presupuesto/forecast
+Accept: application/json
+
+### 3. Obtener Ambas Tablas (Consolidado Crudo)
+GET {{ApiDesposte_HostAddress}}/api/presupuesto/todo
+Accept: application/json
+
+### 4. COMPARATIVO COMPLETO (Unión T_Cabecera vs T_ForeCast por CECO, Mes, Grupo, Clase, Partida)
+GET {{ApiDesposte_HostAddress}}/api/comparativopresupuesto/datos-comparativo
+Accept: application/json
+
+### 5. Resumen Comparativo por CECO
+GET {{ApiDesposte_HostAddress}}/api/comparativopresupuesto/resumen-ceco
+Accept: application/json
+
+### 6. Resumen Comparativo por Mes
+GET {{ApiDesposte_HostAddress}}/api/comparativopresupuesto/resumen-mes
+Accept: application/json

@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Comparativo: Presupuesto vs ForeCast 2027</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            /* Paleta corporativa */
+            --primary: #1F4E78;
+            --primary-dark: #1B365D;
+            --secondary-blue: #34495E;
+            --budget-color: #3A4758;
+            /* Color 1 de la paleta */
+            --forecast-color: #0B6679;
+            /* Color 4 de la paleta */
+            --accent-blue: #89A5CC;
+            /* Color 2 de la paleta */
+            --accent-steel: #647F93;
+            /* Color 3 de la paleta */
+            --accent-sage: #9EBEC3;
+            /* Color 5 de la paleta */
+            --accent-mint: #98C7BB;
+            /* Color 6 de la paleta */
+            --accent-sky: #76B1C7;
+            /* Color 7 de la paleta */
+            --green: #1E8449;
+            --orange: #D35400;
+            --red: #C0392B;
+            --purple: #8E44AD;
+            --bg: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --text: #1E293B;
+            --text-muted: #64748B;
+            --border: #CBD5E1;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 12px;
+        }
+
+        .header h1 {
+            color: var(--primary);
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header .badge {
+            background: #E8F4FD;
+            color: var(--primary);
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        /* Filtros */
+        .filter-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            background: var(--card-bg);
+            padding: 12px 18px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .filter-group label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 6px 10px;
+            font-size: 12px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            outline: none;
+            background-color: #fff;
+            min-width: 140px;
+        }
+
+        .btn-reset {
+            margin-top: 18px;
+            padding: 6px 14px;
+            font-size: 12px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: #fff;
+            cursor: pointer;
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .btn-reset:hover {
+            background: #ECEFF1;
+        }
+
+        /* Tarjetas KPI */
+        .kpi-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .kpi-card {
+            background: var(--card-bg);
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            border-left: 5px solid var(--primary);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .kpi-title {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .kpi-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text);
+            margin-top: 5px;
+        }
+
+        .kpi-sub {
+            font-size: 11px;
+            margin-top: 4px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .kpi-positive {
+            color: var(--green);
+        }
+
+        .kpi-negative {
+            color: var(--red);
+        }
+
+        /* Grid de Gráficos */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 18px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border);
+        }
+
+        .card h3 {
+            font-size: 14px;
+            margin-bottom: 15px;
+            color: var(--primary);
+            font-weight: 700;
+            border-bottom: 1px solid #ECEFF1;
+            padding-bottom: 8px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 320px;
+            width: 100%;
+        }
+
+        .chart-container.large {
+            height: 360px;
+        }
+
+        /* Tabla Matriz */
+        .table-wrapper {
+            max-height: 480px;
+            overflow-y: auto;
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+        }
+
+        table.matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            text-align: left;
+        }
+
+        table.matrix-table th {
+            position: sticky;
+            top: 0;
+            background-color: var(--primary);
+            color: #fff;
+            padding: 10px;
+            font-weight: 600;
+            z-index: 2;
+        }
+
+        table.matrix-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        table.matrix-table tr:nth-child(even) {
+            background-color: #F8FAFC;
+        }
+
+        table.matrix-table tr:hover {
+            background-color: #EBF3FB;
+        }
+
+        .num-col {
+            text-align: right;
+            font-weight: 600;
+        }
+
+        .badge-diff {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .badge-positive {
+            background-color: #E8F8F5;
+            color: var(--green);
+        }
+
+        .badge-negative {
+            background-color: #FDEDEC;
+            color: var(--red);
+        }
+
+        .badge-neutral {
+            background-color: #EAEDED;
+            color: #5D6D7E;
+        }
+
+        .loading-overlay {
+            text-align: center;
+            padding: 40px;
+            font-size: 16px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <h1>📊 Comparativo: Presupuesto (T_Cabecera) vs ForeCast (T_ForeCast) <span class="badge">Año 2027</span></h1>
+        <div id="lblRegistros" style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Cargando datos...
+        </div>
+    </div>
+
+    <!-- Barra de Filtros / Segmentadores -->
+    <div class="filter-bar">
+        <div class="filter-group">
+            <label for="cboCeco">Centro de Costo</label>
+            <select id="cboCeco" onchange="aplicarFiltros()">
+                <option value="TODOS">-- Todos los CECO --</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="cboMes">Mes</label>
+            <select id="cboMes" onchange="aplicarFiltros()">
+                <option value="TODOS">-- Todos los Meses --</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="cboGrupo">Grupo</label>
+            <select id="cboGrupo" onchange="aplicarFiltros()">
+                <option value="TODOS">-- Todos los Grupos --</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="cboPartida">Partida Presupuestal</label>
+            <select id="cboPartida" onchange="aplicarFiltros()">
+                <option value="TODOS">-- Todas las Partidas --</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="txtBuscar">Buscar Partida / Clase</label>
+            <input type="text" id="txtBuscar" placeholder="Filtrar por texto..." oninput="aplicarFiltros()">
+        </div>
+
+        <button class="btn-reset" onclick="limpiarFiltros()">↺ Limpiar Filtros</button>
+    </div>
+
+    <!-- Tarjetas KPI -->
+    <div class="kpi-container">
+        <div class="kpi-card" style="border-left-color: var(--budget-color);">
+            <div class="kpi-title">Presupuesto Base (T_Cabecera)</div>
+            <div class="kpi-value" id="kpiPresupuesto">S/ 0.00</div>
+            <div class="kpi-sub">Total Planificado</div>
+        </div>
+
+        <div class="kpi-card" style="border-left-color: var(--forecast-color);">
+            <div class="kpi-title">ForeCast Proyectado (T_ForeCast)</div>
+            <div class="kpi-value" id="kpiForeCast">S/ 0.00</div>
+            <div class="kpi-sub">Total Proyectado</div>
+        </div>
+
+        <div class="kpi-card" id="cardVariacion" style="border-left-color: #D35400;">
+            <div class="kpi-title">Variación Neta (ForeCast - Presup.)</div>
+            <div class="kpi-value" id="kpiVariacion">S/ 0.00</div>
+            <div class="kpi-sub" id="kpiVariacionPct">0.00%</div>
+        </div>
+
+        <div class="kpi-card" style="border-left-color: var(--accent-blue);">
+            <div class="kpi-title">% Cumplimiento Global</div>
+            <div class="kpi-value" id="kpiCumplimiento">0.00%</div>
+            <div class="kpi-sub" id="kpiRegistrosCount">0 registros analizados</div>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- 1. Comparativo Mensual -->
+        <div class="card full-width">
+            <h3>📈 Comparativa Mensual: Presupuesto vs ForeCast</h3>
+            <div class="chart-container large">
+                <canvas id="chartMensual"></canvas>
+            </div>
+        </div>
+
+        <!-- 2. Comparativo por Grupo -->
+        <div class="card">
+            <h3>🏢 Comparativa por Grupo</h3>
+            <div class="chart-container">
+                <canvas id="chartGrupo"></canvas>
+            </div>
+        </div>
+
+        <!-- 3. Comparativo por Centro de Costos -->
+        <div class="card">
+            <h3>📍 Comparativa por Centro de Costos (CECO)</h3>
+            <div class="chart-container">
+                <canvas id="chartCeco"></canvas>
+            </div>
+        </div>
+
+        <!-- 4. Matriz de Detalle -->
+        <div class="card full-width">
+            <h3>📑 Matriz Comparativa Detallada por Partida Presupuestal</h3>
+            <div class="table-wrapper">
+                <table class="matrix-table">
+                    <thead>
+                        <tr>
+                            <th>CECO</th>
+                            <th>Mes</th>
+                            <th>Grupo</th>
+                            <th>Clase</th>
+                            <th>Partida Presupuestal</th>
+                            <th class="num-col">Presupuesto (S/)</th>
+                            <th class="num-col">ForeCast (S/)</th>
+                            <th class="num-col">Variación (S/)</th>
+                            <th class="num-col">% Cumplimiento</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbMatrizBody">
+                        <tr>
+                            <td colspan="9" class="loading-overlay">Cargando datos desde la API...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // URLs de la API (intenta primero localhost y luego el nombre del servidor)
+        const API_URLS = [
+            "http://localhost:8080/api/comparativopresupuesto/datos-comparativo",
+            "http://RAEVSALL001:8080/api/comparativopresupuesto/datos-comparativo"
+        ];
+
+        let rawData = [];
+        let instGraficos = {};
+
+        window.addEventListener('DOMContentLoaded', inicializar);
+
+        async function inicializar() {
+            try {
+                let res = null;
+                for (const url of API_URLS) {
+                    try {
+                        const testRes = await fetch(url);
+                        if (testRes.ok) {
+                            res = testRes;
+                            break;
+                        }
+                    } catch (e) {
+                        // Siguiente URL
+                    }
+                }
+
+                if (!res) throw new Error("No se pudo conectar con la API en localhost:8080 ni en RAEVSALL001:8080.");
+
+                rawData = await res.json();
+
+                if (!rawData || rawData.length === 0) {
+                    document.getElementById('tbMatrizBody').innerHTML = '<tr><td colspan="9" style="text-align:center; padding:20px;">No se encontraron registros en el archivo Excel.</td></tr>';
+                    return;
+                }
+
+                poblarFiltros(rawData);
+                renderizarDashboard(rawData);
+            } catch (err) {
+                console.error("Error cargando comparativo:", err);
+                document.getElementById('tbMatrizBody').innerHTML = `<tr><td colspan="9" style="text-align:center; padding:20px; color:red;">Error al conectar con la API (${err.message}). Asegúrate de ejecutar <code>dotnet run</code> en la carpeta ApiDesposte.</td></tr>`;
+            }
+        }
+
+        function poblarFiltros(data) {
+            const cecos = [...new Set(data.map(i => i.centroCostos || 'SIN CECO'))].sort();
+            const meses = [...new Set(data.map(i => i.mes || 'SIN MES'))].sort();
+            const grupos = [...new Set(data.map(i => i.grupo || 'SIN GRUPO'))].sort();
+            const partidas = [...new Set(data.map(i => i.partidaPresupuestal || 'SIN PARTIDA'))].sort();
+
+            const cboCeco = document.getElementById('cboCeco');
+            cecos.forEach(c => cboCeco.appendChild(new Option(c, c)));
+
+            const cboMes = document.getElementById('cboMes');
+            meses.forEach(m => cboMes.appendChild(new Option(m, m)));
+
+            const cboGrupo = document.getElementById('cboGrupo');
+            grupos.forEach(g => cboGrupo.appendChild(new Option(g, g)));
+
+            const cboPartida = document.getElementById('cboPartida');
+            partidas.forEach(p => cboPartida.appendChild(new Option(p, p)));
+        }
+
+        function aplicarFiltros() {
+            const ceco = document.getElementById('cboCeco').value;
+            const mes = document.getElementById('cboMes').value;
+            const grupo = document.getElementById('cboGrupo').value;
+            const partida = document.getElementById('cboPartida').value;
+            const busqueda = (document.getElementById('txtBuscar').value || '').toLowerCase().trim();
+
+            let filtrados = rawData.filter(item => {
+                if (ceco !== 'TODOS' && item.centroCostos !== ceco) return false;
+                if (mes !== 'TODOS' && item.mes !== mes) return false;
+                if (grupo !== 'TODOS' && item.grupo !== grupo) return false;
+                if (partida !== 'TODOS' && item.partidaPresupuestal !== partida) return false;
+
+                if (busqueda) {
+                    const textoFila = `${item.clase} ${item.partidaPresupuestal}`.toLowerCase();
+                    if (!textoFila.includes(busqueda)) return false;
+                }
+                return true;
+            });
+
+            renderizarDashboard(filtrados);
+        }
+
+        function limpiarFiltros() {
+            document.getElementById('cboCeco').value = 'TODOS';
+            document.getElementById('cboMes').value = 'TODOS';
+            document.getElementById('cboGrupo').value = 'TODOS';
+            document.getElementById('cboPartida').value = 'TODOS';
+            document.getElementById('txtBuscar').value = '';
+            renderizarDashboard(rawData);
+        }
+
+        function renderizarDashboard(data) {
+            // 1. KPIs
+            const totalPresupuesto = data.reduce((s, i) => s + (i.presupuesto || 0), 0);
+            const totalForeCast = data.reduce((s, i) => s + (i.forecast || 0), 0);
+            const totalVariacion = totalForeCast - totalPresupuesto;
+            const cumplimientoGlobal = totalPresupuesto > 0 ? (totalForeCast / totalPresupuesto) * 100 : 0;
+
+            document.getElementById('kpiPresupuesto').innerText = 'S/ ' + totalPresupuesto.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            document.getElementById('kpiForeCast').innerText = 'S/ ' + totalForeCast.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+            const elVar = document.getElementById('kpiVariacion');
+            elVar.innerText = (totalVariacion >= 0 ? '+S/ ' : '-S/ ') + Math.abs(totalVariacion).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            elVar.className = 'kpi-value ' + (totalVariacion > 0 ? 'kpi-negative' : 'kpi-positive');
+
+            const elVarPct = document.getElementById('kpiVariacionPct');
+            const pctVar = totalPresupuesto > 0 ? (totalVariacion / totalPresupuesto) * 100 : 0;
+            elVarPct.innerText = `${pctVar >= 0 ? '+' : ''}${pctVar.toFixed(2)}% vs Presupuesto`;
+
+            document.getElementById('kpiCumplimiento').innerText = cumplimientoGlobal.toFixed(2) + '%';
+            document.getElementById('kpiRegistrosCount').innerText = `${data.length} partidas filtradas`;
+            document.getElementById('lblRegistros').innerText = `${data.length} de ${rawData.length} registros`;
+
+            // 2. Gráficos Comparativos
+            renderGraficoMensual(data);
+            renderGraficoGrupo(data);
+            renderGraficoCeco(data);
+
+            // 3. Matriz de Detalle
+            renderizarMatriz(data);
+        }
+
+        function renderGraficoMensual(data) {
+            const agrupado = agruparDoble(data, 'mes');
+            actualizarGraficoDoble('chartMensual', agrupado.etiquetas, agrupado.presupuestos, agrupado.forecasts);
+        }
+
+        function renderGraficoGrupo(data) {
+            const agrupado = agruparDoble(data, 'grupo');
+            actualizarGraficoDoble('chartGrupo', agrupado.etiquetas, agrupado.presupuestos, agrupado.forecasts, true);
+        }
+
+        function renderGraficoCeco(data) {
+            const agrupado = agruparDoble(data, 'centroCostos');
+            actualizarGraficoDoble('chartCeco', agrupado.etiquetas, agrupado.presupuestos, agrupado.forecasts, true);
+        }
+
+        function agruparDoble(data, campo) {
+            const map = {};
+            data.forEach(item => {
+                const k = item[campo] || 'SIN CLASIFICAR';
+                if (!map[k]) map[k] = { presupuesto: 0, forecast: 0 };
+                map[k].presupuesto += (item.presupuesto || 0);
+                map[k].forecast += (item.forecast || 0);
+            });
+
+            const etiquetas = Object.keys(map);
+            const presupuestos = etiquetas.map(k => map[k].presupuesto);
+            const forecasts = etiquetas.map(k => map[k].forecast);
+
+            return { etiquetas, presupuestos, forecasts };
+        }
+
+        const PALETA = ['#3A4758', '#89A5CC', '#647F93', '#0B6679', '#9EBEC3', '#98C7BB', '#76B1C7', '#CACDC3'];
+
+        function actualizarGraficoDoble(idCanvas, etiquetas, presupuestos, forecasts, horizontal = false) {
+            if (instGraficos[idCanvas]) instGraficos[idCanvas].destroy();
+
+            const ctx = document.getElementById(idCanvas).getContext('2d');
+            instGraficos[idCanvas] = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: etiquetas,
+                    datasets: [
+                        {
+                            label: 'Presupuesto (T_Cabecera)',
+                            data: presupuestos,
+                            backgroundColor: '#3A4758',
+                            borderRadius: 4
+                        },
+                        {
+                            label: 'ForeCast (T_ForeCast)',
+                            data: forecasts,
+                            backgroundColor: '#0B6679',
+                            borderRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    indexAxis: horizontal ? 'y' : 'x',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    return context.dataset.label + ': S/ ' + context.parsed[horizontal ? 'x' : 'y'].toLocaleString('es-PE', { minimumFractionDigits: 2 });
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: { grid: { color: '#ECEFF1' } }
+                    }
+                }
+            });
+        }
+
+        function renderizarMatriz(data) {
+            const tbody = document.getElementById('tbMatrizBody');
+            tbody.innerHTML = '';
+
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                const diffBadgeClass = row.variacion > 0 ? 'badge-negative' : (row.variacion < 0 ? 'badge-positive' : 'badge-neutral');
+                const diffSign = row.variacion > 0 ? '+' : '';
+
+                tr.innerHTML = `
+                    <td><strong>${row.centroCostos}</strong></td>
+                    <td>${row.mes}</td>
+                    <td>${row.grupo}</td>
+                    <td>${row.clase}</td>
+                    <td>${row.partidaPresupuestal}</td>
+                    <td class="num-col">S/ ${row.presupuesto.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                    <td class="num-col" style="color: var(--forecast-color);">S/ ${row.forecast.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                    <td class="num-col"><span class="badge-diff ${diffBadgeClass}">${diffSign}S/ ${row.variacion.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></td>
+                    <td class="num-col">${row.porcentajeCumplimiento.toFixed(2)}%</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+    </script>
+</body>
+
+</html>
