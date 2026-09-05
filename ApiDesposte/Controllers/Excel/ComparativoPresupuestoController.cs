@@ -247,58 +247,6 @@ namespace ApiDesposte.Controllers.Excel
             }
         }
 
-        // Endpoint auxiliar para obtener resumen por Centro de Costos
-        [HttpGet("resumen-ceco")]
-        public IActionResult ObtenerResumenCeco()
-        {
-            var res = ObtenerDatosComparativo();
-            if (res is OkObjectResult ok && ok.Value is IEnumerable<dynamic> lista)
-            {
-                var resumen = lista
-                    .GroupBy(x => (string)x.centroCostos)
-                    .Select(g => new
-                    {
-                        centroCostos = g.Key,
-                        presupuesto = Math.Round(g.Sum(x => (double)x.presupuesto), 2),
-                        forecast = Math.Round(g.Sum(x => (double)x.forecast), 2),
-                        variacion = Math.Round(g.Sum(x => (double)x.variacion), 2),
-                        porcentajeCumplimiento = g.Sum(x => (double)x.presupuesto) > 0
-                            ? Math.Round((g.Sum(x => (double)x.forecast) / g.Sum(x => (double)x.presupuesto)) * 100, 2)
-                            : 0.0
-                    })
-                    .OrderBy(x => x.centroCostos)
-                    .ToList();
-
-                return Ok(resumen);
-            }
-            return res;
-        }
-
-        // Endpoint auxiliar para obtener resumen mensual
-        [HttpGet("resumen-mes")]
-        public IActionResult ObtenerResumenMes()
-        {
-            var res = ObtenerDatosComparativo();
-            if (res is OkObjectResult ok && ok.Value is IEnumerable<dynamic> lista)
-            {
-                var resumen = lista
-                    .GroupBy(x => (string)x.mes)
-                    .Select(g => new
-                    {
-                        mes = g.Key,
-                        presupuesto = Math.Round(g.Sum(x => (double)x.presupuesto), 2),
-                        forecast = Math.Round(g.Sum(x => (double)x.forecast), 2),
-                        variacion = Math.Round(g.Sum(x => (double)x.variacion), 2),
-                        porcentajeCumplimiento = g.Sum(x => (double)x.presupuesto) > 0
-                            ? Math.Round((g.Sum(x => (double)x.forecast) / g.Sum(x => (double)x.presupuesto)) * 100, 2)
-                            : 0.0
-                    })
-                    .ToList();
-
-                return Ok(resumen);
-            }
-            return res;
-        }
     }
 
     public class ComparativoItemDto

@@ -196,9 +196,11 @@
             user-select: none;
             border-top: 2px solid #cbd5e1;
         }
+
         .row-grupo:hover {
             background-color: #cbd5e1 !important;
         }
+
         .row-clase {
             background-color: #f1f5f9 !important;
             color: #334155;
@@ -207,16 +209,20 @@
             user-select: none;
             border-top: 1px solid #e2e8f0;
         }
+
         .row-clase:hover {
             background-color: #e2e8f0 !important;
         }
+
         .row-articulo {
             background-color: #ffffff;
             font-size: 11.5px;
         }
+
         .row-articulo:hover {
             background-color: #f8fafc !important;
         }
+
         .toggle-btn {
             display: inline-flex;
             align-items: center;
@@ -232,8 +238,9 @@
             font-family: monospace;
             font-weight: bold;
             color: #1e293b;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
         }
+
         .btn-matriz-ctrl {
             padding: 5px 12px;
             font-size: 12px;
@@ -248,10 +255,12 @@
             align-items: center;
             gap: 4px;
         }
+
         .btn-matriz-ctrl:hover {
             background: #f1f5f9;
             border-color: var(--primary);
         }
+
         .subtotal-badge {
             font-size: 10.5px;
             color: #64748b;
@@ -266,21 +275,26 @@
             left: 0;
             z-index: 2;
             background-color: inherit;
-            box-shadow: 2px 0 4px rgba(0,0,0,0.04);
+            box-shadow: 2px 0 4px rgba(0, 0, 0, 0.04);
         }
+
         table.matrix-table-mes th.sticky-col {
             z-index: 4;
             background-color: var(--primary);
         }
+
         .row-grupo .sticky-col {
             background-color: #e2e8f0 !important;
         }
+
         .row-clase .sticky-col {
             background-color: #f1f5f9 !important;
         }
+
         .row-articulo .sticky-col {
             background-color: #ffffff !important;
         }
+
         .row-articulo:hover .sticky-col {
             background-color: #f8fafc !important;
         }
@@ -302,12 +316,18 @@
     </div>
 
     <!-- Banner de Estado de Carga -->
-    <div id="statusBanner" style="background: #e0f2fe; color: #0369a1; padding: 12px 20px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; display: flex; align-items: center; gap: 12px; border: 1px solid #bae6fd;">
-        <span style="display:inline-block; width:16px; height:16px; border:2px solid #0369a1; border-top-color:transparent; border-radius:50%; animation: spin 1s linear infinite;"></span>
+    <div id="statusBanner"
+        style="background: #e0f2fe; color: #0369a1; padding: 12px 20px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; display: flex; align-items: center; gap: 12px; border: 1px solid #bae6fd;">
+        <span
+            style="display:inline-block; width:16px; height:16px; border:2px solid #0369a1; border-top-color:transparent; border-radius:50%; animation: spin 1s linear infinite;"></span>
         <span id="statusText">Conectando con la API y leyendo datos de Presupuesto 2027 desde Excel...</span>
     </div>
     <style>
-        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
     </style>
 
     <!-- Tarjetas KPI -->
@@ -362,11 +382,13 @@
         </div>
 
         <div class="card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
                 <h3 style="margin-bottom: 0; text-align: left; font-size: 14px;">📊 Matriz de Resumen y Artículos</h3>
                 <div style="display: flex; gap: 6px;">
                     <button type="button" class="btn-matriz-ctrl" onclick="expandirTodoMatriz(true)">➕ Expandir</button>
-                    <button type="button" class="btn-matriz-ctrl" onclick="expandirTodoMatriz(false)">➖ Contraer</button>
+                    <button type="button" class="btn-matriz-ctrl" onclick="expandirTodoMatriz(false)">➖
+                        Contraer</button>
                 </div>
             </div>
             <div class="table-wrapper">
@@ -387,20 +409,27 @@
 
         <!-- Fila Inferior: Matriz de Presupuesto Mensual (Ancho Completo con Segmentador de Trimestre) -->
         <div class="card full-width">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 12px;">
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 12px;">
                 <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
-                    <h3 style="margin-bottom: 0; text-align: left; font-size: 15px;">📅 Matriz de Presupuesto Mensual</h3>
+                    <h3 style="margin-bottom: 0; text-align: left; font-size: 15px;">📅 Matriz de Presupuesto Mensual
+                    </h3>
                     <!-- Segmentador por Trimestre -->
-                    <div style="display: flex; align-items: center; gap: 8px; background: #f8fafc; padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border);">
-                        <label for="cboTrimestre" style="font-size: 12px; font-weight: 700; color: var(--primary);">Trimestre:</label>
-                        <select id="cboTrimestre" onchange="filtrarMatrizPorTrimestre()" style="padding: 4px 10px; font-size: 12px; border-radius: 4px; border: 1px solid var(--border); background: #fff; cursor: pointer; font-weight: 600; color: #1e293b; outline: none;">
+                    <div
+                        style="display: flex; align-items: center; gap: 8px; background: #f8fafc; padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border);">
+                        <label for="cboTrimestre"
+                            style="font-size: 12px; font-weight: 700; color: var(--primary);">Trimestre:</label>
+                        <select id="cboTrimestre" onchange="filtrarMatrizPorTrimestre()"
+                            style="padding: 4px 10px; font-size: 12px; border-radius: 4px; border: 1px solid var(--border); background: #fff; cursor: pointer; font-weight: 600; color: #1e293b; outline: none;">
                             <option value="TODOS">-- Todos los Meses (Año Completo) --</option>
                         </select>
                     </div>
                 </div>
                 <div style="display: flex; gap: 8px;">
-                    <button type="button" class="btn-matriz-ctrl" onclick="expandirTodoMatrizMes(true)">➕ Expandir Todo</button>
-                    <button type="button" class="btn-matriz-ctrl" onclick="expandirTodoMatrizMes(false)">➖ Contraer Todo</button>
+                    <button type="button" class="btn-matriz-ctrl" onclick="expandirTodoMatrizMes(true)">➕ Expandir
+                        Todo</button>
+                    <button type="button" class="btn-matriz-ctrl" onclick="expandirTodoMatrizMes(false)">➖ Contraer
+                        Todo</button>
                 </div>
             </div>
             <div class="table-wrapper">
@@ -688,7 +717,7 @@
             });
 
             // Ordenar Grupos (A-Z)
-            const gruposOrdenados = Object.values(gruposTree).sort((a, b) => 
+            const gruposOrdenados = Object.values(gruposTree).sort((a, b) =>
                 a.nombre.localeCompare(b.nombre, 'es', { numeric: true })
             );
 
@@ -698,7 +727,7 @@
                 trGrupo.className = 'row-grupo';
                 trGrupo.setAttribute('data-gidx', gIdx);
                 trGrupo.onclick = () => toggleGrupoMes(gIdx);
-                
+
                 let htmlMeses = '';
                 let totalGrupoVis = 0;
                 mesesAVisualizar.forEach(mIdx => {
@@ -718,7 +747,7 @@
                 tbody.appendChild(trGrupo);
 
                 // Ordenar Clases de este Grupo
-                const clasesOrdenadas = Object.values(gObj.clases).sort((a, b) => 
+                const clasesOrdenadas = Object.values(gObj.clases).sort((a, b) =>
                     a.nombre.localeCompare(b.nombre, 'es', { numeric: true })
                 );
 
@@ -893,7 +922,7 @@
             });
 
             // 1. Ordenar Grupos (alfabéticamente)
-            const gruposOrdenados = Object.values(gruposTree).sort((a, b) => 
+            const gruposOrdenados = Object.values(gruposTree).sort((a, b) =>
                 a.nombre.localeCompare(b.nombre, 'es', { numeric: true })
             );
 
@@ -916,7 +945,7 @@
                 tbody.appendChild(trGrupo);
 
                 // 2. Ordenar Clases de este Grupo
-                const clasesOrdenadas = Object.values(gObj.clases).sort((a, b) => 
+                const clasesOrdenadas = Object.values(gObj.clases).sort((a, b) =>
                     a.nombre.localeCompare(b.nombre, 'es', { numeric: true })
                 );
 

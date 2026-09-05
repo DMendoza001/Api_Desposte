@@ -16,10 +16,3 @@ Accept: application/json
 GET {{ApiDesposte_HostAddress}}/api/comparativopresupuesto/datos-comparativo
 Accept: application/json
 
-### 5. Resumen Comparativo por CECO
-GET {{ApiDesposte_HostAddress}}/api/comparativopresupuesto/resumen-ceco
-Accept: application/json
-
-### 6. Resumen Comparativo por Mes
-GET {{ApiDesposte_HostAddress}}/api/comparativopresupuesto/resumen-mes
-Accept: application/json
