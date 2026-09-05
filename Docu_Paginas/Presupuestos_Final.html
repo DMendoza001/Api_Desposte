@@ -186,6 +186,104 @@
             text-align: right;
             font-weight: 600;
         }
+
+        /* Estilos de Tabla Dinámica Expandible / Contraíble */
+        .row-grupo {
+            background-color: #e2e8f0 !important;
+            color: #1e3a8a;
+            font-weight: 700;
+            cursor: pointer;
+            user-select: none;
+            border-top: 2px solid #cbd5e1;
+        }
+        .row-grupo:hover {
+            background-color: #cbd5e1 !important;
+        }
+        .row-clase {
+            background-color: #f1f5f9 !important;
+            color: #334155;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+            border-top: 1px solid #e2e8f0;
+        }
+        .row-clase:hover {
+            background-color: #e2e8f0 !important;
+        }
+        .row-articulo {
+            background-color: #ffffff;
+            font-size: 11.5px;
+        }
+        .row-articulo:hover {
+            background-color: #f8fafc !important;
+        }
+        .toggle-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 17px;
+            height: 17px;
+            margin-right: 7px;
+            background: #ffffff;
+            border: 1px solid #94a3b8;
+            border-radius: 3px;
+            font-size: 11px;
+            line-height: 1;
+            font-family: monospace;
+            font-weight: bold;
+            color: #1e293b;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+        }
+        .btn-matriz-ctrl {
+            padding: 5px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid var(--border);
+            background: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .btn-matriz-ctrl:hover {
+            background: #f1f5f9;
+            border-color: var(--primary);
+        }
+        .subtotal-badge {
+            font-size: 10.5px;
+            color: #64748b;
+            margin-left: 8px;
+            font-weight: normal;
+            font-style: italic;
+        }
+
+        /* Columna fija para scroll horizontal en Matriz Mensual */
+        .sticky-col {
+            position: sticky;
+            left: 0;
+            z-index: 2;
+            background-color: inherit;
+            box-shadow: 2px 0 4px rgba(0,0,0,0.04);
+        }
+        table.matrix-table-mes th.sticky-col {
+            z-index: 4;
+            background-color: var(--primary);
+        }
+        .row-grupo .sticky-col {
+            background-color: #e2e8f0 !important;
+        }
+        .row-clase .sticky-col {
+            background-color: #f1f5f9 !important;
+        }
+        .row-articulo .sticky-col {
+            background-color: #ffffff !important;
+        }
+        .row-articulo:hover .sticky-col {
+            background-color: #f8fafc !important;
+        }
     </style>
 </head>
 
@@ -202,6 +300,15 @@
             </select>
         </div>
     </div>
+
+    <!-- Banner de Estado de Carga -->
+    <div id="statusBanner" style="background: #e0f2fe; color: #0369a1; padding: 12px 20px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; display: flex; align-items: center; gap: 12px; border: 1px solid #bae6fd;">
+        <span style="display:inline-block; width:16px; height:16px; border:2px solid #0369a1; border-top-color:transparent; border-radius:50%; animation: spin 1s linear infinite;"></span>
+        <span id="statusText">Conectando con la API y leyendo datos de Presupuesto 2027 desde Excel...</span>
+    </div>
+    <style>
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
 
     <!-- Tarjetas KPI -->
     <div class="kpi-container">
@@ -246,26 +353,29 @@
             </div>
         </div>
 
-        <div class="card full-width">
+        <!-- Fila: Gráfico de Clase (Izquierda) y Matriz de Resumen (Derecha) -->
+        <div class="card">
             <h3>Distribución por Clase (Nclase)</h3>
             <div class="chart-container large">
                 <canvas id="chartClase"></canvas>
             </div>
         </div>
 
-        <!-- Matriz / Tabla Dinámica de Detalle -->
-        <div class="card full-width">
-            <h3>Matriz de Detalle (Grupo ➔ Clase ➔ Artículo ➔ Cantidad & Presupuesto)</h3>
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+                <h3 style="margin-bottom: 0; text-align: left; font-size: 14px;">📊 Matriz de Resumen y Artículos</h3>
+                <div style="display: flex; gap: 6px;">
+                    <button type="button" class="btn-matriz-ctrl" onclick="expandirTodoMatriz(true)">➕ Expandir</button>
+                    <button type="button" class="btn-matriz-ctrl" onclick="expandirTodoMatriz(false)">➖ Contraer</button>
+                </div>
+            </div>
             <div class="table-wrapper">
                 <table class="matrix-table">
                     <thead>
                         <tr>
-                            <th>Grupo (Ngrupo)</th>
-                            <th>Clase (Nclase)</th>
-                            <th>Código Artículo</th>
-                            <th>Nombre Artículo (NArticulo)</th>
-                            <th class="num-col">Cantidad</th>
-                            <th class="num-col">Presupuesto (S/)</th>
+                            <th style="width: 56%;">Jerarquía (Grupo ➔ Clase ➔ Código - Artículo)</th>
+                            <th class="num-col" style="width: 20%;">Cantidad</th>
+                            <th class="num-col" style="width: 24%;">Presupuesto (S/)</th>
                         </tr>
                     </thead>
                     <tbody id="tbMatrizBody">
@@ -274,11 +384,48 @@
                 </table>
             </div>
         </div>
+
+        <!-- Fila Inferior: Matriz de Presupuesto Mensual (Ancho Completo con Segmentador de Trimestre) -->
+        <div class="card full-width">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 12px;">
+                <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+                    <h3 style="margin-bottom: 0; text-align: left; font-size: 15px;">📅 Matriz de Presupuesto Mensual</h3>
+                    <!-- Segmentador por Trimestre -->
+                    <div style="display: flex; align-items: center; gap: 8px; background: #f8fafc; padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border);">
+                        <label for="cboTrimestre" style="font-size: 12px; font-weight: 700; color: var(--primary);">Trimestre:</label>
+                        <select id="cboTrimestre" onchange="filtrarMatrizPorTrimestre()" style="padding: 4px 10px; font-size: 12px; border-radius: 4px; border: 1px solid var(--border); background: #fff; cursor: pointer; font-weight: 600; color: #1e293b; outline: none;">
+                            <option value="TODOS">-- Todos los Meses (Año Completo) --</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" class="btn-matriz-ctrl" onclick="expandirTodoMatrizMes(true)">➕ Expandir Todo</button>
+                    <button type="button" class="btn-matriz-ctrl" onclick="expandirTodoMatrizMes(false)">➖ Contraer Todo</button>
+                </div>
+            </div>
+            <div class="table-wrapper">
+                <table class="matrix-table matrix-table-mes" id="tblMatrizMes">
+                    <thead id="thMatrizMes">
+                        <!-- Cabecera dinámica de meses generada por JS -->
+                    </thead>
+                    <tbody id="tbMatrizMesBody">
+                        <!-- Se llena dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     <script>
-        //const API_URL = "http://RAEVSALL001:8080/api/presupuesto/dashboard-data";    
-        const API_URL = "http://DMENDOZA:8080/api/presupuesto/dashboard-data";
+        // 1. Prioridad absoluta al puerto 8080 (servidor de trabajo y producción)
+        const BASE_HOSTS = [
+            "http://localhost:8080",
+            "http://DMENDOZA:8080",
+            "http://RAEVSALL001:8080",
+            "http://localhost:5000",
+            "http://DMENDOZA:5000",
+            "http://RAEVSALL001:5000"
+        ];
         const PALETA = ['#3A4758', '#89A5CC', '#647F93', '#0B6679', '#9EBEC3', '#98C7BB', '#76B1C7', '#CACDC3'];
 
         let rawData = [];
@@ -286,17 +433,80 @@
 
         window.addEventListener('DOMContentLoaded', inicializar);
 
-        async function inicializar() {
+        async function fetchConTimeout(url, timeoutMs = 6000) {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeoutMs);
             try {
-                const res = await fetch(API_URL);
+                const response = await fetch(url, { signal: controller.signal });
+                clearTimeout(id);
+                return response;
+            } catch (err) {
+                clearTimeout(id);
+                throw err;
+            }
+        }
+
+        async function detectarServidorApi(statusText) {
+            for (const base of BASE_HOSTS) {
+                try {
+                    if (statusText) statusText.innerText = `Buscando API en ${base}...`;
+                    const res = await fetchConTimeout(`${base}/`, 1500);
+                    if (res.ok) {
+                        const txt = await res.text();
+                        if (txt.includes("API Desposte")) {
+                            return base;
+                        }
+                    }
+                } catch (e) {
+                    // Siguiente servidor
+                }
+            }
+            return null;
+        }
+
+        async function inicializar() {
+            const banner = document.getElementById('statusBanner');
+            const statusText = document.getElementById('statusText');
+            try {
+                // Paso 1: Localizar el servidor activo dando prioridad al puerto 8080
+                const baseActiva = await detectarServidorApi(statusText);
+
+                if (!baseActiva) {
+                    throw new Error("No se pudo conectar con la API en el puerto 8080 (ni en 5000). Asegúrate de iniciar la API con 'dotnet run'.");
+                }
+
+                if (statusText) statusText.innerText = `Conectado a ${baseActiva}. Leyendo archivo Excel...`;
+
+                // Paso 2: Descargar datos del presupuesto
+                const res = await fetch(`${baseActiva}/api/presupuesto/dashboard-data`);
+                if (!res.ok) throw new Error(`El servidor respondió con código HTTP ${res.status}`);
+
                 rawData = await res.json();
 
-                if (!rawData || rawData.length === 0) return;
+                if (!rawData || rawData.length === 0) {
+                    if (banner) {
+                        banner.style.background = '#fef3c7';
+                        banner.style.color = '#92400e';
+                        banner.style.borderColor = '#fde68a';
+                        statusText.innerText = 'El archivo Excel no contiene registros para mostrar.';
+                    }
+                    return;
+                }
+
+                // Ocultar banner si cargó con éxito
+                if (banner) banner.style.display = 'none';
 
                 poblarSegmentadorCeco(rawData);
+                poblarSegmentadorTrimestre(rawData);
                 renderizarDashboard(rawData);
             } catch (err) {
                 console.error("Error cargando los datos:", err);
+                if (banner) {
+                    banner.style.background = '#fee2e2';
+                    banner.style.color = '#991b1b';
+                    banner.style.borderColor = '#fca5a5';
+                    banner.innerHTML = `❌ <b>Error:</b> ${err.message} <button onclick="location.reload()" style="margin-left: 15px; padding: 4px 10px; cursor: pointer; border-radius: 4px; border: 1px solid #b91c1c; background: #fff; color: #b91c1c; font-weight: bold;">Reintentar</button>`;
+                }
             }
         }
 
@@ -314,7 +524,23 @@
             });
         }
 
-        // Evento de filtrado por segmentador
+        // Poblar las opciones del filtro de Trimestres
+        function poblarSegmentadorTrimestre(data) {
+            const campoTrim = obtenerNombreCampo(data[0], ['Trim', 'Trimestre', 'TRIM']);
+            const trims = [...new Set(data.map(i => i[campoTrim] ? i[campoTrim].toString().trim() : '').filter(x => x))].sort();
+
+            const cbo = document.getElementById('cboTrimestre');
+            if (!cbo) return;
+            cbo.innerHTML = '<option value="TODOS">-- Todos los Meses (Año Completo) --</option>';
+            trims.forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t;
+                opt.innerText = t;
+                cbo.appendChild(opt);
+            });
+        }
+
+        // Evento de filtrado por segmentador CECO
         function filtrarPorCeco() {
             const cecoSeleccionado = document.getElementById('cboCeco').value;
             const campoCeco = obtenerNombreCampo(rawData[0], ['CentroCostos', 'CentroCosto', 'CECO']);
@@ -325,6 +551,20 @@
             }
 
             renderizarDashboard(datosFiltrados);
+        }
+
+        // Evento de filtrado exclusivo de la Matriz Mensual por Trimestre
+        function filtrarMatrizPorTrimestre() {
+            const cecoSeleccionado = document.getElementById('cboCeco') ? document.getElementById('cboCeco').value : 'TODOS';
+            const campoCeco = obtenerNombreCampo(rawData[0], ['CentroCostos', 'CentroCosto', 'CECO']);
+
+            let datosActuales = rawData;
+            if (cecoSeleccionado !== 'TODOS') {
+                datosActuales = rawData.filter(i => (i[campoCeco] ? i[campoCeco].toString().trim() : 'N/A') === cecoSeleccionado);
+            }
+
+            const campoMonto = obtenerNombreCampo(datosActuales[0], ['Presupuesto', 'Monto', 'Importe', 'Total']);
+            renderizarMatrizMensual(datosActuales, campoMonto);
         }
 
         function renderizarDashboard(data) {
@@ -346,9 +586,271 @@
             actualizarGrafico('chartGrupo', 'bar-h', datosGrupo.etiquetas, datosGrupo.valores, '#2A6F8A');
             actualizarGrafico('chartClase', 'bar-h', datosClase.etiquetas, datosClase.valores, '#7E9FAA');
 
-            // 4. Matriz / Tabla Dinámica con Ordenamiento Jerárquico
+            // 4. Matrices Dinámicas (Mensual y Resumen)
+            renderizarMatrizMensual(data, campoMonto);
             renderizarMatriz(data, campoMonto, campoCant);
         }
+
+        // ==========================================
+        // 1. MATRIZ MENSUAL (CON FILTRO DE TRIMESTRE)
+        // ==========================================
+        function renderizarMatrizMensual(data, campoMonto) {
+            const campoGrupo = obtenerNombreCampo(data[0], ['Ngrupo', 'Grupo', 'GRUPO']);
+            const campoClase = obtenerNombreCampo(data[0], ['Nclase', 'Clase', 'CLASE']);
+            const campoArtId = obtenerNombreCampo(data[0], ['Articulos', 'Articulo', 'Codigo']);
+            const campoArtNom = obtenerNombreCampo(data[0], ['NArticulo', 'NombreArticulo', 'Descripcion']);
+            const campoMes = obtenerNombreCampo(data[0], ['Mes', 'MES', 'NMes']);
+            const campoTrim = obtenerNombreCampo(data[0], ['Trim', 'Trimestre', 'TRIM']);
+
+            const tbody = document.getElementById('tbMatrizMesBody');
+            const thead = document.getElementById('thMatrizMes');
+            if (!tbody || !thead) return;
+            tbody.innerHTML = '';
+
+            const trimestreSeleccionado = document.getElementById('cboTrimestre') ? document.getElementById('cboTrimestre').value : 'TODOS';
+
+            // Filtrar datos si se seleccionó un trimestre específico
+            let datosFiltrados = data;
+            if (trimestreSeleccionado !== 'TODOS') {
+                datosFiltrados = data.filter(i => (i[campoTrim] ? i[campoTrim].toString().trim() : '') === trimestreSeleccionado);
+            }
+
+            // Determinar los meses a mostrar
+            const NOMBRES_MESES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Set', 'Oct', 'Nov', 'Dic'];
+            const MAPA_TRIM_MESES = {
+                'I TRIMESTRE': [0, 1, 2],
+                'II TRIMESTRE': [3, 4, 5],
+                'III TRIMESTRE': [6, 7, 8],
+                'IV TRIMESTRE': [9, 10, 11]
+            };
+
+            let mesesAVisualizar = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+            if (trimestreSeleccionado !== 'TODOS') {
+                const trimUpper = trimestreSeleccionado.toUpperCase();
+                if (MAPA_TRIM_MESES[trimUpper]) {
+                    mesesAVisualizar = MAPA_TRIM_MESES[trimUpper];
+                } else {
+                    const mesesEnTrim = [...new Set(datosFiltrados.map(i => obtenerIndiceMes(i[campoMes])).filter(m => m >= 0 && m < 12))].sort((a, b) => a - b);
+                    if (mesesEnTrim.length > 0) mesesAVisualizar = mesesEnTrim;
+                }
+            }
+
+            // Construir cabecera dinámica de la tabla
+            const labelTotal = trimestreSeleccionado === 'TODOS' ? 'Total Año S/' : `Total ${trimestreSeleccionado} S/`;
+            let thHtml = `<tr>
+                <th class="sticky-col" style="min-width: 260px;">Jerarquía (Grupo ➔ Clase ➔ Código - Artículo)</th>`;
+            mesesAVisualizar.forEach(mIdx => {
+                thHtml += `<th class="num-col" style="min-width: 80px;">${NOMBRES_MESES[mIdx]}</th>`;
+            });
+            thHtml += `<th class="num-col" style="min-width: 105px; background-color: #1b365d;">${labelTotal}</th></tr>`;
+            thead.innerHTML = thHtml;
+
+            // Si no hay datos tras filtrar
+            if (!datosFiltrados || datosFiltrados.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="${mesesAVisualizar.length + 2}" style="text-align: center; padding: 25px; color: #64748b;">No se encontraron registros para el trimestre seleccionado.</td></tr>`;
+                return;
+            }
+
+            // Estructura: Grupo -> Clase -> Artículos -> [12 meses]
+            const gruposTree = {};
+
+            datosFiltrados.forEach(item => {
+                const g = item[campoGrupo] ? item[campoGrupo].toString().trim() : 'N/A';
+                const c = item[campoClase] ? item[campoClase].toString().trim() : 'N/A';
+                const idArt = item[campoArtId] ? item[campoArtId].toString().trim() : '-';
+                const nomArt = item[campoArtNom] ? item[campoArtNom].toString().trim() : '-';
+                const monto = parseFloat(item[campoMonto]) || 0;
+                const mIdx = obtenerIndiceMes(item[campoMes]); // 0..11
+
+                if (!gruposTree[g]) {
+                    gruposTree[g] = { nombre: g, meses: new Array(12).fill(0), totalMonto: 0, clases: {} };
+                }
+                if (mIdx >= 0 && mIdx < 12) gruposTree[g].meses[mIdx] += monto;
+                gruposTree[g].totalMonto += monto;
+
+                if (!gruposTree[g].clases[c]) {
+                    gruposTree[g].clases[c] = { nombre: c, meses: new Array(12).fill(0), totalMonto: 0, articulosMap: {} };
+                }
+                if (mIdx >= 0 && mIdx < 12) gruposTree[g].clases[c].meses[mIdx] += monto;
+                gruposTree[g].clases[c].totalMonto += monto;
+
+                const artKey = `${idArt}|${nomArt}`;
+                if (!gruposTree[g].clases[c].articulosMap[artKey]) {
+                    gruposTree[g].clases[c].articulosMap[artKey] = {
+                        artId: idArt,
+                        artNom: nomArt,
+                        meses: new Array(12).fill(0),
+                        totalMonto: 0
+                    };
+                }
+                if (mIdx >= 0 && mIdx < 12) gruposTree[g].clases[c].articulosMap[artKey].meses[mIdx] += monto;
+                gruposTree[g].clases[c].articulosMap[artKey].totalMonto += monto;
+            });
+
+            // Ordenar Grupos (A-Z)
+            const gruposOrdenados = Object.values(gruposTree).sort((a, b) => 
+                a.nombre.localeCompare(b.nombre, 'es', { numeric: true })
+            );
+
+            gruposOrdenados.forEach((gObj, gIdx) => {
+                // Fila de Grupo
+                const trGrupo = document.createElement('tr');
+                trGrupo.className = 'row-grupo';
+                trGrupo.setAttribute('data-gidx', gIdx);
+                trGrupo.onclick = () => toggleGrupoMes(gIdx);
+                
+                let htmlMeses = '';
+                let totalGrupoVis = 0;
+                mesesAVisualizar.forEach(mIdx => {
+                    const mVal = gObj.meses[mIdx];
+                    totalGrupoVis += mVal;
+                    htmlMeses += `<td class="num-col">${formatMontoMes(mVal, true)}</td>`;
+                });
+
+                trGrupo.innerHTML = `
+                    <td class="sticky-col">
+                        <span id="icon-gmes-${gIdx}" class="toggle-btn">−</span>
+                        <span><b>${gObj.nombre}</b></span>
+                    </td>
+                    ${htmlMeses}
+                    <td class="num-col" style="background-color: #e2e8f0;"><b>S/ ${Math.round(totalGrupoVis).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</b></td>
+                `;
+                tbody.appendChild(trGrupo);
+
+                // Ordenar Clases de este Grupo
+                const clasesOrdenadas = Object.values(gObj.clases).sort((a, b) => 
+                    a.nombre.localeCompare(b.nombre, 'es', { numeric: true })
+                );
+
+                clasesOrdenadas.forEach((cObj, cIdx) => {
+                    const artsList = Object.values(cObj.articulosMap).sort((a, b) => b.totalMonto - a.totalMonto);
+
+                    // Fila de Clase
+                    const trClase = document.createElement('tr');
+                    trClase.className = `row-clase gmes-child-${gIdx}`;
+                    trClase.setAttribute('data-gidx', gIdx);
+                    trClase.setAttribute('data-cidx', cIdx);
+                    trClase.onclick = () => toggleClaseMes(gIdx, cIdx);
+
+                    let htmlMesesClase = '';
+                    let totalClaseVis = 0;
+                    mesesAVisualizar.forEach(mIdx => {
+                        const mVal = cObj.meses[mIdx];
+                        totalClaseVis += mVal;
+                        htmlMesesClase += `<td class="num-col">${formatMontoMes(mVal, true)}</td>`;
+                    });
+
+                    trClase.innerHTML = `
+                        <td class="sticky-col" style="padding-left: 24px;">
+                            <span id="icon-cmes-${gIdx}-${cIdx}" class="toggle-btn">−</span>
+                            <span><b>${cObj.nombre}</b></span>
+                        </td>
+                        ${htmlMesesClase}
+                        <td class="num-col" style="background-color: #f1f5f9;"><b>S/ ${Math.round(totalClaseVis).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</b></td>
+                    `;
+                    tbody.appendChild(trClase);
+
+                    // Filas de Artículos
+                    artsList.forEach(art => {
+                        const trArt = document.createElement('tr');
+                        trArt.className = `row-articulo gmes-child-${gIdx} cmes-child-${gIdx}-${cIdx}`;
+
+                        let htmlMesesArt = '';
+                        let totalArtVis = 0;
+                        mesesAVisualizar.forEach(mIdx => {
+                            const mVal = art.meses[mIdx];
+                            totalArtVis += mVal;
+                            htmlMesesArt += `<td class="num-col">${formatMontoMes(mVal, false)}</td>`;
+                        });
+
+                        trArt.innerHTML = `
+                            <td class="sticky-col" style="padding-left: 48px; color: #334155;">
+                                <span style="display: inline-block; width: 5px; height: 5px; background: #64748b; border-radius: 50%; margin-right: 6px; vertical-align: middle;"></span>
+                                <span style="font-family: monospace; font-weight: bold; color: #1e3a8a; margin-right: 5px;">${art.artId}</span>
+                                <span style="color: #64748b; margin-right: 5px;">-</span>
+                                <span title="${art.artNom}">${art.artNom}</span>
+                            </td>
+                            ${htmlMesesArt}
+                            <td class="num-col">S/ ${Math.round(totalArtVis).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</td>
+                        `;
+                        tbody.appendChild(trArt);
+                    });
+                });
+            });
+        }
+
+        function obtenerIndiceMes(val) {
+            if (val === null || val === undefined) return -1;
+            const num = parseInt(val);
+            if (!isNaN(num) && num >= 1 && num <= 12) return num - 1;
+            const str = val.toString().toUpperCase().trim();
+            const meses = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SET', 'OCT', 'NOV', 'DIC'];
+            for (let i = 0; i < meses.length; i++) {
+                if (str.startsWith(meses[i])) return i;
+            }
+            return -1;
+        }
+
+        function formatMontoMes(val, esSubtotal = false) {
+            if (!val || Math.round(val) === 0) return `<span style="color: #cbd5e1;">-</span>`;
+            const txt = Math.round(val).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+            return esSubtotal ? `<b>${txt}</b>` : txt;
+        }
+
+        function toggleGrupoMes(gIdx) {
+            const icon = document.getElementById(`icon-gmes-${gIdx}`);
+            if (!icon) return;
+            const isExpanded = (icon.innerText === '−' || icon.innerText === '-');
+            icon.innerText = isExpanded ? '+' : '−';
+
+            const clases = document.querySelectorAll(`.row-clase.gmes-child-${gIdx}`);
+            clases.forEach(rowCls => {
+                rowCls.style.display = isExpanded ? 'none' : '';
+            });
+
+            if (isExpanded) {
+                const articulos = document.querySelectorAll(`.row-articulo.gmes-child-${gIdx}`);
+                articulos.forEach(rowArt => rowArt.style.display = 'none');
+            } else {
+                clases.forEach(rowCls => {
+                    const cIdx = rowCls.getAttribute('data-cidx');
+                    const clsIcon = document.getElementById(`icon-cmes-${gIdx}-${cIdx}`);
+                    const clsExpanded = clsIcon && (clsIcon.innerText === '−' || clsIcon.innerText === '-');
+                    const articulos = document.querySelectorAll(`.row-articulo.cmes-child-${gIdx}-${cIdx}`);
+                    articulos.forEach(rowArt => {
+                        rowArt.style.display = clsExpanded ? '' : 'none';
+                    });
+                });
+            }
+        }
+
+        function toggleClaseMes(gIdx, cIdx) {
+            const icon = document.getElementById(`icon-cmes-${gIdx}-${cIdx}`);
+            if (!icon) return;
+            const isExpanded = (icon.innerText === '−' || icon.innerText === '-');
+            icon.innerText = isExpanded ? '+' : '−';
+
+            const articulos = document.querySelectorAll(`.row-articulo.cmes-child-${gIdx}-${cIdx}`);
+            articulos.forEach(rowArt => {
+                rowArt.style.display = isExpanded ? 'none' : '';
+            });
+        }
+
+        function expandirTodoMatrizMes(expandir) {
+            const gruposIconos = document.querySelectorAll('[id^="icon-gmes-"]');
+            const clasesIconos = document.querySelectorAll('[id^="icon-cmes-"]');
+            const clasesRows = document.querySelectorAll('.row-clase[class*="gmes-child-"]');
+            const articulosRows = document.querySelectorAll('.row-articulo[class*="gmes-child-"]');
+
+            gruposIconos.forEach(ic => ic.innerText = expandir ? '−' : '+');
+            clasesIconos.forEach(ic => ic.innerText = expandir ? '−' : '+');
+            clasesRows.forEach(row => row.style.display = expandir ? '' : 'none');
+            articulosRows.forEach(row => row.style.display = expandir ? '' : 'none');
+        }
+
+        // ==========================================
+        // 2. MATRIZ DE DETALLE Y RESUMEN (LADO DERECHO)
+        // ==========================================
 
         function renderizarMatriz(data, campoMonto, campoCant) {
             const campoGrupo = obtenerNombreCampo(data[0], ['Ngrupo', 'Grupo', 'GRUPO']);
@@ -359,48 +861,158 @@
             const tbody = document.getElementById('tbMatrizBody');
             tbody.innerHTML = '';
 
-            // Agrupar filas por Grupo + Clase + Código + Nombre
-            const matrizMap = {};
+            // Estructura jerárquica de árbol: Grupo -> Clase -> Artículos
+            const gruposTree = {};
 
             data.forEach(item => {
                 const g = item[campoGrupo] ? item[campoGrupo].toString().trim() : 'N/A';
                 const c = item[campoClase] ? item[campoClase].toString().trim() : 'N/A';
                 const idArt = item[campoArtId] ? item[campoArtId].toString().trim() : '-';
                 const nomArt = item[campoArtNom] ? item[campoArtNom].toString().trim() : '-';
-                const key = `${g}|${c}|${idArt}|${nomArt}`;
+                const cant = parseFloat(item[campoCant]) || 0;
+                const monto = parseFloat(item[campoMonto]) || 0;
 
-                if (!matrizMap[key]) {
-                    matrizMap[key] = { grupo: g, clase: c, artId: idArt, artNom: nomArt, cant: 0, monto: 0 };
+                if (!gruposTree[g]) {
+                    gruposTree[g] = { nombre: g, totalCant: 0, totalMonto: 0, clases: {} };
                 }
+                gruposTree[g].totalCant += cant;
+                gruposTree[g].totalMonto += monto;
 
-                matrizMap[key].cant += (parseFloat(item[campoCant]) || 0);
-                matrizMap[key].monto += (parseFloat(item[campoMonto]) || 0);
+                if (!gruposTree[g].clases[c]) {
+                    gruposTree[g].clases[c] = { nombre: c, totalCant: 0, totalMonto: 0, articulosMap: {} };
+                }
+                gruposTree[g].clases[c].totalCant += cant;
+                gruposTree[g].clases[c].totalMonto += monto;
+
+                const artKey = `${idArt}|${nomArt}`;
+                if (!gruposTree[g].clases[c].articulosMap[artKey]) {
+                    gruposTree[g].clases[c].articulosMap[artKey] = { artId: idArt, artNom: nomArt, cant: 0, monto: 0 };
+                }
+                gruposTree[g].clases[c].articulosMap[artKey].cant += cant;
+                gruposTree[g].clases[c].articulosMap[artKey].monto += monto;
             });
 
-            // Ordenamiento jerárquico: 1. Grupo (A-Z) -> 2. Clase (A-Z) -> 3. Presupuesto (Mayor a Menor)
-            const filasOrdenadas = Object.values(matrizMap).sort((a, b) => {
-                const compGrupo = a.grupo.localeCompare(b.grupo, 'es', { numeric: true });
-                if (compGrupo !== 0) return compGrupo;
+            // 1. Ordenar Grupos (alfabéticamente)
+            const gruposOrdenados = Object.values(gruposTree).sort((a, b) => 
+                a.nombre.localeCompare(b.nombre, 'es', { numeric: true })
+            );
 
-                const compClase = a.clase.localeCompare(b.clase, 'es', { numeric: true });
-                if (compClase !== 0) return compClase;
-
-                return b.monto - a.monto; // Mayor a menor presupuesto dentro de la misma clase
-            });
-
-            // Inserción en la tabla
-            filasOrdenadas.forEach(row => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${row.grupo}</td>
-                    <td>${row.clase}</td>
-                    <td>${row.artId}</td>
-                    <td>${row.artNom}</td>
-                    <td class="num-col">${row.cant.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                    <td class="num-col">S/ ${row.monto.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+            // Generar filas jerárquicas en Diseño Compacto (Orden: Grupo -> Clase -> Código y Artículo)
+            gruposOrdenados.forEach((gObj, gIdx) => {
+                // 1. Fila de Grupo (Botón de expansión a nivel de Grupo)
+                const trGrupo = document.createElement('tr');
+                trGrupo.className = 'row-grupo';
+                trGrupo.setAttribute('data-gidx', gIdx);
+                trGrupo.onclick = () => toggleGrupo(gIdx);
+                trGrupo.innerHTML = `
+                    <td>
+                        <span id="icon-grp-${gIdx}" class="toggle-btn">−</span>
+                        <span><b>${gObj.nombre}</b></span>
+                        <span class="subtotal-badge">(${Object.keys(gObj.clases).length} clases)</span>
+                    </td>
+                    <td class="num-col"><b>${Math.round(gObj.totalCant).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</b></td>
+                    <td class="num-col"><b>S/ ${Math.round(gObj.totalMonto).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</b></td>
                 `;
-                tbody.appendChild(tr);
+                tbody.appendChild(trGrupo);
+
+                // 2. Ordenar Clases de este Grupo
+                const clasesOrdenadas = Object.values(gObj.clases).sort((a, b) => 
+                    a.nombre.localeCompare(b.nombre, 'es', { numeric: true })
+                );
+
+                clasesOrdenadas.forEach((cObj, cIdx) => {
+                    const artsList = Object.values(cObj.articulosMap).sort((a, b) => b.monto - a.monto);
+
+                    // 2. Fila de Clase (Botón de expansión a nivel de Clase, sangría 24px)
+                    const trClase = document.createElement('tr');
+                    trClase.className = `row-clase grp-child-${gIdx}`;
+                    trClase.setAttribute('data-gidx', gIdx);
+                    trClase.setAttribute('data-cidx', cIdx);
+                    trClase.onclick = () => toggleClase(gIdx, cIdx);
+                    trClase.innerHTML = `
+                        <td style="padding-left: 24px;">
+                            <span id="icon-cls-${gIdx}-${cIdx}" class="toggle-btn">−</span>
+                            <span><b>${cObj.nombre}</b></span>
+                            <span class="subtotal-badge">(${artsList.length} artículos)</span>
+                        </td>
+                        <td class="num-col">${Math.round(cObj.totalCant).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</td>
+                        <td class="num-col">S/ ${Math.round(cObj.totalMonto).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</td>
+                    `;
+                    tbody.appendChild(trClase);
+
+                    // 3. Filas de Artículos (Detalle: Código y Artículo, sin botón, sangría 48px)
+                    artsList.forEach(art => {
+                        const trArt = document.createElement('tr');
+                        trArt.className = `row-articulo grp-child-${gIdx} cls-child-${gIdx}-${cIdx}`;
+                        trArt.innerHTML = `
+                            <td style="padding-left: 48px; color: #334155;">
+                                <span style="display: inline-block; width: 5px; height: 5px; background: #64748b; border-radius: 50%; margin-right: 8px; vertical-align: middle;"></span>
+                                <span style="font-family: monospace; font-weight: 700; color: #1e4e78; background: #e2e8f0; padding: 1px 6px; border-radius: 3px; margin-right: 6px;">${art.artId}</span>
+                                <span>${art.artNom}</span>
+                            </td>
+                            <td class="num-col">${Math.round(art.cant).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</td>
+                            <td class="num-col">S/ ${Math.round(art.monto).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</td>
+                        `;
+                        tbody.appendChild(trArt);
+                    });
+                });
             });
+        }
+
+        // Función para expandir / contraer Grupo
+        function toggleGrupo(gIdx) {
+            const icon = document.getElementById(`icon-grp-${gIdx}`);
+            if (!icon) return;
+            const isExpanded = (icon.innerText === '−' || icon.innerText === '-');
+            icon.innerText = isExpanded ? '+' : '−';
+
+            const clases = document.querySelectorAll(`.row-clase.grp-child-${gIdx}`);
+            clases.forEach(rowCls => {
+                rowCls.style.display = isExpanded ? 'none' : '';
+            });
+
+            if (isExpanded) {
+                // Al contraer grupo, ocultar todos sus artículos
+                const articulos = document.querySelectorAll(`.row-articulo.grp-child-${gIdx}`);
+                articulos.forEach(rowArt => rowArt.style.display = 'none');
+            } else {
+                // Al expandir grupo, mostrar solo artículos de las clases que estén abiertas
+                clases.forEach(rowCls => {
+                    const cIdx = rowCls.getAttribute('data-cidx');
+                    const clsIcon = document.getElementById(`icon-cls-${gIdx}-${cIdx}`);
+                    const clsExpanded = clsIcon && (clsIcon.innerText === '−' || clsIcon.innerText === '-');
+                    const articulos = document.querySelectorAll(`.row-articulo.cls-child-${gIdx}-${cIdx}`);
+                    articulos.forEach(rowArt => {
+                        rowArt.style.display = clsExpanded ? '' : 'none';
+                    });
+                });
+            }
+        }
+
+        // Función para expandir / contraer Clase
+        function toggleClase(gIdx, cIdx) {
+            const icon = document.getElementById(`icon-cls-${gIdx}-${cIdx}`);
+            if (!icon) return;
+            const isExpanded = (icon.innerText === '−' || icon.innerText === '-');
+            icon.innerText = isExpanded ? '+' : '−';
+
+            const articulos = document.querySelectorAll(`.row-articulo.cls-child-${gIdx}-${cIdx}`);
+            articulos.forEach(rowArt => {
+                rowArt.style.display = isExpanded ? 'none' : '';
+            });
+        }
+
+        // Función para Expandir o Contraer Todo
+        function expandirTodoMatriz(expandir) {
+            const gruposIconos = document.querySelectorAll('[id^="icon-grp-"]');
+            const clasesIconos = document.querySelectorAll('[id^="icon-cls-"]');
+            const clasesRows = document.querySelectorAll('.row-clase');
+            const articulosRows = document.querySelectorAll('.row-articulo');
+
+            gruposIconos.forEach(ic => ic.innerText = expandir ? '−' : '+');
+            clasesIconos.forEach(ic => ic.innerText = expandir ? '−' : '+');
+            clasesRows.forEach(row => row.style.display = expandir ? '' : 'none');
+            articulosRows.forEach(row => row.style.display = expandir ? '' : 'none');
         }
 
         function obtenerNombreCampo(obj, opciones) {

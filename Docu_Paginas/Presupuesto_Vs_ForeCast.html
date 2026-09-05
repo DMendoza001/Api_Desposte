@@ -13,19 +13,12 @@
             --primary-dark: #1B365D;
             --secondary-blue: #34495E;
             --budget-color: #3A4758;
-            /* Color 1 de la paleta */
             --forecast-color: #0B6679;
-            /* Color 4 de la paleta */
             --accent-blue: #89A5CC;
-            /* Color 2 de la paleta */
             --accent-steel: #647F93;
-            /* Color 3 de la paleta */
             --accent-sage: #9EBEC3;
-            /* Color 5 de la paleta */
             --accent-mint: #98C7BB;
-            /* Color 6 de la paleta */
             --accent-sky: #76B1C7;
-            /* Color 7 de la paleta */
             --green: #1E8449;
             --orange: #D35400;
             --red: #C0392B;
@@ -54,14 +47,16 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
             border-bottom: 2px solid var(--border);
             padding-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 12px;
         }
 
         .header h1 {
             color: var(--primary);
-            font-size: 22px;
+            font-size: 20px;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -76,7 +71,27 @@
             font-weight: 600;
         }
 
-        /* Filtros */
+        /* Banner de Estado */
+        #statusBanner {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 10px 16px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid #bae6fd;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Barra de Filtros */
         .filter-bar {
             display: flex;
             flex-wrap: wrap;
@@ -86,7 +101,7 @@
             border-radius: 8px;
             border: 1px solid var(--border);
             margin-bottom: 20px;
-            align-items: center;
+            align-items: flex-end;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
         }
 
@@ -111,12 +126,24 @@
             border: 1px solid var(--border);
             outline: none;
             background-color: #fff;
-            min-width: 140px;
+            min-width: 150px;
+            font-weight: 500;
+        }
+
+        .filter-group select:focus,
+        .filter-group input:focus {
+            border-color: var(--primary);
+        }
+
+        .filter-group.primary-filter select {
+            background-color: #F0F7FD;
+            border-color: #89A5CC;
+            font-weight: 700;
+            color: var(--primary-dark);
         }
 
         .btn-reset {
-            margin-top: 18px;
-            padding: 6px 14px;
+            padding: 7px 14px;
             font-size: 12px;
             border: 1px solid var(--border);
             border-radius: 4px;
@@ -124,10 +151,16 @@
             cursor: pointer;
             color: var(--text);
             font-weight: 600;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: background 0.15s;
         }
 
         .btn-reset:hover {
             background: #ECEFF1;
+            border-color: #94a3b8;
         }
 
         /* Tarjetas KPI */
@@ -140,7 +173,7 @@
 
         .kpi-card {
             background: var(--card-bg);
-            padding: 16px;
+            padding: 14px 16px;
             border-radius: 8px;
             border: 1px solid var(--border);
             border-left: 5px solid var(--primary);
@@ -155,15 +188,15 @@
         }
 
         .kpi-value {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
             color: var(--text);
-            margin-top: 5px;
+            margin-top: 4px;
         }
 
         .kpi-sub {
             font-size: 11px;
-            margin-top: 4px;
+            margin-top: 3px;
             font-weight: 600;
             color: var(--text-muted);
         }
@@ -176,7 +209,7 @@
             color: var(--red);
         }
 
-        /* Grid de Gráficos */
+        /* Grid del Dashboard */
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -190,14 +223,14 @@
         .card {
             background-color: var(--card-bg);
             border-radius: 8px;
-            padding: 18px;
+            padding: 16px 18px;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
             border: 1px solid var(--border);
         }
 
         .card h3 {
             font-size: 14px;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             color: var(--primary);
             font-weight: 700;
             border-bottom: 1px solid #ECEFF1;
@@ -206,17 +239,17 @@
 
         .chart-container {
             position: relative;
-            height: 320px;
+            height: 300px;
             width: 100%;
         }
 
         .chart-container.large {
-            height: 360px;
+            height: 330px;
         }
 
-        /* Tabla Matriz */
+        /* Tablas y Matrices */
         .table-wrapper {
-            max-height: 480px;
+            max-height: 440px;
             overflow-y: auto;
             overflow-x: auto;
             border: 1px solid var(--border);
@@ -226,7 +259,7 @@
         table.matrix-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 12px;
+            font-size: 11.5px;
             text-align: left;
         }
 
@@ -235,22 +268,15 @@
             top: 0;
             background-color: var(--primary);
             color: #fff;
-            padding: 10px;
+            padding: 8px 10px;
             font-weight: 600;
-            z-index: 2;
+            z-index: 3;
+            font-size: 11px;
         }
 
         table.matrix-table td {
-            padding: 8px 10px;
+            padding: 6px 9px;
             border-bottom: 1px solid var(--border);
-        }
-
-        table.matrix-table tr:nth-child(even) {
-            background-color: #F8FAFC;
-        }
-
-        table.matrix-table tr:hover {
-            background-color: #EBF3FB;
         }
 
         .num-col {
@@ -258,11 +284,96 @@
             font-weight: 600;
         }
 
+        /* Estilos Jerárquicos en Formato Compacto */
+        .row-partida {
+            background-color: #e2e8f0 !important;
+            color: #1e3a8a;
+            font-weight: 700;
+            cursor: pointer;
+            user-select: none;
+            border-top: 2px solid #cbd5e1;
+        }
+
+        .row-partida:hover {
+            background-color: #cbd5e1 !important;
+        }
+
+        .row-grupo {
+            background-color: #f1f5f9 !important;
+            color: #334155;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .row-grupo:hover {
+            background-color: #e2e8f0 !important;
+        }
+
+        .row-clase {
+            background-color: #ffffff;
+            font-size: 11px;
+            color: #475569;
+        }
+
+        .row-clase:hover {
+            background-color: #f8fafc !important;
+        }
+
+        /* Botón de Expansión / Contracción */
+        .toggle-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            margin-right: 6px;
+            background: #ffffff;
+            border: 1px solid #94a3b8;
+            border-radius: 3px;
+            font-size: 11px;
+            line-height: 1;
+            font-family: monospace;
+            font-weight: bold;
+            color: #1e293b;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+            cursor: pointer;
+        }
+
+        .btn-matriz-ctrl {
+            padding: 4px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            border: 1px solid var(--border);
+            background: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--primary);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-matriz-ctrl:hover {
+            background: #f1f5f9;
+            border-color: var(--primary);
+        }
+
+        .subtotal-badge {
+            font-size: 10.5px;
+            color: #64748b;
+            margin-left: 6px;
+            font-weight: normal;
+            font-style: italic;
+        }
+
         .badge-diff {
             display: inline-block;
             padding: 2px 6px;
             border-radius: 4px;
-            font-size: 11px;
+            font-size: 10.5px;
             font-weight: 700;
         }
 
@@ -281,10 +392,84 @@
             color: #5D6D7E;
         }
 
+        /* Columna fija para scroll horizontal en Matriz Mensual */
+        .sticky-col {
+            position: sticky;
+            left: 0;
+            z-index: 2;
+            background-color: inherit;
+            box-shadow: 2px 0 4px rgba(0, 0, 0, 0.04);
+        }
+
+        table.matrix-table-mes th {
+            padding: 6px 8px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        table.matrix-table-mes th.sticky-col {
+            z-index: 5;
+            background-color: var(--primary);
+            text-align: left;
+            border-right: 2px solid #cbd5e1;
+        }
+
+        .header-mes-group {
+            background-color: #1F4E78 !important;
+            font-weight: 700;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+            border-left: 2px solid #ffffff !important;
+            border-right: 2px solid #ffffff !important;
+        }
+
+        .header-total-group {
+            background-color: #11284a !important;
+            font-weight: 700;
+            font-size: 12px;
+            border-left: 2px solid #ffffff !important;
+        }
+
+        .sub-col-header {
+            background-color: #275d8d !important;
+            font-size: 10.5px;
+            font-weight: 600;
+            padding: 4px 6px !important;
+            border-right: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .sub-col-total {
+            background-color: #18375e !important;
+            font-size: 10.5px;
+            font-weight: 600;
+            padding: 4px 6px !important;
+            border-right: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .border-left-group {
+            border-left: 2px solid #cbd5e1 !important;
+        }
+
+        .row-partida .sticky-col {
+            background-color: #e2e8f0 !important;
+        }
+
+        .row-grupo .sticky-col {
+            background-color: #f1f5f9 !important;
+        }
+
+        .row-clase .sticky-col {
+            background-color: #ffffff !important;
+        }
+
+        .row-clase:hover .sticky-col {
+            background-color: #f8fafc !important;
+        }
+
         .loading-overlay {
             text-align: center;
-            padding: 40px;
-            font-size: 16px;
+            padding: 30px;
+            font-size: 14px;
             color: var(--primary);
             font-weight: 600;
         }
@@ -299,45 +484,58 @@
         </div>
     </div>
 
-    <!-- Barra de Filtros / Segmentadores -->
+    <!-- Banner de Estado de Conexión -->
+    <div id="statusBanner">
+        <span
+            style="display:inline-block; width:15px; height:15px; border:2px solid #0369a1; border-top-color:transparent; border-radius:50%; animation: spin 1s linear infinite;"></span>
+        <span id="statusText">Conectando con la API en el puerto 8080 (o 5000) y consolidando Presupuesto vs
+            ForeCast...</span>
+    </div>
+
+    <!-- Barra de Filtros / Segmentadores Globales -->
     <div class="filter-bar">
-        <div class="filter-group">
-            <label for="cboCeco">Centro de Costo</label>
+        <!-- Filtro Global CECO -->
+        <div class="filter-group primary-filter">
+            <label for="cboCeco">📍 Centro de Costo (CECO):</label>
             <select id="cboCeco" onchange="aplicarFiltros()">
-                <option value="TODOS">-- Todos los CECO --</option>
+                <option value="TODOS">-- Todos los Centros de Costo --</option>
             </select>
         </div>
 
+        <!-- Filtro Partida Presupuestal -->
         <div class="filter-group">
-            <label for="cboMes">Mes</label>
-            <select id="cboMes" onchange="aplicarFiltros()">
-                <option value="TODOS">-- Todos los Meses --</option>
-            </select>
-        </div>
-
-        <div class="filter-group">
-            <label for="cboGrupo">Grupo</label>
-            <select id="cboGrupo" onchange="aplicarFiltros()">
-                <option value="TODOS">-- Todos los Grupos --</option>
-            </select>
-        </div>
-
-        <div class="filter-group">
-            <label for="cboPartida">Partida Presupuestal</label>
+            <label for="cboPartida">Partida Presupuestal:</label>
             <select id="cboPartida" onchange="aplicarFiltros()">
                 <option value="TODOS">-- Todas las Partidas --</option>
             </select>
         </div>
 
+        <!-- Filtro Mes -->
         <div class="filter-group">
-            <label for="txtBuscar">Buscar Partida / Clase</label>
+            <label for="cboMes">Mes:</label>
+            <select id="cboMes" onchange="aplicarFiltros()">
+                <option value="TODOS">-- Todos los Meses --</option>
+            </select>
+        </div>
+
+        <!-- Filtro Grupo -->
+        <div class="filter-group">
+            <label for="cboGrupo">Grupo:</label>
+            <select id="cboGrupo" onchange="aplicarFiltros()">
+                <option value="TODOS">-- Todos los Grupos --</option>
+            </select>
+        </div>
+
+        <!-- Búsqueda rápida -->
+        <div class="filter-group">
+            <label for="txtBuscar">Buscar Partida / Clase:</label>
             <input type="text" id="txtBuscar" placeholder="Filtrar por texto..." oninput="aplicarFiltros()">
         </div>
 
         <button class="btn-reset" onclick="limpiarFiltros()">↺ Limpiar Filtros</button>
     </div>
 
-    <!-- Tarjetas KPI -->
+    <!-- Tarjetas KPI Sensibles a Todos los Filtros -->
     <div class="kpi-container">
         <div class="kpi-card" style="border-left-color: var(--budget-color);">
             <div class="kpi-title">Presupuesto Base (T_Cabecera)</div>
@@ -352,36 +550,29 @@
         </div>
 
         <div class="kpi-card" id="cardVariacion" style="border-left-color: #D35400;">
-            <div class="kpi-title">Variación Neta (ForeCast - Presup.)</div>
+            <div class="kpi-title">Variación Neta (Presup. - ForeCast)</div>
             <div class="kpi-value" id="kpiVariacion">S/ 0.00</div>
-            <div class="kpi-sub" id="kpiVariacionPct">0.00%</div>
+            <div class="kpi-sub" id="kpiVariacionPct">0.00% vs ForeCast</div>
         </div>
 
         <div class="kpi-card" style="border-left-color: var(--accent-blue);">
-            <div class="kpi-title">% Cumplimiento Global</div>
+            <div class="kpi-title">% Variación Global</div>
             <div class="kpi-value" id="kpiCumplimiento">0.00%</div>
             <div class="kpi-sub" id="kpiRegistrosCount">0 registros analizados</div>
         </div>
     </div>
 
+    <!-- Layout Optimizado del Dashboard -->
     <div class="dashboard-grid">
-        <!-- 1. Comparativo Mensual -->
-        <div class="card full-width">
+
+        <!-- Fila 1: Gráficos Comparativos Principales -->
+        <div class="card">
             <h3>📈 Comparativa Mensual: Presupuesto vs ForeCast</h3>
-            <div class="chart-container large">
+            <div class="chart-container">
                 <canvas id="chartMensual"></canvas>
             </div>
         </div>
 
-        <!-- 2. Comparativo por Grupo -->
-        <div class="card">
-            <h3>🏢 Comparativa por Grupo</h3>
-            <div class="chart-container">
-                <canvas id="chartGrupo"></canvas>
-            </div>
-        </div>
-
-        <!-- 3. Comparativo por Centro de Costos -->
         <div class="card">
             <h3>📍 Comparativa por Centro de Costos (CECO)</h3>
             <div class="chart-container">
@@ -389,176 +580,374 @@
             </div>
         </div>
 
-        <!-- 4. Matriz de Detalle -->
-        <div class="card full-width">
-            <h3>📑 Matriz Comparativa Detallada por Partida Presupuestal</h3>
+        <!-- Fila 2: Comparativa por Grupo (Izquierda) y Matriz de Resumen Comparativo (Derecha) -->
+        <div class="card">
+            <h3>🏢 Comparativa por Grupo</h3>
+            <div class="chart-container large">
+                <canvas id="chartGrupo"></canvas>
+            </div>
+        </div>
+
+        <!-- MATRIZ 1: Resumen Comparativo Compacto (Partida -> Grupo -> Clase) -->
+        <div class="card">
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+                <h3
+                    style="margin-bottom: 0; text-align: left; font-size: 13.5px; border-bottom: none; padding-bottom: 0;">
+                    📊 Matriz de Resumen Comparativo</h3>
+                <div style="display: flex; gap: 6px;">
+                    <button type="button" class="btn-matriz-ctrl" onclick="expandirTodoMatriz(true)">➕ Expandir
+                        Todo</button>
+                    <button type="button" class="btn-matriz-ctrl" onclick="expandirTodoMatriz(false)">➖ Contraer
+                        Todo</button>
+                </div>
+            </div>
             <div class="table-wrapper">
                 <table class="matrix-table">
                     <thead>
                         <tr>
-                            <th>CECO</th>
-                            <th>Mes</th>
-                            <th>Grupo</th>
-                            <th>Clase</th>
-                            <th>Partida Presupuestal</th>
-                            <th class="num-col">Presupuesto (S/)</th>
-                            <th class="num-col">ForeCast (S/)</th>
-                            <th class="num-col">Variación (S/)</th>
-                            <th class="num-col">% Cumplimiento</th>
+                            <th style="width: 44%;">Jerarquía (Partida ➔ Grupo ➔ Clase)</th>
+                            <th class="num-col" style="width: 17%;">Presupuesto (S/)</th>
+                            <th class="num-col" style="width: 17%;">ForeCast (S/)</th>
+                            <th class="num-col" style="width: 14%;">Variación (S/)</th>
+                            <th class="num-col" style="width: 8%;">% Var.</th>
                         </tr>
                     </thead>
                     <tbody id="tbMatrizBody">
                         <tr>
-                            <td colspan="9" class="loading-overlay">Cargando datos desde la API...</td>
+                            <td colspan="5" class="loading-overlay">Cargando datos desde la API...</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </div>
+
+        <!-- Fila 3: MATRIZ 2: Matriz Mensual Comparativa con Detalle de 4 Métricas y Segmentador de Trimestre -->
+        <div class="card full-width">
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 12px;">
+                <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+                    <h3
+                        style="margin-bottom: 0; text-align: left; font-size: 14.5px; border-bottom: none; padding-bottom: 0;">
+                        📅 Matriz Comparativa Mensual (Presupuesto, ForeCast, Var. y % Var.)</h3>
+
+                    <!-- Segmentador por Trimestre -->
+                    <div
+                        style="display: flex; align-items: center; gap: 6px; background: #f8fafc; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border);">
+                        <label for="cboTrimestreMes"
+                            style="font-size: 11.5px; font-weight: 700; color: var(--primary);">Trimestre:</label>
+                        <select id="cboTrimestreMes" onchange="renderizarMatrizMes()"
+                            style="padding: 3px 8px; font-size: 11.5px; border-radius: 4px; border: 1px solid var(--border); background: #fff; cursor: pointer; font-weight: 600; color: #1e293b; outline: none;">
+                            <option value="T1" selected>I TRIMESTRE (Ene - Mar)</option>
+                            <option value="T2">II TRIMESTRE (Abr - Jun)</option>
+                            <option value="T3">III TRIMESTRE (Jul - Set)</option>
+                            <option value="T4">IV TRIMESTRE (Oct - Dic)</option>
+                            <option value="TODOS">-- Todos los Meses (Año Completo) --</option>
+                        </select>
+                    </div>
+
+                    <!-- Selector de Detalle de Columnas -->
+                    <div
+                        style="display: flex; align-items: center; gap: 6px; background: #f8fafc; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border);">
+                        <label for="cboDetalleMes"
+                            style="font-size: 11.5px; font-weight: 700; color: var(--forecast-color);">Columnas:</label>
+                        <select id="cboDetalleMes" onchange="renderizarMatrizMes()"
+                            style="padding: 3px 8px; font-size: 11.5px; border-radius: 4px; border: 1px solid var(--border); background: #fff; cursor: pointer; font-weight: 600; color: #1e293b; outline: none;">
+                            <option value="ALL" selected>Detalle Completo (Presup., ForeCast, Var., % Var.)</option>
+                            <option value="VAR_PCT">Solo Variación y % Var.</option>
+                            <option value="FORECAST">Solo ForeCast</option>
+                            <option value="PRESUPUESTO">Solo Presupuesto</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 6px;">
+                    <button type="button" class="btn-matriz-ctrl" onclick="expandirTodoMatrizMes(true)">➕ Expandir
+                        Todo</button>
+                    <button type="button" class="btn-matriz-ctrl" onclick="expandirTodoMatrizMes(false)">➖ Contraer
+                        Todo</button>
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <table class="matrix-table matrix-table-mes" id="tblMatrizMes">
+                    <thead id="thMatrizMes">
+                        <!-- Cabecera dinámica de dos niveles generada por JS -->
+                    </thead>
+                    <tbody id="tbMatrizMesBody">
+                        <!-- Filas jerárquicas dinámicas -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
 
     <script>
-        // URLs de la API (intenta primero localhost y luego el nombre del servidor)
-        const API_URLS = [
-            "http://localhost:8080/api/comparativopresupuesto/datos-comparativo",
-            "http://RAEVSALL001:8080/api/comparativopresupuesto/datos-comparativo"
+        // 1. Prioridad absoluta al puerto 8080 (servidor de trabajo y producción), fallback a 5000
+        const BASE_HOSTS = [
+            "http://localhost:8080",
+            "http://DMENDOZA:8080",
+            "http://RAEVSALL001:8080",
+            "http://localhost:5000",
+            "http://DMENDOZA:5000",
+            "http://RAEVSALL001:5000"
         ];
 
         let rawData = [];
+        let datosFiltradosActuales = [];
         let instGraficos = {};
 
         window.addEventListener('DOMContentLoaded', inicializar);
 
-        async function inicializar() {
+        async function fetchConTimeout(url, timeoutMs = 6000) {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeoutMs);
             try {
-                let res = null;
-                for (const url of API_URLS) {
-                    try {
-                        const testRes = await fetch(url);
-                        if (testRes.ok) {
-                            res = testRes;
-                            break;
+                const response = await fetch(url, { signal: controller.signal });
+                clearTimeout(id);
+                return response;
+            } catch (err) {
+                clearTimeout(id);
+                throw err;
+            }
+        }
+
+        async function detectarServidorApi() {
+            for (const base of BASE_HOSTS) {
+                try {
+                    const res = await fetchConTimeout(`${base}/`, 1500);
+                    if (res.ok) {
+                        const txt = await res.text();
+                        if (txt.includes("API Desposte")) {
+                            return base;
                         }
-                    } catch (e) {
-                        // Siguiente URL
                     }
+                } catch (e) { }
+            }
+            return null;
+        }
+
+        async function inicializar() {
+            const banner = document.getElementById('statusBanner');
+            const statusText = document.getElementById('statusText');
+
+            try {
+                statusText.innerText = "Buscando servidor API activo (Prioridad Puerto 8080)...";
+                const baseActiva = await detectarServidorApi();
+
+                if (!baseActiva) {
+                    throw new Error("No se pudo conectar con la API en el puerto 8080 ni 5000. Verifica que el servicio esté corriendo.");
                 }
 
-                if (!res) throw new Error("No se pudo conectar con la API en localhost:8080 ni en RAEVSALL001:8080.");
+                statusText.innerText = `Conectado a ${baseActiva}. Leyendo datos de Presupuesto 2027 y ForeCast desde Excel...`;
+
+                const res = await fetch(`${baseActiva}/api/comparativopresupuesto/datos-comparativo`);
+                if (!res.ok) throw new Error(`El servidor respondió con código HTTP ${res.status}`);
 
                 rawData = await res.json();
 
                 if (!rawData || rawData.length === 0) {
-                    document.getElementById('tbMatrizBody').innerHTML = '<tr><td colspan="9" style="text-align:center; padding:20px;">No se encontraron registros en el archivo Excel.</td></tr>';
+                    banner.style.display = 'none';
+                    document.getElementById('tbMatrizBody').innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">No se encontraron registros en el archivo Excel.</td></tr>';
                     return;
                 }
 
+                banner.style.display = 'none';
                 poblarFiltros(rawData);
-                renderizarDashboard(rawData);
+                aplicarFiltros();
             } catch (err) {
                 console.error("Error cargando comparativo:", err);
-                document.getElementById('tbMatrizBody').innerHTML = `<tr><td colspan="9" style="text-align:center; padding:20px; color:red;">Error al conectar con la API (${err.message}). Asegúrate de ejecutar <code>dotnet run</code> en la carpeta ApiDesposte.</td></tr>`;
+                banner.style.backgroundColor = '#fee2e2';
+                banner.style.borderColor = '#fca5a5';
+                banner.style.color = '#991b1b';
+                statusText.innerHTML = `<b>Error:</b> ${err.message}`;
+                document.getElementById('tbMatrizBody').innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:red;">Error al conectar con la API (${err.message}). Asegúrate de ejecutar <code>dotnet run</code> en la carpeta ApiDesposte.</td></tr>`;
             }
         }
 
         function poblarFiltros(data) {
             const cecos = [...new Set(data.map(i => i.centroCostos || 'SIN CECO'))].sort();
-            const meses = [...new Set(data.map(i => i.mes || 'SIN MES'))].sort();
+            const mesesRaw = [...new Set(data.map(i => i.mes || 'SIN MES'))];
+            // Ordenar meses numéricamente si es posible
+            const meses = mesesRaw.sort((a, b) => {
+                const nA = parseInt(a), nB = parseInt(b);
+                if (!isNaN(nA) && !isNaN(nB)) return nA - nB;
+                return a.toString().localeCompare(b.toString());
+            });
             const grupos = [...new Set(data.map(i => i.grupo || 'SIN GRUPO'))].sort();
             const partidas = [...new Set(data.map(i => i.partidaPresupuestal || 'SIN PARTIDA'))].sort();
 
             const cboCeco = document.getElementById('cboCeco');
             cecos.forEach(c => cboCeco.appendChild(new Option(c, c)));
 
+            const cboPartida = document.getElementById('cboPartida');
+            partidas.forEach(p => cboPartida.appendChild(new Option(p, p)));
+
             const cboMes = document.getElementById('cboMes');
-            meses.forEach(m => cboMes.appendChild(new Option(m, m)));
+            const NOMBRES_MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Setiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+            meses.forEach(m => {
+                const idx = normalizarMesIndice(m);
+                const etiqueta = idx >= 0 ? `${m} - ${NOMBRES_MESES[idx]}` : m;
+                cboMes.appendChild(new Option(etiqueta, m));
+            });
 
             const cboGrupo = document.getElementById('cboGrupo');
             grupos.forEach(g => cboGrupo.appendChild(new Option(g, g)));
-
-            const cboPartida = document.getElementById('cboPartida');
-            partidas.forEach(p => cboPartida.appendChild(new Option(p, p)));
         }
 
         function aplicarFiltros() {
             const ceco = document.getElementById('cboCeco').value;
+            const partida = document.getElementById('cboPartida').value;
             const mes = document.getElementById('cboMes').value;
             const grupo = document.getElementById('cboGrupo').value;
-            const partida = document.getElementById('cboPartida').value;
             const busqueda = (document.getElementById('txtBuscar').value || '').toLowerCase().trim();
 
-            let filtrados = rawData.filter(item => {
+            datosFiltradosActuales = rawData.filter(item => {
                 if (ceco !== 'TODOS' && item.centroCostos !== ceco) return false;
+                if (partida !== 'TODOS' && item.partidaPresupuestal !== partida) return false;
                 if (mes !== 'TODOS' && item.mes !== mes) return false;
                 if (grupo !== 'TODOS' && item.grupo !== grupo) return false;
-                if (partida !== 'TODOS' && item.partidaPresupuestal !== partida) return false;
 
                 if (busqueda) {
-                    const textoFila = `${item.clase} ${item.partidaPresupuestal}`.toLowerCase();
+                    const textoFila = `${item.partidaPresupuestal} ${item.grupo} ${item.clase}`.toLowerCase();
                     if (!textoFila.includes(busqueda)) return false;
                 }
                 return true;
             });
 
-            renderizarDashboard(filtrados);
+            renderizarDashboard(datosFiltradosActuales);
         }
 
         function limpiarFiltros() {
             document.getElementById('cboCeco').value = 'TODOS';
+            document.getElementById('cboPartida').value = 'TODOS';
             document.getElementById('cboMes').value = 'TODOS';
             document.getElementById('cboGrupo').value = 'TODOS';
-            document.getElementById('cboPartida').value = 'TODOS';
             document.getElementById('txtBuscar').value = '';
-            renderizarDashboard(rawData);
+            aplicarFiltros();
+        }
+
+        // ==========================================
+        // CÁLCULO DE VARIACIÓN Y % VARIACIÓN
+        // Fórmula requerida: (Presupuesto - ForeCast) / ForeCast
+        // ==========================================
+        function calcularVariacionYPct(pres, fc) {
+            const p = parseFloat(pres) || 0;
+            const f = parseFloat(fc) || 0;
+            const variacion = p - f;
+            let pct = 0;
+            if (f !== 0) {
+                pct = (variacion / f) * 100;
+            } else {
+                if (p > 0) pct = 100;
+                else if (p < 0) pct = -100;
+                else pct = 0;
+            }
+            return { variacion, pct };
+        }
+
+        function formatMonto(val, esBold = false) {
+            if (!val || Math.abs(Math.round(val)) === 0) return `<span style="color: #cbd5e1;">-</span>`;
+            const txt = 'S/ ' + Math.round(val).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+            return esBold ? `<b>${txt}</b>` : txt;
+        }
+
+        function formatVariacion(val, esBold = false) {
+            if (!val || Math.abs(Math.round(val)) === 0) return `<span style="color: #cbd5e1;">-</span>`;
+            const rounded = Math.round(val);
+            const signo = rounded > 0 ? '+' : '';
+            const txt = signo + 'S/ ' + rounded.toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+            const color = rounded > 0 ? 'var(--green)' : 'var(--red)';
+            return `<span style="color: ${color}; font-weight: ${esBold ? '700' : '600'};">${txt}</span>`;
+        }
+
+        function formatPct(pct, esBold = false) {
+            if (!pct || Math.abs(pct) < 0.005) return `<span style="color: #cbd5e1;">0.0%</span>`;
+            const signo = pct > 0 ? '+' : '';
+            const txt = signo + pct.toFixed(1) + '%';
+            const color = pct > 0 ? 'var(--green)' : 'var(--red)';
+            return `<span style="color: ${color}; font-weight: ${esBold ? '700' : '600'};">${txt}</span>`;
         }
 
         function renderizarDashboard(data) {
-            // 1. KPIs
+            // 1. Recalcular KPIs (Sensibles a Partida Presupuestal, CECO, Mes y Grupo)
             const totalPresupuesto = data.reduce((s, i) => s + (i.presupuesto || 0), 0);
             const totalForeCast = data.reduce((s, i) => s + (i.forecast || 0), 0);
-            const totalVariacion = totalForeCast - totalPresupuesto;
-            const cumplimientoGlobal = totalPresupuesto > 0 ? (totalForeCast / totalPresupuesto) * 100 : 0;
+            const { variacion: totalVariacion, pct: pctVar } = calcularVariacionYPct(totalPresupuesto, totalForeCast);
 
-            document.getElementById('kpiPresupuesto').innerText = 'S/ ' + totalPresupuesto.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            document.getElementById('kpiForeCast').innerText = 'S/ ' + totalForeCast.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            document.getElementById('kpiPresupuesto').innerText = 'S/ ' + Math.round(totalPresupuesto).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+            document.getElementById('kpiForeCast').innerText = 'S/ ' + Math.round(totalForeCast).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
             const elVar = document.getElementById('kpiVariacion');
-            elVar.innerText = (totalVariacion >= 0 ? '+S/ ' : '-S/ ') + Math.abs(totalVariacion).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            elVar.className = 'kpi-value ' + (totalVariacion > 0 ? 'kpi-negative' : 'kpi-positive');
+            const roundedVar = Math.round(totalVariacion);
+            elVar.innerText = (roundedVar >= 0 ? '+S/ ' : '-S/ ') + Math.abs(roundedVar).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+            elVar.className = 'kpi-value ' + (roundedVar >= 0 ? 'kpi-positive' : 'kpi-negative');
 
             const elVarPct = document.getElementById('kpiVariacionPct');
-            const pctVar = totalPresupuesto > 0 ? (totalVariacion / totalPresupuesto) * 100 : 0;
-            elVarPct.innerText = `${pctVar >= 0 ? '+' : ''}${pctVar.toFixed(2)}% vs Presupuesto`;
+            elVarPct.innerText = `${pctVar >= 0 ? '+' : ''}${pctVar.toFixed(1)}% ((Presup. - ForeCast)/ForeCast)`;
 
-            document.getElementById('kpiCumplimiento').innerText = cumplimientoGlobal.toFixed(2) + '%';
+            const elCump = document.getElementById('kpiCumplimiento');
+            elCump.innerText = `${pctVar >= 0 ? '+' : ''}${pctVar.toFixed(1)}%`;
+            elCump.className = 'kpi-value ' + (pctVar >= 0 ? 'kpi-positive' : 'kpi-negative');
             document.getElementById('kpiRegistrosCount').innerText = `${data.length} partidas filtradas`;
             document.getElementById('lblRegistros').innerText = `${data.length} de ${rawData.length} registros`;
 
             // 2. Gráficos Comparativos
             renderGraficoMensual(data);
-            renderGraficoGrupo(data);
             renderGraficoCeco(data);
+            renderGraficoGrupo(data);
 
-            // 3. Matriz de Detalle
-            renderizarMatriz(data);
+            // 3. Matriz 1: Resumen Comparativo Compacto (Partida -> Grupo -> Clase)
+            renderizarMatrizResumen(data);
+
+            // 4. Matriz 2: Matriz Comparativa Mensual con Detalle de 4 Métricas y Segmentador de Trimestre
+            renderizarMatrizMes();
+        }
+
+        // ==========================================
+        // GRÁFICOS COMPARATIVOS
+        // ==========================================
+
+        function normalizarMesIndice(val) {
+            if (val === null || val === undefined) return -1;
+            const num = parseInt(val);
+            if (!isNaN(num) && num >= 1 && num <= 12) return num - 1;
+            const str = val.toString().toUpperCase().trim();
+            const meses = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SET', 'OCT', 'NOV', 'DIC'];
+            for (let i = 0; i < meses.length; i++) {
+                if (str.startsWith(meses[i])) return i;
+            }
+            return -1;
         }
 
         function renderGraficoMensual(data) {
-            const agrupado = agruparDoble(data, 'mes');
-            actualizarGraficoDoble('chartMensual', agrupado.etiquetas, agrupado.presupuestos, agrupado.forecasts);
-        }
+            const NOMBRES_MESES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Set', 'Oct', 'Nov', 'Dic'];
+            const presMeses = new Array(12).fill(0);
+            const fcMeses = new Array(12).fill(0);
 
-        function renderGraficoGrupo(data) {
-            const agrupado = agruparDoble(data, 'grupo');
-            actualizarGraficoDoble('chartGrupo', agrupado.etiquetas, agrupado.presupuestos, agrupado.forecasts, true);
+            data.forEach(item => {
+                const idx = normalizarMesIndice(item.mes);
+                if (idx >= 0 && idx < 12) {
+                    presMeses[idx] += (item.presupuesto || 0);
+                    fcMeses[idx] += (item.forecast || 0);
+                }
+            });
+
+            actualizarGraficoDoble('chartMensual', NOMBRES_MESES, presMeses, fcMeses, false);
         }
 
         function renderGraficoCeco(data) {
-            const agrupado = agruparDoble(data, 'centroCostos');
+            const agrupado = agruparDoble(data, 'centroCostos', 8);
             actualizarGraficoDoble('chartCeco', agrupado.etiquetas, agrupado.presupuestos, agrupado.forecasts, true);
         }
 
-        function agruparDoble(data, campo) {
+        function renderGraficoGrupo(data) {
+            const agrupado = agruparDoble(data, 'grupo', 8);
+            actualizarGraficoDoble('chartGrupo', agrupado.etiquetas, agrupado.presupuestos, agrupado.forecasts, true);
+        }
+
+        function agruparDoble(data, campo, limite = 10) {
             const map = {};
             data.forEach(item => {
                 const k = item[campo] || 'SIN CLASIFICAR';
@@ -567,14 +956,17 @@
                 map[k].forecast += (item.forecast || 0);
             });
 
-            const etiquetas = Object.keys(map);
-            const presupuestos = etiquetas.map(k => map[k].presupuesto);
-            const forecasts = etiquetas.map(k => map[k].forecast);
+            let entradas = Object.entries(map).sort((a, b) => (b[1].presupuesto + b[1].forecast) - (a[1].presupuesto + a[1].forecast));
+            if (limite && entradas.length > limite) {
+                entradas = entradas.slice(0, limite);
+            }
+
+            const etiquetas = entradas.map(e => e[0]);
+            const presupuestos = entradas.map(e => Math.round(e[1].presupuesto * 100) / 100);
+            const forecasts = entradas.map(e => Math.round(e[1].forecast * 100) / 100);
 
             return { etiquetas, presupuestos, forecasts };
         }
-
-        const PALETA = ['#3A4758', '#89A5CC', '#647F93', '#0B6679', '#9EBEC3', '#98C7BB', '#76B1C7', '#CACDC3'];
 
         function actualizarGraficoDoble(idCanvas, etiquetas, presupuestos, forecasts, horizontal = false) {
             if (instGraficos[idCanvas]) instGraficos[idCanvas].destroy();
@@ -586,13 +978,13 @@
                     labels: etiquetas,
                     datasets: [
                         {
-                            label: 'Presupuesto (T_Cabecera)',
+                            label: 'Presupuesto (Base)',
                             data: presupuestos,
                             backgroundColor: '#3A4758',
                             borderRadius: 4
                         },
                         {
-                            label: 'ForeCast (T_ForeCast)',
+                            label: 'ForeCast (Proyectado)',
                             data: forecasts,
                             backgroundColor: '#0B6679',
                             borderRadius: 4
@@ -604,7 +996,7 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { position: 'top' },
+                        legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } },
                         tooltip: {
                             callbacks: {
                                 label: function (context) {
@@ -614,35 +1006,484 @@
                         }
                     },
                     scales: {
-                        x: { grid: { display: false } },
-                        y: { grid: { color: '#ECEFF1' } }
+                        x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+                        y: { grid: { color: '#ECEFF1' }, ticks: { font: { size: 10 } } }
                     }
                 }
             });
         }
 
-        function renderizarMatriz(data) {
+        // =========================================================================
+        // 1. MATRIZ DE RESUMEN COMPARATIVO (PARTIDA ➔ GRUPO ➔ CLASE)
+        // =========================================================================
+
+        function construirArbolJerarquico(data) {
+            // Estructura: Partida Presupuestal -> Grupo -> Clase
+            const partidasTree = {};
+
+            data.forEach(item => {
+                const p = (item.partidaPresupuestal || 'SIN PARTIDA').trim();
+                const g = (item.grupo || 'SIN GRUPO').trim();
+                const c = (item.clase || 'SIN CLASE').trim();
+                const pres = parseFloat(item.presupuesto) || 0;
+                const fc = parseFloat(item.forecast) || 0;
+                const mIdx = normalizarMesIndice(item.mes);
+
+                if (!partidasTree[p]) {
+                    partidasTree[p] = {
+                        nombre: p,
+                        presupuesto: 0,
+                        forecast: 0,
+                        mesesPres: new Array(12).fill(0),
+                        mesesFc: new Array(12).fill(0),
+                        grupos: {}
+                    };
+                }
+                partidasTree[p].presupuesto += pres;
+                partidasTree[p].forecast += fc;
+                if (mIdx >= 0 && mIdx < 12) {
+                    partidasTree[p].mesesPres[mIdx] += pres;
+                    partidasTree[p].mesesFc[mIdx] += fc;
+                }
+
+                if (!partidasTree[p].grupos[g]) {
+                    partidasTree[p].grupos[g] = {
+                        nombre: g,
+                        presupuesto: 0,
+                        forecast: 0,
+                        mesesPres: new Array(12).fill(0),
+                        mesesFc: new Array(12).fill(0),
+                        clases: {}
+                    };
+                }
+                partidasTree[p].grupos[g].presupuesto += pres;
+                partidasTree[p].grupos[g].forecast += fc;
+                if (mIdx >= 0 && mIdx < 12) {
+                    partidasTree[p].grupos[g].mesesPres[mIdx] += pres;
+                    partidasTree[p].grupos[g].mesesFc[mIdx] += fc;
+                }
+
+                if (!partidasTree[p].grupos[g].clases[c]) {
+                    partidasTree[p].grupos[g].clases[c] = {
+                        nombre: c,
+                        presupuesto: 0,
+                        forecast: 0,
+                        mesesPres: new Array(12).fill(0),
+                        mesesFc: new Array(12).fill(0)
+                    };
+                }
+                partidasTree[p].grupos[g].clases[c].presupuesto += pres;
+                partidasTree[p].grupos[g].clases[c].forecast += fc;
+                if (mIdx >= 0 && mIdx < 12) {
+                    partidasTree[p].grupos[g].clases[c].mesesPres[mIdx] += pres;
+                    partidasTree[p].grupos[g].clases[c].mesesFc[mIdx] += fc;
+                }
+            });
+
+            return partidasTree;
+        }
+
+        function renderizarMatrizResumen(data) {
             const tbody = document.getElementById('tbMatrizBody');
             tbody.innerHTML = '';
 
-            data.forEach(row => {
-                const tr = document.createElement('tr');
-                const diffBadgeClass = row.variacion > 0 ? 'badge-negative' : (row.variacion < 0 ? 'badge-positive' : 'badge-neutral');
-                const diffSign = row.variacion > 0 ? '+' : '';
+            if (!data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:#64748b;">No hay registros con los filtros seleccionados.</td></tr>';
+                return;
+            }
 
-                tr.innerHTML = `
-                    <td><strong>${row.centroCostos}</strong></td>
-                    <td>${row.mes}</td>
-                    <td>${row.grupo}</td>
-                    <td>${row.clase}</td>
-                    <td>${row.partidaPresupuestal}</td>
-                    <td class="num-col">S/ ${row.presupuesto.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                    <td class="num-col" style="color: var(--forecast-color);">S/ ${row.forecast.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                    <td class="num-col"><span class="badge-diff ${diffBadgeClass}">${diffSign}S/ ${row.variacion.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></td>
-                    <td class="num-col">${row.porcentajeCumplimiento.toFixed(2)}%</td>
+            const tree = construirArbolJerarquico(data);
+            const partidasOrdenadas = Object.values(tree).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es', { numeric: true }));
+
+            partidasOrdenadas.forEach((pObj, pIdx) => {
+                const { variacion: pVar, pct: pPctVar } = calcularVariacionYPct(pObj.presupuesto, pObj.forecast);
+                const pBadgeClass = pVar > 0 ? 'badge-positive' : (pVar < 0 ? 'badge-negative' : 'badge-neutral');
+                const pDiffSign = pVar > 0 ? '+' : '';
+
+                // 1. Fila de Partida Presupuestal (Nivel 0 - Sangría 0)
+                const trPartida = document.createElement('tr');
+                trPartida.className = 'row-partida';
+                trPartida.setAttribute('data-pidx', pIdx);
+                trPartida.onclick = () => togglePartida(pIdx);
+                trPartida.innerHTML = `
+                    <td>
+                        <span id="icon-p-${pIdx}" class="toggle-btn">−</span>
+                        <span><b>${pObj.nombre}</b></span>
+                        <span class="subtotal-badge">(${Object.keys(pObj.grupos).length} grupos)</span>
+                    </td>
+                    <td class="num-col"><b>${formatMonto(pObj.presupuesto)}</b></td>
+                    <td class="num-col" style="color: var(--forecast-color);"><b>${formatMonto(pObj.forecast)}</b></td>
+                    <td class="num-col"><span class="badge-diff ${pBadgeClass}">${pDiffSign}${formatMonto(pVar)}</span></td>
+                    <td class="num-col"><b>${formatPct(pPctVar, true)}</b></td>
                 `;
-                tbody.appendChild(tr);
+                tbody.appendChild(trPartida);
+
+                // Grupos ordenados
+                const gruposOrdenados = Object.values(pObj.grupos).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es', { numeric: true }));
+
+                gruposOrdenados.forEach((gObj, gIdx) => {
+                    const { variacion: gVar, pct: gPctVar } = calcularVariacionYPct(gObj.presupuesto, gObj.forecast);
+                    const gBadgeClass = gVar > 0 ? 'badge-positive' : (gVar < 0 ? 'badge-negative' : 'badge-neutral');
+                    const gDiffSign = gVar > 0 ? '+' : '';
+
+                    // 2. Fila de Grupo (Nivel 1 - Sangría 24px)
+                    const trGrupo = document.createElement('tr');
+                    trGrupo.className = `row-grupo p-child-${pIdx}`;
+                    trGrupo.setAttribute('data-pidx', pIdx);
+                    trGrupo.setAttribute('data-gidx', gIdx);
+                    trGrupo.onclick = () => toggleGrupo(pIdx, gIdx);
+                    trGrupo.innerHTML = `
+                        <td style="padding-left: 24px;">
+                            <span id="icon-g-${pIdx}-${gIdx}" class="toggle-btn">−</span>
+                            <span><b>${gObj.nombre}</b></span>
+                            <span class="subtotal-badge">(${Object.keys(gObj.clases).length} clases)</span>
+                        </td>
+                        <td class="num-col">${formatMonto(gObj.presupuesto)}</td>
+                        <td class="num-col" style="color: var(--forecast-color);">${formatMonto(gObj.forecast)}</td>
+                        <td class="num-col"><span class="badge-diff ${gBadgeClass}">${gDiffSign}${formatMonto(gVar)}</span></td>
+                        <td class="num-col">${formatPct(gPctVar)}</td>
+                    `;
+                    tbody.appendChild(trGrupo);
+
+                    // Clases ordenadas
+                    const clasesOrdenadas = Object.values(gObj.clases).sort((a, b) => (b.presupuesto + b.forecast) - (a.presupuesto + a.forecast));
+
+                    clasesOrdenadas.forEach(cObj => {
+                        const { variacion: cVar, pct: cPctVar } = calcularVariacionYPct(cObj.presupuesto, cObj.forecast);
+                        const cBadgeClass = cVar > 0 ? 'badge-positive' : (cVar < 0 ? 'badge-negative' : 'badge-neutral');
+                        const cDiffSign = cVar > 0 ? '+' : '';
+
+                        // 3. Fila de Clase (Nivel 2 - Sangría 48px)
+                        const trClase = document.createElement('tr');
+                        trClase.className = `row-clase p-child-${pIdx} g-child-${pIdx}-${gIdx}`;
+                        trClase.innerHTML = `
+                            <td style="padding-left: 48px;">
+                                <span style="display: inline-block; width: 5px; height: 5px; background: #64748b; border-radius: 50%; margin-right: 6px; vertical-align: middle;"></span>
+                                <span>${cObj.nombre}</span>
+                            </td>
+                            <td class="num-col">${formatMonto(cObj.presupuesto)}</td>
+                            <td class="num-col" style="color: var(--forecast-color);">${formatMonto(cObj.forecast)}</td>
+                            <td class="num-col"><span class="badge-diff ${cBadgeClass}">${cDiffSign}${formatMonto(cVar)}</span></td>
+                            <td class="num-col">${formatPct(cPctVar)}</td>
+                        `;
+                        tbody.appendChild(trClase);
+                    });
+                });
             });
+        }
+
+        // Funciones de Expansión / Contracción Matriz Resumen
+        function togglePartida(pIdx) {
+            const icon = document.getElementById(`icon-p-${pIdx}`);
+            if (!icon) return;
+            const isExpanded = (icon.innerText === '−' || icon.innerText === '-');
+            icon.innerText = isExpanded ? '+' : '−';
+
+            const grupos = document.querySelectorAll(`.row-grupo.p-child-${pIdx}`);
+            grupos.forEach(rowGrp => {
+                rowGrp.style.display = isExpanded ? 'none' : '';
+            });
+
+            if (isExpanded) {
+                const clases = document.querySelectorAll(`.row-clase.p-child-${pIdx}`);
+                clases.forEach(rowCls => rowCls.style.display = 'none');
+            } else {
+                grupos.forEach(rowGrp => {
+                    const gIdx = rowGrp.getAttribute('data-gidx');
+                    const grpIcon = document.getElementById(`icon-g-${pIdx}-${gIdx}`);
+                    const grpExpanded = grpIcon && (grpIcon.innerText === '−' || grpIcon.innerText === '-');
+                    const clases = document.querySelectorAll(`.row-clase.g-child-${pIdx}-${gIdx}`);
+                    clases.forEach(rowCls => {
+                        rowCls.style.display = grpExpanded ? '' : 'none';
+                    });
+                });
+            }
+        }
+
+        function toggleGrupo(pIdx, gIdx) {
+            const icon = document.getElementById(`icon-g-${pIdx}-${gIdx}`);
+            if (!icon) return;
+            const isExpanded = (icon.innerText === '−' || icon.innerText === '-');
+            icon.innerText = isExpanded ? '+' : '−';
+
+            const clases = document.querySelectorAll(`.row-clase.g-child-${pIdx}-${gIdx}`);
+            clases.forEach(rowCls => {
+                rowCls.style.display = isExpanded ? 'none' : '';
+            });
+        }
+
+        function expandirTodoMatriz(expandir) {
+            const pIcons = document.querySelectorAll('[id^="icon-p-"]');
+            const gIcons = document.querySelectorAll('[id^="icon-g-"]');
+            const grpRows = document.querySelectorAll('.row-grupo');
+            const clsRows = document.querySelectorAll('.row-clase');
+
+            pIcons.forEach(ic => ic.innerText = expandir ? '−' : '+');
+            gIcons.forEach(ic => ic.innerText = expandir ? '−' : '+');
+            grpRows.forEach(r => r.style.display = expandir ? '' : 'none');
+            clsRows.forEach(r => r.style.display = expandir ? '' : 'none');
+        }
+
+        // =========================================================================
+        // 2. MATRIZ MENSUAL COMPARATIVA (PRESUPUESTO, FORECAST, VAR. Y % VAR.)
+        // =========================================================================
+
+        function renderizarMatrizMes() {
+            const tbody = document.getElementById('tbMatrizMesBody');
+            const thead = document.getElementById('thMatrizMes');
+            if (!tbody || !thead) return;
+            tbody.innerHTML = '';
+
+            const trimestre = document.getElementById('cboTrimestreMes') ? document.getElementById('cboTrimestreMes').value : 'T1';
+            const detalle = document.getElementById('cboDetalleMes') ? document.getElementById('cboDetalleMes').value : 'ALL';
+
+            // Meses a visualizar según trimestre
+            const NOMBRES_MESES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Set', 'Oct', 'Nov', 'Dic'];
+            const MAPA_TRIM_MESES = {
+                'T1': [0, 1, 2],
+                'T2': [3, 4, 5],
+                'T3': [6, 7, 8],
+                'T4': [9, 10, 11]
+            };
+
+            let mesesAVisualizar = [0, 1, 2];
+            if (trimestre === 'TODOS') {
+                mesesAVisualizar = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+            } else if (MAPA_TRIM_MESES[trimestre]) {
+                mesesAVisualizar = MAPA_TRIM_MESES[trimestre];
+            }
+
+            // Definición de subcolumnas según la opción seleccionada
+            let subCols = [];
+            if (detalle === 'ALL') {
+                subCols = [
+                    { label: 'Presup.', key: 'pres' },
+                    { label: 'ForeCast', key: 'fc' },
+                    { label: 'Var.', key: 'var' },
+                    { label: '% Var.', key: 'pct' }
+                ];
+            } else if (detalle === 'VAR_PCT') {
+                subCols = [
+                    { label: 'Var.', key: 'var' },
+                    { label: '% Var.', key: 'pct' }
+                ];
+            } else if (detalle === 'FORECAST') {
+                subCols = [
+                    { label: 'ForeCast', key: 'fc' }
+                ];
+            } else {
+                subCols = [
+                    { label: 'Presup.', key: 'pres' }
+                ];
+            }
+
+            const colSpan = subCols.length;
+
+            // Construir cabecera de 2 niveles
+            const labelTotal = (trimestre === 'TODOS') ? 'TOTAL AÑO' : `TOTAL ${trimestre}`;
+            let thRow1 = `<tr><th rowspan="2" class="sticky-col" style="min-width: 250px; vertical-align: middle;">Jerarquía (Partida ➔ Grupo ➔ Clase)</th>`;
+            let thRow2 = `<tr>`;
+
+            mesesAVisualizar.forEach((mIdx, i) => {
+                thRow1 += `<th colspan="${colSpan}" class="header-mes-group">${NOMBRES_MESES[mIdx].toUpperCase()}</th>`;
+                subCols.forEach((sc, j) => {
+                    const extraClass = (j === 0) ? ' border-left-group' : '';
+                    thRow2 += `<th class="num-col sub-col-header${extraClass}">${sc.label}</th>`;
+                });
+            });
+
+            // Columna de Total
+            thRow1 += `<th colspan="${colSpan}" class="header-total-group">${labelTotal}</th></tr>`;
+            subCols.forEach((sc, j) => {
+                const extraClass = (j === 0) ? ' border-left-group' : '';
+                thRow2 += `<th class="num-col sub-col-total${extraClass}">${sc.label}</th>`;
+            });
+            thRow2 += `</tr>`;
+
+            thead.innerHTML = thRow1 + thRow2;
+
+            if (!datosFiltradosActuales || datosFiltradosActuales.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="${(mesesAVisualizar.length + 1) * colSpan + 1}" style="text-align: center; padding: 25px; color: #64748b;">No se encontraron registros para los filtros seleccionados.</td></tr>`;
+                return;
+            }
+
+            const tree = construirArbolJerarquico(datosFiltradosActuales);
+            const partidasOrdenadas = Object.values(tree).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es', { numeric: true }));
+
+            // Helper para generar las celdas de un mes
+            function generarCeldasMes(pres, fc, esSubtotal, bgCol = '') {
+                const { variacion, pct } = calcularVariacionYPct(pres, fc);
+                let html = '';
+                subCols.forEach((sc, j) => {
+                    const styleBg = bgCol ? `background-color: ${bgCol};` : '';
+                    const extraClass = (j === 0) ? ' border-left-group' : '';
+                    if (sc.key === 'pres') {
+                        html += `<td class="num-col${extraClass}" style="${styleBg}">${formatMonto(pres, esSubtotal)}</td>`;
+                    } else if (sc.key === 'fc') {
+                        html += `<td class="num-col${extraClass}" style="${styleBg} color: var(--forecast-color);">${formatMonto(fc, esSubtotal)}</td>`;
+                    } else if (sc.key === 'var') {
+                        html += `<td class="num-col${extraClass}" style="${styleBg}">${formatVariacion(variacion, esSubtotal)}</td>`;
+                    } else if (sc.key === 'pct') {
+                        html += `<td class="num-col${extraClass}" style="${styleBg}">${formatPct(pct, esSubtotal)}</td>`;
+                    }
+                });
+                return html;
+            }
+
+            partidasOrdenadas.forEach((pObj, pIdx) => {
+                // 1. Fila de Partida
+                const trPartida = document.createElement('tr');
+                trPartida.className = 'row-partida';
+                trPartida.setAttribute('data-pmes-idx', pIdx);
+                trPartida.onclick = () => togglePartidaMes(pIdx);
+
+                let htmlMeses = '';
+                let totPresPartida = 0;
+                let totFcPartida = 0;
+
+                mesesAVisualizar.forEach(mIdx => {
+                    const pres = pObj.mesesPres[mIdx] || 0;
+                    const fc = pObj.mesesFc[mIdx] || 0;
+                    totPresPartida += pres;
+                    totFcPartida += fc;
+                    htmlMeses += generarCeldasMes(pres, fc, true);
+                });
+
+                // Celdas Total Partida
+                const celdasTotalPartida = generarCeldasMes(totPresPartida, totFcPartida, true, '#cbd5e1');
+
+                trPartida.innerHTML = `
+                    <td class="sticky-col">
+                        <span id="icon-pmes-${pIdx}" class="toggle-btn">−</span>
+                        <span><b>${pObj.nombre}</b></span>
+                    </td>
+                    ${htmlMeses}
+                    ${celdasTotalPartida}
+                `;
+                tbody.appendChild(trPartida);
+
+                // Grupos ordenados
+                const gruposOrdenados = Object.values(pObj.grupos).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es', { numeric: true }));
+
+                gruposOrdenados.forEach((gObj, gIdx) => {
+                    // 2. Fila de Grupo
+                    const trGrupo = document.createElement('tr');
+                    trGrupo.className = `row-grupo pmes-child-${pIdx}`;
+                    trGrupo.setAttribute('data-pmes-idx', pIdx);
+                    trGrupo.setAttribute('data-gmes-idx', gIdx);
+                    trGrupo.onclick = () => toggleGrupoMes(pIdx, gIdx);
+
+                    let htmlMesesGrp = '';
+                    let totPresGrupo = 0;
+                    let totFcGrupo = 0;
+
+                    mesesAVisualizar.forEach(mIdx => {
+                        const pres = gObj.mesesPres[mIdx] || 0;
+                        const fc = gObj.mesesFc[mIdx] || 0;
+                        totPresGrupo += pres;
+                        totFcGrupo += fc;
+                        htmlMesesGrp += generarCeldasMes(pres, fc, true);
+                    });
+
+                    // Celdas Total Grupo
+                    const celdasTotalGrupo = generarCeldasMes(totPresGrupo, totFcGrupo, true, '#e2e8f0');
+
+                    trGrupo.innerHTML = `
+                        <td class="sticky-col" style="padding-left: 24px;">
+                            <span id="icon-gmes-${pIdx}-${gIdx}" class="toggle-btn">−</span>
+                            <span><b>${gObj.nombre}</b></span>
+                        </td>
+                        ${htmlMesesGrp}
+                        ${celdasTotalGrupo}
+                    `;
+                    tbody.appendChild(trGrupo);
+
+                    // Clases ordenadas
+                    const clasesOrdenadas = Object.values(gObj.clases).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es', { numeric: true }));
+
+                    clasesOrdenadas.forEach(cObj => {
+                        // 3. Fila de Clase
+                        const trClase = document.createElement('tr');
+                        trClase.className = `row-clase pmes-child-${pIdx} gmes-child-${pIdx}-${gIdx}`;
+
+                        let htmlMesesCls = '';
+                        let totPresClase = 0;
+                        let totFcClase = 0;
+
+                        mesesAVisualizar.forEach(mIdx => {
+                            const pres = cObj.mesesPres[mIdx] || 0;
+                            const fc = cObj.mesesFc[mIdx] || 0;
+                            totPresClase += pres;
+                            totFcClase += fc;
+                            htmlMesesCls += generarCeldasMes(pres, fc, false);
+                        });
+
+                        // Celdas Total Clase
+                        const celdasTotalClase = generarCeldasMes(totPresClase, totFcClase, false, '#f1f5f9');
+
+                        trClase.innerHTML = `
+                            <td class="sticky-col" style="padding-left: 48px;">
+                                <span style="display: inline-block; width: 5px; height: 5px; background: #64748b; border-radius: 50%; margin-right: 6px; vertical-align: middle;"></span>
+                                <span>${cObj.nombre}</span>
+                            </td>
+                            ${htmlMesesCls}
+                            ${celdasTotalClase}
+                        `;
+                        tbody.appendChild(trClase);
+                    });
+                });
+            });
+        }
+
+        function togglePartidaMes(pIdx) {
+            const icon = document.getElementById(`icon-pmes-${pIdx}`);
+            if (!icon) return;
+            const isExpanded = (icon.innerText === '−' || icon.innerText === '-');
+            icon.innerText = isExpanded ? '+' : '−';
+
+            const grupos = document.querySelectorAll(`.row-grupo.pmes-child-${pIdx}`);
+            grupos.forEach(rowGrp => {
+                rowGrp.style.display = isExpanded ? 'none' : '';
+            });
+
+            if (isExpanded) {
+                const clases = document.querySelectorAll(`.row-clase.pmes-child-${pIdx}`);
+                clases.forEach(rowCls => rowCls.style.display = 'none');
+            } else {
+                grupos.forEach(rowGrp => {
+                    const gIdx = rowGrp.getAttribute('data-gmes-idx');
+                    const grpIcon = document.getElementById(`icon-gmes-${pIdx}-${gIdx}`);
+                    const grpExpanded = grpIcon && (grpIcon.innerText === '−' || grpIcon.innerText === '-');
+                    const clases = document.querySelectorAll(`.row-clase.gmes-child-${pIdx}-${gIdx}`);
+                    clases.forEach(rowCls => {
+                        rowCls.style.display = grpExpanded ? '' : 'none';
+                    });
+                });
+            }
+        }
+
+        function toggleGrupoMes(pIdx, gIdx) {
+            const icon = document.getElementById(`icon-gmes-${pIdx}-${gIdx}`);
+            if (!icon) return;
+            const isExpanded = (icon.innerText === '−' || icon.innerText === '-');
+            icon.innerText = isExpanded ? '+' : '−';
+
+            const clases = document.querySelectorAll(`.row-clase.gmes-child-${pIdx}-${gIdx}`);
+            clases.forEach(rowCls => {
+                rowCls.style.display = isExpanded ? 'none' : '';
+            });
+        }
+
+        function expandirTodoMatrizMes(expandir) {
+            const pIcons = document.querySelectorAll('[id^="icon-pmes-"]');
+            const gIcons = document.querySelectorAll('[id^="icon-gmes-"]');
+            const grpRows = document.querySelectorAll('.row-grupo[class*="pmes-child-"]');
+            const clsRows = document.querySelectorAll('.row-clase[class*="pmes-child-"]');
+
+            pIcons.forEach(ic => ic.innerText = expandir ? '−' : '+');
+            gIcons.forEach(ic => ic.innerText = expandir ? '−' : '+');
+            grpRows.forEach(r => r.style.display = expandir ? '' : 'none');
+            clsRows.forEach(r => r.style.display = expandir ? '' : 'none');
         }
     </script>
 </body>

@@ -36,4 +36,45 @@ app.MapGet("/", () => Results.Content(
     "text/html"
 ));
 
-app.Run("http://0.0.0.0:8080");
+static bool IsPortAvailable(int port)
+{
+    try
+    {
+        using var tcpListener = new System.Net.Sockets.TcpListener(System.Net.IPAddress.Any, port);
+        tcpListener.Start();
+        tcpListener.Stop();
+        return true;
+    }
+    catch
+    {
+        return false;
+    }
+}
+
+if (IsPortAvailable(8080))
+{
+    app.Urls.Add("http://0.0.0.0:8080");
+    Console.WriteLine("✅ Escuchando en http://0.0.0.0:8080");
+}
+else
+{
+    Console.WriteLine("⚠️ Puerto 8080 ocupado por otra aplicación (MiniTool / otro servicio).");
+}
+
+if (IsPortAvailable(5000))
+{
+    app.Urls.Add("http://0.0.0.0:5000");
+    Console.WriteLine("✅ Escuchando en http://0.0.0.0:5000");
+}
+else
+{
+    Console.WriteLine("⚠️ Puerto 5000 ocupado.");
+}
+
+if (app.Urls.Count == 0)
+{
+    app.Urls.Add("http://0.0.0.0:8085");
+    Console.WriteLine("✅ Escuchando en puerto de respaldo http://0.0.0.0:8085");
+}
+
+app.Run();
