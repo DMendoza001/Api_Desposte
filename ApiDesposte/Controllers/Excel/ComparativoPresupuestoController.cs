@@ -17,25 +17,7 @@ namespace ApiDesposte.Controllers.Excel
         private string ObtenerRutaExcel()
         {
             string userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            string rutaPrincipal = Path.Combine(userProfile, @"OneDrive - Corporación Rico SAC\Desposte-03\Presupuestos\2027\Presupuesto_2027.xlsm");
-
-            if (System.IO.File.Exists(rutaPrincipal))
-                return rutaPrincipal;
-
-            // Rutas alternativas por si cambia el nombre de usuario local
-            string[] rutasAlternativas = new[]
-            {
-                @"C:\Users\dennis.mendoza\OneDrive - Corporación Rico SAC\Desposte-03\Presupuestos\2027\Presupuesto_2027.xlsm",
-                @"C:\Users\Dennis\OneDrive - Corporación Rico SAC\Desposte-03\Presupuestos\2027\Presupuesto_2027.xlsm"
-            };
-
-            foreach (var ruta in rutasAlternativas)
-            {
-                if (System.IO.File.Exists(ruta))
-                    return ruta;
-            }
-
-            return rutaPrincipal;
+            return Path.Combine(userProfile, @"OneDrive - Corporación Rico SAC\Desposte-03\Presupuestos\2027\Presupuesto_2027.xlsm");
         }
 
         private XLWorkbook CargarWorkbookEnMemoria(string rutaExcel)

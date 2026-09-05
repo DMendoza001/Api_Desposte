@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -22,16 +23,59 @@
             --border: #cbd5e1;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); color: var(--text); padding: 20px; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid var(--border); padding-bottom: 12px; }
-        .header h1 { color: var(--primary); font-size: 22px; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 12px;
+        }
+
+        .header h1 {
+            color: var(--primary);
+            font-size: 22px;
+        }
 
         /* Segmentador / Filtro */
-        .filter-container { display: flex; align-items: center; gap: 10px; background: var(--card-bg); padding: 8px 15px; border-radius: 6px; border: 1px solid var(--border); }
-        .filter-container label { font-size: 13px; font-weight: 700; color: var(--primary); }
-        .filter-container select { padding: 6px 12px; font-size: 13px; border-radius: 4px; border: 1px solid var(--border); outline: none; background-color: #fff; cursor: pointer; }
+        .filter-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--card-bg);
+            padding: 8px 15px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+
+        .filter-container label {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .filter-container select {
+            padding: 6px 12px;
+            font-size: 13px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            outline: none;
+            background-color: #fff;
+            cursor: pointer;
+        }
 
         /* Tarjetas KPI */
         .kpi-container {
@@ -40,16 +84,29 @@
             gap: 15px;
             margin-bottom: 20px;
         }
+
         .kpi-card {
             background: var(--card-bg);
             padding: 15px;
             border-radius: 8px;
             border: 1px solid var(--border);
             border-left: 5px solid var(--primary);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
-        .kpi-title { font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase; }
-        .kpi-value { font-size: 18px; font-weight: 700; color: var(--primary); margin-top: 5px; }
+
+        .kpi-title {
+            font-size: 11px;
+            color: #64748b;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .kpi-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-top: 5px;
+        }
 
         /* Grid del Dashboard */
         .dashboard-grid {
@@ -57,7 +114,10 @@
             grid-template-columns: repeat(2, 1fr);
             gap: 20px;
         }
-        .full-width { grid-column: span 2; }
+
+        .full-width {
+            grid-column: span 2;
+        }
 
         .card {
             background-color: var(--card-bg);
@@ -66,26 +126,74 @@
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
             border: 1px solid var(--border);
         }
-        .card h3 { font-size: 15px; margin-bottom: 15px; color: var(--primary); text-align: center; }
 
-        .chart-container { position: relative; height: 320px; width: 100%; }
-        .chart-container.large { height: 380px; }
+        .card h3 {
+            font-size: 15px;
+            margin-bottom: 15px;
+            color: var(--primary);
+            text-align: center;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 320px;
+            width: 100%;
+        }
+
+        .chart-container.large {
+            height: 380px;
+        }
 
         /* Matriz / Tabla Dinámica */
-        .table-wrapper { max-height: 420px; overflow-y: auto; overflow-x: auto; border: 1px solid var(--border); border-radius: 6px; }
-        table.matrix-table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: left; }
-        table.matrix-table th { position: sticky; top: 0; background-color: var(--primary); color: #fff; padding: 10px; font-weight: 600; }
-        table.matrix-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); }
-        table.matrix-table tr:nth-child(even) { background-color: #f1f5f9; }
-        table.matrix-table tr:hover { background-color: #e2e8f0; }
-        .num-col { text-align: right; font-weight: 600; }
+        .table-wrapper {
+            max-height: 420px;
+            overflow-y: auto;
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+        }
+
+        table.matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            text-align: left;
+        }
+
+        table.matrix-table th {
+            position: sticky;
+            top: 0;
+            background-color: var(--primary);
+            color: #fff;
+            padding: 10px;
+            font-weight: 600;
+        }
+
+        table.matrix-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        table.matrix-table tr:nth-child(even) {
+            background-color: #f1f5f9;
+        }
+
+        table.matrix-table tr:hover {
+            background-color: #e2e8f0;
+        }
+
+        .num-col {
+            text-align: right;
+            font-weight: 600;
+        }
     </style>
 </head>
+
 <body>
 
     <div class="header">
         <h1>📊 Dashboard Analítico Presupuesto 2027</h1>
-        
+
         <!-- Segmentador por Centro de Costo -->
         <div class="filter-container">
             <label for="cboCeco">Centro de Costo:</label>
@@ -169,7 +277,8 @@
     </div>
 
     <script>
-	const API_URL = "http://RAEVSALL001:8080/api/presupuesto/dashboard-data";       
+        //const API_URL = "http://RAEVSALL001:8080/api/presupuesto/dashboard-data";    
+        const API_URL = "http://DMENDOZA:8080/api/presupuesto/dashboard-data";
         const PALETA = ['#3A4758', '#89A5CC', '#647F93', '#0B6679', '#9EBEC3', '#98C7BB', '#76B1C7', '#CACDC3'];
 
         let rawData = [];
@@ -195,7 +304,7 @@
         function poblarSegmentadorCeco(data) {
             const campoCeco = obtenerNombreCampo(data[0], ['CentroCostos', 'CentroCosto', 'CECO']);
             const cecos = [...new Set(data.map(i => i[campoCeco] ? i[campoCeco].toString().trim() : 'N/A'))].sort();
-            
+
             const cbo = document.getElementById('cboCeco');
             cecos.forEach(c => {
                 const opt = document.createElement('option');
@@ -357,4 +466,5 @@
         }
     </script>
 </body>
+
 </html>
