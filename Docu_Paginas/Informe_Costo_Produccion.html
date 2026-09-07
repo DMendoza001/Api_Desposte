@@ -966,8 +966,13 @@
 
     <!-- Scripts con la Lógica Completa -->
     <script>
-        // Configuración de la API
-        const API_URL_BASE = "http://localhost:5000/api/costosproduccion";
+        // Configuración de la API con detección de puertos
+        const API_ENDPOINTS = [
+            "http://localhost:5000/api/costosproduccion/listar",
+            "http://localhost:8080/api/costosproduccion/listar",
+            "http://localhost:8085/api/costosproduccion/listar",
+            "/api/costosproduccion/listar"
+        ];
 
         // Paleta de Colores
         const PALETTE = {
@@ -995,11 +1000,11 @@
         let allYears = [];
         let allMonths = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
-        // Periodos seleccionados para Modo Contiguo (por defecto como en la imagen: 202512, 202601, 202602)
-        let selectedContiguousPeriods = ["202512", "202601", "202602"];
+        // Periodos seleccionados para Modo Contiguo (se determinan dinámicamente con los más recientes)
+        let selectedContiguousPeriods = [];
 
         // Configuración para Modo Interanual
-        let selectedInteranualMonth = 2; // Febrero por defecto
+        let selectedInteranualMonth = 7; // Mes por defecto
         let selectedInteranualYears = [2024, 2025, 2026];
 
         // Instancias de Charts
@@ -1326,28 +1331,33 @@
         // 1. Carga de Datos desde API con Fallback Inteligente
         async function cargarDatosIniciales() {
             actualizarEstadoAPI("loading", "Conectando con API...");
-            try {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 4000);
+            let dataCargada = false;
 
-                const res = await fetch(`${API_URL_BASE}/listar`, { signal: controller.signal });
-                clearTimeout(timeoutId);
+            for (const url of API_ENDPOINTS) {
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 3500);
 
-                if (res.ok) {
-                    const data = await res.json();
-                    if (Array.isArray(data) && data.length > 0) {
-                        rawData = normalizarDatos(data);
-                        actualizarEstadoAPI("online", "API en Línea (SQL Server)");
-                        mostrarToast("✅ Datos sincronizados desde SQL Server", "success");
-                    } else {
-                        usarDatosRespaldo("API respondió vacía. Usando datos locales.");
+                    const res = await fetch(url, { signal: controller.signal });
+                    clearTimeout(timeoutId);
+
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (Array.isArray(data) && data.length > 0) {
+                            rawData = normalizarDatos(data);
+                            actualizarEstadoAPI("online", `API en Línea (${data.length} registros)`);
+                            mostrarToast(`✅ ${data.length} registros sincronizados desde SQL Server`, "success");
+                            dataCargada = true;
+                            break;
+                        }
                     }
-                } else {
-                    usarDatosRespaldo(`API respondió con error HTTP ${res.status}`);
+                } catch (err) {
+                    console.warn(`Intento fallido en ${url}:`, err.message);
                 }
-            } catch (err) {
-                console.warn("No se pudo conectar a la API. Usando datos de respaldo:", err.message);
-                usarDatosRespaldo("Modo Offline (Datos precargados)");
+            }
+
+            if (!dataCargada) {
+                usarDatosRespaldo("No se pudo conectar a la API local. Usando datos precargados.");
             }
 
             procesarDimensiones();
@@ -1407,9 +1417,20 @@
             allPeriods = Array.from(periodosSet).sort();
             allYears = Array.from(aniosSet).sort((a, b) => a - b);
 
-            // Asegurar que selectedContiguousPeriods tenga valores válidos
-            if (allPeriods.length >= 3 && !selectedContiguousPeriods.every(p => allPeriods.includes(p))) {
-                selectedContiguousPeriods = allPeriods.slice(-3);
+            // Siempre seleccionar por defecto los últimos 3 periodos disponibles si el más reciente no está seleccionado
+            if (allPeriods.length >= 3) {
+                const ultimoPeriodoBD = allPeriods[allPeriods.length - 1];
+                if (!selectedContiguousPeriods || selectedContiguousPeriods.length === 0 || !selectedContiguousPeriods.includes(ultimoPeriodoBD)) {
+                    selectedContiguousPeriods = allPeriods.slice(-3);
+                }
+            } else if (allPeriods.length > 0) {
+                selectedContiguousPeriods = [...allPeriods];
+            }
+
+            // Seleccionar por defecto el último mes registrado para interanual
+            if (allPeriods.length > 0) {
+                const ultimoPeriodo = allPeriods[allPeriods.length - 1];
+                selectedInteranualMonth = parseInt(ultimoPeriodo.substring(4, 6));
             }
         }
 
