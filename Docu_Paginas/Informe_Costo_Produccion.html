@@ -8,7 +8,8 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -224,10 +225,21 @@
             box-shadow: var(--shadow-md);
         }
 
-        .kpi-card.accent-1 { border-left-color: var(--c-teal-deep); }
-        .kpi-card.accent-2 { border-left-color: var(--c-soft-blue); }
-        .kpi-card.accent-3 { border-left-color: var(--c-mint-green); }
-        .kpi-card.accent-4 { border-left-color: #E74C3C; }
+        .kpi-card.accent-1 {
+            border-left-color: var(--c-teal-deep);
+        }
+
+        .kpi-card.accent-2 {
+            border-left-color: var(--c-soft-blue);
+        }
+
+        .kpi-card.accent-3 {
+            border-left-color: var(--c-mint-green);
+        }
+
+        .kpi-card.accent-4 {
+            border-left-color: #E74C3C;
+        }
 
         .kpi-title {
             font-size: 11px;
@@ -475,8 +487,13 @@
             cursor: pointer;
         }
 
-        .text-right { text-align: right; }
-        .text-center { text-align: center; }
+        .text-right {
+            text-align: right;
+        }
+
+        .text-center {
+            text-align: center;
+        }
 
         .code-pill {
             font-family: 'Consolas', 'Courier New', monospace;
@@ -641,8 +658,15 @@
         }
 
         @keyframes modalFadeIn {
-            from { opacity: 0; transform: scale(0.95) translateY(10px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
         }
 
         .modal-header {
@@ -732,15 +756,30 @@
         }
 
         @keyframes slideUp {
-            from { transform: translateY(100%); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
         /* Responsive adjustments */
         @media (max-width: 768px) {
-            body { padding: 12px; }
-            .header-container { padding: 16px; }
-            .charts-grid { grid-template-columns: 1fr; }
+            body {
+                padding: 12px;
+            }
+
+            .header-container {
+                padding: 16px;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -803,17 +842,20 @@
         <div class="filter-row">
             <div class="form-group" style="grid-column: span 2;">
                 <label>🔍 Buscar por Nombre (LIKE / Autocompletar)</label>
-                <input type="text" id="filtroNombre" class="form-control" placeholder="Ej: CERDO ENTERO, LOMO, CHULETA, PANCETA..." oninput="filtrarEnVivo()">
+                <input type="text" id="filtroNombre" class="form-control"
+                    placeholder="Ej: CERDO ENTERO, LOMO, CHULETA, PANCETA..." oninput="filtrarEnVivo()">
             </div>
 
             <div class="form-group">
                 <label>🏷️ Cód. Corto</label>
-                <input type="text" id="filtroCodCorto" class="form-control" placeholder="Ej: 05201, 05340..." oninput="filtrarEnVivo()">
+                <input type="text" id="filtroCodCorto" class="form-control" placeholder="Ej: 05201, 05340..."
+                    oninput="filtrarEnVivo()">
             </div>
 
             <div class="form-group">
                 <label>🔢 Cód. Largo</label>
-                <input type="text" id="filtroCodLargo" class="form-control" placeholder="Ej: 040502001..." oninput="filtrarEnVivo()">
+                <input type="text" id="filtroCodLargo" class="form-control" placeholder="Ej: 040502001..."
+                    oninput="filtrarEnVivo()">
             </div>
 
 
@@ -891,7 +933,8 @@
             <h3 id="tablaTitulo">📋 Vista Comparativa: Costo de Producción</h3>
             <div style="display: flex; gap: 8px; align-items: center;">
                 <span style="font-size: 12px; color: var(--text-muted);">Mostrar:</span>
-                <select id="filtroPaginacion" class="form-control" style="padding: 4px 8px; width: auto;" onchange="cambiarTamanoPagina()">
+                <select id="filtroPaginacion" class="form-control" style="padding: 4px 8px; width: auto;"
+                    onchange="cambiarTamanoPagina()">
                     <option value="15">15 registros</option>
                     <option value="25" selected>25 registros</option>
                     <option value="50">50 registros</option>
@@ -966,13 +1009,30 @@
 
     <!-- Scripts con la Lógica Completa -->
     <script>
-        // Configuración de la API con detección de puertos
-        const API_ENDPOINTS = [
-            "http://localhost:5000/api/costosproduccion/listar",
-            "http://localhost:8080/api/costosproduccion/listar",
-            "http://localhost:8085/api/costosproduccion/listar",
-            "/api/costosproduccion/listar"
-        ];
+        // Generación dinámica de Endpoints API (Prioridad Puerto 8080, fallback a 5000, detección dinámica de Host)
+        function generarEndpointsApi(rutaRelativa) {
+            const hosts = [];
+            if (typeof window !== "undefined" && window.location && window.location.hostname && window.location.hostname !== "") {
+                hosts.push(window.location.hostname);
+            }
+            hosts.push("localhost", "127.0.0.1");
+
+            const puertos = [8080, 5000];
+            const endpoints = [];
+
+            // 1. Probar todos los hosts en puerto 8080 primero, luego en 5000
+            for (const puerto of puertos) {
+                for (const host of hosts) {
+                    endpoints.push(`http://${host}:${puerto}${rutaRelativa}`);
+                }
+            }
+            // 2. Ruta relativa como fallback
+            endpoints.push(rutaRelativa);
+
+            return Array.from(new Set(endpoints));
+        }
+
+        const API_ENDPOINTS = generarEndpointsApi("/api/costosproduccion/listar");
 
         // Paleta de Colores
         const PALETTE = {
@@ -1013,330 +1073,20 @@
         let chartTendenciaInst = null;
         let chartModalInst = null;
 
-        // Dataset de respaldo embebido (para funcionamiento offline garantizado)
-        const EMBEDDED_BACKUP_DATA = [
-  {"Año": 2026, "Mes": 2, "Codigo": "040502001", "CodigoCorto": "05201", "Nombre": "CERDO ENTERO C/CABEZA", "Costo": 6.70305648},
-  {"Año": 2026, "Mes": 3, "Codigo": "040502001", "CodigoCorto": "05201", "Nombre": "CERDO ENTERO C/CABEZA", "Costo": 6.71584522},
-  {"Año": 2026, "Mes": 4, "Codigo": "040502001", "CodigoCorto": "05201", "Nombre": "CERDO ENTERO C/CABEZA", "Costo": 6.72888892},
-  {"Año": 2026, "Mes": 5, "Codigo": "040502001", "CodigoCorto": "05201", "Nombre": "CERDO ENTERO C/CABEZA", "Costo": 7.18576973},
-  {"Año": 2026, "Mes": 6, "Codigo": "040502001", "CodigoCorto": "05201", "Nombre": "CERDO ENTERO C/CABEZA", "Costo": 6.7},
-  {"Año": 2025, "Mes": 8, "Codigo": "040502001", "CodigoCorto": "05201", "Nombre": "CERDO ENTERO C/CABEZA", "Costo": 7.00783316},
-  {"Año": 2025, "Mes": 9, "Codigo": "040502001", "CodigoCorto": "05201", "Nombre": "CERDO ENTERO C/CABEZA", "Costo": 6.80997893},
-  {"Año": 2025, "Mes": 10, "Codigo": "040502001", "CodigoCorto": "05201", "Nombre": "CERDO ENTERO C/CABEZA", "Costo": 6.6831835},
-  {"Año": 2025, "Mes": 11, "Codigo": "040502001", "CodigoCorto": "05201", "Nombre": "CERDO ENTERO C/CABEZA", "Costo": 6.74127085},
-  {"Año": 2025, "Mes": 12, "Codigo": "040502001", "CodigoCorto": "05201", "Nombre": "CERDO ENTERO C/CABEZA", "Costo": 6.75588163},
-  {"Año": 2026, "Mes": 1, "Codigo": "040502001", "CodigoCorto": "05201", "Nombre": "CERDO ENTERO C/CABEZA", "Costo": 7.14},
-  {"Año": 2025, "Mes": 2, "Codigo": "040502001", "CodigoCorto": "05201", "Nombre": "CERDO ENTERO C/CABEZA", "Costo": 6.85616032},
-  {"Año": 2025, "Mes": 3, "Codigo": "040502001", "CodigoCorto": "05201", "Nombre": "CERDO ENTERO C/CABEZA", "Costo": 6.91143451},
-  {"Año": 2025, "Mes": 4, "Codigo": "040502001", "CodigoCorto": "05201", "Nombre": "CERDO ENTERO C/CABEZA", "Costo": 6.72966617},
-  {"Año": 2025, "Mes": 5, "Codigo": "040502001", "CodigoCorto": "05201", "Nombre": "CERDO ENTERO C/CABEZA", "Costo": 6.86128695},
-  {"Año": 2025, "Mes": 6, "Codigo": "040502001", "CodigoCorto": "05201", "Nombre": "CERDO ENTERO C/CABEZA", "Costo": 6.92843172},
-  {"Año": 2025, "Mes": 7, "Codigo": "040502001", "CodigoCorto": "05201", "Nombre": "CERDO ENTERO C/CABEZA", "Costo": 6.87111929},
-  {"Año": 2024, "Mes": 8, "Codigo": "040502001", "CodigoCorto": "05201", "Nombre": "CERDO ENTERO C/CABEZA", "Costo": 7.37287292},
-  {"Año": 2024, "Mes": 9, "Codigo": "040502001", "CodigoCorto": "05201", "Nombre": "CERDO ENTERO C/CABEZA", "Costo": 7.24527593},
-  {"Año": 2024, "Mes": 10, "Codigo": "040502001", "CodigoCorto": "05201", "Nombre": "CERDO ENTERO C/CABEZA", "Costo": 6.89656806},
-  {"Año": 2024, "Mes": 11, "Codigo": "040502001", "CodigoCorto": "05201", "Nombre": "CERDO ENTERO C/CABEZA", "Costo": 6.96136265},
-  {"Año": 2024, "Mes": 12, "Codigo": "040502001", "CodigoCorto": "05201", "Nombre": "CERDO ENTERO C/CABEZA", "Costo": 7.14028276},
-  {"Año": 2025, "Mes": 1, "Codigo": "040502001", "CodigoCorto": "05201", "Nombre": "CERDO ENTERO C/CABEZA", "Costo": 7.02175024},
-  {"Año": 2024, "Mes": 2, "Codigo": "040502001", "CodigoCorto": "05201", "Nombre": "CERDO ENTERO C/CABEZA", "Costo": 7.87},
-  {"Año": 2024, "Mes": 3, "Codigo": "040502001", "CodigoCorto": "05201", "Nombre": "CERDO ENTERO C/CABEZA", "Costo": 7.64},
-  {"Año": 2024, "Mes": 4, "Codigo": "040502001", "CodigoCorto": "05201", "Nombre": "CERDO ENTERO C/CABEZA", "Costo": 7.4137397},
-  {"Año": 2024, "Mes": 5, "Codigo": "040502001", "CodigoCorto": "05201", "Nombre": "CERDO ENTERO C/CABEZA", "Costo": 7.2792},
-  {"Año": 2024, "Mes": 6, "Codigo": "040502001", "CodigoCorto": "05201", "Nombre": "CERDO ENTERO C/CABEZA", "Costo": 7.2902},
-  {"Año": 2024, "Mes": 7, "Codigo": "040502001", "CodigoCorto": "05201", "Nombre": "CERDO ENTERO C/CABEZA", "Costo": 7.49255509},
-  {"Año": 2024, "Mes": 1, "Codigo": "040502001", "CodigoCorto": "05201", "Nombre": "CERDO ENTERO C/CABEZA", "Costo": 7.72521219},
-  {"Año": 2026, "Mes": 4, "Codigo": "040502002", "CodigoCorto": "05202", "Nombre": "CERDO ENTERO SIN CABEZA", "Costo": 7.1607132},
-  {"Año": 2026, "Mes": 5, "Codigo": "040502002", "CodigoCorto": "05202", "Nombre": "CERDO ENTERO SIN CABEZA", "Costo": 7.97528061},
-  {"Año": 2026, "Mes": 6, "Codigo": "040502002", "CodigoCorto": "05202", "Nombre": "CERDO ENTERO SIN CABEZA", "Costo": 7.26},
-  {"Año": 2026, "Mes": 1, "Codigo": "040502002", "CodigoCorto": "05202", "Nombre": "CERDO ENTERO SIN CABEZA", "Costo": 7.79},
-  {"Año": 2026, "Mes": 2, "Codigo": "040502002", "CodigoCorto": "05202", "Nombre": "CERDO ENTERO SIN CABEZA", "Costo": 7.27026003},
-  {"Año": 2026, "Mes": 3, "Codigo": "040502002", "CodigoCorto": "05202", "Nombre": "CERDO ENTERO SIN CABEZA", "Costo": 7.21250526},
-  {"Año": 2025, "Mes": 10, "Codigo": "040502002", "CodigoCorto": "05202", "Nombre": "CERDO ENTERO SIN CABEZA", "Costo": 7.21510161},
-  {"Año": 2025, "Mes": 11, "Codigo": "040502002", "CodigoCorto": "05202", "Nombre": "CERDO ENTERO SIN CABEZA", "Costo": 7.30586112},
-  {"Año": 2025, "Mes": 12, "Codigo": "040502002", "CodigoCorto": "05202", "Nombre": "CERDO ENTERO SIN CABEZA", "Costo": 7.32432692},
-  {"Año": 2025, "Mes": 7, "Codigo": "040502002", "CodigoCorto": "05202", "Nombre": "CERDO ENTERO SIN CABEZA", "Costo": 7.41474241},
-  {"Año": 2025, "Mes": 8, "Codigo": "040502002", "CodigoCorto": "05202", "Nombre": "CERDO ENTERO SIN CABEZA", "Costo": 7.52159185},
-  {"Año": 2025, "Mes": 9, "Codigo": "040502002", "CodigoCorto": "05202", "Nombre": "CERDO ENTERO SIN CABEZA", "Costo": 7.342935},
-  {"Año": 2025, "Mes": 4, "Codigo": "040502002", "CodigoCorto": "05202", "Nombre": "CERDO ENTERO SIN CABEZA", "Costo": 7.20106593},
-  {"Año": 2025, "Mes": 5, "Codigo": "040502002", "CodigoCorto": "05202", "Nombre": "CERDO ENTERO SIN CABEZA", "Costo": 7.30504415},
-  {"Año": 2025, "Mes": 6, "Codigo": "040502002", "CodigoCorto": "05202", "Nombre": "CERDO ENTERO SIN CABEZA", "Costo": 7.46203012},
-  {"Año": 2025, "Mes": 1, "Codigo": "040502002", "CodigoCorto": "05202", "Nombre": "CERDO ENTERO SIN CABEZA", "Costo": 7.76684113},
-  {"Año": 2025, "Mes": 2, "Codigo": "040502002", "CodigoCorto": "05202", "Nombre": "CERDO ENTERO SIN CABEZA", "Costo": 7.55737819},
-  {"Año": 2025, "Mes": 3, "Codigo": "040502002", "CodigoCorto": "05202", "Nombre": "CERDO ENTERO SIN CABEZA", "Costo": 7.62066927},
-  {"Año": 2024, "Mes": 10, "Codigo": "040502002", "CodigoCorto": "05202", "Nombre": "CERDO ENTERO SIN CABEZA", "Costo": 7.37305226},
-  {"Año": 2024, "Mes": 11, "Codigo": "040502002", "CodigoCorto": "05202", "Nombre": "CERDO ENTERO SIN CABEZA", "Costo": 7.54662691},
-  {"Año": 2024, "Mes": 12, "Codigo": "040502002", "CodigoCorto": "05202", "Nombre": "CERDO ENTERO SIN CABEZA", "Costo": 7.90338335},
-  {"Año": 2024, "Mes": 7, "Codigo": "040502002", "CodigoCorto": "05202", "Nombre": "CERDO ENTERO SIN CABEZA", "Costo": 7.18675226},
-  {"Año": 2024, "Mes": 8, "Codigo": "040502002", "CodigoCorto": "05202", "Nombre": "CERDO ENTERO SIN CABEZA", "Costo": 8.0838128},
-  {"Año": 2024, "Mes": 9, "Codigo": "040502002", "CodigoCorto": "05202", "Nombre": "CERDO ENTERO SIN CABEZA", "Costo": 7.7901634},
-  {"Año": 2024, "Mes": 4, "Codigo": "040502002", "CodigoCorto": "05202", "Nombre": "CERDO ENTERO SIN CABEZA", "Costo": 7.40404749},
-  {"Año": 2024, "Mes": 5, "Codigo": "040502002", "CodigoCorto": "05202", "Nombre": "CERDO ENTERO SIN CABEZA", "Costo": 7.3011},
-  {"Año": 2024, "Mes": 6, "Codigo": "040502002", "CodigoCorto": "05202", "Nombre": "CERDO ENTERO SIN CABEZA", "Costo": 7.3312},
-  {"Año": 2024, "Mes": 1, "Codigo": "040502002", "CodigoCorto": "05202", "Nombre": "CERDO ENTERO SIN CABEZA", "Costo": 7.93329485},
-  {"Año": 2024, "Mes": 2, "Codigo": "040502002", "CodigoCorto": "05202", "Nombre": "CERDO ENTERO SIN CABEZA", "Costo": 8.06},
-  {"Año": 2024, "Mes": 3, "Codigo": "040502002", "CodigoCorto": "05202", "Nombre": "CERDO ENTERO SIN CABEZA", "Costo": 7.88},
-  {"Año": 2026, "Mes": 5, "Codigo": "040502003", "CodigoCorto": "05203", "Nombre": "GORRINA COMERCIAL", "Costo": 7.49394491},
-  {"Año": 2026, "Mes": 6, "Codigo": "040502003", "CodigoCorto": "05203", "Nombre": "GORRINA COMERCIAL", "Costo": 7.06},
-  {"Año": 2026, "Mes": 2, "Codigo": "040502003", "CodigoCorto": "05203", "Nombre": "GORRINA COMERCIAL", "Costo": 7.26691163},
-  {"Año": 2026, "Mes": 3, "Codigo": "040502003", "CodigoCorto": "05203", "Nombre": "GORRINA COMERCIAL", "Costo": 7.01616666},
-  {"Año": 2026, "Mes": 4, "Codigo": "040502003", "CodigoCorto": "05203", "Nombre": "GORRINA COMERCIAL", "Costo": 7.00622635},
-  {"Año": 2025, "Mes": 11, "Codigo": "040502003", "CodigoCorto": "05203", "Nombre": "GORRINA COMERCIAL", "Costo": 7.20621681},
-  {"Año": 2025, "Mes": 12, "Codigo": "040502003", "CodigoCorto": "05203", "Nombre": "GORRINA COMERCIAL", "Costo": 7.26469226},
-  {"Año": 2026, "Mes": 1, "Codigo": "040502003", "CodigoCorto": "05203", "Nombre": "GORRINA COMERCIAL", "Costo": 7.6},
-  {"Año": 2025, "Mes": 8, "Codigo": "040502003", "CodigoCorto": "05203", "Nombre": "GORRINA COMERCIAL", "Costo": 7.5452297},
-  {"Año": 2025, "Mes": 9, "Codigo": "040502003", "CodigoCorto": "05203", "Nombre": "GORRINA COMERCIAL", "Costo": 7.46670016},
-  {"Año": 2025, "Mes": 10, "Codigo": "040502003", "CodigoCorto": "05203", "Nombre": "GORRINA COMERCIAL", "Costo": 7.22946263},
-  {"Año": 2025, "Mes": 5, "Codigo": "040502003", "CodigoCorto": "05203", "Nombre": "GORRINA COMERCIAL", "Costo": 7.34556683},
-  {"Año": 2025, "Mes": 6, "Codigo": "040502003", "CodigoCorto": "05203", "Nombre": "GORRINA COMERCIAL", "Costo": 7.32420277},
-  {"Año": 2025, "Mes": 7, "Codigo": "040502003", "CodigoCorto": "05203", "Nombre": "GORRINA COMERCIAL", "Costo": 7.29415094},
-  {"Año": 2025, "Mes": 2, "Codigo": "040502003", "CodigoCorto": "05203", "Nombre": "GORRINA COMERCIAL", "Costo": 7.30466176},
-  {"Año": 2025, "Mes": 3, "Codigo": "040502003", "CodigoCorto": "05203", "Nombre": "GORRINA COMERCIAL", "Costo": 6.89776946},
-  {"Año": 2025, "Mes": 4, "Codigo": "040502003", "CodigoCorto": "05203", "Nombre": "GORRINA COMERCIAL", "Costo": 7.15124217},
-  {"Año": 2024, "Mes": 11, "Codigo": "040502003", "CodigoCorto": "05203", "Nombre": "GORRINA COMERCIAL", "Costo": 7.48647531},
-  {"Año": 2024, "Mes": 12, "Codigo": "040502003", "CodigoCorto": "05203", "Nombre": "GORRINA COMERCIAL", "Costo": 7.73714036},
-  {"Año": 2025, "Mes": 1, "Codigo": "040502003", "CodigoCorto": "05203", "Nombre": "GORRINA COMERCIAL", "Costo": 7.75842116},
-  {"Año": 2024, "Mes": 8, "Codigo": "040502003", "CodigoCorto": "05203", "Nombre": "GORRINA COMERCIAL", "Costo": 8.06539803},
-  {"Año": 2024, "Mes": 9, "Codigo": "040502003", "CodigoCorto": "05203", "Nombre": "GORRINA COMERCIAL", "Costo": 7.92602744},
-  {"Año": 2024, "Mes": 10, "Codigo": "040502003", "CodigoCorto": "05203", "Nombre": "GORRINA COMERCIAL", "Costo": 7.4369884},
-  {"Año": 2024, "Mes": 5, "Codigo": "040502003", "CodigoCorto": "05203", "Nombre": "GORRINA COMERCIAL", "Costo": 7.6187},
-  {"Año": 2024, "Mes": 6, "Codigo": "040502003", "CodigoCorto": "05203", "Nombre": "GORRINA COMERCIAL", "Costo": 7.68164112},
-  {"Año": 2024, "Mes": 7, "Codigo": "040502003", "CodigoCorto": "05203", "Nombre": "GORRINA COMERCIAL", "Costo": 7.84587791},
-  {"Año": 2024, "Mes": 2, "Codigo": "040502003", "CodigoCorto": "05203", "Nombre": "GORRINA COMERCIAL", "Costo": 8.06},
-  {"Año": 2024, "Mes": 3, "Codigo": "040502003", "CodigoCorto": "05203", "Nombre": "GORRINA COMERCIAL", "Costo": 8.13},
-  {"Año": 2024, "Mes": 4, "Codigo": "040502003", "CodigoCorto": "05203", "Nombre": "GORRINA COMERCIAL", "Costo": 7.54189869},
-  {"Año": 2024, "Mes": 1, "Codigo": "040502003", "CodigoCorto": "05203", "Nombre": "GORRINA COMERCIAL", "Costo": 8.42798642},
-  {"Año": 2026, "Mes": 2, "Codigo": "040502004", "CodigoCorto": "05204", "Nombre": "MARRANA ENTERA", "Costo": 5.79781103},
-  {"Año": 2026, "Mes": 3, "Codigo": "040502004", "CodigoCorto": "05204", "Nombre": "MARRANA ENTERA", "Costo": 5.17739199},
-  {"Año": 2026, "Mes": 4, "Codigo": "040502004", "CodigoCorto": "05204", "Nombre": "MARRANA ENTERA", "Costo": 5.19288863},
-  {"Año": 2026, "Mes": 5, "Codigo": "040502004", "CodigoCorto": "05204", "Nombre": "MARRANA ENTERA", "Costo": 5.33324145},
-  {"Año": 2026, "Mes": 6, "Codigo": "040502004", "CodigoCorto": "05204", "Nombre": "MARRANA ENTERA", "Costo": 5.42},
-  {"Año": 2025, "Mes": 8, "Codigo": "040502004", "CodigoCorto": "05204", "Nombre": "MARRANA ENTERA", "Costo": 5.47437453},
-  {"Año": 2025, "Mes": 9, "Codigo": "040502004", "CodigoCorto": "05204", "Nombre": "MARRANA ENTERA", "Costo": 5.47509446},
-  {"Año": 2025, "Mes": 10, "Codigo": "040502004", "CodigoCorto": "05204", "Nombre": "MARRANA ENTERA", "Costo": 5.47793828},
-  {"Año": 2025, "Mes": 11, "Codigo": "040502004", "CodigoCorto": "05204", "Nombre": "MARRANA ENTERA", "Costo": 5.32865437},
-  {"Año": 2025, "Mes": 12, "Codigo": "040502004", "CodigoCorto": "05204", "Nombre": "MARRANA ENTERA", "Costo": 5.40925592},
-  {"Año": 2026, "Mes": 1, "Codigo": "040502004", "CodigoCorto": "05204", "Nombre": "MARRANA ENTERA", "Costo": 5.32},
-  {"Año": 2025, "Mes": 2, "Codigo": "040502004", "CodigoCorto": "05204", "Nombre": "MARRANA ENTERA", "Costo": 5.5779889},
-  {"Año": 2025, "Mes": 3, "Codigo": "040502004", "CodigoCorto": "05204", "Nombre": "MARRANA ENTERA", "Costo": 5.28449037},
-  {"Año": 2025, "Mes": 4, "Codigo": "040502004", "CodigoCorto": "05204", "Nombre": "MARRANA ENTERA", "Costo": 5.30000777},
-  {"Año": 2025, "Mes": 5, "Codigo": "040502004", "CodigoCorto": "05204", "Nombre": "MARRANA ENTERA", "Costo": 5.23587392},
-  {"Año": 2025, "Mes": 6, "Codigo": "040502004", "CodigoCorto": "05204", "Nombre": "MARRANA ENTERA", "Costo": 5.32536851},
-  {"Año": 2025, "Mes": 7, "Codigo": "040502004", "CodigoCorto": "05204", "Nombre": "MARRANA ENTERA", "Costo": 5.43722848},
-  {"Año": 2024, "Mes": 8, "Codigo": "040502004", "CodigoCorto": "05204", "Nombre": "MARRANA ENTERA", "Costo": 5.89711701},
-  {"Año": 2024, "Mes": 9, "Codigo": "040502004", "CodigoCorto": "05204", "Nombre": "MARRANA ENTERA", "Costo": 5.7934886},
-  {"Año": 2024, "Mes": 10, "Codigo": "040502004", "CodigoCorto": "05204", "Nombre": "MARRANA ENTERA", "Costo": 5.60885605},
-  {"Año": 2024, "Mes": 11, "Codigo": "040502004", "CodigoCorto": "05204", "Nombre": "MARRANA ENTERA", "Costo": 5.41370796},
-  {"Año": 2024, "Mes": 12, "Codigo": "040502004", "CodigoCorto": "05204", "Nombre": "MARRANA ENTERA", "Costo": 5.51088334},
-  {"Año": 2025, "Mes": 1, "Codigo": "040502004", "CodigoCorto": "05204", "Nombre": "MARRANA ENTERA", "Costo": 5.81759171},
-  {"Año": 2024, "Mes": 2, "Codigo": "040502004", "CodigoCorto": "05204", "Nombre": "MARRANA ENTERA", "Costo": 6.22},
-  {"Año": 2024, "Mes": 3, "Codigo": "040502004", "CodigoCorto": "05204", "Nombre": "MARRANA ENTERA", "Costo": 6.23},
-  {"Año": 2024, "Mes": 4, "Codigo": "040502004", "CodigoCorto": "05204", "Nombre": "MARRANA ENTERA", "Costo": 5.88076029},
-  {"Año": 2024, "Mes": 5, "Codigo": "040502004", "CodigoCorto": "05204", "Nombre": "MARRANA ENTERA", "Costo": 5.6192},
-  {"Año": 2024, "Mes": 6, "Codigo": "040502004", "CodigoCorto": "05204", "Nombre": "MARRANA ENTERA", "Costo": 5.6795},
-  {"Año": 2024, "Mes": 7, "Codigo": "040502004", "CodigoCorto": "05204", "Nombre": "MARRANA ENTERA", "Costo": 5.51845736},
-  {"Año": 2024, "Mes": 1, "Codigo": "040502004", "CodigoCorto": "05204", "Nombre": "MARRANA ENTERA", "Costo": 6.39144478},
-  {"Año": 2025, "Mes": 6, "Codigo": "040502005", "CodigoCorto": "05205", "Nombre": "LECHON ENTERO 1RA.", "Costo": 11.98124317},
-  {"Año": 2025, "Mes": 7, "Codigo": "040502005", "CodigoCorto": "05205", "Nombre": "LECHON ENTERO 1RA.", "Costo": 11.95286368},
-  {"Año": 2025, "Mes": 8, "Codigo": "040502005", "CodigoCorto": "05205", "Nombre": "LECHON ENTERO 1RA.", "Costo": 11.93633282},
-  {"Año": 2025, "Mes": 9, "Codigo": "040502005", "CodigoCorto": "05205", "Nombre": "LECHON ENTERO 1RA.", "Costo": 13.10982494},
-  {"Año": 2024, "Mes": 12, "Codigo": "040502005", "CodigoCorto": "05205", "Nombre": "LECHON ENTERO 1RA.", "Costo": 12.16852714},
-  {"Año": 2025, "Mes": 1, "Codigo": "040502005", "CodigoCorto": "05205", "Nombre": "LECHON ENTERO 1RA.", "Costo": 11.97495862},
-  {"Año": 2025, "Mes": 2, "Codigo": "040502005", "CodigoCorto": "05205", "Nombre": "LECHON ENTERO 1RA.", "Costo": 11.53936888},
-  {"Año": 2025, "Mes": 3, "Codigo": "040502005", "CodigoCorto": "05205", "Nombre": "LECHON ENTERO 1RA.", "Costo": 10.86392613},
-  {"Año": 2025, "Mes": 4, "Codigo": "040502005", "CodigoCorto": "05205", "Nombre": "LECHON ENTERO 1RA.", "Costo": 11.76958144},
-  {"Año": 2025, "Mes": 5, "Codigo": "040502005", "CodigoCorto": "05205", "Nombre": "LECHON ENTERO 1RA.", "Costo": 11.40304386},
-  {"Año": 2024, "Mes": 4, "Codigo": "040502005", "CodigoCorto": "05205", "Nombre": "LECHON ENTERO 1RA.", "Costo": 11.86291669},
-  {"Año": 2024, "Mes": 5, "Codigo": "040502005", "CodigoCorto": "05205", "Nombre": "LECHON ENTERO 1RA.", "Costo": 11.9371},
-  {"Año": 2024, "Mes": 8, "Codigo": "040502005", "CodigoCorto": "05205", "Nombre": "LECHON ENTERO 1RA.", "Costo": 12.61350948},
-  {"Año": 2024, "Mes": 9, "Codigo": "040502005", "CodigoCorto": "05205", "Nombre": "LECHON ENTERO 1RA.", "Costo": 13.3493094},
-  {"Año": 2024, "Mes": 10, "Codigo": "040502005", "CodigoCorto": "05205", "Nombre": "LECHON ENTERO 1RA.", "Costo": 13.28017313},
-  {"Año": 2024, "Mes": 11, "Codigo": "040502005", "CodigoCorto": "05205", "Nombre": "LECHON ENTERO 1RA.", "Costo": 12.20942617},
-  {"Año": 2024, "Mes": 1, "Codigo": "040502005", "CodigoCorto": "05205", "Nombre": "LECHON ENTERO 1RA.", "Costo": 12.4757441},
-  {"Año": 2024, "Mes": 2, "Codigo": "040502005", "CodigoCorto": "05205", "Nombre": "LECHON ENTERO 1RA.", "Costo": 11.45},
-  {"Año": 2024, "Mes": 3, "Codigo": "040502005", "CodigoCorto": "05205", "Nombre": "LECHON ENTERO 1RA.", "Costo": 11.26},
-  {"Año": 2024, "Mes": 3, "Codigo": "040502007", "CodigoCorto": "05207", "Nombre": "VERRACO ENTERO", "Costo": 0.67},
-  {"Año": 2024, "Mes": 9, "Codigo": "040502007", "CodigoCorto": "05207", "Nombre": "VERRACO ENTERO", "Costo": 0.78246705},
-  {"Año": 2024, "Mes": 12, "Codigo": "040502007", "CodigoCorto": "05207", "Nombre": "VERRACO ENTERO", "Costo": 0.64682554},
-  {"Año": 2025, "Mes": 10, "Codigo": "040502007", "CodigoCorto": "05207", "Nombre": "VERRACO ENTERO", "Costo": 0.67414247},
-  {"Año": 2026, "Mes": 2, "Codigo": "040502011", "CodigoCorto": "05211", "Nombre": "CERDO ENTERO C/CABEZA 2DA", "Costo": 5.68502987},
-  {"Año": 2026, "Mes": 3, "Codigo": "040502011", "CodigoCorto": "05211", "Nombre": "CERDO ENTERO C/CABEZA 2DA", "Costo": 5.23721635},
-  {"Año": 2026, "Mes": 4, "Codigo": "040502011", "CodigoCorto": "05211", "Nombre": "CERDO ENTERO C/CABEZA 2DA", "Costo": 5.24262918},
-  {"Año": 2026, "Mes": 5, "Codigo": "040502011", "CodigoCorto": "05211", "Nombre": "CERDO ENTERO C/CABEZA 2DA", "Costo": 5.37942059},
-  {"Año": 2026, "Mes": 6, "Codigo": "040502011", "CodigoCorto": "05211", "Nombre": "CERDO ENTERO C/CABEZA 2DA", "Costo": 5.47},
-  {"Año": 2025, "Mes": 8, "Codigo": "040502011", "CodigoCorto": "05211", "Nombre": "CERDO ENTERO C/CABEZA 2DA", "Costo": 5.22488574},
-  {"Año": 2025, "Mes": 9, "Codigo": "040502011", "CodigoCorto": "05211", "Nombre": "CERDO ENTERO C/CABEZA 2DA", "Costo": 5.39596149},
-  {"Año": 2025, "Mes": 10, "Codigo": "040502011", "CodigoCorto": "05211", "Nombre": "CERDO ENTERO C/CABEZA 2DA", "Costo": 5.51353209},
-  {"Año": 2025, "Mes": 11, "Codigo": "040502011", "CodigoCorto": "05211", "Nombre": "CERDO ENTERO C/CABEZA 2DA", "Costo": 5.36572164},
-  {"Año": 2025, "Mes": 12, "Codigo": "040502011", "CodigoCorto": "05211", "Nombre": "CERDO ENTERO C/CABEZA 2DA", "Costo": 5.44347933},
-  {"Año": 2026, "Mes": 1, "Codigo": "040502011", "CodigoCorto": "05211", "Nombre": "CERDO ENTERO C/CABEZA 2DA", "Costo": 5.36},
-  {"Año": 2025, "Mes": 2, "Codigo": "040502011", "CodigoCorto": "05211", "Nombre": "CERDO ENTERO C/CABEZA 2DA", "Costo": 5.67850694},
-  {"Año": 2025, "Mes": 3, "Codigo": "040502011", "CodigoCorto": "05211", "Nombre": "CERDO ENTERO C/CABEZA 2DA", "Costo": 5.77910755},
-  {"Año": 2025, "Mes": 4, "Codigo": "040502011", "CodigoCorto": "05211", "Nombre": "CERDO ENTERO C/CABEZA 2DA", "Costo": 5.29974805},
-  {"Año": 2025, "Mes": 5, "Codigo": "040502011", "CodigoCorto": "05211", "Nombre": "CERDO ENTERO C/CABEZA 2DA", "Costo": 5.30281758},
-  {"Año": 2025, "Mes": 6, "Codigo": "040502011", "CodigoCorto": "05211", "Nombre": "CERDO ENTERO C/CABEZA 2DA", "Costo": 5.33960384},
-  {"Año": 2025, "Mes": 7, "Codigo": "040502011", "CodigoCorto": "05211", "Nombre": "CERDO ENTERO C/CABEZA 2DA", "Costo": 5.39134781},
-  {"Año": 2024, "Mes": 8, "Codigo": "040502011", "CodigoCorto": "05211", "Nombre": "CERDO ENTERO C/CABEZA 2DA", "Costo": 6.21479547},
-  {"Año": 2024, "Mes": 9, "Codigo": "040502011", "CodigoCorto": "05211", "Nombre": "CERDO ENTERO C/CABEZA 2DA", "Costo": 5.97583066},
-  {"Año": 2024, "Mes": 10, "Codigo": "040502011", "CodigoCorto": "05211", "Nombre": "CERDO ENTERO C/CABEZA 2DA", "Costo": 5.93045714},
-  {"Año": 2024, "Mes": 11, "Codigo": "040502011", "CodigoCorto": "05211", "Nombre": "CERDO ENTERO C/CABEZA 2DA", "Costo": 5.45881359},
-  {"Año": 2024, "Mes": 12, "Codigo": "040502011", "CodigoCorto": "05211", "Nombre": "CERDO ENTERO C/CABEZA 2DA", "Costo": 5.50599933},
-  {"Año": 2025, "Mes": 1, "Codigo": "040502011", "CodigoCorto": "05211", "Nombre": "CERDO ENTERO C/CABEZA 2DA", "Costo": 5.95725967},
-  {"Año": 2024, "Mes": 2, "Codigo": "040502011", "CodigoCorto": "05211", "Nombre": "CERDO ENTERO C/CABEZA 2DA", "Costo": 6.16},
-  {"Año": 2024, "Mes": 3, "Codigo": "040502011", "CodigoCorto": "05211", "Nombre": "CERDO ENTERO C/CABEZA 2DA", "Costo": 6.07},
-  {"Año": 2024, "Mes": 4, "Codigo": "040502011", "CodigoCorto": "05211", "Nombre": "CERDO ENTERO C/CABEZA 2DA", "Costo": 5.77766305},
-  {"Año": 2024, "Mes": 5, "Codigo": "040502011", "CodigoCorto": "05211", "Nombre": "CERDO ENTERO C/CABEZA 2DA", "Costo": 5.5851},
-  {"Año": 2024, "Mes": 6, "Codigo": "040502011", "CodigoCorto": "05211", "Nombre": "CERDO ENTERO C/CABEZA 2DA", "Costo": 5.676},
-  {"Año": 2024, "Mes": 7, "Codigo": "040502011", "CodigoCorto": "05211", "Nombre": "CERDO ENTERO C/CABEZA 2DA", "Costo": 5.63653558},
-  {"Año": 2024, "Mes": 1, "Codigo": "040502011", "CodigoCorto": "05211", "Nombre": "CERDO ENTERO C/CABEZA 2DA", "Costo": 6.24834659},
-  {"Año": 2026, "Mes": 3, "Codigo": "040503022", "CodigoCorto": "05322", "Nombre": "LONJA de Cerdo", "Costo": 1.32041239},
-  {"Año": 2026, "Mes": 4, "Codigo": "040503022", "CodigoCorto": "05322", "Nombre": "LONJA de Cerdo", "Costo": 1.32004263},
-  {"Año": 2026, "Mes": 5, "Codigo": "040503022", "CodigoCorto": "05322", "Nombre": "LONJA de Cerdo", "Costo": 1.49375163},
-  {"Año": 2026, "Mes": 6, "Codigo": "040503022", "CodigoCorto": "05322", "Nombre": "LONJA de Cerdo", "Costo": 1.32},
-  {"Año": 2025, "Mes": 12, "Codigo": "040503022", "CodigoCorto": "05322", "Nombre": "LONJA de Cerdo", "Costo": 1.378817},
-  {"Año": 2026, "Mes": 1, "Codigo": "040503022", "CodigoCorto": "05322", "Nombre": "LONJA de Cerdo", "Costo": 1.47},
-  {"Año": 2026, "Mes": 2, "Codigo": "040503022", "CodigoCorto": "05322", "Nombre": "LONJA de Cerdo", "Costo": 1.43600226},
-  {"Año": 2026, "Mes": 4, "Codigo": "040503024", "CodigoCorto": "05324", "Nombre": "CHICHARRON MIX DE CERDO FRESCO", "Costo": 5.55860516},
-  {"Año": 2025, "Mes": 12, "Codigo": "040503024", "CodigoCorto": "05324", "Nombre": "CHICHARRON MIX DE CERDO FRESCO", "Costo": 6.50200332},
-  {"Año": 2026, "Mes": 1, "Codigo": "040503024", "CodigoCorto": "05324", "Nombre": "CHICHARRON MIX DE CERDO FRESCO", "Costo": 6.5},
-  {"Año": 2026, "Mes": 2, "Codigo": "040503024", "CodigoCorto": "05324", "Nombre": "CHICHARRON MIX DE CERDO FRESCO", "Costo": 5.98105843},
-  {"Año": 2026, "Mes": 3, "Codigo": "040503024", "CodigoCorto": "05324", "Nombre": "CHICHARRON MIX DE CERDO FRESCO", "Costo": 5.69091606},
-  {"Año": 2026, "Mes": 3, "Codigo": "040503026", "CodigoCorto": "05326", "Nombre": "HUESO de Cerdo", "Costo": 0.6},
-  {"Año": 2026, "Mes": 4, "Codigo": "040503026", "CodigoCorto": "05326", "Nombre": "HUESO de Cerdo", "Costo": 0.6},
-  {"Año": 2026, "Mes": 5, "Codigo": "040503026", "CodigoCorto": "05326", "Nombre": "HUESO de Cerdo", "Costo": 0.6},
-  {"Año": 2026, "Mes": 6, "Codigo": "040503026", "CodigoCorto": "05326", "Nombre": "HUESO de Cerdo", "Costo": 0.6},
-  {"Año": 2025, "Mes": 12, "Codigo": "040503026", "CodigoCorto": "05326", "Nombre": "HUESO de Cerdo", "Costo": 0.6},
-  {"Año": 2026, "Mes": 1, "Codigo": "040503026", "CodigoCorto": "05326", "Nombre": "HUESO de Cerdo", "Costo": 0.6},
-  {"Año": 2026, "Mes": 2, "Codigo": "040503026", "CodigoCorto": "05326", "Nombre": "HUESO de Cerdo", "Costo": 0.6},
-  {"Año": 2026, "Mes": 3, "Codigo": "040503030", "CodigoCorto": "05330", "Nombre": "LONJA DE CERDO CON GRASA", "Costo": 2.58128194},
-  {"Año": 2026, "Mes": 4, "Codigo": "040503030", "CodigoCorto": "05330", "Nombre": "LONJA DE CERDO CON GRASA", "Costo": 3.19820866},
-  {"Año": 2025, "Mes": 12, "Codigo": "040503030", "CodigoCorto": "05330", "Nombre": "LONJA DE CERDO CON GRASA", "Costo": 2.68353076},
-  {"Año": 2026, "Mes": 1, "Codigo": "040503030", "CodigoCorto": "05330", "Nombre": "LONJA DE CERDO CON GRASA", "Costo": 2.85},
-  {"Año": 2026, "Mes": 2, "Codigo": "040503030", "CodigoCorto": "05330", "Nombre": "LONJA DE CERDO CON GRASA", "Costo": 2.70348538},
-  {"Año": 2026, "Mes": 5, "Codigo": "040503037", "CodigoCorto": "05337", "Nombre": "LONJA DE MARRANA", "Costo": 0.6},
-  {"Año": 2026, "Mes": 6, "Codigo": "040503037", "CodigoCorto": "05337", "Nombre": "LONJA DE MARRANA", "Costo": 0.6},
-  {"Año": 2026, "Mes": 2, "Codigo": "040503037", "CodigoCorto": "05337", "Nombre": "LONJA DE MARRANA", "Costo": 0.6},
-  {"Año": 2026, "Mes": 3, "Codigo": "040503037", "CodigoCorto": "05337", "Nombre": "LONJA DE MARRANA", "Costo": 0.6},
-  {"Año": 2026, "Mes": 4, "Codigo": "040503037", "CodigoCorto": "05337", "Nombre": "LONJA DE MARRANA", "Costo": 0.6},
-  {"Año": 2025, "Mes": 12, "Codigo": "040503037", "CodigoCorto": "05337", "Nombre": "LONJA DE MARRANA", "Costo": 0.6},
-  {"Año": 2026, "Mes": 1, "Codigo": "040503037", "CodigoCorto": "05337", "Nombre": "LONJA DE MARRANA", "Costo": 0.6},
-  {"Año": 2026, "Mes": 5, "Codigo": "040503040", "CodigoCorto": "05340", "Nombre": "LOMO DE CERDO S/COG UND (6-16KG)", "Costo": 8.74959193},
-  {"Año": 2026, "Mes": 6, "Codigo": "040503040", "CodigoCorto": "05340", "Nombre": "LOMO DE CERDO S/COG UND (6-16KG)", "Costo": 8.08},
-  {"Año": 2026, "Mes": 2, "Codigo": "040503040", "CodigoCorto": "05340", "Nombre": "LOMO DE CERDO S/COG UND (6-16KG)", "Costo": 8.47610615},
-  {"Año": 2026, "Mes": 3, "Codigo": "040503040", "CodigoCorto": "05340", "Nombre": "LOMO DE CERDO S/COG UND (6-16KG)", "Costo": 8.2539003},
-  {"Año": 2026, "Mes": 4, "Codigo": "040503040", "CodigoCorto": "05340", "Nombre": "LOMO DE CERDO S/COG UND (6-16KG)", "Costo": 8.1063078},
-  {"Año": 2025, "Mes": 12, "Codigo": "040503040", "CodigoCorto": "05340", "Nombre": "LOMO DE CERDO S/COG UND (6-16KG)", "Costo": 8.67081125},
-  {"Año": 2026, "Mes": 1, "Codigo": "040503040", "CodigoCorto": "05340", "Nombre": "LOMO DE CERDO S/COG UND (6-16KG)", "Costo": 9.14},
-  {"Año": 2026, "Mes": 4, "Codigo": "040503041", "CodigoCorto": "05341", "Nombre": "LOMO DE CERDO S/COG S/LONJ UND (6-14KG)", "Costo": 8.82470636},
-  {"Año": 2026, "Mes": 6, "Codigo": "040503041", "CodigoCorto": "05341", "Nombre": "LOMO DE CERDO S/COG S/LONJ UND (6-14KG)", "Costo": 8.67},
-  {"Año": 2026, "Mes": 1, "Codigo": "040503041", "CodigoCorto": "05341", "Nombre": "LOMO DE CERDO S/COG S/LONJ UND (6-14KG)", "Costo": 9.63},
-  {"Año": 2026, "Mes": 2, "Codigo": "040503041", "CodigoCorto": "05341", "Nombre": "LOMO DE CERDO S/COG S/LONJ UND (6-14KG)", "Costo": 8.88339995},
-  {"Año": 2026, "Mes": 3, "Codigo": "040503041", "CodigoCorto": "05341", "Nombre": "LOMO DE CERDO S/COG S/LONJ UND (6-14KG)", "Costo": 8.85666264},
-  {"Año": 2025, "Mes": 12, "Codigo": "040503041", "CodigoCorto": "05341", "Nombre": "LOMO DE CERDO S/COG S/LONJ UND (6-14KG)", "Costo": 9.226305},
-  {"Año": 2026, "Mes": 4, "Codigo": "040503042", "CodigoCorto": "05342", "Nombre": "PIERNA ENTERA DE CERDO UND (6-18KG)", "Costo": 6.76844459},
-  {"Año": 2026, "Mes": 5, "Codigo": "040503042", "CodigoCorto": "05342", "Nombre": "PIERNA ENTERA DE CERDO UND (6-18KG)", "Costo": 7.289479},
-  {"Año": 2026, "Mes": 2, "Codigo": "040503046", "CodigoCorto": "05346", "Nombre": "BRAZUELO ENTERO DE CERDO UND (4-11KG)", "Costo": 6.61184501},
-  {"Año": 2026, "Mes": 3, "Codigo": "040503046", "CodigoCorto": "05346", "Nombre": "BRAZUELO ENTERO DE CERDO UND (4-11KG)", "Costo": 6.43499567},
-  {"Año": 2026, "Mes": 4, "Codigo": "040503046", "CodigoCorto": "05346", "Nombre": "BRAZUELO ENTERO DE CERDO UND (4-11KG)", "Costo": 6.34883549},
-  {"Año": 2026, "Mes": 5, "Codigo": "040503046", "CodigoCorto": "05346", "Nombre": "BRAZUELO ENTERO DE CERDO UND (4-11KG)", "Costo": 6.80188407},
-  {"Año": 2026, "Mes": 6, "Codigo": "040503046", "CodigoCorto": "05346", "Nombre": "BRAZUELO ENTERO DE CERDO UND (4-11KG)", "Costo": 6.31},
-  {"Año": 2025, "Mes": 12, "Codigo": "040503046", "CodigoCorto": "05346", "Nombre": "BRAZUELO ENTERO DE CERDO UND (4-11KG)", "Costo": 6.77438977},
-  {"Año": 2026, "Mes": 1, "Codigo": "040503046", "CodigoCorto": "05346", "Nombre": "BRAZUELO ENTERO DE CERDO UND (4-11KG)", "Costo": 6.61},
-  {"Año": 2026, "Mes": 2, "Codigo": "040503049", "CodigoCorto": "05349", "Nombre": "COSTILLAR E.C.C/L -GR2CM - UND(3-14)FR", "Costo": 9.76709635},
-  {"Año": 2026, "Mes": 3, "Codigo": "040503049", "CodigoCorto": "05349", "Nombre": "COSTILLAR E.C.C/L -GR2CM - UND(3-14)FR", "Costo": 9.12466741},
-  {"Año": 2026, "Mes": 4, "Codigo": "040503049", "CodigoCorto": "05349", "Nombre": "COSTILLAR E.C.C/L -GR2CM - UND(3-14)FR", "Costo": 9.04083036},
-  {"Año": 2026, "Mes": 5, "Codigo": "040503049", "CodigoCorto": "05349", "Nombre": "COSTILLAR E.C.C/L -GR2CM - UND(3-14)FR", "Costo": 9.54991692},
-  {"Año": 2026, "Mes": 6, "Codigo": "040503049", "CodigoCorto": "05349", "Nombre": "COSTILLAR E.C.C/L -GR2CM - UND(3-14)FR", "Costo": 8.95},
-  {"Año": 2025, "Mes": 12, "Codigo": "040503049", "CodigoCorto": "05349", "Nombre": "COSTILLAR E.C.C/L -GR2CM - UND(3-14)FR", "Costo": 9.58883215},
-  {"Año": 2026, "Mes": 1, "Codigo": "040503049", "CodigoCorto": "05349", "Nombre": "COSTILLAR E.C.C/L -GR2CM - UND(3-14)FR", "Costo": 9.34},
-  {"Año": 2025, "Mes": 12, "Codigo": "040503051", "CodigoCorto": "05351", "Nombre": "COGOTE DE CERDO S/LONJ UND (4-11KG)", "Costo": 8.72435861},
-  {"Año": 2026, "Mes": 1, "Codigo": "040503051", "CodigoCorto": "05351", "Nombre": "COGOTE DE CERDO S/LONJ UND (4-11KG)", "Costo": 8.85},
-  {"Año": 2026, "Mes": 2, "Codigo": "040503051", "CodigoCorto": "05351", "Nombre": "COGOTE DE CERDO S/LONJ UND (4-11KG)", "Costo": 7.92214202},
-  {"Año": 2026, "Mes": 3, "Codigo": "040503051", "CodigoCorto": "05351", "Nombre": "COGOTE DE CERDO S/LONJ UND (4-11KG)", "Costo": 7.86100307},
-  {"Año": 2026, "Mes": 4, "Codigo": "040503051", "CodigoCorto": "05351", "Nombre": "COGOTE DE CERDO S/LONJ UND (4-11KG)", "Costo": 7.7040283},
-  {"Año": 2026, "Mes": 2, "Codigo": "040503052", "CodigoCorto": "05352", "Nombre": "COGOTE DE CERDO C/LONJ UND (4-16KG)", "Costo": 7.63251355},
-  {"Año": 2026, "Mes": 3, "Codigo": "040503052", "CodigoCorto": "05352", "Nombre": "COGOTE DE CERDO C/LONJ UND (4-16KG)", "Costo": 7.47146051},
-  {"Año": 2026, "Mes": 4, "Codigo": "040503052", "CodigoCorto": "05352", "Nombre": "COGOTE DE CERDO C/LONJ UND (4-16KG)", "Costo": 7.39106856},
-  {"Año": 2026, "Mes": 6, "Codigo": "040503052", "CodigoCorto": "05352", "Nombre": "COGOTE DE CERDO C/LONJ UND (4-16KG)", "Costo": 7.33},
-  {"Año": 2025, "Mes": 12, "Codigo": "040503052", "CodigoCorto": "05352", "Nombre": "COGOTE DE CERDO C/LONJ UND (4-16KG)", "Costo": 7.89431199},
-  {"Año": 2026, "Mes": 1, "Codigo": "040503052", "CodigoCorto": "05352", "Nombre": "COGOTE DE CERDO C/LONJ UND (4-16KG)", "Costo": 8.42},
-  {"Año": 2026, "Mes": 3, "Codigo": "040503053", "CodigoCorto": "05353", "Nombre": "BIFE DE CERDO - UND (1.5-6KG)", "Costo": 10.66054231},
-  {"Año": 2026, "Mes": 4, "Codigo": "040503053", "CodigoCorto": "05353", "Nombre": "BIFE DE CERDO - UND (1.5-6KG)", "Costo": 10.82474987},
-  {"Año": 2026, "Mes": 5, "Codigo": "040503053", "CodigoCorto": "05353", "Nombre": "BIFE DE CERDO - UND (1.5-6KG)", "Costo": 11.56758777},
-  {"Año": 2026, "Mes": 6, "Codigo": "040503053", "CodigoCorto": "05353", "Nombre": "BIFE DE CERDO - UND (1.5-6KG)", "Costo": 10.72},
-  {"Año": 2025, "Mes": 12, "Codigo": "040503053", "CodigoCorto": "05353", "Nombre": "BIFE DE CERDO - UND (1.5-6KG)", "Costo": 11.23043941},
-  {"Año": 2026, "Mes": 1, "Codigo": "040503053", "CodigoCorto": "05353", "Nombre": "BIFE DE CERDO - UND (1.5-6KG)", "Costo": 11.74},
-  {"Año": 2026, "Mes": 2, "Codigo": "040503053", "CodigoCorto": "05353", "Nombre": "BIFE DE CERDO - UND (1.5-6KG)", "Costo": 10.94150961},
-  {"Año": 2026, "Mes": 3, "Codigo": "040503057", "CodigoCorto": "05357", "Nombre": "COSTILLAR E.C.C/L-GR2CM CORT2TIRA(4-11)F", "Costo": 9.15861111},
-  {"Año": 2026, "Mes": 4, "Codigo": "040503057", "CodigoCorto": "05357", "Nombre": "COSTILLAR E.C.C/L-GR2CM CORT2TIRA(4-11)F", "Costo": 9.06006254},
-  {"Año": 2026, "Mes": 5, "Codigo": "040503057", "CodigoCorto": "05357", "Nombre": "COSTILLAR E.C.C/L-GR2CM CORT2TIRA(4-11)F", "Costo": 9.57915932},
-  {"Año": 2026, "Mes": 6, "Codigo": "040503057", "CodigoCorto": "05357", "Nombre": "COSTILLAR E.C.C/L-GR2CM CORT2TIRA(4-11)F", "Costo": 8.96},
-  {"Año": 2025, "Mes": 12, "Codigo": "040503057", "CodigoCorto": "05357", "Nombre": "COSTILLAR E.C.C/L-GR2CM CORT2TIRA(4-11)F", "Costo": 9.96990282},
-  {"Año": 2026, "Mes": 1, "Codigo": "040503057", "CodigoCorto": "05357", "Nombre": "COSTILLAR E.C.C/L-GR2CM CORT2TIRA(4-11)F", "Costo": 9.28},
-  {"Año": 2026, "Mes": 2, "Codigo": "040503057", "CodigoCorto": "05357", "Nombre": "COSTILLAR E.C.C/L-GR2CM CORT2TIRA(4-11)F", "Costo": 9.89525509},
-  {"Año": 2026, "Mes": 4, "Codigo": "040503059", "CodigoCorto": "05359", "Nombre": "CHULETA-LOMO S/LMARIP FRES 10M 310-410GR", "Costo": 9.91085538},
-  {"Año": 2026, "Mes": 5, "Codigo": "040503059", "CodigoCorto": "05359", "Nombre": "CHULETA-LOMO S/LMARIP FRES 10M 310-410GR", "Costo": 10.58750054},
-  {"Año": 2026, "Mes": 6, "Codigo": "040503059", "CodigoCorto": "05359", "Nombre": "CHULETA-LOMO S/LMARIP FRES 10M 310-410GR", "Costo": 9.79},
-  {"Año": 2026, "Mes": 1, "Codigo": "040503059", "CodigoCorto": "05359", "Nombre": "CHULETA-LOMO S/LMARIP FRES 10M 310-410GR", "Costo": 10.6},
-  {"Año": 2026, "Mes": 2, "Codigo": "040503059", "CodigoCorto": "05359", "Nombre": "CHULETA-LOMO S/LMARIP FRES 10M 310-410GR", "Costo": 10.00929894},
-  {"Año": 2026, "Mes": 3, "Codigo": "040503059", "CodigoCorto": "05359", "Nombre": "CHULETA-LOMO S/LMARIP FRES 10M 310-410GR", "Costo": 9.95699626},
-  {"Año": 2025, "Mes": 12, "Codigo": "040503059", "CodigoCorto": "05359", "Nombre": "CHULETA-LOMO S/LMARIP FRES 10M 310-410GR", "Costo": 10.44353252},
-  {"Año": 2026, "Mes": 6, "Codigo": "040503061", "CodigoCorto": "05361", "Nombre": "CHULETA-LOMO C/L-MARIPOSA 10mm 280-410gr", "Costo": 9.22},
-  {"Año": 2025, "Mes": 12, "Codigo": "040503061", "CodigoCorto": "05361", "Nombre": "CHULETA-LOMO C/L-MARIPOSA 10mm 280-410gr", "Costo": 9.85565723},
-  {"Año": 2026, "Mes": 1, "Codigo": "040503061", "CodigoCorto": "05361", "Nombre": "CHULETA-LOMO C/L-MARIPOSA 10mm 280-410gr", "Costo": 10.04},
-  {"Año": 2026, "Mes": 2, "Codigo": "040503061", "CodigoCorto": "05361", "Nombre": "CHULETA-LOMO C/L-MARIPOSA 10mm 280-410gr", "Costo": 9.46068206},
-  {"Año": 2026, "Mes": 3, "Codigo": "040503061", "CodigoCorto": "05361", "Nombre": "CHULETA-LOMO C/L-MARIPOSA 10mm 280-410gr", "Costo": 9.3398008},
-  {"Año": 2026, "Mes": 4, "Codigo": "040503061", "CodigoCorto": "05361", "Nombre": "CHULETA-LOMO C/L-MARIPOSA 10mm 280-410gr", "Costo": 9.19864054},
-  {"Año": 2026, "Mes": 5, "Codigo": "040503061", "CodigoCorto": "05361", "Nombre": "CHULETA-LOMO C/L-MARIPOSA 10mm 280-410gr", "Costo": 9.90816213},
-  {"Año": 2026, "Mes": 5, "Codigo": "040503067", "CodigoCorto": "05367", "Nombre": "CHULETA-COGOTE C/L-ADOBO 13mm 220-270grs", "Costo": 9.49188202},
-  {"Año": 2026, "Mes": 6, "Codigo": "040503067", "CodigoCorto": "05367", "Nombre": "CHULETA-COGOTE C/L-ADOBO 13mm 220-270grs", "Costo": 8.79},
-  {"Año": 2025, "Mes": 12, "Codigo": "040503067", "CodigoCorto": "05367", "Nombre": "CHULETA-COGOTE C/L-ADOBO 13mm 220-270grs", "Costo": 9.2282404},
-  {"Año": 2026, "Mes": 1, "Codigo": "040503067", "CodigoCorto": "05367", "Nombre": "CHULETA-COGOTE C/L-ADOBO 13mm 220-270grs", "Costo": 9.24},
-  {"Año": 2026, "Mes": 2, "Codigo": "040503067", "CodigoCorto": "05367", "Nombre": "CHULETA-COGOTE C/L-ADOBO 13mm 220-270grs", "Costo": 8.72342973},
-  {"Año": 2026, "Mes": 3, "Codigo": "040503067", "CodigoCorto": "05367", "Nombre": "CHULETA-COGOTE C/L-ADOBO 13mm 220-270grs", "Costo": 8.81453288},
-  {"Año": 2026, "Mes": 4, "Codigo": "040503067", "CodigoCorto": "05367", "Nombre": "CHULETA-COGOTE C/L-ADOBO 13mm 220-270grs", "Costo": 8.80614719},
-  {"Año": 2025, "Mes": 12, "Codigo": "040503071", "CodigoCorto": "05371", "Nombre": "PIERNA DESHUESADA FRESCA UND 6 - 12 KG.", "Costo": 8.92990358},
-  {"Año": 2026, "Mes": 3, "Codigo": "040503073", "CodigoCorto": "05373", "Nombre": "COGOTE DESHUESADO FRESCO UND 2-4kg", "Costo": 10.27542005},
-  {"Año": 2026, "Mes": 4, "Codigo": "040503073", "CodigoCorto": "05373", "Nombre": "COGOTE DESHUESADO FRESCO UND 2-4kg", "Costo": 10.18348363},
-  {"Año": 2026, "Mes": 5, "Codigo": "040503073", "CodigoCorto": "05373", "Nombre": "COGOTE DESHUESADO FRESCO UND 2-4kg", "Costo": 11.14478832},
-  {"Año": 2026, "Mes": 6, "Codigo": "040503073", "CodigoCorto": "05373", "Nombre": "COGOTE DESHUESADO FRESCO UND 2-4kg", "Costo": 10.42},
-  {"Año": 2025, "Mes": 12, "Codigo": "040503073", "CodigoCorto": "05373", "Nombre": "COGOTE DESHUESADO FRESCO UND 2-4kg", "Costo": 11.10546254},
-  {"Año": 2026, "Mes": 1, "Codigo": "040503073", "CodigoCorto": "05373", "Nombre": "COGOTE DESHUESADO FRESCO UND 2-4kg", "Costo": 11.92},
-  {"Año": 2026, "Mes": 2, "Codigo": "040503073", "CodigoCorto": "05373", "Nombre": "COGOTE DESHUESADO FRESCO UND 2-4kg", "Costo": 10.47570049},
-  {"Año": 2026, "Mes": 3, "Codigo": "040503074", "CodigoCorto": "05374", "Nombre": "LOMITO FINO 260-420grs BOLS 2und", "Costo": 12.64430395},
-  {"Año": 2026, "Mes": 4, "Codigo": "040503074", "CodigoCorto": "05374", "Nombre": "LOMITO FINO 260-420grs BOLS 2und", "Costo": 12.38315564},
-  {"Año": 2026, "Mes": 5, "Codigo": "040503074", "CodigoCorto": "05374", "Nombre": "LOMITO FINO 260-420grs BOLS 2und", "Costo": 13.09458582},
-  {"Año": 2025, "Mes": 12, "Codigo": "040503074", "CodigoCorto": "05374", "Nombre": "LOMITO FINO 260-420grs BOLS 2und", "Costo": 11.79019323},
-  {"Año": 2026, "Mes": 1, "Codigo": "040503074", "CodigoCorto": "05374", "Nombre": "LOMITO FINO 260-420grs BOLS 2und", "Costo": 13.62},
-  {"Año": 2026, "Mes": 2, "Codigo": "040503074", "CodigoCorto": "05374", "Nombre": "LOMITO FINO 260-420grs BOLS 2und", "Costo": 12.61365429},
-  {"Año": 2026, "Mes": 2, "Codigo": "040503075", "CodigoCorto": "05375", "Nombre": " COSTILLITAS BARBACOA 300-750GRS", "Costo": 18.6322561},
-  {"Año": 2026, "Mes": 3, "Codigo": "040503078", "CodigoCorto": "05378", "Nombre": "PIERNA DESHUESADA C/L FRESCA  7-16 KG", "Costo": 7.67654776},
-  {"Año": 2026, "Mes": 4, "Codigo": "040503078", "CodigoCorto": "05378", "Nombre": "PIERNA DESHUESADA C/L FRESCA  7-16 KG", "Costo": 7.62665701},
-  {"Año": 2026, "Mes": 5, "Codigo": "040503078", "CodigoCorto": "05378", "Nombre": "PIERNA DESHUESADA C/L FRESCA  7-16 KG", "Costo": 8.07191682},
-  {"Año": 2026, "Mes": 6, "Codigo": "040503078", "CodigoCorto": "05378", "Nombre": "PIERNA DESHUESADA C/L FRESCA  7-16 KG", "Costo": 7.51},
-  {"Año": 2026, "Mes": 1, "Codigo": "040503078", "CodigoCorto": "05378", "Nombre": "PIERNA DESHUESADA C/L FRESCA  7-16 KG", "Costo": 8.49},
-  {"Año": 2026, "Mes": 2, "Codigo": "040503078", "CodigoCorto": "05378", "Nombre": "PIERNA DESHUESADA C/L FRESCA  7-16 KG", "Costo": 8.00503739},
-  {"Año": 2026, "Mes": 2, "Codigo": "040503096", "CodigoCorto": "05396", "Nombre": "COSTILLAR ENTERO FRES - P.CORTE  3-14 KG", "Costo": 9.20335295},
-  {"Año": 2026, "Mes": 3, "Codigo": "040503096", "CodigoCorto": "05396", "Nombre": "COSTILLAR ENTERO FRES - P.CORTE  3-14 KG", "Costo": 8.68722705},
-  {"Año": 2026, "Mes": 4, "Codigo": "040503096", "CodigoCorto": "05396", "Nombre": "COSTILLAR ENTERO FRES - P.CORTE  3-14 KG", "Costo": 8.73239623},
-  {"Año": 2026, "Mes": 6, "Codigo": "040503096", "CodigoCorto": "05396", "Nombre": "COSTILLAR ENTERO FRES - P.CORTE  3-14 KG", "Costo": 8.54},
-  {"Año": 2025, "Mes": 12, "Codigo": "040503096", "CodigoCorto": "05396", "Nombre": "COSTILLAR ENTERO FRES - P.CORTE  3-14 KG", "Costo": 9.24815445},
-  {"Año": 2026, "Mes": 1, "Codigo": "040503096", "CodigoCorto": "05396", "Nombre": "COSTILLAR ENTERO FRES - P.CORTE  3-14 KG", "Costo": 9.62}
-        ];
-
         // Inicialización al cargar la página
         window.addEventListener("DOMContentLoaded", async () => {
             await cargarDatosIniciales();
         });
 
-        // 1. Carga de Datos desde API con Fallback Inteligente
+        // 1. Carga de Datos exclusivamente desde la API SQL
         async function cargarDatosIniciales() {
-            actualizarEstadoAPI("loading", "Conectando con API...");
+            actualizarEstadoAPI("loading", "Conectando con API SQL...");
             let dataCargada = false;
 
             for (const url of API_ENDPOINTS) {
                 try {
                     const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 3500);
+                    const timeoutId = setTimeout(() => controller.abort(), 4000);
 
                     const res = await fetch(url, { signal: controller.signal });
                     clearTimeout(timeoutId);
@@ -1357,18 +1107,14 @@
             }
 
             if (!dataCargada) {
-                usarDatosRespaldo("No se pudo conectar a la API local. Usando datos precargados.");
+                rawData = [];
+                actualizarEstadoAPI("offline", "Sin conexión con la API SQL");
+                mostrarToast("❌ No se pudieron obtener datos desde la consulta SQL.", "error");
             }
 
             procesarDimensiones();
             renderizarBarraConfiguracion();
             procesarVistaActual();
-        }
-
-        function usarDatosRespaldo(motivo) {
-            rawData = normalizarDatos(EMBEDDED_BACKUP_DATA);
-            actualizarEstadoAPI("offline", "Modo Local / Standalone");
-            mostrarToast("ℹ️ " + motivo, "info");
         }
 
         function normalizarDatos(lista) {
@@ -1704,7 +1450,7 @@
 
                 // Columnas de Variación Porcentual (% Var entre periodos contiguos)
                 for (let i = 1; i < selectedContiguousPeriods.length; i++) {
-                    theadHtml += `<th class="header-variation text-right" onclick="ordenarPor('varFinal')">Porc${i} (%)<br><small>(${selectedContiguousPeriods[i-1]} vs ${selectedContiguousPeriods[i]})</small></th>`;
+                    theadHtml += `<th class="header-variation text-right" onclick="ordenarPor('varFinal')">Porc${i} (%)<br><small>(${selectedContiguousPeriods[i - 1]} vs ${selectedContiguousPeriods[i]})</small></th>`;
                 }
 
                 theadHtml += `<th class="text-center">Acción</th></tr>`;
@@ -1727,7 +1473,7 @@
                 });
 
                 for (let i = 1; i < allYears.length; i++) {
-                    theadHtml += `<th class="header-variation text-right">Var % (${allYears[i-1]}-${allYears[i]})</th>`;
+                    theadHtml += `<th class="header-variation text-right">Var % (${allYears[i - 1]}-${allYears[i]})</th>`;
                 }
 
                 theadHtml += `<th class="text-center">Acción</th></tr>`;
@@ -2272,7 +2018,7 @@
                 let header = ["CodigoCorto", "Codigo", "Nombre"];
                 allYears.forEach(y => header.push(`Costo_${y}_Mes${selectedInteranualMonth}`));
                 for (let i = 1; i < allYears.length; i++) {
-                    header.push(`Var%_${allYears[i-1]}-${allYears[i]}`);
+                    header.push(`Var%_${allYears[i - 1]}-${allYears[i]}`);
                 }
                 csvContent += header.join(";") + "\n";
 

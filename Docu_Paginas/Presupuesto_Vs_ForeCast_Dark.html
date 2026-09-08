@@ -4,30 +4,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Comparativo: Presupuesto vs ForeCast 2027</title>
+    <title>Dashboard Comparativo: Presupuesto vs ForeCast 2027 (Dark Cyan Edition)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            /* Paleta corporativa */
-            --primary: #1F4E78;
-            --primary-dark: #1B365D;
-            --secondary-blue: #34495E;
-            --budget-color: #3A4758;
-            --forecast-color: #0B6679;
-            --accent-blue: #89A5CC;
-            --accent-steel: #647F93;
-            --accent-sage: #9EBEC3;
-            --accent-mint: #98C7BB;
-            --accent-sky: #76B1C7;
-            --green: #1E8449;
-            --orange: #D35400;
-            --red: #C0392B;
-            --purple: #8E44AD;
-            --bg: #F8FAFC;
-            --card-bg: #FFFFFF;
-            --text: #1E293B;
-            --text-muted: #64748B;
-            --border: #CBD5E1;
+            /* Paleta Dark Cyan / Teal solicitada */
+            --bg-main: #031726;
+            --bg-card: #062338;
+            --border-color: #0E3A59;
+            --primary-cyan: #4CE3D7;
+            --secondary-teal: #1C9AA8;
+            --dark-teal: #0E5B6A;
+            --text-light: #FFFFFF;
+            --text-muted: #8FAFC4;
+
+            /* Acentos Semánticos */
+            --budget-color: #1C9AA8;
+            --forecast-color: #4CE3D7;
+            --positive: #4CE3D7;
+            --negative: #FF6B81;
+            --orange: #FFB356;
+            --neutral: #8FAFC4;
+            --glow: rgba(76, 227, 215, 0.18);
         }
 
         * {
@@ -37,52 +38,82 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            padding: 20px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-main);
+            background-image: radial-gradient(circle at 50% 0%, #072a44 0%, #031726 75%);
+            color: var(--text-light);
+            padding: 24px;
+            min-height: 100vh;
         }
 
+        /* Scrollbars elegantes en tema oscuro */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-main);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary-teal);
+        }
+
+        /* Header */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 16px;
-            border-bottom: 2px solid var(--border);
-            padding-bottom: 12px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 16px;
             flex-wrap: wrap;
-            gap: 12px;
+            gap: 14px;
         }
 
         .header h1 {
-            color: var(--primary);
-            font-size: 20px;
+            color: var(--text-light);
+            font-size: 21px;
+            font-weight: 800;
+            letter-spacing: 0.3px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+        }
+
+        .header h1 span.highlight {
+            color: var(--primary-cyan);
+            text-shadow: 0 0 12px rgba(76, 227, 215, 0.4);
         }
 
         .header .badge {
-            background: #E8F4FD;
-            color: var(--primary);
+            background: rgba(76, 227, 215, 0.12);
+            color: var(--primary-cyan);
             font-size: 12px;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-weight: 600;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            border: 1px solid rgba(76, 227, 215, 0.35);
+            box-shadow: 0 0 10px rgba(76, 227, 215, 0.15);
         }
 
         /* Banner de Estado */
         #statusBanner {
-            background: #e0f2fe;
-            color: #0369a1;
-            padding: 10px 16px;
-            border-radius: 6px;
-            margin-bottom: 16px;
+            background: var(--bg-card);
+            color: var(--primary-cyan);
+            padding: 11px 18px;
+            border-radius: 8px;
+            margin-bottom: 20px;
             font-size: 13px;
+            font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 10px;
-            border: 1px solid #bae6fd;
+            gap: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), 0 0 10px rgba(76, 227, 215, 0.05);
         }
 
         @keyframes spin {
@@ -95,89 +126,106 @@
         .filter-bar {
             display: flex;
             flex-wrap: wrap;
-            gap: 12px;
-            background: var(--card-bg);
-            padding: 12px 18px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            margin-bottom: 20px;
+            gap: 14px;
+            background: var(--bg-card);
+            padding: 16px 20px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 24px;
             align-items: flex-end;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
         }
 
         .filter-group {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 6px;
         }
 
         .filter-group label {
             font-size: 11px;
             font-weight: 700;
-            color: var(--primary);
+            color: var(--primary-cyan);
             text-transform: uppercase;
+            letter-spacing: 0.6px;
         }
 
         .filter-group select,
         .filter-group input {
-            padding: 6px 10px;
-            font-size: 12px;
-            border-radius: 4px;
-            border: 1px solid var(--border);
+            padding: 8px 12px;
+            font-size: 12.5px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
             outline: none;
-            background-color: #fff;
-            min-width: 150px;
+            background-color: var(--bg-main);
+            color: var(--text-light);
+            min-width: 160px;
             font-weight: 500;
+            font-family: inherit;
+            transition: all 0.2s ease;
         }
 
         .filter-group select:focus,
         .filter-group input:focus {
-            border-color: var(--primary);
+            border-color: var(--primary-cyan);
+            box-shadow: 0 0 10px rgba(76, 227, 215, 0.25);
         }
 
         .filter-group.primary-filter select {
-            background-color: #F0F7FD;
-            border-color: #89A5CC;
+            background-color: #072238;
+            border-color: var(--secondary-teal);
             font-weight: 700;
-            color: var(--primary-dark);
+            color: var(--primary-cyan);
         }
 
         .btn-reset {
-            padding: 7px 14px;
+            padding: 8px 18px;
             font-size: 12px;
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            background: #fff;
+            border: 1px solid var(--secondary-teal);
+            border-radius: 20px;
+            background: rgba(28, 154, 168, 0.15);
             cursor: pointer;
-            color: var(--text);
-            font-weight: 600;
-            height: 32px;
+            color: var(--primary-cyan);
+            font-weight: 700;
+            height: 36px;
             display: inline-flex;
             align-items: center;
-            gap: 4px;
-            transition: background 0.15s;
+            gap: 6px;
+            transition: all 0.25s ease;
+            box-shadow: 0 0 10px rgba(76, 227, 215, 0.1);
         }
 
         .btn-reset:hover {
-            background: #ECEFF1;
-            border-color: #94a3b8;
+            background: var(--primary-cyan);
+            color: var(--bg-main);
+            border-color: var(--primary-cyan);
+            box-shadow: 0 0 15px rgba(76, 227, 215, 0.4);
+            transform: translateY(-1px);
         }
 
         /* Tarjetas KPI */
         .kpi-container {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
+            gap: 18px;
+            margin-bottom: 24px;
         }
 
         .kpi-card {
-            background: var(--card-bg);
-            padding: 14px 16px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            border-left: 5px solid var(--primary);
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            background: var(--bg-card);
+            padding: 16px 20px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--primary-cyan);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), 0 0 15px rgba(76, 227, 215, 0.12);
         }
 
         .kpi-title {
@@ -185,35 +233,39 @@
             color: var(--text-muted);
             font-weight: 700;
             text-transform: uppercase;
+            letter-spacing: 0.6px;
         }
 
         .kpi-value {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--text);
-            margin-top: 4px;
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--text-light);
+            margin-top: 6px;
+            font-variant-numeric: tabular-nums;
         }
 
         .kpi-sub {
-            font-size: 11px;
-            margin-top: 3px;
+            font-size: 11.5px;
+            margin-top: 4px;
             font-weight: 600;
             color: var(--text-muted);
         }
 
         .kpi-positive {
-            color: var(--green);
+            color: var(--primary-cyan) !important;
+            text-shadow: 0 0 8px rgba(76, 227, 215, 0.3);
         }
 
         .kpi-negative {
-            color: var(--red);
+            color: var(--negative) !important;
+            text-shadow: 0 0 8px rgba(255, 107, 129, 0.3);
         }
 
         /* Grid del Dashboard */
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
+            gap: 22px;
         }
 
         .full-width {
@@ -221,62 +273,71 @@
         }
 
         .card {
-            background-color: var(--card-bg);
-            border-radius: 8px;
-            padding: 16px 18px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-            border: 1px solid var(--border);
+            background-color: var(--bg-card);
+            border-radius: 10px;
+            padding: 20px 22px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+            border: 1px solid var(--border-color);
         }
 
         .card h3 {
-            font-size: 14px;
-            margin-bottom: 12px;
-            color: var(--primary);
+            font-size: 14.5px;
+            margin-bottom: 16px;
+            color: var(--text-light);
             font-weight: 700;
-            border-bottom: 1px solid #ECEFF1;
-            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .chart-container {
             position: relative;
-            height: 300px;
+            height: 310px;
             width: 100%;
         }
 
         .chart-container.large {
-            height: 330px;
+            height: 340px;
         }
 
         /* Tablas y Matrices */
         .table-wrapper {
-            max-height: 440px;
+            max-height: 460px;
             overflow-y: auto;
             overflow-x: auto;
-            border: 1px solid var(--border);
-            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-card);
         }
 
         table.matrix-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 11.5px;
+            font-size: 12px;
             text-align: left;
+            color: var(--text-light);
         }
 
         table.matrix-table th {
             position: sticky;
             top: 0;
-            background-color: var(--primary);
-            color: #fff;
-            padding: 8px 10px;
-            font-weight: 600;
+            background-color: #0E3A59;
+            color: var(--primary-cyan);
+            padding: 10px 12px;
+            font-weight: 700;
             z-index: 3;
             font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--border-color);
         }
 
         table.matrix-table td {
-            padding: 6px 9px;
-            border-bottom: 1px solid var(--border);
+            padding: 8px 11px;
+            border-bottom: 1px solid rgba(14, 58, 89, 0.5);
+            font-variant-numeric: tabular-nums;
         }
 
         .num-col {
@@ -284,41 +345,45 @@
             font-weight: 600;
         }
 
-        /* Estilos Jerárquicos en Formato Compacto */
+        /* Estilos Jerárquicos */
         .row-partida {
-            background-color: #e2e8f0 !important;
-            color: #1e3a8a;
+            background-color: #0B2B43 !important;
+            color: var(--primary-cyan) !important;
             font-weight: 700;
             cursor: pointer;
             user-select: none;
-            border-top: 2px solid #cbd5e1;
+            border-top: 1px solid var(--border-color);
+            transition: background 0.15s ease;
         }
 
         .row-partida:hover {
-            background-color: #cbd5e1 !important;
+            background-color: #0E3E61 !important;
         }
 
         .row-grupo {
-            background-color: #f1f5f9 !important;
-            color: #334155;
+            background-color: #071F32 !important;
+            color: #E2E8F0 !important;
             font-weight: 600;
             cursor: pointer;
             user-select: none;
-            border-top: 1px solid #e2e8f0;
+            border-top: 1px solid rgba(14, 58, 89, 0.4);
+            transition: background 0.15s ease;
         }
 
         .row-grupo:hover {
-            background-color: #e2e8f0 !important;
+            background-color: #0B2E49 !important;
         }
 
         .row-clase {
-            background-color: #ffffff;
-            font-size: 11px;
-            color: #475569;
+            background-color: var(--bg-main) !important;
+            font-size: 11.5px;
+            color: var(--text-muted);
+            transition: background 0.15s ease;
         }
 
         .row-clase:hover {
-            background-color: #f8fafc !important;
+            background-color: #08243A !important;
+            color: var(--text-light);
         }
 
         /* Botón de Expansión / Contracción */
@@ -326,44 +391,51 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 16px;
-            height: 16px;
-            margin-right: 6px;
-            background: #ffffff;
-            border: 1px solid #94a3b8;
-            border-radius: 3px;
+            width: 17px;
+            height: 17px;
+            margin-right: 8px;
+            background: #031726;
+            border: 1px solid var(--secondary-teal);
+            border-radius: 4px;
             font-size: 11px;
             line-height: 1;
             font-family: monospace;
             font-weight: bold;
-            color: #1e293b;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+            color: var(--primary-cyan);
             cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .toggle-btn:hover {
+            background: var(--primary-cyan);
+            color: var(--bg-main);
+            box-shadow: 0 0 8px rgba(76, 227, 215, 0.4);
         }
 
         .btn-matriz-ctrl {
-            padding: 4px 10px;
-            font-size: 11px;
-            font-weight: 600;
-            border: 1px solid var(--border);
-            background: #fff;
-            border-radius: 4px;
+            padding: 5px 12px;
+            font-size: 11.5px;
+            font-weight: 700;
+            border: 1px solid var(--border-color);
+            background: var(--bg-main);
+            border-radius: 6px;
             cursor: pointer;
             transition: all 0.2s;
-            color: var(--primary);
+            color: var(--primary-cyan);
             display: inline-flex;
             align-items: center;
-            gap: 4px;
+            gap: 5px;
         }
 
         .btn-matriz-ctrl:hover {
-            background: #f1f5f9;
-            border-color: var(--primary);
+            background: var(--secondary-teal);
+            color: var(--text-light);
+            border-color: var(--primary-cyan);
         }
 
         .subtotal-badge {
-            font-size: 10.5px;
-            color: #64748b;
+            font-size: 11px;
+            color: var(--text-muted);
             margin-left: 6px;
             font-weight: normal;
             font-style: italic;
@@ -371,107 +443,146 @@
 
         .badge-diff {
             display: inline-block;
-            padding: 2px 6px;
+            padding: 3px 8px;
             border-radius: 4px;
-            font-size: 10.5px;
+            font-size: 11px;
             font-weight: 700;
         }
 
         .badge-positive {
-            background-color: #E8F8F5;
-            color: var(--green);
+            background-color: rgba(76, 227, 215, 0.15);
+            color: var(--primary-cyan);
+            border: 1px solid rgba(76, 227, 215, 0.35);
         }
 
         .badge-negative {
-            background-color: #FDEDEC;
-            color: var(--red);
+            background-color: rgba(255, 107, 129, 0.15);
+            color: var(--negative);
+            border: 1px solid rgba(255, 107, 129, 0.35);
         }
 
         .badge-neutral {
-            background-color: #EAEDED;
-            color: #5D6D7E;
+            background-color: rgba(143, 175, 196, 0.12);
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
         }
 
-        /* Columna fija para scroll horizontal en Matriz Mensual */
+        /* Columna fija para scroll horizontal */
         .sticky-col {
             position: sticky;
             left: 0;
             z-index: 2;
             background-color: inherit;
-            box-shadow: 2px 0 4px rgba(0, 0, 0, 0.04);
+            box-shadow: 3px 0 6px rgba(0, 0, 0, 0.3);
         }
 
         table.matrix-table-mes th {
-            padding: 6px 8px;
+            padding: 8px 10px;
             text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(14, 58, 89, 0.8);
         }
 
         table.matrix-table-mes th.sticky-col {
             z-index: 5;
-            background-color: var(--primary);
+            background-color: #0E3A59;
             text-align: left;
-            border-right: 2px solid #cbd5e1;
+            border-right: 2px solid var(--primary-cyan);
         }
 
         .header-mes-group {
-            background-color: #1F4E78 !important;
-            font-weight: 700;
+            background-color: #0E5B6A !important;
+            color: #FFFFFF !important;
+            font-weight: 800;
             font-size: 12px;
-            letter-spacing: 0.5px;
-            border-left: 2px solid #ffffff !important;
-            border-right: 2px solid #ffffff !important;
+            letter-spacing: 0.8px;
+            border-left: 2px solid var(--border-color) !important;
+            border-right: 2px solid var(--border-color) !important;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
         }
 
         .header-total-group {
-            background-color: #11284a !important;
-            font-weight: 700;
+            background-color: #093448 !important;
+            color: var(--primary-cyan) !important;
+            font-weight: 800;
             font-size: 12px;
-            border-left: 2px solid #ffffff !important;
+            letter-spacing: 0.8px;
+            border-left: 2px solid var(--primary-cyan) !important;
         }
 
         .sub-col-header {
-            background-color: #275d8d !important;
-            font-size: 10.5px;
+            background-color: #062338 !important;
+            color: var(--text-muted) !important;
+            font-size: 11px;
             font-weight: 600;
-            padding: 4px 6px !important;
-            border-right: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 6px 8px !important;
+            border-right: 1px solid rgba(14, 58, 89, 0.6);
         }
 
         .sub-col-total {
-            background-color: #18375e !important;
-            font-size: 10.5px;
-            font-weight: 600;
-            padding: 4px 6px !important;
-            border-right: 1px solid rgba(255, 255, 255, 0.15);
+            background-color: #08283e !important;
+            color: var(--primary-cyan) !important;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 6px 8px !important;
+            border-right: 1px solid rgba(14, 58, 89, 0.6);
         }
 
         .border-left-group {
-            border-left: 2px solid #cbd5e1 !important;
+            border-left: 2px solid var(--border-color) !important;
         }
 
         .row-partida .sticky-col {
-            background-color: #e2e8f0 !important;
+            background-color: #0B2B43 !important;
         }
 
         .row-grupo .sticky-col {
-            background-color: #f1f5f9 !important;
+            background-color: #071F32 !important;
         }
 
         .row-clase .sticky-col {
-            background-color: #ffffff !important;
+            background-color: var(--bg-main) !important;
         }
 
         .row-clase:hover .sticky-col {
-            background-color: #f8fafc !important;
+            background-color: #08243A !important;
         }
 
         .loading-overlay {
             text-align: center;
-            padding: 30px;
+            padding: 35px;
             font-size: 14px;
-            color: var(--primary);
+            color: var(--primary-cyan);
             font-weight: 600;
+        }
+
+        .control-pill {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #031726;
+            padding: 5px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }
+        .control-pill label {
+            font-size: 11.5px;
+            font-weight: 700;
+            color: var(--primary-cyan);
+        }
+        .control-pill select {
+            padding: 4px 8px;
+            font-size: 11.5px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-card);
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-light);
+            outline: none;
+            font-family: inherit;
+        }
+        .control-pill select:focus {
+            border-color: var(--primary-cyan);
         }
     </style>
 </head>
@@ -479,17 +590,14 @@
 <body>
 
     <div class="header">
-        <h1>📊 Comparativo: Presupuesto (T_Cabecera) vs ForeCast (T_ForeCast) <span class="badge">Año 2027</span></h1>
-        <div id="lblRegistros" style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Cargando datos...
-        </div>
+        <h1>📊 Comparativo: <span class="highlight">Presupuesto</span> (T_Cabecera) vs <span class="highlight">ForeCast</span> (T_ForeCast) <span class="badge">Año 2027</span></h1>
+        <div id="lblRegistros" style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Cargando datos...</div>
     </div>
 
     <!-- Banner de Estado de Conexión -->
     <div id="statusBanner">
-        <span
-            style="display:inline-block; width:15px; height:15px; border:2px solid #0369a1; border-top-color:transparent; border-radius:50%; animation: spin 1s linear infinite;"></span>
-        <span id="statusText">Conectando con la API en el puerto 8080 (o 5000) y consolidando Presupuesto vs
-            ForeCast...</span>
+        <span style="display:inline-block; width:15px; height:15px; border:2px solid var(--primary-cyan); border-top-color:transparent; border-radius:50%; animation: spin 1s linear infinite;"></span>
+        <span id="statusText">Conectando con la API en el puerto 8080 (o 5000) y consolidando Presupuesto vs ForeCast...</span>
     </div>
 
     <!-- Barra de Filtros / Segmentadores Globales -->
@@ -537,25 +645,25 @@
 
     <!-- Tarjetas KPI Sensibles a Todos los Filtros -->
     <div class="kpi-container">
-        <div class="kpi-card" style="border-left-color: var(--budget-color);">
+        <div class="kpi-card" style="border-left-color: var(--secondary-teal);">
             <div class="kpi-title">Presupuesto Base (T_Cabecera)</div>
             <div class="kpi-value" id="kpiPresupuesto">S/ 0.00</div>
             <div class="kpi-sub">Total Planificado</div>
         </div>
 
-        <div class="kpi-card" style="border-left-color: var(--forecast-color);">
+        <div class="kpi-card" style="border-left-color: var(--primary-cyan);">
             <div class="kpi-title">ForeCast Proyectado (T_ForeCast)</div>
-            <div class="kpi-value" id="kpiForeCast">S/ 0.00</div>
+            <div class="kpi-value" id="kpiForeCast" style="color: var(--primary-cyan);">S/ 0.00</div>
             <div class="kpi-sub">Total Proyectado</div>
         </div>
 
-        <div class="kpi-card" id="cardVariacion" style="border-left-color: #D35400;">
+        <div class="kpi-card" id="cardVariacion" style="border-left-color: var(--orange);">
             <div class="kpi-title">Variación Neta (Presup. - ForeCast)</div>
             <div class="kpi-value" id="kpiVariacion">S/ 0.00</div>
             <div class="kpi-sub" id="kpiVariacionPct">0.00% vs ForeCast</div>
         </div>
 
-        <div class="kpi-card" style="border-left-color: var(--accent-blue);">
+        <div class="kpi-card" style="border-left-color: var(--border-color);">
             <div class="kpi-title">% Variación Global</div>
             <div class="kpi-value" id="kpiCumplimiento">0.00%</div>
             <div class="kpi-sub" id="kpiRegistrosCount">0 registros analizados</div>
@@ -590,16 +698,13 @@
 
         <!-- MATRIZ 1: Resumen Comparativo Compacto (Partida -> Grupo -> Clase) -->
         <div class="card">
-            <div
-                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
-                <h3
-                    style="margin-bottom: 0; text-align: left; font-size: 13.5px; border-bottom: none; padding-bottom: 0;">
-                    📊 Matriz de Resumen Comparativo</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                <h3 style="margin-bottom: 0; text-align: left; font-size: 14px; border-bottom: none; padding-bottom: 0;">
+                    📊 Matriz de Resumen Comparativo
+                </h3>
                 <div style="display: flex; gap: 6px;">
-                    <button type="button" class="btn-matriz-ctrl" onclick="expandirTodoMatriz(true)">➕ Expandir
-                        Todo</button>
-                    <button type="button" class="btn-matriz-ctrl" onclick="expandirTodoMatriz(false)">➖ Contraer
-                        Todo</button>
+                    <button type="button" class="btn-matriz-ctrl" onclick="expandirTodoMatriz(true)">➕ Expandir Todo</button>
+                    <button type="button" class="btn-matriz-ctrl" onclick="expandirTodoMatriz(false)">➖ Contraer Todo</button>
                 </div>
             </div>
             <div class="table-wrapper">
@@ -624,20 +729,16 @@
 
         <!-- Fila 3: MATRIZ 2: Matriz Mensual Comparativa con Detalle de 4 Métricas y Segmentador de Trimestre -->
         <div class="card full-width">
-            <div
-                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 12px;">
-                <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
-                    <h3
-                        style="margin-bottom: 0; text-align: left; font-size: 14.5px; border-bottom: none; padding-bottom: 0;">
-                        📅 Matriz Comparativa Mensual (Presupuesto, ForeCast, Var. y % Var.)</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 12px;">
+                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                    <h3 style="margin-bottom: 0; text-align: left; font-size: 14.5px; border-bottom: none; padding-bottom: 0;">
+                        📅 Matriz Comparativa Mensual (Presupuesto, ForeCast, Var. y % Var.)
+                    </h3>
 
                     <!-- Segmentador por Trimestre -->
-                    <div
-                        style="display: flex; align-items: center; gap: 6px; background: #f8fafc; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border);">
-                        <label for="cboTrimestreMes"
-                            style="font-size: 11.5px; font-weight: 700; color: var(--primary);">Trimestre:</label>
-                        <select id="cboTrimestreMes" onchange="renderizarMatrizMes()"
-                            style="padding: 3px 8px; font-size: 11.5px; border-radius: 4px; border: 1px solid var(--border); background: #fff; cursor: pointer; font-weight: 600; color: #1e293b; outline: none;">
+                    <div class="control-pill">
+                        <label for="cboTrimestreMes">Trimestre:</label>
+                        <select id="cboTrimestreMes" onchange="renderizarMatrizMes()">
                             <option value="T1" selected>I TRIMESTRE (Ene - Mar)</option>
                             <option value="T2">II TRIMESTRE (Abr - Jun)</option>
                             <option value="T3">III TRIMESTRE (Jul - Set)</option>
@@ -647,12 +748,9 @@
                     </div>
 
                     <!-- Selector de Detalle de Columnas -->
-                    <div
-                        style="display: flex; align-items: center; gap: 6px; background: #f8fafc; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border);">
-                        <label for="cboDetalleMes"
-                            style="font-size: 11.5px; font-weight: 700; color: var(--forecast-color);">Columnas:</label>
-                        <select id="cboDetalleMes" onchange="renderizarMatrizMes()"
-                            style="padding: 3px 8px; font-size: 11.5px; border-radius: 4px; border: 1px solid var(--border); background: #fff; cursor: pointer; font-weight: 600; color: #1e293b; outline: none;">
+                    <div class="control-pill">
+                        <label for="cboDetalleMes" style="color: var(--secondary-teal);">Columnas:</label>
+                        <select id="cboDetalleMes" onchange="renderizarMatrizMes()">
                             <option value="ALL" selected>Detalle Completo (Presup., ForeCast, Var., % Var.)</option>
                             <option value="VAR_PCT">Solo Variación y % Var.</option>
                             <option value="FORECAST">Solo ForeCast</option>
@@ -662,10 +760,8 @@
                 </div>
 
                 <div style="display: flex; gap: 6px;">
-                    <button type="button" class="btn-matriz-ctrl" onclick="expandirTodoMatrizMes(true)">➕ Expandir
-                        Todo</button>
-                    <button type="button" class="btn-matriz-ctrl" onclick="expandirTodoMatrizMes(false)">➖ Contraer
-                        Todo</button>
+                    <button type="button" class="btn-matriz-ctrl" onclick="expandirTodoMatrizMes(true)">➕ Expandir Todo</button>
+                    <button type="button" class="btn-matriz-ctrl" onclick="expandirTodoMatrizMes(false)">➖ Contraer Todo</button>
                 </div>
             </div>
 
@@ -759,35 +855,30 @@
                 rawData = await res.json();
 
                 if (!rawData || rawData.length === 0) {
-                    banner.style.display = 'none';
-                    document.getElementById('tbMatrizBody').innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">No se encontraron registros en el archivo Excel.</td></tr>';
-                    return;
+                    throw new Error("La API no devolvió registros para Presupuesto vs ForeCast.");
                 }
 
+                // Ocultar banner de estado
                 banner.style.display = 'none';
+
+                // Inicializar combo filtros con datos reales
                 poblarFiltros(rawData);
-                aplicarFiltros();
+
+                // Renderizar todo el dashboard
+                datosFiltradosActuales = [...rawData];
+                renderizarDashboard(datosFiltradosActuales);
+
             } catch (err) {
-                console.error("Error cargando comparativo:", err);
-                banner.style.backgroundColor = '#fee2e2';
-                banner.style.borderColor = '#fca5a5';
-                banner.style.color = '#991b1b';
-                statusText.innerHTML = `<b>Error:</b> ${err.message}`;
-                document.getElementById('tbMatrizBody').innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:red;">Error al conectar con la API (${err.message}). Asegúrate de ejecutar <code>dotnet run</code> en la carpeta ApiDesposte.</td></tr>`;
+                console.error(err);
+                statusText.innerHTML = `⚠️ <b style="color:#FF6B81;">Error:</b> ${err.message}`;
+                document.getElementById('tbMatrizBody').innerHTML = `<tr><td colspan="5" style="text-align:center; padding:30px; color:#FF6B81;">${err.message}</td></tr>`;
             }
         }
 
         function poblarFiltros(data) {
-            const cecos = [...new Set(data.map(i => i.centroCostos || 'SIN CECO'))].sort();
-            const mesesRaw = [...new Set(data.map(i => i.mes || 'SIN MES'))];
-            // Ordenar meses numéricamente si es posible
-            const meses = mesesRaw.sort((a, b) => {
-                const nA = parseInt(a), nB = parseInt(b);
-                if (!isNaN(nA) && !isNaN(nB)) return nA - nB;
-                return a.toString().localeCompare(b.toString());
-            });
-            const grupos = [...new Set(data.map(i => i.grupo || 'SIN GRUPO'))].sort();
-            const partidas = [...new Set(data.map(i => i.partidaPresupuestal || 'SIN PARTIDA'))].sort();
+            const cecos = [...new Set(data.map(i => i.centroCostos).filter(Boolean))].sort();
+            const partidas = [...new Set(data.map(i => i.partidaPresupuestal).filter(Boolean))].sort();
+            const grupos = [...new Set(data.map(i => i.grupo).filter(Boolean))].sort();
 
             const cboCeco = document.getElementById('cboCeco');
             cecos.forEach(c => cboCeco.appendChild(new Option(c, c)));
@@ -796,7 +887,8 @@
             partidas.forEach(p => cboPartida.appendChild(new Option(p, p)));
 
             const cboMes = document.getElementById('cboMes');
-            const NOMBRES_MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Setiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+            const meses = [...new Set(data.map(i => i.mes).filter(Boolean))].sort((a, b) => normalizarMesIndice(a) - normalizarMesIndice(b));
+            const NOMBRES_MESES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Set', 'Oct', 'Nov', 'Dic'];
             meses.forEach(m => {
                 const idx = normalizarMesIndice(m);
                 const etiqueta = idx >= 0 ? `${m} - ${NOMBRES_MESES[idx]}` : m;
@@ -859,25 +951,25 @@
         }
 
         function formatMonto(val, esBold = false) {
-            if (!val || Math.abs(Math.round(val)) === 0) return `<span style="color: #cbd5e1;">-</span>`;
+            if (!val || Math.abs(Math.round(val)) === 0) return `<span style="color: #0E3A59;">-</span>`;
             const txt = 'S/ ' + Math.round(val).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
             return esBold ? `<b>${txt}</b>` : txt;
         }
 
         function formatVariacion(val, esBold = false) {
-            if (!val || Math.abs(Math.round(val)) === 0) return `<span style="color: #cbd5e1;">-</span>`;
+            if (!val || Math.abs(Math.round(val)) === 0) return `<span style="color: #0E3A59;">-</span>`;
             const rounded = Math.round(val);
             const signo = rounded > 0 ? '+' : '';
             const txt = signo + 'S/ ' + rounded.toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-            const color = rounded > 0 ? 'var(--green)' : 'var(--red)';
+            const color = rounded > 0 ? 'var(--primary-cyan)' : 'var(--negative)';
             return `<span style="color: ${color}; font-weight: ${esBold ? '700' : '600'};">${txt}</span>`;
         }
 
         function formatPct(pct, esBold = false) {
-            if (!pct || Math.abs(pct) < 0.005) return `<span style="color: #cbd5e1;">0.0%</span>`;
+            if (!pct || Math.abs(pct) < 0.005) return `<span style="color: #0E3A59;">0.0%</span>`;
             const signo = pct > 0 ? '+' : '';
             const txt = signo + pct.toFixed(1) + '%';
-            const color = pct > 0 ? 'var(--green)' : 'var(--red)';
+            const color = pct > 0 ? 'var(--primary-cyan)' : 'var(--negative)';
             return `<span style="color: ${color}; font-weight: ${esBold ? '700' : '600'};">${txt}</span>`;
         }
 
@@ -917,7 +1009,7 @@
         }
 
         // ==========================================
-        // GRÁFICOS COMPARATIVOS
+        // GRÁFICOS COMPARATIVOS (Paleta Dark Cyan / Teal)
         // ==========================================
 
         function normalizarMesIndice(val) {
@@ -991,14 +1083,18 @@
                         {
                             label: 'Presupuesto (Base)',
                             data: presupuestos,
-                            backgroundColor: '#3A4758',
-                            borderRadius: 4
+                            backgroundColor: '#1C9AA8',
+                            borderColor: '#0E5B6A',
+                            borderWidth: 1,
+                            borderRadius: 5
                         },
                         {
                             label: 'ForeCast (Proyectado)',
                             data: forecasts,
-                            backgroundColor: '#0B6679',
-                            borderRadius: 4
+                            backgroundColor: '#4CE3D7',
+                            borderColor: '#8FAFC4',
+                            borderWidth: 1,
+                            borderRadius: 5
                         }
                     ]
                 },
@@ -1007,8 +1103,21 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } },
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                boxWidth: 12,
+                                font: { size: 11, family: 'Inter', weight: '600' },
+                                color: '#8FAFC4'
+                            }
+                        },
                         tooltip: {
+                            backgroundColor: '#062338',
+                            titleColor: '#4CE3D7',
+                            bodyColor: '#FFFFFF',
+                            borderColor: '#0E3A59',
+                            borderWidth: 1,
+                            padding: 10,
                             callbacks: {
                                 label: function (context) {
                                     return context.dataset.label + ': S/ ' + context.parsed[horizontal ? 'x' : 'y'].toLocaleString('es-PE', { minimumFractionDigits: 2 });
@@ -1017,8 +1126,14 @@
                         }
                     },
                     scales: {
-                        x: { grid: { display: false }, ticks: { font: { size: 10 } } },
-                        y: { grid: { color: '#ECEFF1' }, ticks: { font: { size: 10 } } }
+                        x: {
+                            grid: { color: 'rgba(14, 58, 89, 0.4)', drawBorder: false },
+                            ticks: { font: { size: 10.5, family: 'Inter' }, color: '#8FAFC4' }
+                        },
+                        y: {
+                            grid: { color: 'rgba(14, 58, 89, 0.4)', drawBorder: false },
+                            ticks: { font: { size: 10.5, family: 'Inter' }, color: '#8FAFC4' }
+                        }
                     }
                 }
             });
@@ -1029,7 +1144,6 @@
         // =========================================================================
 
         function construirArbolJerarquico(data) {
-            // Estructura: Partida Presupuestal -> Grupo -> Clase
             const partidasTree = {};
 
             data.forEach(item => {
@@ -1070,8 +1184,8 @@
                 partidasTree[p].grupos[g].presupuesto += pres;
                 partidasTree[p].grupos[g].forecast += fc;
                 if (mIdx >= 0 && mIdx < 12) {
-                    partidasTree[p].grupos[g].mesesPres[mIdx] += pres;
-                    partidasTree[p].grupos[g].mesesFc[mIdx] += fc;
+                    partidasTree[p].mesesPres[mIdx] += pres;
+                    partidasTree[p].mesesFc[mIdx] += fc;
                 }
 
                 if (!partidasTree[p].grupos[g].clases[c]) {
@@ -1099,7 +1213,7 @@
             tbody.innerHTML = '';
 
             if (!data || data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:#64748b;">No hay registros con los filtros seleccionados.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--text-muted);">No hay registros con los filtros seleccionados.</td></tr>';
                 return;
             }
 
@@ -1123,7 +1237,7 @@
                         <span class="subtotal-badge">(${Object.keys(pObj.grupos).length} grupos)</span>
                     </td>
                     <td class="num-col"><b>${formatMonto(pObj.presupuesto)}</b></td>
-                    <td class="num-col" style="color: var(--forecast-color);"><b>${formatMonto(pObj.forecast)}</b></td>
+                    <td class="num-col" style="color: var(--primary-cyan);"><b>${formatMonto(pObj.forecast)}</b></td>
                     <td class="num-col"><span class="badge-diff ${pBadgeClass}">${pDiffSign}${formatMonto(pVar)}</span></td>
                     <td class="num-col"><b>${formatPct(pPctVar, true)}</b></td>
                 `;
@@ -1150,7 +1264,7 @@
                             <span class="subtotal-badge">(${Object.keys(gObj.clases).length} clases)</span>
                         </td>
                         <td class="num-col">${formatMonto(gObj.presupuesto)}</td>
-                        <td class="num-col" style="color: var(--forecast-color);">${formatMonto(gObj.forecast)}</td>
+                        <td class="num-col" style="color: var(--primary-cyan);">${formatMonto(gObj.forecast)}</td>
                         <td class="num-col"><span class="badge-diff ${gBadgeClass}">${gDiffSign}${formatMonto(gVar)}</span></td>
                         <td class="num-col">${formatPct(gPctVar)}</td>
                     `;
@@ -1169,11 +1283,11 @@
                         trClase.className = `row-clase p-child-${pIdx} g-child-${pIdx}-${gIdx}`;
                         trClase.innerHTML = `
                             <td style="padding-left: 48px;">
-                                <span style="display: inline-block; width: 5px; height: 5px; background: #64748b; border-radius: 50%; margin-right: 6px; vertical-align: middle;"></span>
+                                <span style="display: inline-block; width: 6px; height: 6px; background: var(--secondary-teal); border-radius: 50%; margin-right: 8px; vertical-align: middle;"></span>
                                 <span>${cObj.nombre}</span>
                             </td>
                             <td class="num-col">${formatMonto(cObj.presupuesto)}</td>
-                            <td class="num-col" style="color: var(--forecast-color);">${formatMonto(cObj.forecast)}</td>
+                            <td class="num-col" style="color: var(--primary-cyan);">${formatMonto(cObj.forecast)}</td>
                             <td class="num-col"><span class="badge-diff ${cBadgeClass}">${cDiffSign}${formatMonto(cVar)}</span></td>
                             <td class="num-col">${formatPct(cPctVar)}</td>
                         `;
@@ -1248,7 +1362,6 @@
             const trimestre = document.getElementById('cboTrimestreMes') ? document.getElementById('cboTrimestreMes').value : 'T1';
             const detalle = document.getElementById('cboDetalleMes') ? document.getElementById('cboDetalleMes').value : 'ALL';
 
-            // Meses a visualizar según trimestre
             const NOMBRES_MESES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Set', 'Oct', 'Nov', 'Dic'];
             const MAPA_TRIM_MESES = {
                 'T1': [0, 1, 2],
@@ -1264,7 +1377,6 @@
                 mesesAVisualizar = MAPA_TRIM_MESES[trimestre];
             }
 
-            // Definición de subcolumnas según la opción seleccionada
             let subCols = [];
             if (detalle === 'ALL') {
                 subCols = [
@@ -1290,9 +1402,8 @@
 
             const colSpan = subCols.length;
 
-            // Construir cabecera de 2 niveles
             const labelTotal = (trimestre === 'TODOS') ? 'TOTAL AÑO' : `TOTAL ${trimestre}`;
-            let thRow1 = `<tr><th rowspan="2" class="sticky-col" style="min-width: 250px; vertical-align: middle;">Jerarquía (Partida ➔ Grupo ➔ Clase)</th>`;
+            let thRow1 = `<tr><th rowspan="2" class="sticky-col" style="min-width: 260px; vertical-align: middle;">Jerarquía (Partida ➔ Grupo ➔ Clase)</th>`;
             let thRow2 = `<tr>`;
 
             mesesAVisualizar.forEach((mIdx, i) => {
@@ -1314,14 +1425,13 @@
             thead.innerHTML = thRow1 + thRow2;
 
             if (!datosFiltradosActuales || datosFiltradosActuales.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="${(mesesAVisualizar.length + 1) * colSpan + 1}" style="text-align: center; padding: 25px; color: #64748b;">No se encontraron registros para los filtros seleccionados.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="${(mesesAVisualizar.length + 1) * colSpan + 1}" style="text-align: center; padding: 25px; color: var(--text-muted);">No se encontraron registros para los filtros seleccionados.</td></tr>`;
                 return;
             }
 
             const tree = construirArbolJerarquico(datosFiltradosActuales);
             const partidasOrdenadas = Object.values(tree).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es', { numeric: true }));
 
-            // Helper para generar las celdas de un mes
             function generarCeldasMes(pres, fc, esSubtotal, bgCol = '') {
                 const { variacion, pct } = calcularVariacionYPct(pres, fc);
                 let html = '';
@@ -1331,7 +1441,7 @@
                     if (sc.key === 'pres') {
                         html += `<td class="num-col${extraClass}" style="${styleBg}">${formatMonto(pres, esSubtotal)}</td>`;
                     } else if (sc.key === 'fc') {
-                        html += `<td class="num-col${extraClass}" style="${styleBg} color: var(--forecast-color);">${formatMonto(fc, esSubtotal)}</td>`;
+                        html += `<td class="num-col${extraClass}" style="${styleBg} color: var(--primary-cyan);">${formatMonto(fc, esSubtotal)}</td>`;
                     } else if (sc.key === 'var') {
                         html += `<td class="num-col${extraClass}" style="${styleBg}">${formatVariacion(variacion, esSubtotal)}</td>`;
                     } else if (sc.key === 'pct') {
@@ -1361,7 +1471,7 @@
                 });
 
                 // Celdas Total Partida
-                const celdasTotalPartida = generarCeldasMes(totPresPartida, totFcPartida, true, '#cbd5e1');
+                const celdasTotalPartida = generarCeldasMes(totPresPartida, totFcPartida, true, '#0E3A59');
 
                 trPartida.innerHTML = `
                     <td class="sticky-col">
@@ -1397,7 +1507,7 @@
                     });
 
                     // Celdas Total Grupo
-                    const celdasTotalGrupo = generarCeldasMes(totPresGrupo, totFcGrupo, true, '#e2e8f0');
+                    const celdasTotalGrupo = generarCeldasMes(totPresGrupo, totFcGrupo, true, '#093448');
 
                     trGrupo.innerHTML = `
                         <td class="sticky-col" style="padding-left: 24px;">
@@ -1430,11 +1540,11 @@
                         });
 
                         // Celdas Total Clase
-                        const celdasTotalClase = generarCeldasMes(totPresClase, totFcClase, false, '#f1f5f9');
+                        const celdasTotalClase = generarCeldasMes(totPresClase, totFcClase, false, '#062338');
 
                         trClase.innerHTML = `
                             <td class="sticky-col" style="padding-left: 48px;">
-                                <span style="display: inline-block; width: 5px; height: 5px; background: #64748b; border-radius: 50%; margin-right: 6px; vertical-align: middle;"></span>
+                                <span style="display: inline-block; width: 6px; height: 6px; background: var(--secondary-teal); border-radius: 50%; margin-right: 8px; vertical-align: middle;"></span>
                                 <span>${cObj.nombre}</span>
                             </td>
                             ${htmlMesesCls}

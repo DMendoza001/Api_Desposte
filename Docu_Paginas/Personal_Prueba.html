@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,36 +14,125 @@
             --border: #cbd5e1;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); padding: 20px; color: #1e293b; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-        .container { display: grid; grid-template-columns: 320px 1fr; gap: 20px; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg);
+            padding: 20px;
+            color: #1e293b;
+        }
 
-        .card { background: white; padding: 20px; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        h2 { font-size: 16px; margin-bottom: 15px; color: var(--primary); }
+        .container {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 20px;
+        }
 
-        .form-group { margin-bottom: 12px; }
-        label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; color: #64748b; }
-        input { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 4px; outline: none; }
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
 
-        .btn-group { display: flex; gap: 8px; margin-top: 15px; }
-        button { flex: 1; padding: 9px; border: none; border-radius: 4px; font-weight: 600; cursor: pointer; color: white; }
-        .btn-save { background: var(--primary); }
-        .btn-clear { background: #64748b; }
+        h2 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
 
-        table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        th { background: var(--primary); color: white; padding: 10px; text-align: left; }
-        td { padding: 10px; border-bottom: 1px solid var(--border); }
-        tr:hover { background-color: #f1f5f9; }
+        .form-group {
+            margin-bottom: 12px;
+        }
 
-        .btn-action { padding: 4px 8px; font-size: 11px; margin-right: 4px; }
-        .btn-edit { background: #2563eb; }
-        .btn-delete { background: var(--danger); }
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #64748b;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            outline: none;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        button {
+            flex: 1;
+            padding: 9px;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            color: white;
+        }
+
+        .btn-save {
+            background: var(--primary);
+        }
+
+        .btn-clear {
+            background: #64748b;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        th {
+            background: var(--primary);
+            color: white;
+            padding: 10px;
+            text-align: left;
+        }
+
+        td {
+            padding: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tr:hover {
+            background-color: #f1f5f9;
+        }
+
+        .btn-action {
+            padding: 4px 8px;
+            font-size: 11px;
+            margin-right: 4px;
+        }
+
+        .btn-edit {
+            background: #2563eb;
+        }
+
+        .btn-delete {
+            background: var(--danger);
+        }
     </style>
 </head>
+
 <body>
 
-    <h1 style="font-size: 20px; color: var(--primary); margin-bottom: 20px;">👤 Registro de Personal (Tabla T_Personal)</h1>
+    <h1 style="font-size: 20px; color: var(--primary); margin-bottom: 20px;">👤 Registro de Personal (Tabla T_Personal)
+    </h1>
 
     <div class="container">
         <!-- Formulario CRUD -->
@@ -81,22 +171,66 @@
                     </tr>
                 </thead>
                 <tbody id="cuerpoTabla">
-                    <tr><td colspan="4" style="text-align:center;">Cargando registros...</td></tr>
+                    <tr>
+                        <td colspan="4" style="text-align:center;">Cargando registros...</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
     </div>
 
     <script>
-        const API_URL = "http://localhost:5000/api/personalexcel";
+        let apiBaseActiva = null;
         let editando = false;
+
+        function generarBasesApi() {
+            const hosts = [];
+            if (typeof window !== "undefined" && window.location && window.location.hostname && window.location.hostname !== "") {
+                hosts.push(window.location.hostname);
+            }
+            hosts.push("localhost", "127.0.0.1");
+
+            const puertos = [8080, 5000];
+            const bases = [];
+            for (const puerto of puertos) {
+                for (const host of hosts) {
+                    bases.push(`http://${host}:${puerto}`);
+                }
+            }
+            bases.push(""); // Relativo
+            return Array.from(new Set(bases));
+        }
+
+        async function obtenerApiUrl(rutaRelativa) {
+            if (apiBaseActiva !== null) {
+                return `${apiBaseActiva}${rutaRelativa}`;
+            }
+
+            const candidatos = generarBasesApi();
+            for (const base of candidatos) {
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 2000);
+                    const res = await fetch(`${base}/api/personalexcel/listar`, { signal: controller.signal });
+                    clearTimeout(timeoutId);
+                    if (res.ok) {
+                        apiBaseActiva = base;
+                        return `${apiBaseActiva}${rutaRelativa}`;
+                    }
+                } catch (e) { }
+            }
+
+            apiBaseActiva = candidatos[0] || "http://localhost:8080";
+            return `${apiBaseActiva}${rutaRelativa}`;
+        }
 
         window.addEventListener('DOMContentLoaded', cargarInforme);
 
         async function cargarInforme() {
             const tbody = document.getElementById("cuerpoTabla");
             try {
-                const res = await fetch(`${API_URL}/listar`);
+                const url = await obtenerApiUrl("/api/personalexcel/listar");
+                const res = await fetch(url);
                 const data = await res.json();
 
                 if (data.length === 0) {
@@ -119,7 +253,7 @@
                     tbody.appendChild(tr);
                 });
             } catch (err) {
-                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:red;">Error al cargar datos.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:red;">Error al conectar con la API (Puertos 8080 / 5000).</td></tr>`;
             }
         }
 
@@ -132,20 +266,25 @@
             };
 
             const metodo = editando ? "PUT" : "POST";
-            const endpoint = editando ? `${API_URL}/actualizar` : `${API_URL}/crear`;
+            const ruta = editando ? "/api/personalexcel/actualizar" : "/api/personalexcel/crear";
+            const endpoint = await obtenerApiUrl(ruta);
 
-            const res = await fetch(endpoint, {
-                method: metodo,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(dto)
-            });
+            try {
+                const res = await fetch(endpoint, {
+                    method: metodo,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dto)
+                });
 
-            const data = await res.json();
-            alert(data.mensaje || data.error);
+                const data = await res.json();
+                alert(data.mensaje || data.error);
 
-            if (res.ok) {
-                limpiarFormulario();
-                cargarInforme();
+                if (res.ok) {
+                    limpiarFormulario();
+                    cargarInforme();
+                }
+            } catch (err) {
+                alert("Error al guardar el registro en el servidor.");
             }
         }
 
@@ -160,11 +299,16 @@
         async function eliminar(dni) {
             if (!confirm(`¿Desea eliminar al DNI ${dni}?`)) return;
 
-            const res = await fetch(`${API_URL}/eliminar/${dni}`, { method: 'DELETE' });
-            const data = await res.json();
-            alert(data.mensaje || data.error);
+            try {
+                const endpoint = await obtenerApiUrl(`/api/personalexcel/eliminar/${dni}`);
+                const res = await fetch(endpoint, { method: 'DELETE' });
+                const data = await res.json();
+                alert(data.mensaje || data.error);
 
-            if (res.ok) cargarInforme();
+                if (res.ok) cargarInforme();
+            } catch (err) {
+                alert("Error al intentar eliminar el registro.");
+            }
         }
 
         function limpiarFormulario() {
@@ -174,4 +318,5 @@
         }
     </script>
 </body>
+
 </html>

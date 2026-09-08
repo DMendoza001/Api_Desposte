@@ -446,15 +446,26 @@
     </div>
 
     <script>
-        // 1. Prioridad absoluta al puerto 8080 (servidor de trabajo y producción)
-        const BASE_HOSTS = [
-            "http://localhost:8080",
-            "http://DMENDOZA:8080",
-            "http://RAEVSALL001:8080",
-            "http://localhost:5000",
-            "http://DMENDOZA:5000",
-            "http://RAEVSALL001:5000"
-        ];
+        // 1. Generación dinámica de servidores API (Prioridad Puerto 8080, fallback a 5000)
+        function generarBasesApi() {
+            const hosts = [];
+            if (typeof window !== "undefined" && window.location && window.location.hostname && window.location.hostname !== "") {
+                hosts.push(window.location.hostname);
+            }
+            hosts.push("localhost", "127.0.0.1");
+
+            const puertos = [8080, 5000];
+            const bases = [];
+            for (const puerto of puertos) {
+                for (const host of hosts) {
+                    bases.push(`http://${host}:${puerto}`);
+                }
+            }
+            bases.push(""); // Relativo
+            return Array.from(new Set(bases));
+        }
+
+        const BASE_HOSTS = generarBasesApi();
         const PALETA = ['#3A4758', '#89A5CC', '#647F93', '#0B6679', '#9EBEC3', '#98C7BB', '#76B1C7', '#CACDC3'];
 
         let rawData = [];
