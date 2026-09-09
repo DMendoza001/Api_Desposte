@@ -11,24 +11,31 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            /* Paleta Dark Cyan / Teal solicitada */
-            --bg-main: #031726;
-            --bg-card: #062338;
-            --border-color: #0E3A59;
-            --primary-cyan: #4CE3D7;
-            --secondary-teal: #1C9AA8;
-            --dark-teal: #0E5B6A;
-            --text-light: #FFFFFF;
-            --text-muted: #8FAFC4;
+            --bg-main: #081326;
+            --bg-card: #0D1E3A;
+            --border-card: #1A3358;
+            --accent-cyan: #48B2CF;
+            --accent-blue: #206788;
+            --accent-gold: #F3BE4D;
+            --accent-orange: #E55A36;
+            --text-primary: #FFFFFF;
+            --text-secondary: #8AA2BE;
 
-            /* Acentos Semánticos */
-            --budget-color: #1C9AA8;
-            --forecast-color: #4CE3D7;
-            --positive: #4CE3D7;
-            --negative: #FF6B81;
-            --orange: #FFB356;
-            --neutral: #8FAFC4;
-            --glow: rgba(76, 227, 215, 0.18);
+            /* Variables Semánticas y Compatibilidad */
+            --border-color: var(--border-card);
+            --primary-cyan: var(--accent-cyan);
+            --secondary-teal: var(--accent-blue);
+            --dark-teal: #142E52;
+            --text-light: var(--text-primary);
+            --text-muted: var(--text-secondary);
+
+            --budget-color: var(--accent-blue);
+            --forecast-color: var(--accent-cyan);
+            --positive: var(--accent-cyan);
+            --negative: var(--accent-orange);
+            --orange: var(--accent-gold);
+            --neutral: var(--text-secondary);
+            --glow: rgba(72, 178, 207, 0.2);
         }
 
         * {
@@ -40,8 +47,8 @@
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background-color: var(--bg-main);
-            background-image: radial-gradient(circle at 50% 0%, #072a44 0%, #031726 75%);
-            color: var(--text-light);
+            background-image: radial-gradient(circle at 50% 0%, #102548 0%, #081326 75%);
+            color: var(--text-primary);
             padding: 24px;
             min-height: 100vh;
         }
@@ -51,15 +58,18 @@
             width: 8px;
             height: 8px;
         }
+
         ::-webkit-scrollbar-track {
             background: var(--bg-main);
         }
+
         ::-webkit-scrollbar-thumb {
-            background: var(--border-color);
+            background: var(--border-card);
             border-radius: 4px;
         }
+
         ::-webkit-scrollbar-thumb:hover {
-            background: var(--secondary-teal);
+            background: var(--accent-blue);
         }
 
         /* Header */
@@ -68,14 +78,14 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-card);
             padding-bottom: 16px;
             flex-wrap: wrap;
             gap: 14px;
         }
 
         .header h1 {
-            color: var(--text-light);
+            color: var(--text-primary);
             font-size: 21px;
             font-weight: 800;
             letter-spacing: 0.3px;
@@ -85,25 +95,25 @@
         }
 
         .header h1 span.highlight {
-            color: var(--primary-cyan);
-            text-shadow: 0 0 12px rgba(76, 227, 215, 0.4);
+            color: var(--accent-cyan);
+            text-shadow: 0 0 12px rgba(72, 178, 207, 0.4);
         }
 
         .header .badge {
-            background: rgba(76, 227, 215, 0.12);
-            color: var(--primary-cyan);
+            background: rgba(72, 178, 207, 0.12);
+            color: var(--accent-cyan);
             font-size: 12px;
             padding: 5px 12px;
             border-radius: 20px;
             font-weight: 700;
-            border: 1px solid rgba(76, 227, 215, 0.35);
-            box-shadow: 0 0 10px rgba(76, 227, 215, 0.15);
+            border: 1px solid rgba(72, 178, 207, 0.35);
+            box-shadow: 0 0 10px rgba(72, 178, 207, 0.15);
         }
 
         /* Banner de Estado */
         #statusBanner {
             background: var(--bg-card);
-            color: var(--primary-cyan);
+            color: var(--accent-cyan);
             padding: 11px 18px;
             border-radius: 8px;
             margin-bottom: 20px;
@@ -112,8 +122,8 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), 0 0 10px rgba(76, 227, 215, 0.05);
+            border: 1px solid var(--border-card);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), 0 0 10px rgba(72, 178, 207, 0.05);
         }
 
         @keyframes spin {
@@ -130,7 +140,7 @@
             background: var(--bg-card);
             padding: 16px 20px;
             border-radius: 10px;
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--border-card);
             margin-bottom: 24px;
             align-items: flex-end;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
@@ -145,7 +155,7 @@
         .filter-group label {
             font-size: 11px;
             font-weight: 700;
-            color: var(--primary-cyan);
+            color: var(--accent-cyan);
             text-transform: uppercase;
             letter-spacing: 0.6px;
         }
@@ -155,10 +165,10 @@
             padding: 8px 12px;
             font-size: 12.5px;
             border-radius: 6px;
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--border-card);
             outline: none;
             background-color: var(--bg-main);
-            color: var(--text-light);
+            color: var(--text-primary);
             min-width: 160px;
             font-weight: 500;
             font-family: inherit;
@@ -167,39 +177,39 @@
 
         .filter-group select:focus,
         .filter-group input:focus {
-            border-color: var(--primary-cyan);
-            box-shadow: 0 0 10px rgba(76, 227, 215, 0.25);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 10px rgba(72, 178, 207, 0.25);
         }
 
         .filter-group.primary-filter select {
-            background-color: #072238;
-            border-color: var(--secondary-teal);
+            background-color: #0d2242;
+            border-color: var(--accent-blue);
             font-weight: 700;
-            color: var(--primary-cyan);
+            color: var(--accent-cyan);
         }
 
         .btn-reset {
             padding: 8px 18px;
             font-size: 12px;
-            border: 1px solid var(--secondary-teal);
+            border: 1px solid var(--accent-blue);
             border-radius: 20px;
-            background: rgba(28, 154, 168, 0.15);
+            background: rgba(32, 103, 136, 0.2);
             cursor: pointer;
-            color: var(--primary-cyan);
+            color: var(--accent-cyan);
             font-weight: 700;
             height: 36px;
             display: inline-flex;
             align-items: center;
             gap: 6px;
             transition: all 0.25s ease;
-            box-shadow: 0 0 10px rgba(76, 227, 215, 0.1);
+            box-shadow: 0 0 10px rgba(72, 178, 207, 0.1);
         }
 
         .btn-reset:hover {
-            background: var(--primary-cyan);
+            background: var(--accent-cyan);
             color: var(--bg-main);
-            border-color: var(--primary-cyan);
-            box-shadow: 0 0 15px rgba(76, 227, 215, 0.4);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 15px rgba(72, 178, 207, 0.4);
             transform: translateY(-1px);
         }
 
@@ -215,8 +225,8 @@
             background: var(--bg-card);
             padding: 16px 20px;
             border-radius: 10px;
-            border: 1px solid var(--border-color);
-            border-left: 4px solid var(--primary-cyan);
+            border: 1px solid var(--border-card);
+            border-left: 4px solid var(--accent-cyan);
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
             position: relative;
             overflow: hidden;
@@ -225,12 +235,12 @@
 
         .kpi-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), 0 0 15px rgba(76, 227, 215, 0.12);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), 0 0 15px rgba(72, 178, 207, 0.12);
         }
 
         .kpi-title {
             font-size: 11px;
-            color: var(--text-muted);
+            color: var(--text-secondary);
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.6px;
@@ -239,7 +249,7 @@
         .kpi-value {
             font-size: 22px;
             font-weight: 800;
-            color: var(--text-light);
+            color: var(--text-primary);
             margin-top: 6px;
             font-variant-numeric: tabular-nums;
         }
@@ -248,17 +258,17 @@
             font-size: 11.5px;
             margin-top: 4px;
             font-weight: 600;
-            color: var(--text-muted);
+            color: var(--text-secondary);
         }
 
         .kpi-positive {
-            color: var(--primary-cyan) !important;
-            text-shadow: 0 0 8px rgba(76, 227, 215, 0.3);
+            color: var(--accent-cyan) !important;
+            text-shadow: 0 0 8px rgba(72, 178, 207, 0.3);
         }
 
         .kpi-negative {
-            color: var(--negative) !important;
-            text-shadow: 0 0 8px rgba(255, 107, 129, 0.3);
+            color: var(--accent-orange) !important;
+            text-shadow: 0 0 8px rgba(229, 90, 54, 0.3);
         }
 
         /* Grid del Dashboard */
@@ -277,15 +287,15 @@
             border-radius: 10px;
             padding: 20px 22px;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--border-card);
         }
 
         .card h3 {
             font-size: 14.5px;
             margin-bottom: 16px;
-            color: var(--text-light);
+            color: var(--text-primary);
             font-weight: 700;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-card);
             padding-bottom: 10px;
             display: flex;
             align-items: center;
@@ -307,7 +317,7 @@
             max-height: 460px;
             overflow-y: auto;
             overflow-x: auto;
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--border-card);
             border-radius: 8px;
             background: var(--bg-card);
         }
@@ -317,26 +327,26 @@
             border-collapse: collapse;
             font-size: 12px;
             text-align: left;
-            color: var(--text-light);
+            color: var(--text-primary);
         }
 
         table.matrix-table th {
             position: sticky;
             top: 0;
-            background-color: #0E3A59;
-            color: var(--primary-cyan);
+            background-color: var(--border-card);
+            color: var(--accent-cyan);
             padding: 10px 12px;
             font-weight: 700;
             z-index: 3;
             font-size: 11px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            border-bottom: 2px solid var(--border-color);
+            border-bottom: 2px solid var(--border-card);
         }
 
         table.matrix-table td {
             padding: 8px 11px;
-            border-bottom: 1px solid rgba(14, 58, 89, 0.5);
+            border-bottom: 1px solid rgba(26, 51, 88, 0.5);
             font-variant-numeric: tabular-nums;
         }
 
@@ -347,43 +357,43 @@
 
         /* Estilos Jerárquicos */
         .row-partida {
-            background-color: #0B2B43 !important;
-            color: var(--primary-cyan) !important;
+            background-color: #12243e !important;
+            color: var(--accent-cyan) !important;
             font-weight: 700;
             cursor: pointer;
             user-select: none;
-            border-top: 1px solid var(--border-color);
+            border-top: 1px solid var(--border-card);
             transition: background 0.15s ease;
         }
 
         .row-partida:hover {
-            background-color: #0E3E61 !important;
+            background-color: #173052 !important;
         }
 
         .row-grupo {
-            background-color: #071F32 !important;
+            background-color: #0d1e38 !important;
             color: #E2E8F0 !important;
             font-weight: 600;
             cursor: pointer;
             user-select: none;
-            border-top: 1px solid rgba(14, 58, 89, 0.4);
+            border-top: 1px solid rgba(26, 51, 88, 0.4);
             transition: background 0.15s ease;
         }
 
         .row-grupo:hover {
-            background-color: #0B2E49 !important;
+            background-color: #132a4d !important;
         }
 
         .row-clase {
             background-color: var(--bg-main) !important;
             font-size: 11.5px;
-            color: var(--text-muted);
+            color: var(--text-secondary);
             transition: background 0.15s ease;
         }
 
         .row-clase:hover {
-            background-color: #08243A !important;
-            color: var(--text-light);
+            background-color: #0e203c !important;
+            color: var(--text-primary);
         }
 
         /* Botón de Expansión / Contracción */
@@ -394,48 +404,48 @@
             width: 17px;
             height: 17px;
             margin-right: 8px;
-            background: #031726;
-            border: 1px solid var(--secondary-teal);
+            background: var(--bg-main);
+            border: 1px solid var(--accent-blue);
             border-radius: 4px;
             font-size: 11px;
             line-height: 1;
             font-family: monospace;
             font-weight: bold;
-            color: var(--primary-cyan);
+            color: var(--accent-cyan);
             cursor: pointer;
             transition: all 0.2s;
         }
 
         .toggle-btn:hover {
-            background: var(--primary-cyan);
+            background: var(--accent-cyan);
             color: var(--bg-main);
-            box-shadow: 0 0 8px rgba(76, 227, 215, 0.4);
+            box-shadow: 0 0 8px rgba(72, 178, 207, 0.4);
         }
 
         .btn-matriz-ctrl {
             padding: 5px 12px;
             font-size: 11.5px;
             font-weight: 700;
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--border-card);
             background: var(--bg-main);
             border-radius: 6px;
             cursor: pointer;
             transition: all 0.2s;
-            color: var(--primary-cyan);
+            color: var(--accent-cyan);
             display: inline-flex;
             align-items: center;
             gap: 5px;
         }
 
         .btn-matriz-ctrl:hover {
-            background: var(--secondary-teal);
-            color: var(--text-light);
-            border-color: var(--primary-cyan);
+            background: var(--accent-blue);
+            color: var(--text-primary);
+            border-color: var(--accent-cyan);
         }
 
         .subtotal-badge {
             font-size: 11px;
-            color: var(--text-muted);
+            color: var(--text-secondary);
             margin-left: 6px;
             font-weight: normal;
             font-style: italic;
@@ -450,21 +460,21 @@
         }
 
         .badge-positive {
-            background-color: rgba(76, 227, 215, 0.15);
-            color: var(--primary-cyan);
-            border: 1px solid rgba(76, 227, 215, 0.35);
+            background-color: rgba(72, 178, 207, 0.15);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(72, 178, 207, 0.35);
         }
 
         .badge-negative {
-            background-color: rgba(255, 107, 129, 0.15);
-            color: var(--negative);
-            border: 1px solid rgba(255, 107, 129, 0.35);
+            background-color: rgba(229, 90, 54, 0.15);
+            color: var(--accent-orange);
+            border: 1px solid rgba(229, 90, 54, 0.35);
         }
 
         .badge-neutral {
-            background-color: rgba(143, 175, 196, 0.12);
-            color: var(--text-muted);
-            border: 1px solid var(--border-color);
+            background-color: rgba(138, 162, 190, 0.12);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-card);
         }
 
         /* Columna fija para scroll horizontal */
@@ -479,64 +489,64 @@
         table.matrix-table-mes th {
             padding: 8px 10px;
             text-align: center;
-            border: 1px solid rgba(14, 58, 89, 0.8);
+            border: 1px solid rgba(26, 51, 88, 0.8);
         }
 
         table.matrix-table-mes th.sticky-col {
             z-index: 5;
-            background-color: #0E3A59;
+            background-color: var(--border-card);
             text-align: left;
-            border-right: 2px solid var(--primary-cyan);
+            border-right: 2px solid var(--accent-cyan);
         }
 
         .header-mes-group {
-            background-color: #0E5B6A !important;
+            background-color: #17375e !important;
             color: #FFFFFF !important;
             font-weight: 800;
             font-size: 12px;
             letter-spacing: 0.8px;
-            border-left: 2px solid var(--border-color) !important;
-            border-right: 2px solid var(--border-color) !important;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+            border-left: 2px solid var(--border-card) !important;
+            border-right: 2px solid var(--border-card) !important;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
         }
 
         .header-total-group {
-            background-color: #093448 !important;
-            color: var(--primary-cyan) !important;
+            background-color: #143254 !important;
+            color: var(--accent-cyan) !important;
             font-weight: 800;
             font-size: 12px;
             letter-spacing: 0.8px;
-            border-left: 2px solid var(--primary-cyan) !important;
+            border-left: 2px solid var(--accent-cyan) !important;
         }
 
         .sub-col-header {
-            background-color: #062338 !important;
-            color: var(--text-muted) !important;
+            background-color: var(--bg-card) !important;
+            color: var(--text-secondary) !important;
             font-size: 11px;
             font-weight: 600;
             padding: 6px 8px !important;
-            border-right: 1px solid rgba(14, 58, 89, 0.6);
+            border-right: 1px solid rgba(26, 51, 88, 0.6);
         }
 
         .sub-col-total {
-            background-color: #08283e !important;
-            color: var(--primary-cyan) !important;
+            background-color: #112644 !important;
+            color: var(--accent-cyan) !important;
             font-size: 11px;
             font-weight: 700;
             padding: 6px 8px !important;
-            border-right: 1px solid rgba(14, 58, 89, 0.6);
+            border-right: 1px solid rgba(26, 51, 88, 0.6);
         }
 
         .border-left-group {
-            border-left: 2px solid var(--border-color) !important;
+            border-left: 2px solid var(--border-card) !important;
         }
 
         .row-partida .sticky-col {
-            background-color: #0B2B43 !important;
+            background-color: #12243e !important;
         }
 
         .row-grupo .sticky-col {
-            background-color: #071F32 !important;
+            background-color: #0d1e38 !important;
         }
 
         .row-clase .sticky-col {
@@ -544,14 +554,14 @@
         }
 
         .row-clase:hover .sticky-col {
-            background-color: #08243A !important;
+            background-color: #0e203c !important;
         }
 
         .loading-overlay {
             text-align: center;
             padding: 35px;
             font-size: 14px;
-            color: var(--primary-cyan);
+            color: var(--accent-cyan);
             font-weight: 600;
         }
 
@@ -559,30 +569,33 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            background: #031726;
+            background: var(--bg-main);
             padding: 5px 12px;
             border-radius: 6px;
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--border-card);
         }
+
         .control-pill label {
             font-size: 11.5px;
             font-weight: 700;
-            color: var(--primary-cyan);
+            color: var(--accent-cyan);
         }
+
         .control-pill select {
             padding: 4px 8px;
             font-size: 11.5px;
             border-radius: 4px;
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--border-card);
             background: var(--bg-card);
             cursor: pointer;
             font-weight: 600;
-            color: var(--text-light);
+            color: var(--text-primary);
             outline: none;
             font-family: inherit;
         }
+
         .control-pill select:focus {
-            border-color: var(--primary-cyan);
+            border-color: var(--accent-cyan);
         }
     </style>
 </head>
@@ -590,14 +603,18 @@
 <body>
 
     <div class="header">
-        <h1>📊 Comparativo: <span class="highlight">Presupuesto</span> (T_Cabecera) vs <span class="highlight">ForeCast</span> (T_ForeCast) <span class="badge">Año 2027</span></h1>
-        <div id="lblRegistros" style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Cargando datos...</div>
+        <h1>📊 Comparativo: <span class="highlight">Presupuesto</span> (T_Cabecera) vs <span
+                class="highlight">ForeCast</span> (T_ForeCast) <span class="badge">Año 2027</span></h1>
+        <div id="lblRegistros" style="font-size: 12px; color: var(--text-secondary); font-weight: 600;">Cargando
+            datos...</div>
     </div>
 
     <!-- Banner de Estado de Conexión -->
     <div id="statusBanner">
-        <span style="display:inline-block; width:15px; height:15px; border:2px solid var(--primary-cyan); border-top-color:transparent; border-radius:50%; animation: spin 1s linear infinite;"></span>
-        <span id="statusText">Conectando con la API en el puerto 8080 (o 5000) y consolidando Presupuesto vs ForeCast...</span>
+        <span
+            style="display:inline-block; width:15px; height:15px; border:2px solid var(--accent-cyan); border-top-color:transparent; border-radius:50%; animation: spin 1s linear infinite;"></span>
+        <span id="statusText">Conectando con la API en el puerto 8080 (o 5000) y consolidando Presupuesto vs
+            ForeCast...</span>
     </div>
 
     <!-- Barra de Filtros / Segmentadores Globales -->
@@ -645,25 +662,25 @@
 
     <!-- Tarjetas KPI Sensibles a Todos los Filtros -->
     <div class="kpi-container">
-        <div class="kpi-card" style="border-left-color: var(--secondary-teal);">
+        <div class="kpi-card" style="border-left-color: var(--accent-blue);">
             <div class="kpi-title">Presupuesto Base (T_Cabecera)</div>
             <div class="kpi-value" id="kpiPresupuesto">S/ 0.00</div>
             <div class="kpi-sub">Total Planificado</div>
         </div>
 
-        <div class="kpi-card" style="border-left-color: var(--primary-cyan);">
+        <div class="kpi-card" style="border-left-color: var(--accent-cyan);">
             <div class="kpi-title">ForeCast Proyectado (T_ForeCast)</div>
-            <div class="kpi-value" id="kpiForeCast" style="color: var(--primary-cyan);">S/ 0.00</div>
+            <div class="kpi-value" id="kpiForeCast" style="color: var(--accent-cyan);">S/ 0.00</div>
             <div class="kpi-sub">Total Proyectado</div>
         </div>
 
-        <div class="kpi-card" id="cardVariacion" style="border-left-color: var(--orange);">
+        <div class="kpi-card" id="cardVariacion" style="border-left-color: var(--accent-gold);">
             <div class="kpi-title">Variación Neta (Presup. - ForeCast)</div>
             <div class="kpi-value" id="kpiVariacion">S/ 0.00</div>
             <div class="kpi-sub" id="kpiVariacionPct">0.00% vs ForeCast</div>
         </div>
 
-        <div class="kpi-card" style="border-left-color: var(--border-color);">
+        <div class="kpi-card" style="border-left-color: var(--border-card);">
             <div class="kpi-title">% Variación Global</div>
             <div class="kpi-value" id="kpiCumplimiento">0.00%</div>
             <div class="kpi-sub" id="kpiRegistrosCount">0 registros analizados</div>
@@ -698,13 +715,17 @@
 
         <!-- MATRIZ 1: Resumen Comparativo Compacto (Partida -> Grupo -> Clase) -->
         <div class="card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
-                <h3 style="margin-bottom: 0; text-align: left; font-size: 14px; border-bottom: none; padding-bottom: 0;">
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                <h3
+                    style="margin-bottom: 0; text-align: left; font-size: 14px; border-bottom: none; padding-bottom: 0;">
                     📊 Matriz de Resumen Comparativo
                 </h3>
                 <div style="display: flex; gap: 6px;">
-                    <button type="button" class="btn-matriz-ctrl" onclick="expandirTodoMatriz(true)">➕ Expandir Todo</button>
-                    <button type="button" class="btn-matriz-ctrl" onclick="expandirTodoMatriz(false)">➖ Contraer Todo</button>
+                    <button type="button" class="btn-matriz-ctrl" onclick="expandirTodoMatriz(true)">➕ Expandir
+                        Todo</button>
+                    <button type="button" class="btn-matriz-ctrl" onclick="expandirTodoMatriz(false)">➖ Contraer
+                        Todo</button>
                 </div>
             </div>
             <div class="table-wrapper">
@@ -729,9 +750,11 @@
 
         <!-- Fila 3: MATRIZ 2: Matriz Mensual Comparativa con Detalle de 4 Métricas y Segmentador de Trimestre -->
         <div class="card full-width">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 12px;">
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 12px;">
                 <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                    <h3 style="margin-bottom: 0; text-align: left; font-size: 14.5px; border-bottom: none; padding-bottom: 0;">
+                    <h3
+                        style="margin-bottom: 0; text-align: left; font-size: 14.5px; border-bottom: none; padding-bottom: 0;">
                         📅 Matriz Comparativa Mensual (Presupuesto, ForeCast, Var. y % Var.)
                     </h3>
 
@@ -749,7 +772,7 @@
 
                     <!-- Selector de Detalle de Columnas -->
                     <div class="control-pill">
-                        <label for="cboDetalleMes" style="color: var(--secondary-teal);">Columnas:</label>
+                        <label for="cboDetalleMes" style="color: var(--accent-blue);">Columnas:</label>
                         <select id="cboDetalleMes" onchange="renderizarMatrizMes()">
                             <option value="ALL" selected>Detalle Completo (Presup., ForeCast, Var., % Var.)</option>
                             <option value="VAR_PCT">Solo Variación y % Var.</option>
@@ -760,8 +783,10 @@
                 </div>
 
                 <div style="display: flex; gap: 6px;">
-                    <button type="button" class="btn-matriz-ctrl" onclick="expandirTodoMatrizMes(true)">➕ Expandir Todo</button>
-                    <button type="button" class="btn-matriz-ctrl" onclick="expandirTodoMatrizMes(false)">➖ Contraer Todo</button>
+                    <button type="button" class="btn-matriz-ctrl" onclick="expandirTodoMatrizMes(true)">➕ Expandir
+                        Todo</button>
+                    <button type="button" class="btn-matriz-ctrl" onclick="expandirTodoMatrizMes(false)">➖ Contraer
+                        Todo</button>
                 </div>
             </div>
 
@@ -870,8 +895,8 @@
 
             } catch (err) {
                 console.error(err);
-                statusText.innerHTML = `⚠️ <b style="color:#FF6B81;">Error:</b> ${err.message}`;
-                document.getElementById('tbMatrizBody').innerHTML = `<tr><td colspan="5" style="text-align:center; padding:30px; color:#FF6B81;">${err.message}</td></tr>`;
+                statusText.innerHTML = `⚠️ <b style="color:var(--accent-orange);">Error:</b> ${err.message}`;
+                document.getElementById('tbMatrizBody').innerHTML = `<tr><td colspan="5" style="text-align:center; padding:30px; color:var(--accent-orange);">${err.message}</td></tr>`;
             }
         }
 
@@ -951,25 +976,25 @@
         }
 
         function formatMonto(val, esBold = false) {
-            if (!val || Math.abs(Math.round(val)) === 0) return `<span style="color: #0E3A59;">-</span>`;
+            if (!val || Math.abs(Math.round(val)) === 0) return `<span style="color: var(--border-card);">-</span>`;
             const txt = 'S/ ' + Math.round(val).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
             return esBold ? `<b>${txt}</b>` : txt;
         }
 
         function formatVariacion(val, esBold = false) {
-            if (!val || Math.abs(Math.round(val)) === 0) return `<span style="color: #0E3A59;">-</span>`;
+            if (!val || Math.abs(Math.round(val)) === 0) return `<span style="color: var(--border-card);">-</span>`;
             const rounded = Math.round(val);
             const signo = rounded > 0 ? '+' : '';
             const txt = signo + 'S/ ' + rounded.toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-            const color = rounded > 0 ? 'var(--primary-cyan)' : 'var(--negative)';
+            const color = rounded > 0 ? 'var(--accent-cyan)' : 'var(--accent-orange)';
             return `<span style="color: ${color}; font-weight: ${esBold ? '700' : '600'};">${txt}</span>`;
         }
 
         function formatPct(pct, esBold = false) {
-            if (!pct || Math.abs(pct) < 0.005) return `<span style="color: #0E3A59;">0.0%</span>`;
+            if (!pct || Math.abs(pct) < 0.005) return `<span style="color: var(--border-card);">0.0%</span>`;
             const signo = pct > 0 ? '+' : '';
             const txt = signo + pct.toFixed(1) + '%';
-            const color = pct > 0 ? 'var(--primary-cyan)' : 'var(--negative)';
+            const color = pct > 0 ? 'var(--accent-cyan)' : 'var(--accent-orange)';
             return `<span style="color: ${color}; font-weight: ${esBold ? '700' : '600'};">${txt}</span>`;
         }
 
@@ -1009,7 +1034,7 @@
         }
 
         // ==========================================
-        // GRÁFICOS COMPARATIVOS (Paleta Dark Cyan / Teal)
+        // GRÁFICOS COMPARATIVOS (Paleta Dark Cyan / Blue)
         // ==========================================
 
         function normalizarMesIndice(val) {
@@ -1083,16 +1108,16 @@
                         {
                             label: 'Presupuesto (Base)',
                             data: presupuestos,
-                            backgroundColor: '#1C9AA8',
-                            borderColor: '#0E5B6A',
+                            backgroundColor: '#206788',
+                            borderColor: '#1A3358',
                             borderWidth: 1,
                             borderRadius: 5
                         },
                         {
                             label: 'ForeCast (Proyectado)',
                             data: forecasts,
-                            backgroundColor: '#4CE3D7',
-                            borderColor: '#8FAFC4',
+                            backgroundColor: '#48B2CF',
+                            borderColor: '#8AA2BE',
                             borderWidth: 1,
                             borderRadius: 5
                         }
@@ -1108,14 +1133,14 @@
                             labels: {
                                 boxWidth: 12,
                                 font: { size: 11, family: 'Inter', weight: '600' },
-                                color: '#8FAFC4'
+                                color: '#8AA2BE'
                             }
                         },
                         tooltip: {
-                            backgroundColor: '#062338',
-                            titleColor: '#4CE3D7',
+                            backgroundColor: '#0D1E3A',
+                            titleColor: '#48B2CF',
                             bodyColor: '#FFFFFF',
-                            borderColor: '#0E3A59',
+                            borderColor: '#1A3358',
                             borderWidth: 1,
                             padding: 10,
                             callbacks: {
@@ -1127,12 +1152,12 @@
                     },
                     scales: {
                         x: {
-                            grid: { color: 'rgba(14, 58, 89, 0.4)', drawBorder: false },
-                            ticks: { font: { size: 10.5, family: 'Inter' }, color: '#8FAFC4' }
+                            grid: { color: 'rgba(26, 51, 88, 0.4)', drawBorder: false },
+                            ticks: { font: { size: 10.5, family: 'Inter' }, color: '#8AA2BE' }
                         },
                         y: {
-                            grid: { color: 'rgba(14, 58, 89, 0.4)', drawBorder: false },
-                            ticks: { font: { size: 10.5, family: 'Inter' }, color: '#8FAFC4' }
+                            grid: { color: 'rgba(26, 51, 88, 0.4)', drawBorder: false },
+                            ticks: { font: { size: 10.5, family: 'Inter' }, color: '#8AA2BE' }
                         }
                     }
                 }
@@ -1471,7 +1496,7 @@
                 });
 
                 // Celdas Total Partida
-                const celdasTotalPartida = generarCeldasMes(totPresPartida, totFcPartida, true, '#0E3A59');
+                const celdasTotalPartida = generarCeldasMes(totPresPartida, totFcPartida, true, '#1A3358');
 
                 trPartida.innerHTML = `
                     <td class="sticky-col">
@@ -1507,7 +1532,7 @@
                     });
 
                     // Celdas Total Grupo
-                    const celdasTotalGrupo = generarCeldasMes(totPresGrupo, totFcGrupo, true, '#093448');
+                    const celdasTotalGrupo = generarCeldasMes(totPresGrupo, totFcGrupo, true, '#143254');
 
                     trGrupo.innerHTML = `
                         <td class="sticky-col" style="padding-left: 24px;">
@@ -1540,7 +1565,7 @@
                         });
 
                         // Celdas Total Clase
-                        const celdasTotalClase = generarCeldasMes(totPresClase, totFcClase, false, '#062338');
+                        const celdasTotalClase = generarCeldasMes(totPresClase, totFcClase, false, '#0D1E3A');
 
                         trClase.innerHTML = `
                             <td class="sticky-col" style="padding-left: 48px;">
