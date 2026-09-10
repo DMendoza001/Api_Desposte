@@ -58,7 +58,7 @@ if (IsPortAvailable(8080))
 }
 else
 {
-    Console.WriteLine("⚠️ Puerto 8080 ocupado por otra aplicación (MiniTool / otro servicio).");
+    Console.WriteLine("⚠️ Puerto 8080 ocupado.");
 }
 
 if (IsPortAvailable(5000))
@@ -69,12 +69,6 @@ if (IsPortAvailable(5000))
 else
 {
     Console.WriteLine("⚠️ Puerto 5000 ocupado.");
-}
-
-if (app.Urls.Count == 0)
-{
-    app.Urls.Add("http://0.0.0.0:8085");
-    Console.WriteLine("✅ Escuchando en puerto de respaldo http://0.0.0.0:8085");
 }
 
 app.Run();

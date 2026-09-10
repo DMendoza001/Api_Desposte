@@ -101,7 +101,7 @@ public class CostosProduccionController : ControllerBase
 
             sql += " ORDER BY YEAR(a.Fecha) DESC, MONTH(a.Fecha) DESC, b.CodigoCorto ASC, a.Codigo ASC;";
 
-            var resultados = await db.QueryAsync(sql, parametros);
+            var resultados = await db.QueryAsync(sql, parametros, commandTimeout: 1200);
 
             return Ok(resultados);
         }
@@ -136,3 +136,5 @@ public class CostosProduccionController : ControllerBase
         }
     }
 }
+
+
