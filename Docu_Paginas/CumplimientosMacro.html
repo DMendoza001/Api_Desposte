@@ -1,0 +1,1932 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Macro - Producción vs Pedido Proyectado (PTC)</title>
+
+    <!-- Fuentes e Iconos -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Chart.js y Chart.js Datalabels Plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+    <!-- SheetJS para exportar a Excel (.xlsx) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <style>
+        :root {
+            --bg-main: #0D1424;
+            --bg-card: #162238;
+            --bg-card-hover: #1C2B47;
+            --border-card: #223554;
+            --border-subtle: rgba(255, 255, 255, 0.08);
+
+            /* Series y acciones requeridas */
+            --color-pedido: #5C7CFA;
+            --color-despacho: #10B981;
+
+            /* Semáforo / Alertas */
+            --status-success: #00D084;
+            --status-warning: #F59E0B;
+            --status-danger: #EF4444;
+
+            /* Paleta complementaria de categorías */
+            --color-prod-cerdo: #0E7490;
+            --color-prod-marrana: #0891B2;
+            --color-prod-menudo: #06B6D4;
+            --color-prod-inyeccion: #38BDF8;
+
+            --color-ped-comercial: #3B82F6;
+            --color-ped-embutidos: #6366F1;
+            --color-ped-westphalia: #8B5CF6;
+
+            /* Tipografía */
+            --text-primary: #FFFFFF;
+            --text-muted: #94A3B8;
+            --text-dim: #64748B;
+
+            /* Sombras y bordes */
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.45);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-main);
+            background-image:
+                radial-gradient(circle at 20% 15%, rgba(92, 124, 250, 0.07) 0%, transparent 45%),
+                radial-gradient(circle at 80% 20%, rgba(16, 185, 129, 0.07) 0%, transparent 45%),
+                radial-gradient(circle at 50% 90%, rgba(34, 53, 84, 0.35) 0%, transparent 60%);
+            background-attachment: fixed;
+            color: var(--text-primary);
+            padding: 24px;
+            min-height: 100vh;
+        }
+
+        /* Scrollbars */
+        ::-webkit-scrollbar {
+            width: 7px;
+            height: 7px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-main);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-card);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #2E4770;
+        }
+
+        .dashboard-container {
+            max-width: 1720px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+        }
+
+        /* HEADER */
+        .dashboard-header {
+            background: linear-gradient(135deg, var(--bg-card) 0%, #111A2C 100%);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-lg);
+            padding: 20px 24px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            box-shadow: var(--shadow-card);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--color-despacho), var(--color-pedido), var(--status-success));
+        }
+
+        .header-title-group {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, rgba(92, 124, 250, 0.2), rgba(16, 185, 129, 0.2));
+            border: 1px solid rgba(92, 124, 250, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #7995FA;
+            flex-shrink: 0;
+        }
+
+        .header-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .badge-tag {
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 3px 10px;
+            border-radius: 6px;
+            background: rgba(92, 124, 250, 0.15);
+            color: var(--color-pedido);
+            border: 1px solid rgba(92, 124, 250, 0.35);
+        }
+
+        .header-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            padding: 6px 14px;
+            border-radius: 9999px;
+            background: rgba(16, 185, 129, 0.12);
+            color: var(--status-success);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            font-weight: 600;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--status-success);
+            box-shadow: 0 0 8px var(--status-success);
+            animation: pulse-dot 2s infinite;
+        }
+
+        @keyframes pulse-dot {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.4;
+                transform: scale(0.8);
+            }
+        }
+
+        .btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            color: var(--text-primary);
+            padding: 8px 16px;
+            border-radius: var(--radius-md);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            background: var(--bg-card-hover);
+            border-color: #385580;
+            transform: translateY(-1px);
+        }
+
+        .btn-excel {
+            background: rgba(16, 185, 129, 0.14);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #10B981;
+        }
+
+        .btn-excel:hover {
+            background: rgba(16, 185, 129, 0.28);
+            border-color: #10B981;
+            color: #FFFFFF;
+            box-shadow: 0 0 12px rgba(16, 185, 129, 0.25);
+        }
+
+        .btn-ctrl {
+            background: #0E182A;
+            border: 1px solid var(--border-card);
+            color: var(--text-primary);
+            padding: 5px 12px;
+            border-radius: var(--radius-sm);
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .btn-ctrl:hover {
+            background: #192A45;
+            border-color: var(--color-pedido);
+            color: #FFFFFF;
+        }
+
+        /* FILTROS Y SELECTOR DE SEMANAS */
+        .filter-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-lg);
+            padding: 16px 22px;
+            box-shadow: var(--shadow-card);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .filter-top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+
+        .filter-title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .filter-title {
+            font-size: 0.88rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+        }
+
+        .quick-modes {
+            display: flex;
+            align-items: center;
+            background: #0E182A;
+            padding: 4px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-card);
+            gap: 4px;
+        }
+
+        .quick-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 6px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quick-btn.active {
+            background: var(--color-pedido);
+            color: #FFFFFF;
+            box-shadow: 0 2px 10px rgba(92, 124, 250, 0.4);
+        }
+
+        .weeks-selector-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .week-pill {
+            padding: 8px 16px;
+            border-radius: var(--radius-md);
+            background: #0E182A;
+            border: 1px solid var(--border-card);
+            color: var(--text-muted);
+            font-size: 0.84rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            user-select: none;
+        }
+
+        .week-pill:hover {
+            border-color: #385580;
+            color: var(--text-primary);
+            background: #14223A;
+        }
+
+        .week-pill.selected {
+            background: linear-gradient(135deg, rgba(92, 124, 250, 0.3), rgba(92, 124, 250, 0.12));
+            border-color: var(--color-pedido);
+            color: #FFFFFF;
+            box-shadow: 0 0 14px rgba(92, 124, 250, 0.25);
+        }
+
+        .week-pill.latest-badge::after {
+            content: 'ÚLTIMA';
+            font-size: 0.65rem;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: rgba(16, 185, 129, 0.25);
+            color: var(--status-success);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+        }
+
+        .filter-secondary-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border-subtle);
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+
+        .active-selection-summary {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .active-selection-summary span {
+            color: var(--color-pedido);
+        }
+
+        /* KPIS PRINCIPALES */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+        }
+
+        .kpi-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-lg);
+            padding: 18px 20px;
+            box-shadow: var(--shadow-card);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 10px;
+            transition: transform 0.2s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+        }
+
+        .kpi-prod::before {
+            background: var(--color-despacho);
+        }
+
+        .kpi-ped::before {
+            background: var(--color-pedido);
+        }
+
+        .kpi-balance::before {
+            background: var(--status-success);
+        }
+
+        .kpi-unidades::before {
+            background: #EC4899;
+        }
+
+        .kpi-promedio::before {
+            background: var(--status-warning);
+        }
+
+        .kpi-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .kpi-label {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--text-muted);
+        }
+
+        .kpi-value {
+            font-size: 1.85rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            line-height: 1.1;
+        }
+
+        .kpi-unit {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-left: 4px;
+        }
+
+        .kpi-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-subtle);
+            padding-top: 8px;
+        }
+
+        .badge-kpi {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 0.75rem;
+        }
+
+        .badge-success {
+            background: rgba(0, 208, 132, 0.15);
+            color: var(--status-success);
+            border: 1px solid rgba(0, 208, 132, 0.3);
+        }
+
+        .badge-warning {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--status-warning);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .badge-danger {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--status-danger);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .badge-info {
+            background: rgba(92, 124, 250, 0.15);
+            color: var(--color-pedido);
+            border: 1px solid rgba(92, 124, 250, 0.3);
+        }
+
+        /* ======================================================= */
+        /* FILA SUPERIOR: GRÁFICO 1 (DESGLOSE) + MATRIZ JERÁRQUICA */
+        /* ======================================================= */
+        .top-split-grid {
+            display: grid;
+            grid-template-columns: 42% 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 1250px) {
+            .top-split-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-card-ref {
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-lg);
+            padding: 22px 24px;
+            box-shadow: var(--shadow-card);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            position: relative;
+        }
+
+        .chart-ref-header {
+            text-align: center;
+            border-bottom: 1px solid var(--border-subtle);
+            padding-bottom: 14px;
+        }
+
+        .chart-ref-main-title {
+            font-size: 1.12rem;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+            color: var(--text-primary);
+        }
+
+        .chart-ref-subtitle {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 3px;
+        }
+
+        .chart-ref-body {
+            position: relative;
+            min-height: 380px;
+            width: 100%;
+        }
+
+        .chart-group-labels {
+            display: flex;
+            justify-content: space-around;
+            padding-top: 8px;
+            border-top: 2px solid var(--border-card);
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+
+        .group-label-prod {
+            color: var(--color-despacho);
+            text-align: center;
+            flex: 4;
+            border-right: 1px dashed var(--border-card);
+        }
+
+        .group-label-ped {
+            color: var(--color-pedido);
+            text-align: center;
+            flex: 3;
+        }
+
+        /* ======================================================= */
+        /* ESTILOS DE LA MATRIZ JERÁRQUICA EXPANDIBLE / CONTRAÍBLE */
+        /* ======================================================= */
+        .matrix-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-lg);
+            padding: 20px 22px;
+            box-shadow: var(--shadow-card);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .matrix-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            border-bottom: 1px solid var(--border-subtle);
+            padding-bottom: 12px;
+        }
+
+        .matrix-table-wrapper {
+            overflow-x: auto;
+            max-height: 430px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-card);
+        }
+
+        .matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.83rem;
+            text-align: left;
+        }
+
+        .matrix-table thead {
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            background: #0B1322;
+        }
+
+        .matrix-table th {
+            padding: 11px 14px;
+            color: var(--text-muted);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.73rem;
+            letter-spacing: 0.04em;
+            border-bottom: 1px solid var(--border-card);
+            white-space: nowrap;
+        }
+
+        .matrix-table td {
+            padding: 9px 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            color: var(--text-primary);
+            white-space: nowrap;
+        }
+
+        /* Filas por nivel */
+        .row-semana {
+            background: rgba(92, 124, 250, 0.09);
+            font-weight: 800;
+            cursor: pointer;
+            border-left: 3px solid var(--color-pedido);
+        }
+
+        .row-semana:hover {
+            background: rgba(92, 124, 250, 0.16);
+        }
+
+        .row-tipopy {
+            background: rgba(255, 255, 255, 0.03);
+            font-weight: 700;
+            cursor: pointer;
+            border-left: 3px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .row-tipopy:hover {
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .row-origendestino {
+            background: rgba(0, 0, 0, 0.15);
+            font-weight: 600;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+        }
+
+        .row-origendestino:hover {
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .row-tipo-leaf {
+            background: transparent;
+            font-weight: 400;
+            color: #CBD5E1;
+        }
+
+        .row-tipo-leaf:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .toggle-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 19px;
+            height: 19px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-primary);
+            font-size: 0.72rem;
+            font-weight: 800;
+            margin-right: 8px;
+            user-select: none;
+            transition: all 0.15s;
+        }
+
+        .toggle-btn:hover {
+            background: var(--color-pedido);
+            color: #FFFFFF;
+        }
+
+        .subtotal-badge {
+            font-size: 0.7rem;
+            opacity: 0.65;
+            font-weight: normal;
+            margin-left: 6px;
+        }
+
+        .num-cell {
+            font-family: 'JetBrains Mono', monospace;
+            text-align: right;
+        }
+
+        /* ======================================================= */
+        /* FILA INFERIOR: GRÁFICO HISTÓRICO EN LÍNEAS + DIFERENCIAL */
+        /* ======================================================= */
+        .bottom-chart-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-lg);
+            padding: 22px 24px;
+            box-shadow: var(--shadow-card);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            position: relative;
+        }
+
+        .bottom-chart-body {
+            position: relative;
+            min-height: 380px;
+            width: 100%;
+        }
+
+        /* Toast */
+        .toast-notify {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #1E293B;
+            border: 1px solid var(--border-card);
+            color: #FFFFFF;
+            padding: 12px 20px;
+            border-radius: var(--radius-md);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            font-size: 0.85rem;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+        }
+
+        .toast-notify.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="dashboard-container">
+
+        <!-- HEADER -->
+        <header class="dashboard-header">
+            <div class="header-title-group">
+                <div class="header-icon">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 3v18h18" />
+                        <path d="M18 17V9" />
+                        <path d="M13 17V5" />
+                        <path d="M8 17v-3" />
+                    </svg>
+                </div>
+                <div>
+                    <div class="header-title">
+                        PRODUCCION VS PEDIDO PROYECTADO
+                        <span class="badge-tag">Planta Desposte (PTC)</span>
+                    </div>
+                    <div class="header-subtitle">
+                        Análisis comparativo de Producción Proyectada vs Pedidos Proyectados
+                    </div>
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <div class="status-badge" id="apiStatusBadge">
+                    <span class="status-dot"></span>
+                    <span id="apiStatusText">Datos Conectados</span>
+                </div>
+                <button class="btn btn-excel" onclick="descargarExcelDataPlana()"
+                    title="Descargar data plana de proyecciones en formato Excel">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="7 10 12 15 17 10" />
+                        <line x1="12" y1="15" x2="12" y2="3" />
+                    </svg>
+                    Descargar Excel
+                </button>
+                <button class="btn" onclick="cargarDatosDesdeAPI()">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+                    </svg>
+                    Actualizar
+                </button>
+            </div>
+        </header>
+
+        <!-- PANEL DE CONTROL Y FILTRO POR SEMANA -->
+        <section class="filter-panel">
+            <div class="filter-top-row">
+                <div class="filter-title-wrap">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" color="var(--text-muted)">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    <span class="filter-title">Selección de Semanas</span>
+                </div>
+
+                <div class="quick-modes">
+                    <button class="quick-btn active" id="btnModeLatest" onclick="setQuickFilter('latest')">Última
+                        Semana</button>
+                    <button class="quick-btn" id="btnModeAll" onclick="setQuickFilter('all')">Todas (Histórico)</button>
+                    <button class="quick-btn" id="btnModeCustom"
+                        onclick="setQuickFilter('custom')">Personalizado</button>
+                </div>
+            </div>
+
+            <!-- Píldoras de semanas dinámicas -->
+            <div class="weeks-selector-container" id="weeksPillsContainer">
+                <!-- Se llena dinámicamente con JS -->
+            </div>
+
+            <div class="filter-secondary-row">
+                <div class="active-selection-summary" id="selectionSummaryText">
+                    Mostrando: <span>Cargando...</span>
+                </div>
+                <div>
+                    <span style="color: var(--text-dim);">Haz clic en cualquier semana para alternar o sumar a la
+                        vista.</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- KPIS PRINCIPALES -->
+        <section class="kpi-grid">
+            <!-- 1. Total Producción -->
+            <div class="kpi-card kpi-prod">
+                <div class="kpi-top">
+                    <span class="kpi-label">Total Producción</span>
+                    <span class="badge-kpi badge-success">PROD PY</span>
+                </div>
+                <div>
+                    <div class="kpi-value" id="kpiKilosProd">0<span class="kpi-unit">kg</span></div>
+                </div>
+                <div class="kpi-footer">
+                    <span>Cerdo, Marrana, Menudo, Inyección</span>
+                </div>
+            </div>
+
+            <!-- 2. Total Pedido -->
+            <div class="kpi-card kpi-ped">
+                <div class="kpi-top">
+                    <span class="kpi-label">Total Pedido</span>
+                    <span class="badge-kpi badge-info">PEDIDO PY</span>
+                </div>
+                <div>
+                    <div class="kpi-value" id="kpiKilosPed">0<span class="kpi-unit">kg</span></div>
+                </div>
+                <div class="kpi-footer">
+                    <span>Comercial, Embutidos, Westphalia</span>
+                </div>
+            </div>
+
+            <!-- 3. Balance -->
+            <div class="kpi-card kpi-balance">
+                <div class="kpi-top">
+                    <span class="kpi-label">Balance / Brecha</span>
+                    <span class="badge-kpi badge-success" id="kpiCoverageBadge">100.0%</span>
+                </div>
+                <div>
+                    <div class="kpi-value" id="kpiKilosDiff">0<span class="kpi-unit">kg</span></div>
+                </div>
+                <div class="kpi-footer">
+                    <span>Superávit / Déficit Proyectado</span>
+                </div>
+            </div>
+
+            <!-- 4. Unidades -->
+            <div class="kpi-card kpi-unidades">
+                <div class="kpi-top">
+                    <span class="kpi-label">Total Cabezas</span>
+                    <span class="badge-kpi badge-info">UNIDADES</span>
+                </div>
+                <div>
+                    <div class="kpi-value" id="kpiUnidades">0<span class="kpi-unit">und</span></div>
+                </div>
+                <div class="kpi-footer">
+                    <span id="kpiUnidadesBreakdown">Cerdo: 0 | Marrana: 0</span>
+                </div>
+            </div>
+
+            <!-- 5. Peso Promedio Cerdo -->
+            <div class="kpi-card kpi-promedio">
+                <div class="kpi-top">
+                    <span class="kpi-label">Promedio Cerdo</span>
+                    <span class="badge-kpi badge-warning">KG/UND</span>
+                </div>
+                <div>
+                    <div class="kpi-value" id="kpiPesoPromCerdo">0.0<span class="kpi-unit">kg</span></div>
+                </div>
+                <div class="kpi-footer">
+                    <span id="kpiPesoPromMarrana">Marrana: 0.0 kg/und</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- FILA SUPERIOR: GRÁFICO 1 (DESGLOSE) + MATRIZ JERÁRQUICA EXPANDIBLE        -->
+        <!-- ========================================================================= -->
+        <section class="top-split-grid">
+
+            <!-- GRÁFICO 1 (IZQUIERDA): DESGLOSE PRODUCCION VS PEDIDO POR TIPO -->
+            <div class="chart-card-ref">
+                <div class="chart-ref-header">
+                    <h2 class="chart-ref-main-title">PRODUCCION VS PEDIDO PROYECTADO</h2>
+                    <div class="chart-ref-subtitle" id="chartDesgloseSubtitle">Desglose por Categoría / Destino
+                        (Selección Activa)</div>
+                </div>
+                <div class="chart-ref-body">
+                    <canvas id="chartDesgloseCategorias"></canvas>
+                </div>
+                <div class="chart-group-labels">
+                    <div class="group-label-prod">PROD PY</div>
+                    <div class="group-label-ped">PEDIDO PY</div>
+                </div>
+            </div>
+
+            <!-- MATRIZ JERÁRQUICA (DERECHA): SEMANA > TIPO PY > TIPO -->
+            <div class="matrix-card">
+                <div class="matrix-header-row">
+                    <div>
+                        <h2 class="chart-ref-main-title" style="text-align: left; font-size: 1.05rem;">
+                            📊 Matriz de Proyecciones
+                        </h2>
+                        <div class="chart-ref-subtitle" style="text-align: left;">
+                            Desglose por Semana ➔ Tipo Py (PROD PY / PEDIDO PY) ➔ Tipo
+                        </div>
+                    </div>
+                </div>
+
+                <div class="matrix-table-wrapper">
+                    <table class="matrix-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 48%;">Jerarquía (Semana / Tipo Py / Tipo)</th>
+                                <th style="width: 17%; text-align: right;">Unidades (und)</th>
+                                <th style="width: 17%; text-align: right;">Peso Promedio (kg)</th>
+                                <th style="width: 18%; text-align: right;">Kilos (kg)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbMatrizJerarquicaBody">
+                            <!-- Llenado dinámico con JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- FILA INFERIOR: GRÁFICO HISTÓRICO SEMANAL (LÍNEAS + DIFERENCIAL / BRECHA) -->
+        <!-- ========================================================================= -->
+        <section class="bottom-chart-card">
+            <div class="chart-ref-header"
+                style="text-align: left; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                <div>
+                    <h2 class="chart-ref-main-title">PRODUCCION VS PEDIDO PROYECTADO (HISTÓRICO SEMANAL)</h2>
+                    <div class="chart-ref-subtitle">Evolución y Tendencia de Producción vs Demanda con Barras de
+                        Diferencial / Brecha (kg)</div>
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); display: flex; gap: 14px;">
+                    <span><strong style="color: var(--color-despacho);">●</strong> PROD PY</span>
+                    <span><strong style="color: var(--color-pedido);">●</strong> PEDIDO PY</span>
+                    <span><strong style="color: var(--status-success);">▮</strong> Diferencial
+                        (Superávit/Déficit)</span>
+                </div>
+            </div>
+            <div class="bottom-chart-body">
+                <canvas id="chartHistoricoSemanas"></canvas>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast-notify" id="toastNotification">
+        <span id="toastMsg">Actualizado con éxito</span>
+    </div>
+
+    <script>
+        // Registrar Plugin de DataLabels globalmente
+        Chart.register(ChartDataLabels);
+
+        // 1. Generación dinámica de servidores API (Prioridad Puerto 8080, fallback a 5000)
+        function generarBasesApi() {
+            const hosts = [];
+            if (typeof window !== "undefined" && window.location && window.location.hostname && window.location.hostname !== "") {
+                hosts.push(window.location.hostname);
+            }
+            hosts.push("localhost", "127.0.0.1");
+
+            const puertos = [8080, 5000, 5101];
+            const bases = [];
+            for (const puerto of puertos) {
+                for (const host of hosts) {
+                    bases.push(`http://${host}:${puerto}`);
+                }
+            }
+            bases.push(""); // Relativo
+            return Array.from(new Set(bases));
+        }
+
+        const BASE_HOSTS = generarBasesApi();
+
+        let rawData = [];
+        let processedData = [];
+        let allWeeks = [];
+        let selectedWeeks = new Set();
+        let currentFilterMode = 'latest';
+
+        // Estado de expansión de la matriz
+        let collapsedNodes = new Set();
+
+        let chartDesglose = null;
+        let chartHistorico = null;
+
+        document.addEventListener('DOMContentLoaded', inicializar);
+
+        function initChartDefaults() {
+            Chart.defaults.color = '#94A3B8';
+            Chart.defaults.font.family = "'Inter', sans-serif";
+            Chart.defaults.plugins.tooltip.backgroundColor = '#0B1322';
+            Chart.defaults.plugins.tooltip.titleColor = '#FFFFFF';
+            Chart.defaults.plugins.tooltip.bodyColor = '#CBD5E1';
+            Chart.defaults.plugins.tooltip.borderColor = '#223554';
+            Chart.defaults.plugins.tooltip.borderWidth = 1;
+            Chart.defaults.plugins.tooltip.padding = 10;
+        }
+
+        async function fetchConTimeout(url, timeoutMs = 6000) {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+                const response = await fetch(url, { signal: controller.signal });
+                clearTimeout(id);
+                return response;
+            } catch (err) {
+                clearTimeout(id);
+                throw err;
+            }
+        }
+
+        async function detectarServidorApi() {
+            for (const base of BASE_HOSTS) {
+                try {
+                    const res = await fetchConTimeout(`${base}/`, 1500);
+                    if (res.ok) {
+                        const txt = await res.text();
+                        if (txt.includes("API Desposte")) {
+                            return base;
+                        }
+                    }
+                } catch (e) { }
+            }
+            return null;
+        }
+
+        async function inicializar() {
+            initChartDefaults();
+            await cargarDatosDesdeAPI();
+        }
+
+        async function cargarDatosDesdeAPI() {
+            mostrarToast("Buscando servidor API activo...");
+            const statusBadge = document.getElementById('apiStatusBadge');
+            statusBadge.innerHTML = '<span class="status-dot" style="background:#5C7CFA;box-shadow:0 0 8px #5C7CFA"></span><span style="color:#5C7CFA">Buscando servidor...</span>';
+
+            try {
+                let baseActiva = await detectarServidorApi();
+
+                if (baseActiva === null) {
+                    for (const base of BASE_HOSTS) {
+                        try {
+                            const testRes = await fetchConTimeout(`${base}/api/Cumplimientos/datos-proyectado`, 2000);
+                            if (testRes.ok) {
+                                baseActiva = base;
+                                break;
+                            }
+                        } catch (e) { }
+                    }
+                }
+
+                if (baseActiva === null) {
+                    throw new Error("No se pudo conectar con la API en el puerto 8080 ni 5000. Verifica que el servicio esté corriendo.");
+                }
+
+                statusBadge.innerHTML = `<span class="status-dot"></span><span>Conectado a ${baseActiva || 'Local'}</span>`;
+                mostrarToast(`Conectado a ${baseActiva || 'Local'}. Leyendo datos de Cumplimiento_PTC.xlsm...`);
+
+                const res = await fetchConTimeout(`${baseActiva}/api/Cumplimientos/datos-proyectado`, 15000);
+                if (!res.ok) throw new Error(`El servidor respondió con código HTTP ${res.status}`);
+
+                rawData = await res.json();
+
+                if (!rawData || rawData.length === 0) {
+                    throw new Error("La API no devolvió registros para la tabla T_Proyectado.");
+                }
+
+                statusBadge.innerHTML = '<span class="status-dot"></span><span>API En Línea</span>';
+                mostrarToast("Datos cargados correctamente");
+
+                enriquecerDatos();
+                construirSelectorSemanas();
+                aplicarModoFiltro(currentFilterMode);
+
+            } catch (err) {
+                console.error("Error al conectar con la API:", err);
+                rawData = [];
+                processedData = [];
+                allWeeks = [];
+                selectedWeeks.clear();
+
+                statusBadge.innerHTML = '<span class="status-dot" style="background:#EF4444;box-shadow:0 0 8px #EF4444"></span><span style="color:#EF4444">Error de Conexión</span>';
+                mostrarToast(`Error: ${err.message}`);
+
+                const tbody = document.getElementById('tbMatrizJerarquicaBody');
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#EF4444;padding:30px;font-weight:600;">
+                    ⚠️ ${err.message}<br>
+                    <span style="font-size:0.8rem;color:var(--text-muted);font-weight:normal;margin-top:6px;display:inline-block;">
+                        Asegúrate de reiniciar 'dotnet run' en la terminal para que el backend compile y reconozca el nuevo CumplimientosController.
+                    </span>
+                </td></tr>`;
+            }
+        }
+
+        function enriquecerDatos() {
+            processedData = rawData.map(item => {
+                const semanaStr = String(item.Semana || item.semana || '').trim();
+                let anio = item.Anio || item.anio || 0;
+                let nSemana = item.NSemana || item.nSemana || 0;
+
+                if ((!anio || !nSemana) && semanaStr.length >= 5) {
+                    anio = parseInt(semanaStr.substring(0, 4), 10) || 0;
+                    nSemana = parseInt(semanaStr.substring(4), 10) || 0;
+                }
+
+                return {
+                    semanaRaw: semanaStr,
+                    anio: anio,
+                    nSemana: nSemana,
+                    tipoPy: String(item.TipoPy || item.tipoPy || '').trim().toUpperCase(),
+                    origenDestino: String(item.OrigenDestino || item.origenDestino || '').trim().toUpperCase(),
+                    tipo: String(item.Tipo || item.tipo || '').trim().toUpperCase(),
+                    unidades: Number(item.Unidades || item.unidades || 0),
+                    promedio: Number(item.Prom || item.prom || item.Promedio || item.promedio || 0),
+                    kilos: Number(item.Kilos || item.kilos || 0)
+                };
+            });
+
+            const semanasUnicas = [...new Set(processedData.map(d => d.semanaRaw).filter(Boolean))];
+            semanasUnicas.sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+            allWeeks = semanasUnicas;
+        }
+
+        function construirSelectorSemanas() {
+            const container = document.getElementById('weeksPillsContainer');
+            container.innerHTML = '';
+            if (allWeeks.length === 0) return;
+
+            const ultimaSemana = allWeeks[allWeeks.length - 1];
+
+            allWeeks.forEach((sem) => {
+                const itemSample = processedData.find(d => d.semanaRaw === sem);
+                const anio = itemSample ? itemSample.anio : '';
+                const nSem = itemSample ? itemSample.nSemana : '';
+
+                const pill = document.createElement('div');
+                pill.className = `week-pill ${sem === ultimaSemana ? 'latest-badge' : ''}`;
+                pill.dataset.week = sem;
+                pill.innerHTML = `
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    Sem ${nSem || sem} <span style="opacity:0.6;font-size:0.75rem">(${anio})</span>
+                `;
+
+                pill.onclick = () => toggleWeekPill(sem);
+                container.appendChild(pill);
+            });
+        }
+
+        function toggleWeekPill(sem) {
+            currentFilterMode = 'custom';
+            actualizarBotonesModo();
+
+            if (selectedWeeks.has(sem)) {
+                if (selectedWeeks.size > 1) {
+                    selectedWeeks.delete(sem);
+                } else {
+                    mostrarToast("Debe haber al menos una semana seleccionada");
+                    return;
+                }
+            } else {
+                selectedWeeks.add(sem);
+            }
+
+            refrescarDashboard();
+        }
+
+        function setQuickFilter(mode) {
+            currentFilterMode = mode;
+            aplicarModoFiltro(mode);
+        }
+
+        function aplicarModoFiltro(mode) {
+            actualizarBotonesModo();
+            selectedWeeks.clear();
+
+            if (mode === 'latest') {
+                if (allWeeks.length > 0) {
+                    selectedWeeks.add(allWeeks[allWeeks.length - 1]);
+                }
+            } else if (mode === 'all') {
+                allWeeks.forEach(w => selectedWeeks.add(w));
+            } else if (mode === 'custom') {
+                if (allWeeks.length > 0) {
+                    selectedWeeks.add(allWeeks[allWeeks.length - 1]);
+                }
+            }
+
+            refrescarDashboard();
+        }
+
+        function actualizarBotonesModo() {
+            document.getElementById('btnModeLatest').classList.toggle('active', currentFilterMode === 'latest');
+            document.getElementById('btnModeAll').classList.toggle('active', currentFilterMode === 'all');
+            document.getElementById('btnModeCustom').classList.toggle('active', currentFilterMode === 'custom');
+        }
+
+        function actualizarPillsUI() {
+            const pills = document.querySelectorAll('.week-pill');
+            pills.forEach(pill => {
+                const sem = pill.dataset.week;
+                pill.classList.toggle('selected', selectedWeeks.has(sem));
+            });
+
+            const summaryText = document.getElementById('selectionSummaryText');
+            if (selectedWeeks.size === allWeeks.length && allWeeks.length > 1) {
+                summaryText.innerHTML = `Mostrando: <span>Todas las Semanas (${allWeeks.length} semanas)</span>`;
+            } else if (selectedWeeks.size === 1) {
+                const sem = Array.from(selectedWeeks)[0];
+                const sample = processedData.find(d => d.semanaRaw === sem);
+                summaryText.innerHTML = `Mostrando: <span>Semana ${sample ? sample.nSemana : sem} (${sample ? sample.anio : ''})</span>`;
+            } else {
+                const listaNombres = Array.from(selectedWeeks).map(w => {
+                    const sample = processedData.find(d => d.semanaRaw === w);
+                    return sample ? `S${sample.nSemana}` : w;
+                }).join(', ');
+                summaryText.innerHTML = `Mostrando: <span>${listaNombres}</span>`;
+            }
+        }
+
+        function refrescarDashboard() {
+            actualizarPillsUI();
+            const datosFiltrados = processedData.filter(d => selectedWeeks.has(d.semanaRaw));
+
+            renderizarKPIs(datosFiltrados);
+            renderizarGrafico1_Desglose(datosFiltrados);
+            renderizarMatrizJerarquica(datosFiltrados);
+            renderizarGrafico2_Historico();
+        }
+
+        function renderizarKPIs(datos) {
+            let totalProdKilos = 0;
+            let totalPedKilos = 0;
+            let totalUnidades = 0;
+            let undCerdos = 0;
+            let undMarranas = 0;
+            let kgCerdos = 0;
+            let kgMarranas = 0;
+
+            datos.forEach(d => {
+                if (d.tipoPy === 'PROD PY') {
+                    totalProdKilos += d.kilos;
+                    totalUnidades += d.unidades;
+
+                    if (d.tipo === 'CERDO') {
+                        undCerdos += d.unidades;
+                        kgCerdos += d.kilos;
+                    } else if (d.tipo === 'MARRANA') {
+                        undMarranas += d.unidades;
+                        kgMarranas += d.kilos;
+                    }
+                } else if (d.tipoPy === 'PEDIDO PY') {
+                    totalPedKilos += d.kilos;
+                }
+            });
+
+            const diffKilos = totalProdKilos - totalPedKilos;
+            const coberturaPct = totalPedKilos > 0 ? (totalProdKilos / totalPedKilos) * 100 : 0;
+            const promCerdo = undCerdos > 0 ? (kgCerdos / undCerdos) : 0;
+            const promMarrana = undMarranas > 0 ? (kgMarranas / undMarranas) : 0;
+
+            document.getElementById('kpiKilosProd').innerHTML = `${formatearEntero(totalProdKilos)}<span class="kpi-unit">kg</span>`;
+            document.getElementById('kpiKilosPed').innerHTML = `${formatearEntero(totalPedKilos)}<span class="kpi-unit">kg</span>`;
+
+            const signo = diffKilos >= 0 ? '+' : '';
+            document.getElementById('kpiKilosDiff').innerHTML = `${signo}${formatearEntero(diffKilos)}<span class="kpi-unit">kg</span>`;
+
+            const badgeCoverage = document.getElementById('kpiCoverageBadge');
+            badgeCoverage.textContent = `${coberturaPct.toFixed(1)}%`;
+            badgeCoverage.className = 'badge-kpi';
+            if (coberturaPct >= 100) badgeCoverage.classList.add('badge-success');
+            else if (coberturaPct >= 95) badgeCoverage.classList.add('badge-warning');
+            else badgeCoverage.classList.add('badge-danger');
+
+            document.getElementById('kpiUnidades').innerHTML = `${formatearEntero(totalUnidades)}<span class="kpi-unit">und</span>`;
+            document.getElementById('kpiUnidadesBreakdown').textContent = `Cerdo: ${formatearEntero(undCerdos)} | Marrana: ${formatearEntero(undMarranas)}`;
+
+            document.getElementById('kpiPesoPromCerdo').innerHTML = `${promCerdo.toFixed(1)}<span class="kpi-unit">kg</span>`;
+            document.getElementById('kpiPesoPromMarrana').textContent = `Marrana: ${promMarrana.toFixed(1)} kg/und`;
+        }
+
+        // =========================================================================
+        // GRÁFICO 1: DESGLOSE DE PRODUCCIÓN Y PEDIDO (7 CATEGORÍAS)
+        // =========================================================================
+        function renderizarGrafico1_Desglose(datos) {
+            const ctx = document.getElementById('chartDesgloseCategorias').getContext('2d');
+            if (chartDesglose) chartDesglose.destroy();
+
+            const categoriasOrdenadas = [
+                { key: 'CERDO', grupo: 'PROD PY' },
+                { key: 'MARRANA', grupo: 'PROD PY' },
+                { key: 'MENUDO', grupo: 'PROD PY' },
+                { key: 'INYECCION', grupo: 'PROD PY' },
+                { key: 'COMERCIAL', grupo: 'PEDIDO PY' },
+                { key: 'EMBUTIDOS', grupo: 'PEDIDO PY' },
+                { key: 'WESTPHALIA', grupo: 'PEDIDO PY' }
+            ];
+
+            const labels = categoriasOrdenadas.map(c => c.key);
+            const dataValues = categoriasOrdenadas.map(c => {
+                const match = datos.filter(d => d.tipoPy === c.grupo && (d.tipo === c.key || d.origenDestino === c.key));
+                const total = match.reduce((sum, item) => sum + item.kilos, 0);
+                return Math.round(total);
+            });
+
+            const bgColors = [
+                '#156586', '#156586', '#156586', '#156586', // PROD PY
+                '#195B78', '#195B78', '#195B78'             // PEDIDO PY
+            ];
+
+            chartDesglose = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: dataValues,
+                        backgroundColor: bgColors,
+                        borderRadius: 4,
+                        borderWidth: 1,
+                        borderColor: '#2D6B8C',
+                        barPercentage: 0.55
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: {
+                        padding: { top: 30, bottom: 5 }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => ` ${ctx.raw.toLocaleString('es-PE')} kg`
+                            }
+                        },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'top',
+                            color: '#FFFFFF',
+                            font: {
+                                family: "'JetBrains Mono', monospace",
+                                size: 11,
+                                weight: 'bold'
+                            },
+                            formatter: function (value) {
+                                return value > 0 ? value.toLocaleString('es-PE') : '';
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                color: '#CBD5E1',
+                                font: { size: 10, weight: '700' },
+                                minRotation: 90,
+                                maxRotation: 90,
+                                autoSkip: false
+                            }
+                        },
+                        y: {
+                            grid: { color: 'rgba(255,255,255,0.06)' },
+                            ticks: {
+                                color: '#94A3B8',
+                                callback: val => val.toLocaleString('es-PE')
+                            },
+                            suggestedMax: Math.max(...dataValues, 350000) * 1.15
+                        }
+                    }
+                }
+            });
+        }
+
+        // =========================================================================
+        // MATRIZ JERÁRQUICA: SEMANA > TIPO PY > TIPO
+        // =========================================================================
+        function construirArbolJerarquico(datos) {
+            const arbol = {};
+
+            datos.forEach(d => {
+                const semKey = d.semanaRaw || 'SIN_SEMANA';
+                if (!arbol[semKey]) {
+                    arbol[semKey] = {
+                        semanaRaw: semKey,
+                        anio: d.anio,
+                        nSemana: d.nSemana,
+                        unidades: 0,
+                        kilos: 0,
+                        kilosConUnidades: 0,
+                        tiposPy: {}
+                    };
+                }
+
+                arbol[semKey].unidades += d.unidades;
+                arbol[semKey].kilos += d.kilos;
+                if (d.unidades > 0) arbol[semKey].kilosConUnidades += d.kilos;
+
+                const pyKey = d.tipoPy || 'OTROS';
+                if (!arbol[semKey].tiposPy[pyKey]) {
+                    arbol[semKey].tiposPy[pyKey] = {
+                        tipoPy: pyKey,
+                        unidades: 0,
+                        kilos: 0,
+                        kilosConUnidades: 0,
+                        tipos: []
+                    };
+                }
+
+                arbol[semKey].tiposPy[pyKey].unidades += d.unidades;
+                arbol[semKey].tiposPy[pyKey].kilos += d.kilos;
+                if (d.unidades > 0) arbol[semKey].tiposPy[pyKey].kilosConUnidades += d.kilos;
+
+                arbol[semKey].tiposPy[pyKey].tipos.push(d);
+            });
+
+            return arbol;
+        }
+
+        function renderizarMatrizJerarquica(datos) {
+            const tbody = document.getElementById('tbMatrizJerarquicaBody');
+            tbody.innerHTML = '';
+
+            if (!datos || datos.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:24px;">No hay registros con los filtros seleccionados</td></tr>';
+                return;
+            }
+
+            const arbol = construirArbolJerarquico(datos);
+            // Ordenar semanas de mayor a menor (descendente)
+            const semanasOrdenadas = Object.keys(arbol).sort((a, b) => b.localeCompare(a, undefined, { numeric: true }));
+
+            const ordenTiposPy = { 'PROD PY': 1, 'PEDIDO PY': 2 };
+            const ordenTiposProd = { 'CERDO': 1, 'MARRANA': 2, 'MENUDO': 3, 'INYECCION': 4 };
+            const ordenTiposPed = { 'COMERCIAL': 1, 'EMBUTIDOS': 2, 'WESTPHALIA': 3 };
+
+            semanasOrdenadas.forEach((semKey) => {
+                const sNode = arbol[semKey];
+                const promSem = sNode.unidades > 0 ? (sNode.kilosConUnidades / sNode.unidades) : 0;
+
+                // 1. FILA DE SEMANA (NIVEL 1)
+                const trSem = document.createElement('tr');
+                trSem.className = 'row-semana';
+                trSem.innerHTML = `
+                    <td>
+                        <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--color-pedido); margin-right:8px;"></span>
+                        <span><b>Semana ${sNode.nSemana || semKey}</b> (${sNode.anio || ''})</span>
+                    </td>
+                    <td class="num-cell"><b>${sNode.unidades > 0 ? formatearEntero(sNode.unidades) : '-'}</b></td>
+                    <td class="num-cell"><b>${promSem > 0 ? promSem.toFixed(2) : '-'}</b></td>
+                    <td class="num-cell" style="color:var(--text-primary);"><b>${formatearEntero(sNode.kilos)}</b></td>
+                `;
+                tbody.appendChild(trSem);
+
+                // Nivel 2: Tipos Py (PROD PY SIEMPRE ARRIBA DE PEDIDO PY)
+                const pyKeys = Object.keys(sNode.tiposPy).sort((a, b) => {
+                    const oA = ordenTiposPy[a.toUpperCase().trim()] || 99;
+                    const oB = ordenTiposPy[b.toUpperCase().trim()] || 99;
+                    return oA - oB;
+                });
+
+                pyKeys.forEach((pyKey) => {
+                    const pyNode = sNode.tiposPy[pyKey];
+                    const promPy = pyNode.unidades > 0 ? (pyNode.kilosConUnidades / pyNode.unidades) : 0;
+                    const isProd = pyKey.toUpperCase().includes('PROD');
+                    const pyColor = isProd ? 'var(--color-despacho)' : 'var(--color-pedido)';
+                    const pyDot = isProd ? '🟢' : '🔵';
+
+                    // FILA DE TIPO PY (NIVEL 2)
+                    const trPy = document.createElement('tr');
+                    trPy.className = 'row-tipopy';
+                    trPy.innerHTML = `
+                        <td style="padding-left: 28px;">
+                            <span style="margin-right: 6px; font-size: 0.75rem;">${pyDot}</span>
+                            <span style="color:${pyColor}; font-weight:800; letter-spacing:0.02em;">${pyKey}</span>
+                        </td>
+                        <td class="num-cell"><b>${pyNode.unidades > 0 ? formatearEntero(pyNode.unidades) : '-'}</b></td>
+                        <td class="num-cell">${promPy > 0 ? promPy.toFixed(2) : '-'}</td>
+                        <td class="num-cell" style="color:${pyColor};"><b>${formatearEntero(pyNode.kilos)}</b></td>
+                    `;
+                    tbody.appendChild(trPy);
+
+                    // Nivel 3: Hojas directas (Tipo)
+                    const tipoOrderMap = isProd ? ordenTiposProd : ordenTiposPed;
+                    pyNode.tipos.sort((a, b) => {
+                        const oA = tipoOrderMap[(a.tipo || '').toUpperCase().trim()] || 99;
+                        const oB = tipoOrderMap[(b.tipo || '').toUpperCase().trim()] || 99;
+                        return oA - oB;
+                    });
+
+                    pyNode.tipos.forEach((leaf) => {
+                        const trLeaf = document.createElement('tr');
+                        trLeaf.className = 'row-tipo-leaf';
+                        trLeaf.innerHTML = `
+                            <td style="padding-left: 52px;">
+                                <span style="color:var(--text-muted); margin-right:8px;">↳</span>
+                                <span style="font-weight:500;">${leaf.tipo}</span>
+                            </td>
+                            <td class="num-cell">${leaf.unidades > 0 ? formatearEntero(leaf.unidades) : '<span style="color:var(--text-dim)">-</span>'}</td>
+                            <td class="num-cell">${leaf.promedio > 0 ? leaf.promedio.toFixed(2) : '<span style="color:var(--text-dim)">-</span>'}</td>
+                            <td class="num-cell" style="font-weight:600;">${formatearEntero(leaf.kilos)}</td>
+                        `;
+                        tbody.appendChild(trLeaf);
+                    });
+                });
+            });
+        }
+
+        // =========================================================================
+        // GRÁFICO 2: HISTÓRICO COMPARATIVO Y DIFERENCIAL (LÍNEAS + BARRAS DE BRECHA)
+        // =========================================================================
+        function renderizarGrafico2_Historico() {
+            const ctx = document.getElementById('chartHistoricoSemanas').getContext('2d');
+            if (chartHistorico) chartHistorico.destroy();
+
+            const semanas = allWeeks;
+
+            const labels = [];
+            const dataProd = [];
+            const dataPed = [];
+            const dataDiff = [];
+            const bgDiff = [];
+            const borderDiff = [];
+
+            semanas.forEach((sem) => {
+                const sample = processedData.find(d => d.semanaRaw === sem);
+                const label = sample ? `Sem ${sample.nSemana} (${sample.anio})` : sem;
+                labels.push(label);
+
+                const itemsSem = processedData.filter(d => d.semanaRaw === sem);
+                const prod = itemsSem.filter(d => d.tipoPy === 'PROD PY').reduce((sum, d) => sum + d.kilos, 0);
+                const ped = itemsSem.filter(d => d.tipoPy === 'PEDIDO PY').reduce((sum, d) => sum + d.kilos, 0);
+                const diff = prod - ped;
+
+                dataProd.push(Math.round(prod));
+                dataPed.push(Math.round(ped));
+                dataDiff.push(Math.round(diff));
+
+                if (diff >= 0) {
+                    bgDiff.push('rgba(0, 208, 132, 0.28)');
+                    borderDiff.push('#00D084');
+                } else {
+                    bgDiff.push('rgba(239, 68, 68, 0.28)');
+                    borderDiff.push('#EF4444');
+                }
+            });
+
+            chartHistorico = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'PROD PY (Producción)',
+                            data: dataProd,
+                            type: 'line',
+                            borderColor: '#10B981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.08)',
+                            borderWidth: 3.5,
+                            fill: false,
+                            tension: 0.35,
+                            pointBackgroundColor: '#10B981',
+                            pointBorderColor: '#FFFFFF',
+                            pointBorderWidth: 2,
+                            pointRadius: 6,
+                            pointHoverRadius: 9,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'PEDIDO PY (Demanda)',
+                            data: dataPed,
+                            type: 'line',
+                            borderColor: '#5C7CFA',
+                            backgroundColor: 'rgba(92, 124, 250, 0.08)',
+                            borderWidth: 3.5,
+                            fill: false,
+                            tension: 0.35,
+                            pointBackgroundColor: '#5C7CFA',
+                            pointBorderColor: '#FFFFFF',
+                            pointBorderWidth: 2,
+                            pointRadius: 6,
+                            pointHoverRadius: 9,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Diferencial (Prod - Ped)',
+                            data: dataDiff,
+                            type: 'bar',
+                            backgroundColor: bgDiff,
+                            borderColor: borderDiff,
+                            borderWidth: 1.5,
+                            borderRadius: 6,
+                            barPercentage: 0.35,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: {
+                        padding: { top: 35, bottom: 10, left: 10, right: 15 }
+                    },
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#CBD5E1',
+                                boxWidth: 16,
+                                padding: 16,
+                                font: { size: 12, weight: '600' },
+                                usePointStyle: true
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (ctx) {
+                                    if (ctx.datasetIndex === 2) {
+                                        const val = ctx.raw;
+                                        const signo = val >= 0 ? '+' : '';
+                                        return ` Diferencial: ${signo}${val.toLocaleString('es-PE')} kg`;
+                                    }
+                                    return ` ${ctx.dataset.label}: ${ctx.raw.toLocaleString('es-PE')} kg`;
+                                },
+                                afterBody: function (tooltipItems) {
+                                    if (tooltipItems.length >= 2) {
+                                        const prodVal = tooltipItems[0].raw;
+                                        const pedVal = tooltipItems[1].raw;
+                                        const pct = pedVal > 0 ? ((prodVal / pedVal) * 100).toFixed(1) : 0;
+                                        return [
+                                            `-----------------------------`,
+                                            ` % Cobertura: ${pct}%`
+                                        ];
+                                    }
+                                }
+                            }
+                        },
+                        datalabels: {
+                            color: function (context) {
+                                if (context.datasetIndex === 2) {
+                                    return context.dataset.data[context.dataIndex] >= 0 ? '#00D084' : '#EF4444';
+                                }
+                                return '#FFFFFF';
+                            },
+                            backgroundColor: function (context) {
+                                if (context.datasetIndex === 0) return 'rgba(16, 185, 129, 0.9)';
+                                if (context.datasetIndex === 1) return 'rgba(92, 124, 250, 0.9)';
+                                return 'rgba(15, 23, 42, 0.85)';
+                            },
+                            borderColor: function (context) {
+                                if (context.datasetIndex === 2) {
+                                    return context.dataset.data[context.dataIndex] >= 0 ? '#00D084' : '#EF4444';
+                                }
+                                return 'transparent';
+                            },
+                            borderWidth: function (context) {
+                                return context.datasetIndex === 2 ? 1 : 0;
+                            },
+                            borderRadius: 4,
+                            padding: { top: 3, bottom: 3, left: 6, right: 6 },
+                            font: {
+                                family: "'JetBrains Mono', monospace",
+                                size: 10,
+                                weight: 'bold'
+                            },
+                            anchor: function (context) {
+                                if (context.datasetIndex === 0) return 'end';
+                                if (context.datasetIndex === 1) return 'start';
+                                return 'end';
+                            },
+                            align: function (context) {
+                                if (context.datasetIndex === 0) return 'top';
+                                if (context.datasetIndex === 1) return 'bottom';
+                                return 'top';
+                            },
+                            offset: 6,
+                            formatter: function (value, context) {
+                                if (context.datasetIndex === 2) {
+                                    const signo = value >= 0 ? '+' : '';
+                                    return `Dif: ${signo}${value.toLocaleString('es-PE')} kg`;
+                                }
+                                return value.toLocaleString('es-PE');
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: {
+                                color: '#CBD5E1',
+                                font: { size: 11, weight: '700' }
+                            }
+                        },
+                        y: {
+                            type: 'linear',
+                            position: 'left',
+                            grid: { color: 'rgba(255,255,255,0.06)' },
+                            ticks: {
+                                color: '#94A3B8',
+                                callback: val => (val / 1000).toFixed(0) + 'k'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Volumen Total (kg)',
+                                color: '#94A3B8',
+                                font: { size: 11, weight: '600' }
+                            },
+                            suggestedMin: Math.min(...dataProd, ...dataPed, 300000) * 0.9,
+                            suggestedMax: Math.max(...dataProd, ...dataPed, 420000) * 1.12
+                        },
+                        y1: {
+                            type: 'linear',
+                            position: 'right',
+                            grid: { drawOnChartArea: false },
+                            ticks: {
+                                color: '#00D084',
+                                callback: val => (val >= 0 ? '+' : '') + (val / 1000).toFixed(0) + 'k'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Diferencial / Brecha (kg)',
+                                color: '#00D084',
+                                font: { size: 11, weight: '600' }
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: Math.max(...dataDiff, 80000) * 1.4
+                        }
+                    }
+                }
+            });
+        }
+
+        function formatearEntero(num) {
+            if (isNaN(num) || num === null) return '0';
+            return Math.round(num).toLocaleString('es-PE');
+        }
+
+        function descargarExcelDataPlana() {
+            if (!rawData || rawData.length === 0) {
+                mostrarToast("No hay datos disponibles para exportar");
+                return;
+            }
+
+            // Si hay semanas seleccionadas, exportar esas semanas; si no, exportar todo el histórico
+            const datosFiltrados = processedData.filter(d => selectedWeeks.has(d.semanaRaw));
+            const dataSet = (datosFiltrados && datosFiltrados.length > 0) ? datosFiltrados : processedData;
+
+            // Mapear a columnas limpias y descriptivas
+            const filasExcel = dataSet.map(d => ({
+                "Semana": d.semanaRaw || "",
+                "Año": d.anio || 0,
+                "N° Semana": d.nSemana || 0,
+                "Tipo Py": d.tipoPy || "",
+                "Origen / Destino": d.origenDestino || "",
+                "Tipo": d.tipo || "",
+                "Unidades (und)": d.unidades || 0,
+                "Peso Promedio (kg)": d.promedio || 0,
+                "Kilos (kg)": Math.round((d.kilos || 0) * 100) / 100
+            }));
+
+            const fechaStr = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+            const nombreArchivo = `Data_Plana_Proyectado_PTC_${fechaStr}.xlsx`;
+
+            if (typeof XLSX !== "undefined") {
+                const ws = XLSX.utils.json_to_sheet(filasExcel);
+
+                // Configurar ancho de columnas
+                ws['!cols'] = [
+                    { wch: 12 }, // Semana
+                    { wch: 8 },  // Año
+                    { wch: 12 }, // N° Semana
+                    { wch: 14 }, // Tipo Py
+                    { wch: 20 }, // Origen / Destino
+                    { wch: 18 }, // Tipo
+                    { wch: 16 }, // Unidades
+                    { wch: 20 }, // Peso Promedio
+                    { wch: 18 }  // Kilos
+                ];
+
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Data_Plana");
+                XLSX.writeFile(wb, nombreArchivo);
+                mostrarToast("📥 Archivo Excel descargado con éxito");
+            } else {
+                // Fallback CSV compatible con Excel (UTF-8 con BOM)
+                let csvContent = "\uFEFF";
+                const cabeceras = ["Semana", "Año", "N° Semana", "Tipo Py", "Origen / Destino", "Tipo", "Unidades", "Peso Promedio", "Kilos"];
+                csvContent += cabeceras.join(";") + "\r\n";
+
+                filasExcel.forEach(r => {
+                    const row = [
+                        `"${r["Semana"]}"`,
+                        r["Año"],
+                        r["N° Semana"],
+                        `"${r["Tipo Py"]}"`,
+                        `"${r["Origen / Destino"]}"`,
+                        `"${r["Tipo"]}"`,
+                        r["Unidades (und)"],
+                        r["Peso Promedio (kg)"],
+                        r["Kilos (kg)"]
+                    ];
+                    csvContent += row.join(";") + "\r\n";
+                });
+
+                const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `Data_Plana_Proyectado_PTC_${fechaStr}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                mostrarToast("📥 Archivo CSV descargado con éxito");
+            }
+        }
+
+        function mostrarToast(mensaje) {
+            const toast = document.getElementById('toastNotification');
+            const msgEl = document.getElementById('toastMsg');
+            msgEl.textContent = mensaje;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2500);
+        }
+    </script>
+</body>
+
+</html>
