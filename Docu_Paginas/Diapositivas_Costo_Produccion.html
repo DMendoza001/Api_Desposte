@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presentación Ejecutiva - Costo de Producción (3 Últimos Meses vs Año Anterior)</title>
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+
+    <!-- Chart.js y Plugins -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+
+    <style>
+        :root {
+            --bg-primary: #0F172A;
+            --bg-card: #1E293B;
+            --bg-card-hover: #334155;
+            --border-color: #334155;
+            --text-main: #F8FAFC;
+            --text-muted: #94A3B8;
+            --accent-teal: #0EA5E9;
+            --accent-green: #10B981;
+            --accent-red: #F43F5E;
+            --accent-amber: #F59E0B;
+            --accent-purple: #8B5CF6;
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --radius-lg: 16px;
+            --radius-md: 10px;
+            --radius-sm: 6px;
+            --shadow-card: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
+            user-select: none;
+        }
+
+        /* Top Presenter Bar */
+        .presenter-bar {
+            height: 52px;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 100;
+        }
+
+        .presenter-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--text-main);
+        }
+
+        .badge-live {
+            background: rgba(14, 165, 233, 0.2);
+            color: var(--accent-teal);
+            border: 1px solid rgba(14, 165, 233, 0.4);
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .badge-live .dot {
+            width: 6px;
+            height: 6px;
+            background: var(--accent-teal);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.4;
+                transform: scale(1.2);
+            }
+        }
+
+        .presenter-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-ctrl {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 6px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-ctrl:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--accent-teal);
+        }
+
+        .slide-indicator {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-muted);
+            padding: 0 8px;
+        }
+
+        /* Slide Viewport */
+        .slide-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            height: calc(100vh - 52px - 8px);
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateX(60px);
+            transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.4s;
+            padding: 30px 48px 24px 48px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(0);
+        }
+
+        /* Slide Headers */
+        .slide-header {
+            margin-bottom: 24px;
+        }
+
+        .slide-category {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent-teal);
+            margin-bottom: 6px;
+        }
+
+        .slide-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #FFFFFF;
+            letter-spacing: -0.5px;
+        }
+
+        .slide-subtitle {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Cover Slide */
+        .cover-slide {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: radial-gradient(circle at center, rgba(14, 165, 233, 0.12) 0%, rgba(15, 23, 42, 0) 70%);
+        }
+
+        .cover-logo {
+            font-size: 54px;
+            margin-bottom: 16px;
+        }
+
+        .cover-title {
+            font-size: 42px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #FFFFFF 30%, #94A3B8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 14px;
+            line-height: 1.2;
+        }
+
+        .cover-tagline {
+            font-size: 20px;
+            color: var(--accent-teal);
+            font-weight: 600;
+            margin-bottom: 30px;
+        }
+
+        .cover-meta {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .meta-pill {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 8px 18px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        /* Grid Layouts */
+        .grid-kpis {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .kpi-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-card);
+            transition: transform 0.2s;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent-teal);
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--accent-teal);
+        }
+
+        .kpi-card.green::before {
+            background: var(--accent-green);
+        }
+
+        .kpi-card.red::before {
+            background: var(--accent-red);
+        }
+
+        .kpi-card.amber::before {
+            background: var(--accent-amber);
+        }
+
+        .kpi-card.purple::before {
+            background: var(--accent-purple);
+        }
+
+        .kpi-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .kpi-number {
+            font-size: 30px;
+            font-weight: 900;
+            color: #FFFFFF;
+            line-height: 1.1;
+            margin-bottom: 6px;
+        }
+
+        .kpi-diff {
+            font-size: 12px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .diff-up {
+            color: var(--accent-red);
+        }
+
+        .diff-down {
+            color: var(--accent-green);
+        }
+
+        .diff-neutral {
+            color: var(--text-muted);
+        }
+
+        /* Chart & Content Cards */
+        .content-split {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 24px;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .card-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-card);
+            min-height: 0;
+            position: relative;
+        }
+
+        .card-title-box {
+            font-size: 15px;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chart-wrapper {
+            flex: 1;
+            position: relative;
+            min-height: 280px;
+            width: 100%;
+        }
+
+        /* Tables */
+        .table-responsive {
+            flex: 1;
+            overflow-y: auto;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+        }
+
+        table.pres-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            text-align: left;
+        }
+
+        table.pres-table th {
+            background: #111827;
+            color: var(--text-muted);
+            padding: 12px 14px;
+            font-weight: 700;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        table.pres-table td {
+            padding: 11px 14px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-main);
+        }
+
+        table.pres-table tr:hover td {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .badge-delta {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 11px;
+            display: inline-block;
+        }
+
+        .badge-delta.alza {
+            background: rgba(244, 63, 94, 0.15);
+            color: #FB7185;
+            border: 1px solid rgba(244, 63, 94, 0.3);
+        }
+
+        .badge-delta.baja {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34D399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        /* Insight List */
+        .insight-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .insight-item {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--accent-teal);
+            border-radius: var(--radius-md);
+            padding: 14px 18px;
+        }
+
+        .insight-item.red {
+            border-left-color: var(--accent-red);
+        }
+
+        .insight-item.green {
+            border-left-color: var(--accent-green);
+        }
+
+        .insight-item.amber {
+            border-left-color: var(--accent-amber);
+        }
+
+        .insight-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin-bottom: 4px;
+        }
+
+        .insight-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* Bottom Progress Bar */
+        .progress-bar-container {
+            height: 6px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-teal), var(--accent-purple));
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* Floating Nav Buttons */
+        .nav-float-btn {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--border-color);
+            color: #FFFFFF;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 90;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        .nav-float-btn:hover {
+            background: var(--accent-teal);
+            color: #0F172A;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .nav-float-btn.left {
+            left: 16px;
+        }
+
+        .nav-float-btn.right {
+            right: 16px;
+        }
+
+        @media (max-width: 1024px) {
+            .grid-kpis {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .content-split {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Barra de Control del Presentador -->
+    <header class="presenter-bar">
+        <div class="presenter-title">
+            <span>📊 Presentación Ejecutiva</span>
+            <span style="color: var(--text-muted);">|</span>
+            <span>Costos de Producción</span>
+            <div class="badge-live" id="apiStatusBadge">
+                <div class="dot"></div>
+                <span id="apiStatusText">Cargando RAEVSALL001...</span>
+            </div>
+        </div>
+
+        <div class="presenter-controls">
+            <span class="slide-indicator" id="slideNumber">1 / 6</span>
+            <button class="btn-ctrl" onclick="anteriorSlide()">◀ Anterior</button>
+            <button class="btn-ctrl" onclick="siguienteSlide()">Siguiente ▶</button>
+            <button class="btn-ctrl" onclick="toggleFullScreen()" title="Pantalla Completa (F)">⛶ Pantalla
+                Completa</button>
+            <button class="btn-ctrl" onclick="recargarDatosAPI()">🔄 Recargar</button>
+        </div>
+    </header>
+
+    <!-- Botones Flotantes de Navegación -->
+    <button class="nav-float-btn left" onclick="anteriorSlide()" title="Anterior (←)">❮</button>
+    <button class="nav-float-btn right" onclick="siguienteSlide()" title="Siguiente (→)">❯</button>
+
+    <!-- Contenedor Principal de Slides -->
+    <main class="slide-container" id="slideDeck">
+
+        <!-- ========================================== -->
+        <!-- SLIDE 1: PORTADA EJECUTIVA -->
+        <!-- ========================================== -->
+        <section class="slide cover-slide active" id="slide-1">
+            <div class="cover-logo">🥩📊</div>
+            <h1 class="cover-title">Informe de Costo de Producción</h1>
+            <p class="cover-tagline">Comparativa Interanual: 3 Últimos Meses (2026 vs 2025)</p>
+
+            <div class="cover-meta">
+                <div class="meta-pill">📅 Periodo Reciente: <strong>Mayo, Junio, Julio 2026</strong></div>
+                <div class="meta-pill">📆 Periodo Comparativo: <strong>Mayo, Junio, Julio 2025</strong></div>
+                <div class="meta-pill">🏢 Servidor: <strong>RAEVSALL001</strong></div>
+            </div>
+
+            <div style="margin-top: 40px; color: var(--text-muted); font-size: 13px;">
+                💡 Usa las teclas <strong>← Flecha Izq</strong> y <strong>Flecha Der →</strong> o la barra espaciadora
+                para avanzar.
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- SLIDE 2: RESUMEN EJECUTIVO Y KPIS -->
+        <!-- ========================================== -->
+        <section class="slide" id="slide-2">
+            <div class="slide-header">
+                <div class="slide-category">Visión Global Trimestral</div>
+                <h2 class="slide-title">Resumen Ejecutivo de Costos</h2>
+                <div class="slide-subtitle">Comparativa del trimestre consolidado (May-Jul 2026 vs May-Jul 2025)</div>
+            </div>
+
+            <div class="grid-kpis">
+                <div class="kpi-card green">
+                    <div class="kpi-label">Costo Promedio Reciente (2026)</div>
+                    <div class="kpi-number" id="kpiCostoActual">S/ 0.00</div>
+                    <div class="kpi-diff diff-down" id="kpiDiffPromedio">Calculando...</div>
+                </div>
+
+                <div class="kpi-card purple">
+                    <div class="kpi-label">Costo Promedio Año Anterior (2025)</div>
+                    <div class="kpi-number" id="kpiCostoAnterior">S/ 0.00</div>
+                    <div class="kpi-diff diff-neutral">Mismos 3 meses (May-Jul)</div>
+                </div>
+
+                <div class="kpi-card red">
+                    <div class="kpi-label">Mayor Alza Registrada (YoY)</div>
+                    <div class="kpi-number" id="kpiMayorAlza">0.0%</div>
+                    <div class="kpi-diff diff-up" id="kpiMayorAlzaNom">-</div>
+                </div>
+
+                <div class="kpi-card green">
+                    <div class="kpi-label">Mayor Reducción Registrada (YoY)</div>
+                    <div class="kpi-number" id="kpiMayorBaja">0.0%</div>
+                    <div class="kpi-diff diff-down" id="kpiMayorBajaNom">-</div>
+                </div>
+            </div>
+
+            <div class="content-split">
+                <div class="card-box">
+                    <div class="card-title-box">
+                        <span>📈 Evolución del Costo Promedio Trimestral (2025 vs 2026)</span>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="chartResumenYoY"></canvas>
+                    </div>
+                </div>
+
+                <div class="card-box">
+                    <div class="card-title-box">
+                        <span>💡 Conclusiones Clave del Trimestre</span>
+                    </div>
+                    <div class="insight-list">
+                        <div class="insight-item" id="insightGeneral">
+                            <div class="insight-title">Estabilidad General de Costos</div>
+                            <div class="insight-desc">Los costos promedio reflejan la variación entre el trimestre
+                                May-Jul 2026 y el mismo periodo del 2025.</div>
+                        </div>
+                        <div class="insight-item red" id="insightAlzas">
+                            <div class="insight-title">Artículos en Observación</div>
+                            <div class="insight-desc">Identificados productos con incrementos superiores a la media
+                                interanual.</div>
+                        </div>
+                        <div class="insight-item green" id="insightBajas">
+                            <div class="insight-title">Eficiencias Logradas</div>
+                            <div class="insight-desc">Disminución en cortes específicos que optimizan el margen general
+                                de desposte.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- SLIDE 3: COMPARATIVA MES A MES INTERANUAL (YoY) -->
+        <!-- ========================================== -->
+        <section class="slide" id="slide-3">
+            <div class="slide-header">
+                <div class="slide-category">Desglose Interanual</div>
+                <h2 class="slide-title">Comparativa Mes a Mes (Mayo, Junio, Julio)</h2>
+                <div class="slide-subtitle">Comparando cada mes de 2026 contra su par exacto de 2025</div>
+            </div>
+
+            <div class="content-split">
+                <div class="card-box">
+                    <div class="card-title-box">
+                        <span>📊 Comparativa de Costos por Mes (S/ por Kg / Unidad)</span>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="chartMesAMes"></canvas>
+                    </div>
+                </div>
+
+                <div class="card-box">
+                    <div class="card-title-box">
+                        <span>📋 Tabla Resumen Interanual</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="pres-table">
+                            <thead>
+                                <tr>
+                                    <th>Mes</th>
+                                    <th>Año 2025</th>
+                                    <th>Año 2026</th>
+                                    <th>Variación</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyMesAMes">
+                                <tr>
+                                    <td><strong>Mayo</strong></td>
+                                    <td id="m5_2025">S/ 0.00</td>
+                                    <td id="m5_2026">S/ 0.00</td>
+                                    <td id="m5_var"><span class="badge-delta">0%</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Junio</strong></td>
+                                    <td id="m6_2025">S/ 0.00</td>
+                                    <td id="m6_2026">S/ 0.00</td>
+                                    <td id="m6_var"><span class="badge-delta">0%</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Julio</strong></td>
+                                    <td id="m7_2025">S/ 0.00</td>
+                                    <td id="m7_2026">S/ 0.00</td>
+                                    <td id="m7_var"><span class="badge-delta">0%</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- SLIDE 4: TOP INCREMENTOS Y REDUCCIONES -->
+        <!-- ========================================== -->
+        <section class="slide" id="slide-4">
+            <div class="slide-header">
+                <div class="slide-category">Análisis de Sensibilidad</div>
+                <h2 class="slide-title">Top Variaciones por Artículo (Interanual)</h2>
+                <div class="slide-subtitle">Artículos con mayores fluctuaciones entre Julio 2025 y Julio 2026</div>
+            </div>
+
+            <div class="content-split" style="grid-template-columns: 1fr 1fr;">
+                <div class="card-box">
+                    <div class="card-title-box">
+                        <span>🔴 Top 5 Mayores Incrementos de Costo</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="pres-table">
+                            <thead>
+                                <tr>
+                                    <th>Cód</th>
+                                    <th>Artículo</th>
+                                    <th>2025</th>
+                                    <th>2026</th>
+                                    <th>Var %</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyTopAlzas">
+                                <tr>
+                                    <td colspan="5" style="text-align:center;">Cargando...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card-box">
+                    <div class="card-title-box">
+                        <span>🟢 Top 5 Mayores Reducciones de Costo</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="pres-table">
+                            <thead>
+                                <tr>
+                                    <th>Cód</th>
+                                    <th>Artículo</th>
+                                    <th>2025</th>
+                                    <th>2026</th>
+                                    <th>Var %</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyTopBajas">
+                                <tr>
+                                    <td colspan="5" style="text-align:center;">Cargando...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- SLIDE 5: MATRIZ DE DETALLE POR ARTÍCULO -->
+        <!-- ========================================== -->
+        <section class="slide" id="slide-5">
+            <div class="slide-header" style="display:flex; justify-content:space-between; align-items:flex-end;">
+                <div>
+                    <div class="slide-category">Detalle Operativo</div>
+                    <h2 class="slide-title">Matriz Completa de Costos (6 Periodos)</h2>
+                    <div class="slide-subtitle">Mayo-Junio-Julio 2025 frente a Mayo-Junio-Julio 2026</div>
+                </div>
+                <div style="width: 320px;">
+                    <input type="text" id="filtroTabla" placeholder="🔍 Buscar corte o artículo..."
+                        style="width:100%; padding:8px 14px; border-radius:6px; background:var(--bg-card); border:1px solid var(--border-color); color:#fff; font-size:13px;"
+                        oninput="filtrarMatriz()">
+                </div>
+            </div>
+
+            <div class="card-box" style="flex:1;">
+                <div class="table-responsive">
+                    <table class="pres-table" id="tablaMatrizCompleta">
+                        <thead>
+                            <tr>
+                                <th>Cód</th>
+                                <th>Descripción</th>
+                                <th>May 2025</th>
+                                <th>Jun 2025</th>
+                                <th>Jul 2025</th>
+                                <th>May 2026</th>
+                                <th>Jun 2026</th>
+                                <th>Jul 2026</th>
+                                <th>Var YoY (Jul)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyMatriz">
+                            <tr>
+                                <td colspan="9" style="text-align:center;">Cargando matriz...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- SLIDE 6: CONCLUSIONES Y RECOMENDACIONES -->
+        <!-- ========================================== -->
+        <section class="slide" id="slide-6">
+            <div class="slide-header">
+                <div class="slide-category">Cierre Ejecutivo</div>
+                <h2 class="slide-title">Conclusiones y Plan de Acción</h2>
+                <div class="slide-subtitle">Estrategias recomendadas según el comportamiento de costos analizado</div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; flex: 1;">
+                <div class="card-box">
+                    <div class="card-title-box">
+                        <span>📌 Hallazgos Principales</span>
+                    </div>
+                    <div class="insight-list">
+                        <div class="insight-item">
+                            <div class="insight-title">1. Tendencia Interanual Estable</div>
+                            <div class="insight-desc">La mayoría de cortes principales mantienen una variación acotada
+                                en el rango proyectado de producción.</div>
+                        </div>
+                        <div class="insight-item amber">
+                            <div class="insight-title">2. Impacto de Cortes Críticos</div>
+                            <div class="insight-desc">El alza en subproductos y cortes secundarios incide de manera
+                                directa en el costo ponderado final.</div>
+                        </div>
+                        <div class="insight-item green">
+                            <div class="insight-title">3. Optimización de Rendimiento</div>
+                            <div class="insight-desc">Se aprecian mejoras de costos en cortes con mayor tecnificación de
+                                faenado y desposte.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-box">
+                    <div class="card-title-box">
+                        <span>🎯 Recomendaciones y Acciones</span>
+                    </div>
+                    <div class="insight-list">
+                        <div class="insight-item">
+                            <div class="insight-title">1. Monitoreo Semanal de Alzas</div>
+                            <div class="insight-desc">Establecer alertas tempranas cuando un artículo supere el +5% de
+                                variación frente al mes previo.</div>
+                        </div>
+                        <div class="insight-item">
+                            <div class="insight-title">2. Ajuste en Matriz de Precios de Venta</div>
+                            <div class="insight-desc">Sincronizar las variaciones de costo con el área comercial para
+                                salvaguardar el margen bruto.</div>
+                        </div>
+                        <div class="insight-item green">
+                            <div class="insight-title">3. Consolidación de ForeCast 2027</div>
+                            <div class="insight-desc">Utilizar la curva del último trimestre May-Jul 2026 como base
+                                calibrada para el presupuesto 2027.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Barra de Progreso Inferior -->
+    <div class="progress-bar-container">
+        <div class="progress-bar-fill" id="progressBar"></div>
+    </div>
+
+    <!-- Script de Navegación y Lógica de Datos -->
+    <script>
+        // =========================================================================
+        // ⚙️ CONFIGURACIÓN DE CONEXIÓN A LA API (Estilo appsettings.json)
+        // =========================================================================
+        const APP_CONFIG = {
+            servidor: "RAEVSALL001",
+            puertos: [8080, 5000],
+            rutaListar: "/api/costosproduccion/listar",
+            timeoutMs: 20000
+        };
+
+        // Generación de Endpoints API apuntando al nombre del equipo
+        function generarEndpointsApi(rutaRelativa) {
+            const endpoints = [];
+            for (const puerto of APP_CONFIG.puertos) {
+                endpoints.push(`http://${APP_CONFIG.servidor}:${puerto}${rutaRelativa}`);
+            }
+            return endpoints;
+        }
+
+        // Estado de Presentación
+        let currentSlideIndex = 0;
+        const totalSlides = 6;
+        let rawData = [];
+        let articulosFiltrados = [];
+        let chartResumenInst = null;
+        let chartMesAMesInst = null;
+
+        // Meses de análisis: 3 últimos (5, 6, 7 del 2026 y 2025)
+        const MESES_ANALISIS = [5, 6, 7];
+        const NOMBRES_MESES = { 5: "Mayo", 6: "Junio", 7: "Julio" };
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            actualizarSlideUI();
+            document.addEventListener('keydown', manejarTeclado);
+            await cargarDatosAPI();
+        });
+
+        // 1. Control de Navegación de Diapositivas
+        function irASlide(index) {
+            if (index < 0) index = 0;
+            if (index >= totalSlides) index = totalSlides - 1;
+
+            const slides = document.querySelectorAll('.slide');
+            slides.forEach((s, idx) => {
+                if (idx === index) {
+                    s.classList.add('active');
+                } else {
+                    s.classList.remove('active');
+                }
+            });
+
+            currentSlideIndex = index;
+            actualizarSlideUI();
+        }
+
+        function siguienteSlide() {
+            if (currentSlideIndex < totalSlides - 1) {
+                irASlide(currentSlideIndex + 1);
+            }
+        }
+
+        function anteriorSlide() {
+            if (currentSlideIndex > 0) {
+                irASlide(currentSlideIndex - 1);
+            }
+        }
+
+        function actualizarSlideUI() {
+            document.getElementById('slideNumber').textContent = `${currentSlideIndex + 1} / ${totalSlides}`;
+            const pct = ((currentSlideIndex + 1) / totalSlides) * 100;
+            document.getElementById('progressBar').style.width = `${pct}%`;
+        }
+
+        function manejarTeclado(e) {
+            if (e.target.tagName === 'INPUT') return; // Si escribe en el buscador
+            if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+                siguienteSlide();
+            } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+                anteriorSlide();
+            } else if (e.key === 'f' || e.key === 'F') {
+                toggleFullScreen();
+            }
+        }
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => { });
+            } else {
+                if (document.exitFullscreen) document.exitFullscreen();
+            }
+        }
+
+        // 2. Carga y Procesamiento de Datos desde la API
+        async function cargarDatosAPI() {
+            const statusText = document.getElementById("apiStatusText");
+            const endpoints = generarEndpointsApi(APP_CONFIG.rutaListar);
+            let datosObtenidos = null;
+
+            statusText.textContent = `Conectando a ${APP_CONFIG.servidor}...`;
+
+            for (const url of endpoints) {
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), APP_CONFIG.timeoutMs);
+                    const res = await fetch(url, { signal: controller.signal });
+                    clearTimeout(timeoutId);
+
+                    if (res.ok) {
+                        const json = await res.json();
+                        if (Array.isArray(json) && json.length > 0) {
+                            datosObtenidos = json;
+                            statusText.textContent = `API en Línea (${APP_CONFIG.servidor})`;
+                            break;
+                        }
+                    }
+                } catch (e) {
+                    console.warn("Intento fallido:", url, e.message);
+                }
+            }
+
+            if (datosObtenidos) {
+                rawData = normalizarDatos(datosObtenidos);
+            } else {
+                statusText.textContent = `Offline (Generando datos de muestra)`;
+                rawData = generarDatosFallback();
+            }
+
+            procesarInformacionSlide();
+        }
+
+        async function recargarDatosAPI() {
+            await cargarDatosAPI();
+        }
+
+        function normalizarDatos(lista) {
+            return lista.map(item => ({
+                Año: item.Año || item.Anio || item.año || item.anio || item.Ao || 0,
+                Mes: parseInt(item.Mes || item.mes || 0),
+                Codigo: item.Codigo ? String(item.Codigo).padStart(9, '0') : "",
+                CodigoCorto: item.CodigoCorto ? String(item.CodigoCorto).padStart(5, '0') : (item.Codigo ? String(item.Codigo).slice(-5) : "S/C"),
+                Nombre: (item.Nombre || item.nombre || "").trim(),
+                Costo: parseFloat(item.Costo || item.costo || 0)
+            }));
+        }
+
+        // 3. Procesamiento y Renderizado de Gráficos y Tablas
+        function procesarInformacionSlide() {
+            // Filtrar solo los 3 meses (5, 6, 7) de los años 2025 y 2026
+            const datosFiltrados = rawData.filter(d =>
+                (d.Año === 2025 || d.Año === 2026) && MESES_ANALISIS.includes(d.Mes)
+            );
+
+            // Calcular Promedios por Mes y Año
+            const promedios = {};
+            [2025, 2026].forEach(anio => {
+                promedios[anio] = {};
+                MESES_ANALISIS.forEach(mes => {
+                    const registros = datosFiltrados.filter(d => d.Año === anio && d.Mes === mes && d.Costo > 0);
+                    const suma = registros.reduce((acc, curr) => acc + curr.Costo, 0);
+                    promedios[anio][mes] = registros.length > 0 ? (suma / registros.length) : 0;
+                });
+            });
+
+            // Promedio general del trimestre
+            const prom2026 = (promedios[2026][5] + promedios[2026][6] + promedios[2026][7]) / 3;
+            const prom2025 = (promedios[2025][5] + promedios[2025][6] + promedios[2025][7]) / 3;
+            const diffPct = prom2025 > 0 ? (((prom2026 - prom2025) / prom2025) * 100) : 0;
+
+            // Actualizar KPIs de Slide 2
+            document.getElementById('kpiCostoActual').textContent = `S/ ${prom2026.toFixed(2)}`;
+            document.getElementById('kpiCostoAnterior').textContent = `S/ ${prom2025.toFixed(2)}`;
+            const kpiDiff = document.getElementById('kpiDiffPromedio');
+            if (diffPct > 0) {
+                kpiDiff.className = "kpi-diff diff-up";
+                kpiDiff.innerHTML = `▲ +${diffPct.toFixed(1)}% vs 2025`;
+            } else {
+                kpiDiff.className = "kpi-diff diff-down";
+                kpiDiff.innerHTML = `▼ ${diffPct.toFixed(1)}% vs 2025`;
+            }
+
+            // Actualizar Tabla Mes a Mes en Slide 3
+            [5, 6, 7].forEach(m => {
+                const c25 = promedios[2025][m];
+                const c26 = promedios[2026][m];
+                const vPct = c25 > 0 ? (((c26 - c25) / c25) * 100) : 0;
+
+                document.getElementById(`m${m}_2025`).textContent = `S/ ${c25.toFixed(2)}`;
+                document.getElementById(`m${m}_2026`).textContent = `S/ ${c26.toFixed(2)}`;
+
+                const badge = vPct >= 0
+                    ? `<span class="badge-delta alza">+${vPct.toFixed(1)}%</span>`
+                    : `<span class="badge-delta baja">${vPct.toFixed(1)}%</span>`;
+                document.getElementById(`m${m}_var`).innerHTML = badge;
+            });
+
+            // Matriz consolidada por artículo para variaciones
+            const articulosMap = {};
+            datosFiltrados.forEach(d => {
+                if (!articulosMap[d.CodigoCorto]) {
+                    articulosMap[d.CodigoCorto] = {
+                        CodigoCorto: d.CodigoCorto,
+                        Nombre: d.Nombre,
+                        c2025_5: 0, c2025_6: 0, c2025_7: 0,
+                        c2026_5: 0, c2026_6: 0, c2026_7: 0
+                    };
+                }
+                articulosMap[d.CodigoCorto][`c${d.Año}_${d.Mes}`] = d.Costo;
+            });
+
+            const listaArticulos = Object.values(articulosMap).map(a => {
+                const val25 = a.c2025_7 || a.c2025_6 || a.c2025_5 || 0;
+                const val26 = a.c2026_7 || a.c2026_6 || a.c2026_5 || 0;
+                const varPct = val25 > 0 ? (((val26 - val25) / val25) * 100) : 0;
+                return { ...a, varYoY: varPct, val25, val26 };
+            }).filter(a => a.val25 > 0 && a.val26 > 0);
+
+            articulosFiltrados = listaArticulos;
+
+            // Top Alzas y Bajas
+            const ordenadosAlzas = [...listaArticulos].sort((a, b) => b.varYoY - a.varYoY);
+            const ordenadosBajas = [...listaArticulos].sort((a, b) => a.varYoY - b.varYoY);
+
+            if (ordenadosAlzas.length > 0) {
+                document.getElementById('kpiMayorAlza').textContent = `+${ordenadosAlzas[0].varYoY.toFixed(1)}%`;
+                document.getElementById('kpiMayorAlzaNom').textContent = ordenadosAlzas[0].Nombre;
+            }
+            if (ordenadosBajas.length > 0) {
+                document.getElementById('kpiMayorBaja').textContent = `${ordenadosBajas[0].varYoY.toFixed(1)}%`;
+                document.getElementById('kpiMayorBajaNom').textContent = ordenadosBajas[0].Nombre;
+            }
+
+            renderizarTopTablas(ordenadosAlzas.slice(0, 5), ordenadosBajas.slice(0, 5));
+            renderizarMatrizCompleta(articulosFiltrados);
+
+            // Gráficos
+            renderizarGraficos(promedios);
+        }
+
+        function renderizarTopTablas(topAlzas, topBajas) {
+            const tbodyAlzas = document.getElementById('tbodyTopAlzas');
+            tbodyAlzas.innerHTML = topAlzas.map(a => `
+                <tr>
+                    <td><strong>${a.CodigoCorto}</strong></td>
+                    <td>${a.Nombre}</td>
+                    <td>S/ ${a.val25.toFixed(2)}</td>
+                    <td>S/ ${a.val26.toFixed(2)}</td>
+                    <td><span class="badge-delta alza">+${a.varYoY.toFixed(1)}%</span></td>
+                </tr>
+            `).join('');
+
+            const tbodyBajas = document.getElementById('tbodyTopBajas');
+            tbodyBajas.innerHTML = topBajas.map(a => `
+                <tr>
+                    <td><strong>${a.CodigoCorto}</strong></td>
+                    <td>${a.Nombre}</td>
+                    <td>S/ ${a.val25.toFixed(2)}</td>
+                    <td>S/ ${a.val26.toFixed(2)}</td>
+                    <td><span class="badge-delta baja">${a.varYoY.toFixed(1)}%</span></td>
+                </tr>
+            `).join('');
+        }
+
+        function renderizarMatrizCompleta(lista) {
+            const tbody = document.getElementById('tbodyMatriz');
+            tbody.innerHTML = lista.map(a => `
+                <tr>
+                    <td><strong>${a.CodigoCorto}</strong></td>
+                    <td>${a.Nombre}</td>
+                    <td>S/ ${(a.c2025_5 || 0).toFixed(2)}</td>
+                    <td>S/ ${(a.c2025_6 || 0).toFixed(2)}</td>
+                    <td>S/ ${(a.c2025_7 || 0).toFixed(2)}</td>
+                    <td>S/ ${(a.c2026_5 || 0).toFixed(2)}</td>
+                    <td>S/ ${(a.c2026_6 || 0).toFixed(2)}</td>
+                    <td>S/ ${(a.c2026_7 || 0).toFixed(2)}</td>
+                    <td>${a.varYoY >= 0
+                    ? `<span class="badge-delta alza">+${a.varYoY.toFixed(1)}%</span>`
+                    : `<span class="badge-delta baja">${a.varYoY.toFixed(1)}%</span>`}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function filtrarMatriz() {
+            const q = document.getElementById('filtroTabla').value.toLowerCase().trim();
+            const filtrados = articulosFiltrados.filter(a =>
+                a.Nombre.toLowerCase().includes(q) || a.CodigoCorto.includes(q)
+            );
+            renderizarMatrizCompleta(filtrados);
+        }
+
+        function renderizarGraficos(promedios) {
+            // 1. Gráfico Resumen YoY (Slide 2)
+            const ctx1 = document.getElementById('chartResumenYoY').getContext('2d');
+            if (chartResumenInst) chartResumenInst.destroy();
+            chartResumenInst = new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: ['Mayo', 'Junio', 'Julio'],
+                    datasets: [
+                        {
+                            label: 'Año 2025',
+                            data: [promedios[2025][5], promedios[2025][6], promedios[2025][7]],
+                            backgroundColor: 'rgba(148, 163, 184, 0.7)',
+                            borderColor: '#94A3B8',
+                            borderWidth: 1,
+                            borderRadius: 6
+                        },
+                        {
+                            label: 'Año 2026',
+                            data: [promedios[2026][5], promedios[2026][6], promedios[2026][7]],
+                            backgroundColor: 'rgba(14, 165, 233, 0.85)',
+                            borderColor: '#0EA5E9',
+                            borderWidth: 1,
+                            borderRadius: 6
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top', labels: { color: '#F8FAFC', font: { weight: '600' } } }
+                    },
+                    scales: {
+                        y: {
+                            grid: { color: 'rgba(255, 255, 255, 0.08)' },
+                            ticks: { color: '#94A3B8', callback: v => `S/ ${v.toFixed(2)}` }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#F8FAFC', font: { weight: '600' } }
+                        }
+                    }
+                }
+            });
+
+            // 2. Gráfico Mes a Mes Comparativo (Slide 3)
+            const ctx2 = document.getElementById('chartMesAMes').getContext('2d');
+            if (chartMesAMesInst) chartMesAMesInst.destroy();
+            chartMesAMesInst = new Chart(ctx2, {
+                type: 'line',
+                data: {
+                    labels: ['Mayo', 'Junio', 'Julio'],
+                    datasets: [
+                        {
+                            label: 'Costo 2025',
+                            data: [promedios[2025][5], promedios[2025][6], promedios[2025][7]],
+                            borderColor: '#94A3B8',
+                            backgroundColor: 'rgba(148, 163, 184, 0.15)',
+                            tension: 0.3,
+                            fill: true,
+                            pointRadius: 6,
+                            pointHoverRadius: 8
+                        },
+                        {
+                            label: 'Costo 2026',
+                            data: [promedios[2026][5], promedios[2026][6], promedios[2026][7]],
+                            borderColor: '#0EA5E9',
+                            backgroundColor: 'rgba(14, 165, 233, 0.2)',
+                            tension: 0.3,
+                            fill: true,
+                            pointRadius: 6,
+                            pointHoverRadius: 8
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top', labels: { color: '#F8FAFC', font: { weight: '600' } } }
+                    },
+                    scales: {
+                        y: {
+                            grid: { color: 'rgba(255, 255, 255, 0.08)' },
+                            ticks: { color: '#94A3B8', callback: v => `S/ ${v.toFixed(2)}` }
+                        },
+                        x: {
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { color: '#F8FAFC', font: { weight: '600' } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Datos fallback en caso de no poder consultar la base de datos de inmediato
+        function generarDatosFallback() {
+            const fallbackArticulos = [
+                { CodigoCorto: "05201", Nombre: "CERDO ENTERO BENEFICIADO", c25: [11.20, 11.45, 11.60], c26: [12.10, 12.30, 12.45] },
+                { CodigoCorto: "05340", Nombre: "CHULETA DE CERDO PARRILLERA", c25: [16.80, 17.10, 17.20], c26: [17.50, 17.80, 17.90] },
+                { CodigoCorto: "05341", Nombre: "LOMO FINO DE CERDO", c25: [22.40, 22.80, 23.10], c26: [21.90, 22.10, 22.30] },
+                { CodigoCorto: "05342", Nombre: "PANCETA DE CERDO C/PIEL", c25: [18.50, 18.90, 19.20], c26: [20.10, 20.40, 20.80] },
+                { CodigoCorto: "05345", Nombre: "COSTILLA BABY BACK", c25: [19.20, 19.50, 19.80], c26: [21.50, 21.90, 22.20] },
+                { CodigoCorto: "05350", Nombre: "BRAZUELO DE CERDO C/HUESO", c25: [13.10, 13.30, 13.50], c26: [12.80, 12.90, 13.10] },
+                { CodigoCorto: "05355", Nombre: "PIERNA DE CERDO C/PIEL", c25: [14.20, 14.50, 14.70], c26: [14.00, 14.10, 14.20] },
+                { CodigoCorto: "05360", Nombre: "GRASA EN RAMA DE CERDO", c25: [5.20, 5.40, 5.50], c26: [6.10, 6.30, 6.50] }
+            ];
+
+            const result = [];
+            fallbackArticulos.forEach(art => {
+                [5, 6, 7].forEach((m, idx) => {
+                    result.push({ Año: 2025, Mes: m, Codigo: "0000" + art.CodigoCorto, CodigoCorto: art.CodigoCorto, Nombre: art.Nombre, Costo: art.c25[idx] });
+                    result.push({ Año: 2026, Mes: m, Codigo: "0000" + art.CodigoCorto, CodigoCorto: art.CodigoCorto, Nombre: art.Nombre, Costo: art.c26[idx] });
+                });
+            });
+            return result;
+        }
+    </script>
+</body>
+
+</html>
