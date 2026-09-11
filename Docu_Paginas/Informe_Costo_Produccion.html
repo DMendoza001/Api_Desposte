@@ -797,7 +797,8 @@
         </div>
 
         <div class="header-controls">
-            <div class="api-badge" id="apiStatusBadge">
+            <div class="api-badge" id="apiStatusBadge" onclick="recargarDatos()"
+                title="Estado de conexión con el servidor RAEVSALL001 (Clic para recargar)" style="cursor: pointer;">
                 <div class="status-dot" id="statusDot"></div>
                 <span id="apiStatusText">Cargando API...</span>
             </div>
@@ -1009,30 +1010,33 @@
 
     <!-- Scripts con la Lógica Completa -->
     <script>
-        // Generación dinámica de Endpoints API (Prioridad Puerto 8080, fallback a 5000, detección dinámica de Host)
+        // =========================================================================
+        // ⚙️ CONFIGURACIÓN DE CONEXIÓN A LA API (Estilo appsettings.json)
+        // =========================================================================
+        const APP_CONFIG = {
+            // Nombre del equipo donde corre tu API .NET
+            // 🏢 Oficina: "RAEVSALL001"
+            // 🏠 Casa: Cambiar aquí por el nombre de tu máquina en casa
+            servidor: "RAEVSALL001",
+
+            // Puertos a los que intentará conectarse en orden de prioridad
+            puertos: [8080, 5000],
+
+            // Endpoint del controlador SQL
+            rutaListar: "/api/costosproduccion/listar",
+
+            // Tiempo máximo de espera para la consulta SQL (20 segundos)
+            timeoutMs: 20000
+        };
+
+        // Generación de Endpoints API apuntando al nombre del equipo
         function generarEndpointsApi(rutaRelativa) {
-            const hosts = [];
-            if (typeof window !== "undefined" && window.location && window.location.hostname && window.location.hostname !== "") {
-                hosts.push(window.location.hostname);
-            }
-            hosts.push("localhost", "127.0.0.1");
-
-            const puertos = [8080, 5000];
             const endpoints = [];
-
-            // 1. Probar todos los hosts en puerto 8080 primero, luego en 5000
-            for (const puerto of puertos) {
-                for (const host of hosts) {
-                    endpoints.push(`http://${host}:${puerto}${rutaRelativa}`);
-                }
+            for (const puerto of APP_CONFIG.puertos) {
+                endpoints.push(`http://${APP_CONFIG.servidor}:${puerto}${rutaRelativa}`);
             }
-            // 2. Ruta relativa como fallback
-            endpoints.push(rutaRelativa);
-
-            return Array.from(new Set(endpoints));
+            return endpoints;
         }
-
-        const API_ENDPOINTS = generarEndpointsApi("/api/costosproduccion/listar");
 
         // Paleta de Colores
         const PALETTE = {
@@ -1080,13 +1084,14 @@
 
         // 1. Carga de Datos exclusivamente desde la API SQL
         async function cargarDatosIniciales() {
-            actualizarEstadoAPI("loading", "Conectando con API SQL...");
+            actualizarEstadoAPI("loading", `Conectando con ${APP_CONFIG.servidor}...`);
             let dataCargada = false;
+            const endpoints = generarEndpointsApi(APP_CONFIG.rutaListar);
 
-            for (const url of API_ENDPOINTS) {
+            for (const url of endpoints) {
                 try {
                     const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 4000);
+                    const timeoutId = setTimeout(() => controller.abort(), APP_CONFIG.timeoutMs);
 
                     const res = await fetch(url, { signal: controller.signal });
                     clearTimeout(timeoutId);
@@ -1095,8 +1100,9 @@
                         const data = await res.json();
                         if (Array.isArray(data) && data.length > 0) {
                             rawData = normalizarDatos(data);
-                            actualizarEstadoAPI("online", `API en Línea (${data.length} registros)`);
-                            mostrarToast(`✅ ${data.length} registros sincronizados desde SQL Server`, "success");
+                            const urlObj = new URL(url, window.location.href);
+                            actualizarEstadoAPI("online", `API en Línea (${urlObj.host}) - ${data.length} reg.`);
+                            mostrarToast(`✅ Conectado a ${urlObj.host} (${data.length} registros)`, "success");
                             dataCargada = true;
                             break;
                         }
@@ -1108,8 +1114,8 @@
 
             if (!dataCargada) {
                 rawData = [];
-                actualizarEstadoAPI("offline", "Sin conexión con la API SQL");
-                mostrarToast("❌ No se pudieron obtener datos desde la consulta SQL.", "error");
+                actualizarEstadoAPI("offline", `Sin conexión con ${APP_CONFIG.servidor}`);
+                mostrarToast(`❌ No se pudo conectar a la API en ${APP_CONFIG.servidor} (Puertos 8080/5000).`, "error");
             }
 
             procesarDimensiones();

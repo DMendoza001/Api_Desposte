@@ -183,22 +183,26 @@
         let apiBaseActiva = null;
         let editando = false;
 
-        function generarBasesApi() {
-            const hosts = [];
-            if (typeof window !== "undefined" && window.location && window.location.hostname && window.location.hostname !== "") {
-                hosts.push(window.location.hostname);
-            }
-            hosts.push("localhost", "127.0.0.1");
+        // =========================================================================
+        // ⚙️ CONFIGURACIÓN DE CONEXIÓN A LA API (Estilo appsettings.json)
+        // =========================================================================
+        const APP_CONFIG = {
+            // Nombre del equipo donde corre tu API .NET
+            // 🏢 Oficina: "RAEVSALL001"
+            // 🏠 Casa: Cambiar aquí por el nombre de tu máquina en casa
+            servidor: "RAEVSALL001",
 
-            const puertos = [8080, 5000];
+            // Puertos a los que intentará conectarse en orden de prioridad
+            puertos: [8080, 5000]
+        };
+
+        // Generación de servidores API apuntando al nombre del equipo
+        function generarBasesApi() {
             const bases = [];
-            for (const puerto of puertos) {
-                for (const host of hosts) {
-                    bases.push(`http://${host}:${puerto}`);
-                }
+            for (const puerto of APP_CONFIG.puertos) {
+                bases.push(`http://${APP_CONFIG.servidor}:${puerto}`);
             }
-            bases.push(""); // Relativo
-            return Array.from(new Set(bases));
+            return bases;
         }
 
         async function obtenerApiUrl(rutaRelativa) {
