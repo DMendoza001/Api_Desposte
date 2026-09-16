@@ -14,8 +14,9 @@ namespace ApiDesposte.Controllers.Excel
         private string ObtenerRutaExcel()
         {
             string userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            return Path.Combine(userProfile, @"OneDrive - Corporación Rico SAC\Desposte-03\Temporales\Cumplimiento_PTC.xlsm");
+            return Path.Combine(userProfile, @"OneDrive - Corporación Rico SAC\Desposte-03\PlantasCore\Planificacion\Cumplimiento_PTC.xlsm");
         }
+   
 
         private XLWorkbook CargarWorkbookEnMemoria(string rutaExcel)
         {
