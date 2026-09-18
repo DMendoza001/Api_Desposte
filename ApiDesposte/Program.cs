@@ -51,24 +51,27 @@ static bool IsPortAvailable(int port)
     }
 }
 
-if (IsPortAvailable(8080))
+int[] candidatePorts = { 8080, 5000, 5050, 8085 };
+bool anyBound = false;
+
+foreach (int port in candidatePorts)
 {
-    app.Urls.Add("http://0.0.0.0:8080");
-    Console.WriteLine("✅ Escuchando en http://0.0.0.0:8080");
-}
-else
-{
-    Console.WriteLine("⚠️ Puerto 8080 ocupado.");
+    if (IsPortAvailable(port))
+    {
+        app.Urls.Add($"http://0.0.0.0:{port}");
+        Console.WriteLine($"✅ Escuchando en http://0.0.0.0:{port}");
+        anyBound = true;
+    }
+    else
+    {
+        Console.WriteLine($"⚠️ Puerto {port} ocupado.");
+    }
 }
 
-if (IsPortAvailable(5000))
+if (!anyBound)
 {
-    app.Urls.Add("http://0.0.0.0:5000");
-    Console.WriteLine("✅ Escuchando en http://0.0.0.0:5000");
-}
-else
-{
-    Console.WriteLine("⚠️ Puerto 5000 ocupado.");
+    Console.WriteLine("⚠️ No se encontraron puertos candidatos libres, intentando 8080 por defecto.");
+    app.Urls.Add("http://0.0.0.0:8080");
 }
 
 app.Run();

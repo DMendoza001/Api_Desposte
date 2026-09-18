@@ -1,0 +1,3612 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Cumplimiento PTC - Detalle SKU y Familias</title>
+
+    <!-- Fuentes e Iconos Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Chart.js y Plugins -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+    <!-- SheetJS para exportar a Excel (.xlsx) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <style>
+        :root {
+            --bg-main: #0D1424;
+            --bg-card: #162238;
+            --bg-card-hover: #1C2B47;
+            --bg-card-alt: #131D31;
+            --border-card: #223554;
+            --border-subtle: rgba(255, 255, 255, 0.08);
+
+            /* Series de datos */
+            --color-prod: #10B981;
+            --color-prod-light: rgba(16, 185, 129, 0.15);
+            --color-demanda: #5C7CFA;
+            --color-demanda-light: rgba(92, 124, 250, 0.15);
+
+            /* Semáforo y Alertas */
+            --status-success: #00D084;
+            --status-warning: #F59E0B;
+            --status-danger: #EF4444;
+            --status-info: #38BDF8;
+
+            /* Tipografía */
+            --text-primary: #FFFFFF;
+            --text-secondary: #CBD5E1;
+            --text-muted: #94A3B8;
+            --text-dim: #64748B;
+
+            /* Sombras y bordes */
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --shadow-card: 0 6px 24px -2px rgba(0, 0, 0, 0.45);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-main);
+            background-image:
+                radial-gradient(circle at 15% 15%, rgba(16, 185, 129, 0.08) 0%, transparent 45%),
+                radial-gradient(circle at 85% 15%, rgba(92, 124, 250, 0.08) 0%, transparent 45%),
+                radial-gradient(circle at 50% 90%, rgba(34, 53, 84, 0.35) 0%, transparent 60%);
+            background-attachment: fixed;
+            color: var(--text-primary);
+            padding: 24px;
+            min-height: 100vh;
+        }
+
+        /* Scrollbars */
+        ::-webkit-scrollbar {
+            width: 7px;
+            height: 7px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-main);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-card);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #2E4770;
+        }
+
+        .dashboard-container {
+            max-width: 1780px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+        }
+
+        /* HEADER */
+        .dashboard-header {
+            background: linear-gradient(135deg, var(--bg-card) 0%, #111A2C 100%);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-lg);
+            padding: 20px 24px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            box-shadow: var(--shadow-card);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--color-prod), var(--color-demanda), var(--status-success));
+        }
+
+        .header-title-group {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(92, 124, 250, 0.25));
+            border: 1px solid rgba(16, 185, 129, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #10B981;
+            flex-shrink: 0;
+        }
+
+        .header-title {
+            font-size: 1.45rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .badge-tag {
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            border-radius: 6px;
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--color-prod);
+            border: 1px solid rgba(16, 185, 129, 0.35);
+        }
+
+        .header-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            padding: 6px 14px;
+            border-radius: 9999px;
+            background: rgba(16, 185, 129, 0.12);
+            color: var(--status-success);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            font-weight: 600;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--status-success);
+            box-shadow: 0 0 8px var(--status-success);
+            animation: pulse-dot 2s infinite;
+        }
+
+        @keyframes pulse-dot {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.4;
+                transform: scale(0.8);
+            }
+        }
+
+        .btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            color: var(--text-primary);
+            padding: 8px 16px;
+            border-radius: var(--radius-md);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .btn:hover {
+            background: var(--bg-card-hover);
+            border-color: #385580;
+            transform: translateY(-1px);
+        }
+
+        .btn-excel {
+            background: rgba(16, 185, 129, 0.16);
+            border: 1px solid rgba(16, 185, 129, 0.45);
+            color: #34D399;
+        }
+
+        .btn-excel:hover {
+            background: rgba(16, 185, 129, 0.26);
+            border-color: #10B981;
+        }
+
+        .btn-primary {
+            background: rgba(92, 124, 250, 0.18);
+            border: 1px solid rgba(92, 124, 250, 0.45);
+            color: #7995FA;
+        }
+
+        .btn-primary:hover {
+            background: rgba(92, 124, 250, 0.28);
+            border-color: #5C7CFA;
+        }
+
+        /* FILTROS SECTION */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-lg);
+            padding: 20px 24px;
+            box-shadow: var(--shadow-card);
+        }
+
+        .filter-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .filter-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-quick-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .filter-quick-btn {
+            background: #0E1626;
+            border: 1px solid var(--border-card);
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            padding: 5px 12px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .filter-quick-btn:hover,
+        .filter-quick-btn.active {
+            background: rgba(92, 124, 250, 0.2);
+            color: #7995FA;
+            border-color: rgba(92, 124, 250, 0.5);
+        }
+
+        .years-pills-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 4px 2px;
+        }
+
+        .year-pill {
+            background: #0F1829;
+            border: 1px solid var(--border-card);
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            font-weight: 700;
+            padding: 7px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            user-select: none;
+        }
+
+        .year-pill:hover {
+            border-color: #F59E0B;
+            color: var(--text-primary);
+            background: #162238;
+        }
+
+        .year-pill.selected {
+            background: rgba(245, 158, 11, 0.22);
+            border-color: #F59E0B;
+            color: #FBBF24;
+            box-shadow: 0 0 12px rgba(245, 158, 11, 0.3);
+        }
+
+        .year-pill .year-pill-count {
+            background: rgba(0, 0, 0, 0.35);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: inherit;
+        }
+
+        .weeks-pills-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            max-height: 125px;
+            overflow-y: auto;
+            padding: 4px 2px;
+        }
+
+        .week-pill {
+            background: #0F1829;
+            border: 1px solid var(--border-card);
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            user-select: none;
+        }
+
+        .week-pill:hover {
+            border-color: #3B5377;
+            color: var(--text-primary);
+            background: #15223A;
+        }
+
+        .week-pill.selected {
+            background: rgba(16, 185, 129, 0.18);
+            border-color: rgba(16, 185, 129, 0.6);
+            color: #34D399;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
+        }
+
+        .week-pill.has-demanda::after {
+            content: '●';
+            color: #5C7CFA;
+            font-size: 0.6rem;
+            margin-left: 2px;
+        }
+
+        .selection-summary-bar {
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border-subtle);
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .selection-summary-bar span b {
+            color: #34D399;
+        }
+
+        /* KPI CARDS */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 18px;
+        }
+
+        .kpi-card {
+            background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-card-alt) 100%);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            box-shadow: var(--shadow-card);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            border-color: #364F75;
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--kpi-accent, var(--color-prod));
+        }
+
+        .kpi-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .kpi-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .kpi-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+        }
+
+        .kpi-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.85rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            line-height: 1.1;
+        }
+
+        .kpi-unit {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-left: 4px;
+        }
+
+        .kpi-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .badge-kpi {
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .badge-success {
+            background: rgba(0, 208, 132, 0.15);
+            color: var(--status-success);
+            border: 1px solid rgba(0, 208, 132, 0.35);
+        }
+
+        .badge-warning {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--status-warning);
+            border: 1px solid rgba(245, 158, 11, 0.35);
+        }
+
+        .badge-danger {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--status-danger);
+            border: 1px solid rgba(239, 68, 68, 0.35);
+        }
+
+        /* GRÁFICO HISTÓRICO */
+        .chart-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-lg);
+            padding: 22px 24px;
+            box-shadow: var(--shadow-card);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .chart-title-group h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .chart-title-group p {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-top: 3px;
+        }
+
+        .chart-container-wrapper {
+            position: relative;
+            height: 380px;
+            width: 100%;
+        }
+
+        /* TABS SECTION */
+        .tabs-header {
+            display: flex;
+            gap: 8px;
+            border-bottom: 1px solid var(--border-card);
+            padding-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            font-weight: 700;
+            padding: 9px 16px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .tab-btn.active {
+            background: rgba(92, 124, 250, 0.16);
+            color: #7995FA;
+            border-color: rgba(92, 124, 250, 0.4);
+        }
+
+        .tab-btn.tab-prod.active {
+            background: rgba(16, 185, 129, 0.16);
+            color: #34D399;
+            border-color: rgba(16, 185, 129, 0.4);
+        }
+
+        .tab-btn.tab-demanda.active {
+            background: rgba(56, 189, 248, 0.16);
+            color: #38BDF8;
+            border-color: rgba(56, 189, 248, 0.4);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* MATRICES Y TABLAS JERÁRQUICAS */
+        .matrix-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-lg);
+            padding: 22px 24px;
+            box-shadow: var(--shadow-card);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .matrix-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .search-box {
+            position: relative;
+            min-width: 280px;
+        }
+
+        .search-input {
+            width: 100%;
+            background: #0E1626;
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            padding: 8px 14px 8px 36px;
+            font-size: 0.85rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: #5C7CFA;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-md);
+            max-height: 650px;
+        }
+
+        table.matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.84rem;
+            text-align: left;
+        }
+
+        table.matrix-table thead {
+            position: sticky;
+            top: 0;
+            background: #111B2E;
+            z-index: 10;
+            border-bottom: 2px solid var(--border-card);
+        }
+
+        table.matrix-table th {
+            padding: 12px 14px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            white-space: nowrap;
+        }
+
+        table.matrix-table th.num-col {
+            text-align: right;
+        }
+
+        table.matrix-table td {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+            vertical-align: middle;
+        }
+
+        table.matrix-table td.num-cell {
+            text-align: right;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.83rem;
+            white-space: nowrap;
+        }
+
+        tr.level-1 {
+            background: rgba(34, 53, 84, 0.45);
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        tr.level-1:hover {
+            background: rgba(34, 53, 84, 0.7);
+        }
+
+        tr.level-2 {
+            background: rgba(22, 34, 56, 0.7);
+            font-weight: 600;
+        }
+
+        tr.level-2:hover {
+            background: rgba(28, 43, 71, 0.85);
+        }
+
+        tr.level-3 {
+            background: #0F1728;
+            font-weight: 500;
+        }
+
+        tr.level-3:hover {
+            background: #162238;
+        }
+
+        .toggle-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-secondary);
+            cursor: pointer;
+            margin-right: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: bold;
+            user-select: none;
+            transition: background 0.15s;
+        }
+
+        .toggle-icon:hover {
+            background: rgba(92, 124, 250, 0.3);
+            color: #FFFFFF;
+        }
+
+        .val-positive {
+            color: #00D084 !important;
+            font-weight: 600;
+        }
+
+        .val-negative {
+            color: #EF4444 !important;
+            font-weight: 600;
+        }
+
+        .val-neutral {
+            color: var(--text-dim) !important;
+        }
+
+        /* ANALISIS GRID */
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+            gap: 20px;
+        }
+
+        .analysis-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-lg);
+            padding: 20px 22px;
+            box-shadow: var(--shadow-card);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .analysis-card h4 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ranking-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .ranking-item {
+            background: #0E1626;
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            padding: 10px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.83rem;
+            transition: background 0.2s;
+        }
+
+        .ranking-item:hover {
+            background: #15223A;
+            border-color: #2E4770;
+        }
+
+        .ranking-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 0;
+        }
+
+        .ranking-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .ranking-meta {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            display: flex;
+            gap: 8px;
+        }
+
+        .ranking-value {
+            text-align: right;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        /* TOAST NOTIFICATION */
+        .toast-notification {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #111A2C;
+            border: 1px solid #2B426B;
+            color: var(--text-primary);
+            padding: 12px 20px;
+            border-radius: var(--radius-md);
+            font-size: 0.85rem;
+            font-weight: 600;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 9999;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
+        }
+
+        /* ESTILOS ESPECÍFICOS: GRÁFICO POWERBI */
+        .chart-top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .powerbi-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+            color: var(--text-primary);
+            text-transform: uppercase;
+        }
+
+        .chart-legend-pills {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .legend-pill-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* NIVELES JERÁRQUICOS 4 Y 5 PARA MATRICES PROFUNDAS */
+        tr.level-4 {
+            background: #0B111D;
+            font-weight: 500;
+        }
+
+        tr.level-4:hover {
+            background: #121C2E;
+        }
+
+        tr.level-5 {
+            background: #080D17;
+            font-weight: 400;
+            color: #94A3B8;
+        }
+
+        tr.level-5:hover {
+            background: #0F1728;
+            color: #FFFFFF;
+        }
+
+        /* SELECTORES DE SEMANA EN PESTAÑAS */
+        .tab-filter-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            background: #111A2C;
+            border: 1px solid var(--border-card);
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+        }
+
+        .tab-filter-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-select {
+            background: #0E1626;
+            border: 1px solid #2B426B;
+            color: var(--text-primary);
+            padding: 7px 12px;
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            font-weight: 600;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .filter-select:focus {
+            border-color: #5C7CFA;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-container">
+
+        <!-- HEADER -->
+        <header class="dashboard-header">
+            <div class="header-title-group">
+                <div class="header-icon">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 3v18h18"></path>
+                        <path d="m19 9-5 5-4-4-3 3"></path>
+                    </svg>
+                </div>
+                <div>
+                    <div class="header-title">
+                        Dashboard Cumplimiento PTC - Detalle SKU y Familias
+                        <span class="badge-tag">Planta Desposte</span>
+                    </div>
+                    <div class="header-subtitle">
+                        Análisis comparativo y profundo: Producción Real (T_Produccion) vs Demanda Proyectada
+                        (T_DemandaPy)
+                    </div>
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <div class="status-badge" id="apiStatusBadge">
+                    <span class="status-dot"></span>
+                    <span id="apiStatusText">Buscando servidor...</span>
+                </div>
+
+                <button class="btn btn-excel" onclick="exportarDataPlanaExcel()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Exportar Resumen Excel
+                </button>
+
+                <button class="btn btn-primary" onclick="recargarDatosAPI(true)">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+                    </svg>
+                    Actualizar
+                </button>
+            </div>
+        </header>
+
+        <!-- FILTROS PRINCIPALES (AÑO Y SEMANA MULTI-SELECCIÓN) -->
+        <section class="card">
+            <!-- FILTRO GENERAL POR AÑO (MULTI-SELECCIÓN) -->
+            <div class="filter-section-header">
+                <div class="filter-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    Filtro General por Año (Multi-Selección)
+                </div>
+
+                <div class="filter-quick-actions">
+                    <button class="filter-quick-btn active" id="btnQuickYearAll"
+                        onclick="seleccionarFiltroRapidoAnio('all')">Todos los Años</button>
+                </div>
+            </div>
+
+            <div class="years-pills-container" id="yearsPillsContainer"></div>
+
+            <div style="border-top: 1px solid var(--border-subtle); margin: 16px 0 14px 0;"></div>
+
+            <!-- FILTROS POR SEMANA (MULTI-SELECCIÓN) -->
+            <div class="filter-section-header">
+                <div class="filter-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="10" y2="10"></line>
+                    </svg>
+                    Filtro por Semana (Multi-Selección Dinámica)
+                </div>
+
+                <div class="filter-quick-actions">
+                    <button class="filter-quick-btn" id="btnQuickLatest"
+                        onclick="seleccionarFiltroRapido('latest')">Última Semana</button>
+                    <button class="filter-quick-btn" id="btnQuickDemand"
+                        onclick="seleccionarFiltroRapido('demand')">Semanas con Demanda (●)</button>
+                    <button class="filter-quick-btn active" id="btnQuickAll"
+                        onclick="seleccionarFiltroRapido('all')">Todas las Semanas</button>
+                    <button class="filter-quick-btn" onclick="limpiarSemanas()">Limpiar</button>
+                </div>
+            </div>
+
+            <div class="weeks-pills-container" id="weeksPillsContainer"></div>
+
+            <div class="selection-summary-bar">
+                <span id="selectedWeeksSummary">Cargando semanas disponibles...</span>
+                <span style="font-size:0.75rem; color:var(--text-dim);">Tip: Puedes seleccionar más de un año y varias
+                    semanas simultáneamente.</span>
+            </div>
+        </section>
+
+        <!-- KPI SUMMARY CARDS -->
+        <section class="kpi-grid">
+            <div class="kpi-card" style="--kpi-accent: var(--color-prod);">
+                <div class="kpi-top">
+                    <span class="kpi-label">Producción Total (Real)</span>
+                    <div class="kpi-icon" style="color:var(--color-prod); background:var(--color-prod-light);">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="kpi-value" id="kpiKilosProd">0<span class="kpi-unit">kg</span></div>
+                <div class="kpi-footer">
+                    <span>Tabla: T_Produccion</span>
+                    <span class="badge-kpi badge-success" id="kpiProdBadge">Real</span>
+                </div>
+            </div>
+
+            <div class="kpi-card" style="--kpi-accent: var(--color-demanda);">
+                <div class="kpi-top">
+                    <span class="kpi-label">Demanda Proyectada</span>
+                    <div class="kpi-icon" style="color:var(--color-demanda); background:var(--color-demanda-light);">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                    </div>
+                </div>
+                <div class="kpi-value" id="kpiKilosDemanda">0<span class="kpi-unit">kg</span></div>
+                <div class="kpi-footer">
+                    <span>Tabla: T_DemandaPy</span>
+                    <span class="badge-kpi"
+                        style="background:rgba(92, 124, 250, 0.15); color:#7995FA; border:1px solid rgba(92, 124, 250, 0.35);"
+                        id="kpiDemandaBadge">Plan</span>
+                </div>
+            </div>
+
+            <div class="kpi-card" style="--kpi-accent: var(--status-info);">
+                <div class="kpi-top">
+                    <span class="kpi-label">Diferencia Neta (Prod - Py)</span>
+                    <div class="kpi-icon" style="color:#38BDF8; background:rgba(56, 189, 248, 0.15);">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </div>
+                </div>
+                <div class="kpi-value" id="kpiKilosDiferencia">0<span class="kpi-unit">kg</span></div>
+                <div class="kpi-footer">
+                    <span>Brecha en volumen</span>
+                    <span class="badge-kpi" id="kpiDiffBadge">+0%</span>
+                </div>
+            </div>
+
+            <div class="kpi-card" style="--kpi-accent: var(--status-success);">
+                <div class="kpi-top">
+                    <span class="kpi-label">% Cumplimiento Global</span>
+                    <div class="kpi-icon" style="color:#00D084; background:rgba(0, 208, 132, 0.15);">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                    </div>
+                </div>
+                <div class="kpi-value" id="kpiPctCumplimiento">0.0<span class="kpi-unit">%</span></div>
+                <div class="kpi-footer">
+                    <span id="kpiCumplimientoSubtitle">Prod / DemandaPy</span>
+                    <span class="badge-kpi badge-success" id="kpiStatusLevel">Óptimo</span>
+                </div>
+            </div>
+
+            <div class="kpi-card" style="--kpi-accent: #A855F7;">
+                <div class="kpi-top">
+                    <span class="kpi-label">SKUs Analizados</span>
+                    <div class="kpi-icon" style="color:#C084FC; background:rgba(168, 85, 247, 0.15);">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z">
+                            </path>
+                            <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                        </svg>
+                    </div>
+                </div>
+                <div class="kpi-value" id="kpiTotalSkus">0<span class="kpi-unit">SKUs</span></div>
+                <div class="kpi-footer">
+                    <span id="kpiSkusBreakdown">Coincidentes: 0</span>
+                    <span class="badge-kpi"
+                        style="background:rgba(168, 85, 247, 0.15); color:#C084FC;">Consolidado</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- GRÁFICO SEMANAL COMPARATIVO ESTILO POWERBI / EXCEL (CON SOMBREADO ENTRE LÍNEAS) -->
+        <section class="chart-card">
+            <div class="chart-top-bar">
+                <div class="powerbi-title">
+                    VENTAS TOTALES POR SEMANA
+                </div>
+
+                <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+                    <div class="chart-legend-pills">
+                        <span class="legend-pill-item" style="color:#F59E0B;">
+                            <span
+                                style="width:12px; height:12px; border-radius:50%; background:#F59E0B; display:inline-block;"></span>
+                            <span id="lblLegendAnterior">Tn_Anterior (Demanda)</span>
+                        </span>
+                        <span class="legend-pill-item" style="color:#93C5FD;">
+                            <span
+                                style="width:12px; height:12px; border-radius:50%; background:#1E293B; border:2px solid #FFFFFF; display:inline-block;"></span>
+                            <span id="lblLegendActual">Tn_Actual (Producción)</span>
+                        </span>
+                    </div>
+
+                    <div
+                        style="display:flex; gap:4px; align-items:center; background:#0E1626; padding:3px 6px; border-radius:6px; border:1px solid var(--border-card);">
+                        <button class="filter-quick-btn active" id="btnUnitTn"
+                            style="padding:3px 8px; font-size:0.75rem;" onclick="cambiarUnidadGrafico('Tn')">Tn</button>
+                        <button class="filter-quick-btn" id="btnUnitKg" style="padding:3px 8px; font-size:0.75rem;"
+                            onclick="cambiarUnidadGrafico('Kg')">Kg</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container-wrapper" style="height:440px;">
+                <canvas id="chartComparativoSemanas"></canvas>
+            </div>
+        </section>
+
+        <!-- PESTAÑAS DE VISTAS (MATRICES + ANÁLISIS DE TABLAS SEPARADAS) -->
+        <section>
+            <div class="tabs-header">
+                <button class="tab-btn active" onclick="cambiarTab('tabMatriz1')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="8" y1="6" x2="21" y2="6"></line>
+                        <line x1="8" y1="12" x2="21" y2="12"></line>
+                        <line x1="8" y1="18" x2="21" y2="18"></line>
+                        <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                        <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                        <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                    </svg>
+                    Matriz 1: Semana ➔ Familia ➔ Categoría
+                </button>
+
+                <button class="tab-btn" onclick="cambiarTab('tabMatriz2')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path
+                            d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z">
+                        </path>
+                    </svg>
+                    Matriz 2: Familia ➔ Categoría ➔ CódigoCorto ➔ Nombre
+                </button>
+
+                <button class="tab-btn" onclick="cambiarTab('tabAnalisisCruce')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="m4.93 4.93 4.24 4.24"></path>
+                        <path d="m14.83 9.17 4.24-4.24"></path>
+                        <path d="m14.83 14.83 4.24 4.24"></path>
+                        <path d="m9.17 14.83-4.24 4.24"></path>
+                    </svg>
+                    Cruce y Brechas (Prod vs Demanda)
+                </button>
+
+                <!-- PESTAÑA: ANÁLISIS EXCLUSIVO T_PRODUCCION -->
+                <button class="tab-btn tab-prod" onclick="cambiarTab('tabAnalisisProd')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                    </svg>
+                    Análisis T_Producción (Barras por Tipo + Matriz)
+                </button>
+
+                <!-- PESTAÑA: ANÁLISIS EXCLUSIVO T_DEMANDAPY -->
+                <button class="tab-btn tab-demanda" onclick="cambiarTab('tabAnalisisDem')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    Análisis T_DemandaPy (Barras por Origen + Matriz)
+                </button>
+            </div>
+
+            <!-- CONTENIDO TAB 1: MATRIZ SEMANA -> FAMILIA -> CATEGORIA -->
+            <div id="tabMatriz1" class="tab-content active" style="margin-top:16px;">
+                <div class="matrix-card">
+                    <div class="matrix-toolbar">
+                        <div class="search-box">
+                            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                            <input type="text" id="searchMatriz1" class="search-input"
+                                placeholder="Buscar semana, familia, categoría..." oninput="filtrarMatriz1()">
+                        </div>
+
+                        <div style="display:flex; gap:8px;">
+                            <button class="btn" style="padding:6px 12px; font-size:0.78rem;"
+                                onclick="toggleExpandirTodoMatriz1(true)">
+                                ⊞ Expandir Todo
+                            </button>
+                            <button class="btn" style="padding:6px 12px; font-size:0.78rem;"
+                                onclick="toggleExpandirTodoMatriz1(false)">
+                                ⊟ Contraer Todo
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="matrix-table" id="tbMatriz1">
+                            <thead>
+                                <tr>
+                                    <th style="min-width:320px;">Jerarquía (Semana / Familia / Categoría)</th>
+                                    <th class="num-col" style="color:#10B981;">KG Producción</th>
+                                    <th class="num-col" style="color:#5C7CFA;">KG DemandaPy</th>
+                                    <th class="num-col">Variación (kg)</th>
+                                    <th class="num-col">% Variación</th>
+                                    <th class="num-col">% Cumplimiento</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyMatriz1">
+                                <tr>
+                                    <td colspan="6" style="text-align:center; padding:30px; color:var(--text-muted);">
+                                        Cargando datos de matriz...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONTENIDO TAB 2: MATRIZ FAMILIA -> CATEGORIA -> CODIGOCORTO -> NOMBRE -->
+            <div id="tabMatriz2" class="tab-content" style="margin-top:16px;">
+                <div class="matrix-card">
+                    <div class="matrix-toolbar">
+                        <div class="search-box">
+                            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                            <input type="text" id="searchMatriz2" class="search-input"
+                                placeholder="Buscar código, nombre, categoría, familia..." oninput="filtrarMatriz2()">
+                        </div>
+
+                        <div style="display:flex; gap:8px; align-items:center;">
+                            <button class="btn" style="padding:6px 12px; font-size:0.78rem;"
+                                onclick="toggleExpandirTodoMatriz2(true)">
+                                ⊞ Expandir Todo
+                            </button>
+                            <button class="btn" style="padding:6px 12px; font-size:0.78rem;"
+                                onclick="toggleExpandirTodoMatriz2(false)">
+                                ⊟ Contraer Todo
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="matrix-table" id="tbMatriz2">
+                            <thead>
+                                <tr>
+                                    <th style="min-width:360px;">Estructura (Familia ➔ Categoría ➔ Código ➔ Nombre)</th>
+                                    <th class="num-col" style="color:#10B981;">KG Producción</th>
+                                    <th class="num-col" style="color:#5C7CFA;">KG DemandaPy</th>
+                                    <th class="num-col">Variación (kg)</th>
+                                    <th class="num-col">% Variación</th>
+                                    <th class="num-col">% Cumplimiento</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyMatriz2">
+                                <tr>
+                                    <td colspan="6" style="text-align:center; padding:30px; color:var(--text-muted);">
+                                        Cargando datos de matriz por producto...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONTENIDO TAB 3: CRUCE Y BRECHAS (T_PRODUCCION VS T_DEMANDAPY) -->
+            <div id="tabAnalisisCruce" class="tab-content" style="margin-top:16px;">
+                <div class="analysis-grid">
+                    <div class="analysis-card">
+                        <h4>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 14 14"></polyline>
+                            </svg>
+                            Diagnóstico de Cruce de SKUs
+                        </h4>
+                        <div style="display:flex; flex-direction:column; gap:10px; font-size:0.85rem;">
+                            <div
+                                style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border-subtle);">
+                                <span style="color:var(--text-muted);">SKUs Evaluados en Selección:</span>
+                                <b id="diagTotalSkus" style="font-family:'JetBrains Mono';">0</b>
+                            </div>
+                            <div
+                                style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border-subtle);">
+                                <span style="color:var(--text-muted);">SKUs Coincidentes (Prod y Demanda):</span>
+                                <b id="diagSkusAmbos" style="color:#00D084; font-family:'JetBrains Mono';">0</b>
+                            </div>
+                            <div
+                                style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border-subtle);">
+                                <span style="color:var(--text-muted);">SKUs Solo con Producción (Sin Plan):</span>
+                                <b id="diagSkusSoloProd" style="color:#38BDF8; font-family:'JetBrains Mono';">0</b>
+                            </div>
+                            <div
+                                style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border-subtle);">
+                                <span style="color:var(--text-muted);">SKUs Solo con Demanda (Sin Producción):</span>
+                                <b id="diagSkusSoloDem" style="color:#EF4444; font-family:'JetBrains Mono';">0</b>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; padding:8px 0;">
+                                <span style="color:var(--text-muted);">Tasa de Coincidencia de SKUs:</span>
+                                <b id="diagTasaCoincidencia"
+                                    style="font-family:'JetBrains Mono'; color:#7995FA;">0.0%</b>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="analysis-card">
+                        <h4 style="color:#00D084;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="m18 15-6-6-6 6"></path>
+                            </svg>
+                            Top 5 Sobrecumplimiento (Producción > Demanda)
+                        </h4>
+                        <div class="ranking-list" id="listTopSobrecumplimiento">
+                            <span style="color:var(--text-muted); font-size:0.8rem;">Cargando ranking...</span>
+                        </div>
+                    </div>
+
+                    <div class="analysis-card">
+                        <h4 style="color:#EF4444;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="m6 9 6 6 6-6"></path>
+                            </svg>
+                            Top 5 Subcumplimiento (Déficit / Riesgo de Quiebre)
+                        </h4>
+                        <div class="ranking-list" id="listTopSubcumplimiento">
+                            <span style="color:var(--text-muted); font-size:0.8rem;">Cargando ranking...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONTENIDO TAB 4: ANÁLISIS EXCLUSIVO T_PRODUCCION (BARRAS POR TIPO + MATRIZ JERÁRQUICA TIPO -> CODIGOCORTO -> NOMBRE) -->
+            <div id="tabAnalisisProd" class="tab-content" style="margin-top:16px;">
+                <div style="display:flex; flex-direction:column; gap:20px;">
+                    <!-- Barra de Filtro por Semana para Producción -->
+                    <div class="tab-filter-bar">
+                        <div class="tab-filter-group">
+                            <span style="font-size:0.85rem; font-weight:700; color:#10B981;">📅 Filtrar Producción por
+                                Semana:</span>
+                            <select id="filterSemanaProd" class="filter-select"
+                                onchange="cambiarFiltroSemanaProd(this.value)">
+                                <option value="ALL">Todas las Semanas</option>
+                            </select>
+                            <button class="btn" style="padding:6px 12px; font-size:0.78rem;"
+                                onclick="toggleExpandirMatrizProd(true)">⊞ Expandir Todo</button>
+                            <button class="btn" style="padding:6px 12px; font-size:0.78rem;"
+                                onclick="toggleExpandirMatrizProd(false)">⊟ Contraer Todo</button>
+                        </div>
+                        <div class="search-box" style="min-width:260px;">
+                            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                            <input type="text" id="searchMatrizProd" class="search-input"
+                                placeholder="Buscar tipo, código, nombre..." oninput="filtrarMatrizProd()">
+                        </div>
+                    </div>
+
+                    <!-- Gráfico de Barras por Tipo (Kilos) -->
+                    <div class="matrix-card">
+                        <div class="chart-header" style="margin-bottom:8px;">
+                            <div class="chart-title-group">
+                                <h3 style="color:#10B981; display:flex; align-items:center; gap:8px;">
+                                    <span
+                                        style="width:10px; height:10px; border-radius:50%; background:#10B981;"></span>
+                                    Producción por Tipo de Proceso (Kilos)
+                                </h3>
+                                <p>Distribución en base al campo <b>Tipo</b> (LINEAS, CONGELADO, TERCER CORTE, CHULETAS)
+                                    en T_Produccion</p>
+                            </div>
+                            <span id="badgeProdBarrasTotal" class="badge-tag"
+                                style="background:rgba(16,185,129,0.18); color:#10B981;">Total: 0 kg</span>
+                        </div>
+                        <div style="height:280px; position:relative;">
+                            <canvas id="chartProdTipo"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Matriz Jerárquica: Tipo -> CodigoCorto -> Nombre (Unidades y Kilos) -->
+                    <div class="matrix-card">
+                        <div class="matrix-toolbar">
+                            <h4 style="color:var(--text-primary); font-size:0.95rem; font-weight:700;">
+                                Matriz: Tipo ➔ CódigoCorto ➔ Nombre (Unidades y Kilos)
+                            </h4>
+                            <span id="resumenProdTotales"
+                                style="font-size:0.82rem; color:var(--text-muted); font-family:'JetBrains Mono';">Total:
+                                0 und | 0 kg</span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="matrix-table" id="tbMatrizProd">
+                                <thead>
+                                    <tr>
+                                        <th style="min-width:380px;">Estructura (Tipo ➔ Código Corto ➔ Nombre)</th>
+                                        <th class="num-col" style="color:#00D084;">Unidades</th>
+                                        <th class="num-col" style="color:#10B981;">Kilos</th>
+                                        <th class="num-col">Peso Prom. (kg/und)</th>
+                                        <th class="num-col">% Participación</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyMatrizProd">
+                                    <tr>
+                                        <td colspan="5"
+                                            style="text-align:center; padding:30px; color:var(--text-muted);">
+                                            Cargando matriz de producción...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONTENIDO TAB 5: ANÁLISIS EXCLUSIVO T_DEMANDAPY (BARRAS POR ORIGEN + MATRIZ ORIGEN -> FAMILIA -> CATEGORIA -> CODIGOCORTO -> NOMBRE) -->
+            <div id="tabAnalisisDem" class="tab-content" style="margin-top:16px;">
+                <div style="display:flex; flex-direction:column; gap:20px;">
+                    <!-- Barra de Filtro por Semana para DemandaPy -->
+                    <div class="tab-filter-bar">
+                        <div class="tab-filter-group">
+                            <span style="font-size:0.85rem; font-weight:700; color:#5C7CFA;">📅 Filtrar DemandaPy por
+                                Semana:</span>
+                            <select id="filterSemanaDem" class="filter-select"
+                                onchange="cambiarFiltroSemanaDem(this.value)">
+                                <option value="ALL">Todas las Semanas</option>
+                            </select>
+                            <button class="btn" style="padding:6px 12px; font-size:0.78rem;"
+                                onclick="toggleExpandirMatrizDem(true)">⊞ Expandir Todo</button>
+                            <button class="btn" style="padding:6px 12px; font-size:0.78rem;"
+                                onclick="toggleExpandirMatrizDem(false)">⊟ Contraer Todo</button>
+                        </div>
+                        <div class="search-box" style="min-width:260px;">
+                            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                            <input type="text" id="searchMatrizDem" class="search-input"
+                                placeholder="Buscar origen, familia, categoría, código, nombre..."
+                                oninput="filtrarMatrizDem()">
+                        </div>
+                    </div>
+
+                    <!-- Gráfico de Barras por Origen (Kilos) -->
+                    <div class="matrix-card">
+                        <div class="chart-header" style="margin-bottom:8px;">
+                            <div class="chart-title-group">
+                                <h3 style="color:#5C7CFA; display:flex; align-items:center; gap:8px;">
+                                    <span
+                                        style="width:10px; height:10px; border-radius:50%; background:#5C7CFA;"></span>
+                                    Demanda Proyectada por Canal / Origen (Kilos)
+                                </h3>
+                                <p>Distribución en base al campo <b>Origen</b> (COMERCIAL, EMBUTIDOS, WESTPHALIA) en
+                                    T_DemandaPy</p>
+                            </div>
+                            <span id="badgeDemBarrasTotal" class="badge-tag"
+                                style="background:rgba(92,124,250,0.18); color:#5C7CFA;">Total: 0 kg</span>
+                        </div>
+                        <div style="height:280px; position:relative;">
+                            <canvas id="chartDemOrigen"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Matriz Jerárquica: Origen -> Familia -> Categoria -> CodigoCorto -> Nombre (Kilos) -->
+                    <div class="matrix-card">
+                        <div class="matrix-toolbar">
+                            <h4 style="color:var(--text-primary); font-size:0.95rem; font-weight:700;">
+                                Matriz: Origen ➔ Familia ➔ Categoría ➔ CódigoCorto ➔ Nombre (Kilos)
+                            </h4>
+                            <span id="resumenDemTotales"
+                                style="font-size:0.82rem; color:var(--text-muted); font-family:'JetBrains Mono';">Total:
+                                0 kg</span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="matrix-table" id="tbMatrizDem">
+                                <thead>
+                                    <tr>
+                                        <th style="min-width:420px;">Estructura (Origen ➔ Familia ➔ Categoría ➔ Código ➔
+                                            Nombre)</th>
+                                        <th class="num-col" style="color:#5C7CFA;">Kilos Demandados</th>
+                                        <th class="num-col">% Participación</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyMatrizDem">
+                                    <tr>
+                                        <td colspan="3"
+                                            style="text-align:center; padding:30px; color:var(--text-muted);">
+                                            Cargando matriz de demanda...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toastNotification" class="toast-notification">
+        <span id="toastIcon">ℹ️</span>
+        <span id="toastMsg">Mensaje de notificación</span>
+    </div>
+
+    <script>
+        // =========================================================================
+        // CONFIGURACIÓN DE CONEXIÓN CON AUTO-DETECCIÓN
+        // =========================================================================
+        const APP_CONFIG = {
+            hosts: [
+                "http://RAEVSALL001:8080",
+                "http://RAEVSALL001:5000",
+                "http://localhost:8080",
+                "http://localhost:5000",
+                "http://localhost:5050",
+                "http://localhost:8085",
+                "http://127.0.0.1:8080",
+                "http://127.0.0.1:5000"
+            ]
+        };
+
+        let apiBaseActiva = null;
+        let resumenData = [];
+        let semanasDisponibles = [];
+        let selectedWeeks = new Set();
+        let currentQuickMode = 'all';
+
+        // Árboles jerárquicos principales
+        let treeMatriz1 = {};
+        let treeMatriz2 = {};
+        let expandedNodesMatriz1 = new Set();
+        let expandedNodesMatriz2 = new Set();
+
+        let chartComparativo = null;
+
+        // Filtro General por Año (Multi-Selección)
+        let aniosDisponibles = [];
+        let selectedYears = new Set();
+        let unidadGrafico = 'Tn'; // 'Tn' o 'Kg'
+
+        // Variables para Análisis T_Produccion (Tipo -> CodigoCorto -> Nombre)
+        let dataProdItemsCache = null;
+        let treeMatrizProd = [];
+        let expandedNodesMatrizProd = new Set();
+        let chartProdTipoInstance = null;
+        let filtroSemanaProdActivo = 'ALL';
+
+        // Variables para Análisis T_DemandaPy (Origen -> Familia -> Categoria -> CodigoCorto -> Nombre)
+        let dataDemItemsCache = null;
+        let treeMatrizDem = [];
+        let expandedNodesMatrizDem = new Set();
+        let chartDemOrigenInstance = null;
+        let filtroSemanaDemActivo = 'ALL';
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            initChartDefaults();
+            await inicializarDashboard();
+        });
+
+        function initChartDefaults() {
+            if (typeof ChartDataLabels !== 'undefined') {
+                Chart.register(ChartDataLabels);
+            }
+            Chart.defaults.color = '#94A3B8';
+            Chart.defaults.font.family = "'Inter', sans-serif";
+            Chart.defaults.plugins.tooltip.backgroundColor = '#0B1322';
+            Chart.defaults.plugins.tooltip.titleColor = '#FFFFFF';
+            Chart.defaults.plugins.tooltip.bodyColor = '#CBD5E1';
+            Chart.defaults.plugins.tooltip.borderColor = '#223554';
+            Chart.defaults.plugins.tooltip.borderWidth = 1;
+            Chart.defaults.plugins.tooltip.padding = 10;
+        }
+
+        // =========================================================================
+        // CREADOR DE TEXTURA RAYADA / SOMBRA EN CANVAS
+        // =========================================================================
+        function crearPatronRayado(colorFondo, colorLinea) {
+            const pCanvas = document.createElement('canvas');
+            pCanvas.width = 10;
+            pCanvas.height = 10;
+            const pCtx = pCanvas.getContext('2d');
+            pCtx.fillStyle = colorFondo;
+            pCtx.fillRect(0, 0, 10, 10);
+            pCtx.strokeStyle = colorLinea;
+            pCtx.lineWidth = 1.8;
+            pCtx.beginPath();
+            pCtx.moveTo(0, 10);
+            pCtx.lineTo(10, 0);
+            pCtx.stroke();
+            return pCtx.createPattern(pCanvas, 'repeat');
+        }
+
+        async function fetchConTimeout(url, timeoutMs = 6000) {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+                const response = await fetch(url, { signal: controller.signal });
+                clearTimeout(id);
+                return response;
+            } catch (err) {
+                clearTimeout(id);
+                throw err;
+            }
+        }
+
+        async function detectarServidorApi() {
+            for (const base of APP_CONFIG.hosts) {
+                try {
+                    const res = await fetchConTimeout(`${base}/api/CumplimientosDetalle/semanas`, 1500);
+                    if (res.ok) return base;
+                } catch (e) { }
+            }
+            return null;
+        }
+
+        async function inicializarDashboard() {
+            const statusBadge = document.getElementById('apiStatusBadge');
+            const statusText = document.getElementById('apiStatusText');
+            statusText.textContent = "Conectando...";
+
+            try {
+                apiBaseActiva = await detectarServidorApi();
+
+                if (!apiBaseActiva) {
+                    throw new Error("No se pudo conectar con el API en los puertos 8080 ni 5000.");
+                }
+
+                statusBadge.innerHTML = `<span class="status-dot"></span><span>En Línea (${apiBaseActiva.replace('http://', '')})</span>`;
+                mostrarToast(`Conectado exitosamente al backend en ${apiBaseActiva}`);
+
+                await recargarDatosAPI(false);
+
+            } catch (err) {
+                console.error("Error al inicializar dashboard:", err);
+                statusBadge.innerHTML = `<span class="status-dot" style="background:#EF4444;box-shadow:0 0 8px #EF4444"></span><span style="color:#EF4444">Sin Conexión</span>`;
+                mostrarToast(`Error: ${err.message}`, '⚠️');
+
+                document.getElementById('tbodyMatriz1').innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:#EF4444;">
+                    ⚠️ No se pudo conectar con la API. Asegúrate de ejecutar <code>dotnet run</code> en la carpeta <code>ApiDesposte</code>.
+                </td></tr>`;
+            }
+        }
+
+        async function recargarDatosAPI(forzarRecarga = false) {
+            mostrarToast("Cargando datos desde Cumplimiento_PTC.xlsm...", "⏳");
+            try {
+                const resSemanas = await fetchConTimeout(`${apiBaseActiva}/api/CumplimientosDetalle/semanas`);
+                if (!resSemanas.ok) throw new Error("Error al obtener semanas");
+                semanasDisponibles = await resSemanas.json();
+
+                const urlResumen = `${apiBaseActiva}/api/CumplimientosDetalle/resumen${forzarRecarga ? '?recargar=true' : ''}`;
+                const resResumen = await fetchConTimeout(urlResumen, 25000);
+                if (!resResumen.ok) throw new Error("Error al obtener la tabla resumen");
+                resumenData = await resResumen.json();
+
+                // Extraer años disponibles dinámicamente de semanas y resumenData
+                const yearsSet = new Set();
+                semanasDisponibles.forEach(s => {
+                    const y = s.anio || (s.semana && s.semana.length >= 4 ? parseInt(s.semana.substring(0, 4)) : null);
+                    if (y) yearsSet.add(y);
+                });
+                resumenData.forEach(d => {
+                    const y = d.anio || (d.semana && d.semana.length >= 4 ? parseInt(d.semana.substring(0, 4)) : null);
+                    if (y) yearsSet.add(y);
+                });
+                aniosDisponibles = Array.from(yearsSet).sort();
+
+                // Por defecto, seleccionar todos los años si aún no hay selección
+                if (selectedYears.size === 0) {
+                    aniosDisponibles.forEach(y => selectedYears.add(y));
+                }
+
+                construirSelectorAnios();
+                construirSelectorSemanas();
+                seleccionarFiltroRapido(currentQuickMode);
+                mostrarToast("Datos actualizados correctamente", "✅");
+
+            } catch (err) {
+                console.error("Error al recargar datos:", err);
+                mostrarToast(`Error al cargar datos: ${err.message}`, "❌");
+            }
+        }
+
+        // =========================================================================
+        // SELECTOR GENERAL DE AÑOS (MULTI-SELECCIÓN)
+        // =========================================================================
+        function construirSelectorAnios() {
+            const container = document.getElementById('yearsPillsContainer');
+            if (!container) return;
+            container.innerHTML = '';
+
+            aniosDisponibles.forEach(y => {
+                const countWeeks = semanasDisponibles.filter(s => {
+                    const sa = s.anio || (s.semana && parseInt(s.semana.substring(0, 4)));
+                    return sa === y;
+                }).length;
+
+                const pill = document.createElement('div');
+                pill.className = `year-pill ${selectedYears.has(y) ? 'selected' : ''}`;
+                pill.dataset.anio = y;
+                pill.innerHTML = `
+                    <span>Año ${y}</span>
+                    <span class="year-pill-count">${countWeeks} sem</span>
+                `;
+                pill.onclick = () => toggleAnioPill(y);
+                container.appendChild(pill);
+            });
+
+            actualizarBotonAnioAll();
+        }
+
+        function toggleAnioPill(anio) {
+            if (selectedYears.has(anio)) {
+                if (selectedYears.size > 1) {
+                    selectedYears.delete(anio);
+                } else {
+                    mostrarToast("Debe haber al menos un año seleccionado", "ℹ️");
+                    return;
+                }
+            } else {
+                selectedYears.add(anio);
+            }
+
+            document.querySelectorAll('.year-pill').forEach(pill => {
+                const y = parseInt(pill.dataset.anio);
+                pill.classList.toggle('selected', selectedYears.has(y));
+            });
+
+            actualizarBotonAnioAll();
+
+            // Reconstruir selector de semanas mostrando solo las semanas de los años seleccionados
+            construirSelectorSemanas();
+
+            // Sincronizar selectedWeeks: mantener semanas válidas de selectedYears
+            const semanasValidas = new Set(
+                semanasDisponibles.filter(s => {
+                    const y = s.anio || (s.semana && parseInt(s.semana.substring(0, 4)));
+                    return selectedYears.has(y);
+                }).map(s => s.semana)
+            );
+
+            const tienenInterseccion = Array.from(selectedWeeks).some(w => semanasValidas.has(w));
+            if (!tienenInterseccion || currentQuickMode === 'all') {
+                selectedWeeks.clear();
+                semanasValidas.forEach(w => selectedWeeks.add(w));
+                currentQuickMode = 'all';
+                actualizarBotonesFiltroRapido();
+            } else {
+                Array.from(selectedWeeks).forEach(w => {
+                    if (!semanasValidas.has(w)) selectedWeeks.delete(w);
+                });
+            }
+
+            actualizarVistaTrasFiltro();
+        }
+
+        function seleccionarFiltroRapidoAnio(modo) {
+            if (modo === 'all') {
+                aniosDisponibles.forEach(y => selectedYears.add(y));
+            }
+
+            document.querySelectorAll('.year-pill').forEach(pill => {
+                const y = parseInt(pill.dataset.anio);
+                pill.classList.toggle('selected', selectedYears.has(y));
+            });
+
+            actualizarBotonAnioAll();
+
+            construirSelectorSemanas();
+            // Seleccionar todas las semanas de los años seleccionados
+            selectedWeeks.clear();
+            semanasDisponibles.forEach(s => {
+                const y = s.anio || (s.semana && parseInt(s.semana.substring(0, 4)));
+                if (selectedYears.has(y)) selectedWeeks.add(s.semana);
+            });
+            currentQuickMode = 'all';
+            actualizarBotonesFiltroRapido();
+            actualizarVistaTrasFiltro();
+        }
+
+        function actualizarBotonAnioAll() {
+            const btnAll = document.getElementById('btnQuickYearAll');
+            if (btnAll) {
+                btnAll.classList.toggle('active', selectedYears.size === aniosDisponibles.length);
+            }
+        }
+
+        // =========================================================================
+        // SELECTOR DE SEMANAS
+        // =========================================================================
+        function construirSelectorSemanas() {
+            const container = document.getElementById('weeksPillsContainer');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const semanasFiltradasPorAnio = semanasDisponibles.filter(s => {
+                const y = s.anio || (s.semana && s.semana.length >= 4 ? parseInt(s.semana.substring(0, 4)) : null);
+                return selectedYears.has(y);
+            });
+
+            if (semanasFiltradasPorAnio.length === 0) {
+                container.innerHTML = '<span style="color:var(--text-muted); font-size:0.8rem; padding:6px;">No hay semanas para los años seleccionados.</span>';
+                return;
+            }
+
+            semanasFiltradasPorAnio.forEach(s => {
+                const pill = document.createElement('div');
+                pill.className = `week-pill ${s.tieneDemanda ? 'has-demanda' : ''}`;
+                pill.dataset.semana = s.semana;
+                const anioLabel = selectedYears.size > 1 ? ` (${s.anio || ''})` : '';
+                pill.innerHTML = `
+                    <span>Sem ${s.nSemana || s.semana}</span>
+                    <span style="opacity:0.6;font-size:0.75rem;">${anioLabel}</span>
+                `;
+                pill.onclick = () => toggleSemanaPill(s.semana);
+                container.appendChild(pill);
+            });
+        }
+
+        function toggleSemanaPill(semana) {
+            currentQuickMode = 'custom';
+            actualizarBotonesFiltroRapido();
+
+            if (selectedWeeks.has(semana)) {
+                if (selectedWeeks.size > 1) {
+                    selectedWeeks.delete(semana);
+                } else {
+                    mostrarToast("Debe haber al menos una semana seleccionada", "ℹ️");
+                    return;
+                }
+            } else {
+                selectedWeeks.add(semana);
+            }
+
+            actualizarVistaTrasFiltro();
+        }
+
+        function seleccionarFiltroRapido(mode) {
+            currentQuickMode = mode;
+            actualizarBotonesFiltroRapido();
+            selectedWeeks.clear();
+
+            const semanasFiltradasPorAnio = semanasDisponibles.filter(s => {
+                const y = s.anio || (s.semana && parseInt(s.semana.substring(0, 4)));
+                return selectedYears.has(y);
+            });
+
+            if (mode === 'latest') {
+                if (semanasFiltradasPorAnio.length > 0) {
+                    selectedWeeks.add(semanasFiltradasPorAnio[semanasFiltradasPorAnio.length - 1].semana);
+                }
+            } else if (mode === 'demand') {
+                semanasFiltradasPorAnio.filter(s => s.tieneDemanda).forEach(s => selectedWeeks.add(s.semana));
+                if (selectedWeeks.size === 0 && semanasFiltradasPorAnio.length > 0) {
+                    selectedWeeks.add(semanasFiltradasPorAnio[semanasFiltradasPorAnio.length - 1].semana);
+                }
+            } else if (mode === 'all') {
+                semanasFiltradasPorAnio.forEach(s => selectedWeeks.add(s.semana));
+            }
+
+            actualizarVistaTrasFiltro();
+        }
+
+        function limpiarSemanas() {
+            selectedWeeks.clear();
+            const semanasFiltradasPorAnio = semanasDisponibles.filter(s => {
+                const y = s.anio || (s.semana && parseInt(s.semana.substring(0, 4)));
+                return selectedYears.has(y);
+            });
+            if (semanasFiltradasPorAnio.length > 0) {
+                selectedWeeks.add(semanasFiltradasPorAnio[semanasFiltradasPorAnio.length - 1].semana);
+            }
+            currentQuickMode = 'latest';
+            actualizarBotonesFiltroRapido();
+            actualizarVistaTrasFiltro();
+        }
+
+        function actualizarBotonesFiltroRapido() {
+            document.getElementById('btnQuickLatest').classList.toggle('active', currentQuickMode === 'latest');
+            document.getElementById('btnQuickDemand').classList.toggle('active', currentQuickMode === 'demand');
+            document.getElementById('btnQuickAll').classList.toggle('active', currentQuickMode === 'all');
+        }
+
+        async function actualizarVistaTrasFiltro() {
+            document.querySelectorAll('.week-pill').forEach(pill => {
+                const sem = pill.dataset.semana;
+                pill.classList.toggle('selected', selectedWeeks.has(sem));
+            });
+
+            const summaryEl = document.getElementById('selectedWeeksSummary');
+            const aniosList = Array.from(selectedYears).sort().join(', ');
+
+            const semanasFiltradasPorAnio = semanasDisponibles.filter(s => {
+                const y = s.anio || (s.semana && parseInt(s.semana.substring(0, 4)));
+                return selectedYears.has(y);
+            });
+
+            if (selectedWeeks.size === semanasFiltradasPorAnio.length && semanasFiltradasPorAnio.length > 1) {
+                summaryEl.innerHTML = `Mostrando: Años <b>[${aniosList}]</b> • <b>Todas las Semanas (${selectedWeeks.size} semanas seleccionadas)</b>`;
+            } else if (selectedWeeks.size === 1) {
+                const sem = Array.from(selectedWeeks)[0];
+                const sObj = semanasDisponibles.find(x => x.semana === sem);
+                summaryEl.innerHTML = `Mostrando: Años <b>[${aniosList}]</b> • <b>Semana ${sObj ? sObj.nSemana : sem} (${sObj ? sObj.anio : ''})</b>`;
+            } else {
+                const nombres = Array.from(selectedWeeks).sort().map(w => {
+                    const sObj = semanasDisponibles.find(x => x.semana === w);
+                    return sObj ? (selectedYears.size > 1 ? `S${sObj.nSemana}'${String(sObj.anio).slice(-2)}` : `S${sObj.nSemana}`) : w;
+                }).join(', ');
+                summaryEl.innerHTML = `Mostrando: Años <b>[${aniosList}]</b> • <b>${selectedWeeks.size} semanas (${nombres})</b>`;
+            }
+
+            // Filtrar datos considerando tanto los años como las semanas seleccionadas
+            const filteredData = resumenData.filter(d => {
+                const y = d.anio || (d.semana && parseInt(d.semana.substring(0, 4)));
+                return selectedYears.has(y) && selectedWeeks.has(d.semana);
+            });
+
+            actualizarKPIs(filteredData);
+            renderizarGraficoSemanas();
+            construirYRenderizarMatriz1(filteredData);
+            construirYRenderizarMatriz2(filteredData);
+            actualizarAnalisisDiagnostico(filteredData);
+
+            // Cargar análisis especializados de T_Produccion y T_DemandaPy
+            await cargarAnalisisProfundoTablas();
+        }
+
+        function actualizarKPIs(data) {
+            let totalProd = 0;
+            let totalDemanda = 0;
+            let totalSkus = data.length;
+            let skusAmbos = 0;
+
+            data.forEach(d => {
+                totalProd += d.kilosProd;
+                totalDemanda += d.kilosPy;
+                if (d.kilosProd > 0 && d.kilosPy > 0) skusAmbos++;
+            });
+
+            const diferencia = totalProd - totalDemanda;
+            const pctCumplimiento = totalDemanda > 0 ? (totalProd / totalDemanda) * 100 : 0;
+            const pctVariacion = totalDemanda > 0 ? ((totalProd - totalDemanda) / totalDemanda) * 100 : 0;
+
+            document.getElementById('kpiKilosProd').innerHTML = `${formatearNumero(totalProd)}<span class="kpi-unit">kg</span>`;
+            document.getElementById('kpiKilosDemanda').innerHTML = `${formatearNumero(totalDemanda)}<span class="kpi-unit">kg</span>`;
+
+            const signo = diferencia >= 0 ? '+' : '';
+            const diffEl = document.getElementById('kpiKilosDiferencia');
+            diffEl.innerHTML = `${signo}${formatearNumero(diferencia)}<span class="kpi-unit">kg</span>`;
+            diffEl.className = `kpi-value ${diferencia >= 0 ? 'val-positive' : 'val-negative'}`;
+
+            const badgeDiff = document.getElementById('kpiDiffBadge');
+            badgeDiff.textContent = `${signo}${pctVariacion.toFixed(1)}%`;
+            badgeDiff.className = `badge-kpi ${diferencia >= 0 ? 'badge-success' : 'badge-danger'}`;
+
+            const pctEl = document.getElementById('kpiPctCumplimiento');
+            pctEl.innerHTML = `${pctCumplimiento.toFixed(1)}<span class="kpi-unit">%</span>`;
+
+            const statusLevel = document.getElementById('kpiStatusLevel');
+            if (pctCumplimiento >= 100) {
+                statusLevel.textContent = "Superado / Óptimo";
+                statusLevel.className = "badge-kpi badge-success";
+            } else if (pctCumplimiento >= 90) {
+                statusLevel.textContent = "Aceptable";
+                statusLevel.className = "badge-kpi badge-warning";
+            } else {
+                statusLevel.textContent = "Subcumplimiento";
+                statusLevel.className = "badge-kpi badge-danger";
+            }
+
+            document.getElementById('kpiTotalSkus').innerHTML = `${formatearEntero(totalSkus)}<span class="kpi-unit">SKUs</span>`;
+            document.getElementById('kpiSkusBreakdown').textContent = `Coincidentes: ${formatearEntero(skusAmbos)} (${totalSkus > 0 ? ((skusAmbos / totalSkus) * 100).toFixed(0) : 0}%)`;
+        }
+
+        // =========================================================================
+        // GRÁFICO SEMANAL COMPARATIVO ESTILO POWERBI (SOMBRA ENTRE CURVAS)
+        // =========================================================================
+        function cambiarUnidadGrafico(unidad) {
+            unidadGrafico = unidad;
+            document.getElementById('btnUnitTn').classList.toggle('active', unidad === 'Tn');
+            document.getElementById('btnUnitKg').classList.toggle('active', unidad === 'Kg');
+            document.getElementById('lblLegendAnterior').textContent = `${unidad}_Anterior (Demanda)`;
+            document.getElementById('lblLegendActual').textContent = `${unidad}_Actual (Producción)`;
+            renderizarGraficoSemanas();
+        }
+
+        function renderizarGraficoSemanas() {
+            const ctx = document.getElementById('chartComparativoSemanas').getContext('2d');
+            if (chartComparativo) chartComparativo.destroy();
+
+            // Filtrar semanas por los años seleccionados en el filtro general
+            let semanasFiltradas = semanasDisponibles.filter(s => {
+                const y = s.anio || (s.semana && parseInt(s.semana.substring(0, 4)));
+                return selectedYears.has(y);
+            });
+            semanasFiltradas.sort((a, b) => a.semana.localeCompare(b.semana));
+
+            const divisor = unidadGrafico === 'Tn' ? 1000 : 1;
+
+            const labels = [];
+            const dataDemanda = [];
+            const dataProd = [];
+            const metaSemanas = [];
+
+            semanasFiltradas.forEach(s => {
+                let labelSem = s.nSemana ? (s.nSemana < 10 ? '0' + s.nSemana : '' + s.nSemana) : s.semana;
+                if (selectedYears.size > 1 && s.anio) {
+                    labelSem = `S${labelSem} '${String(s.anio).slice(-2)}`;
+                }
+                labels.push(labelSem);
+
+                const itemsSem = resumenData.filter(d => d.semana === s.semana);
+                const pKg = itemsSem.reduce((acc, curr) => acc + curr.kilosProd, 0);
+                const dKg = itemsSem.reduce((acc, curr) => acc + curr.kilosPy, 0);
+
+                dataDemanda.push(Math.round(dKg / divisor));
+                dataProd.push(Math.round(pKg / divisor));
+                metaSemanas.push(s);
+            });
+
+            chartComparativo = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: `Tn_Anterior (Demanda)`,
+                            data: dataDemanda,
+                            borderColor: '#EAB308',
+                            backgroundColor: '#EAB308',
+                            borderWidth: 2.2,
+                            borderDash: [4, 4],
+                            pointBackgroundColor: '#EAB308',
+                            pointBorderColor: '#FFFFFF',
+                            pointBorderWidth: 1.5,
+                            pointRadius: 3.5,
+                            pointHoverRadius: 6,
+                            fill: false,
+                            tension: 0.15
+                        },
+                        {
+                            label: `Tn_Actual (Producción)`,
+                            data: dataProd,
+                            borderColor: '#1E293B',
+                            borderWidth: 3.2,
+                            pointBackgroundColor: '#1E293B',
+                            pointBorderColor: '#FFFFFF',
+                            pointBorderWidth: 2,
+                            pointRadius: 4.5,
+                            pointHoverRadius: 7,
+                            fill: {
+                                target: 0,
+                                above: 'rgba(239, 68, 68, 0.28)', // Déficit (rojo claro)
+                                below: 'rgba(148, 163, 184, 0.45)'  // Superávit (gris azulado)
+                            },
+                            tension: 0.15
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: { padding: { top: 32, bottom: 10, left: 10, right: 15 } },
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                title: items => {
+                                    const idx = items[0].dataIndex;
+                                    const s = metaSemanas[idx];
+                                    return `Semana ${s ? s.nSemana : ''} (${s ? s.anio : ''})`;
+                                },
+                                label: ctx => {
+                                    const val = ctx.raw;
+                                    const name = ctx.datasetIndex === 0 ? 'Demanda (Plan)' : 'Producción (Real)';
+                                    return ` ${name}: ${val.toLocaleString('es-PE')} ${unidadGrafico}`;
+                                },
+                                afterBody: items => {
+                                    if (items.length >= 2) {
+                                        const dem = items[0].raw;
+                                        const prod = items[1].raw;
+                                        const diff = prod - dem;
+                                        const pct = dem > 0 ? ((diff / dem) * 100).toFixed(1) : 0;
+                                        const signo = diff >= 0 ? '+' : '';
+                                        return [
+                                            `-----------------------------`,
+                                            ` Variación: ${signo}${diff.toLocaleString('es-PE')} ${unidadGrafico} (${signo}${pct}%)`
+                                        ];
+                                    }
+                                }
+                            }
+                        },
+                        datalabels: {
+                            display: context => {
+                                // Mostrar badges solo en el dataset de Producción (índice 1)
+                                if (context.datasetIndex !== 1) return false;
+                                const idx = context.dataIndex;
+                                const prod = context.dataset.data[idx];
+                                const dem = context.chart.data.datasets[0].data[idx];
+                                return (prod > 0 || dem > 0);
+                            },
+                            formatter: (val, context) => {
+                                const idx = context.dataIndex;
+                                const prod = val;
+                                const dem = context.chart.data.datasets[0].data[idx];
+                                if (!dem || dem === 0) return prod > 0 ? '+100%' : '0%';
+                                const diffPct = Math.round(((prod - dem) / dem) * 100);
+                                return `${diffPct >= 0 ? '+' : ''}${diffPct}%`;
+                            },
+                            color: context => {
+                                const idx = context.dataIndex;
+                                const prod = context.dataset.data[idx];
+                                const dem = context.chart.data.datasets[0].data[idx];
+                                return prod >= dem ? '#0D9488' : '#E11D48';
+                            },
+                            backgroundColor: context => {
+                                const idx = context.dataIndex;
+                                const prod = context.dataset.data[idx];
+                                const dem = context.chart.data.datasets[0].data[idx];
+                                return prod >= dem ? 'rgba(240, 253, 250, 0.95)' : 'rgba(254, 242, 242, 0.95)';
+                            },
+                            borderColor: context => {
+                                const idx = context.dataIndex;
+                                const prod = context.dataset.data[idx];
+                                const dem = context.chart.data.datasets[0].data[idx];
+                                return prod >= dem ? '#14B8A6' : '#F87171';
+                            },
+                            borderWidth: 1,
+                            borderRadius: 4,
+                            padding: { top: 2, bottom: 2, left: 5, right: 5 },
+                            font: { family: "'Inter', sans-serif", size: 9.5, weight: '800' },
+                            align: context => {
+                                const idx = context.dataIndex;
+                                const prod = context.dataset.data[idx];
+                                const dem = context.chart.data.datasets[0].data[idx];
+                                return prod >= dem ? 'top' : 'bottom';
+                            },
+                            offset: 6
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { color: '#64748B', font: { size: 10.5, weight: '700' } },
+                            title: {
+                                display: true,
+                                text: 'Semana',
+                                color: '#94A3B8',
+                                font: { size: 11, weight: '600' }
+                            }
+                        },
+                        y: {
+                            type: 'linear',
+                            position: 'left',
+                            grid: { color: 'rgba(255, 255, 255, 0.06)' },
+                            ticks: {
+                                color: '#94A3B8',
+                                font: { size: 10.5, weight: '600' },
+                                callback: val => val.toLocaleString('es-PE')
+                            },
+                            title: {
+                                display: true,
+                                text: unidadGrafico,
+                                color: '#94A3B8',
+                                font: { size: 11, weight: '700' }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // =========================================================================
+        // MATRIZ 1: SEMANA ➔ FAMILIA ➔ CATEGORIA
+        // =========================================================================
+        function construirYRenderizarMatriz1(datos) {
+            const arbol = {};
+
+            datos.forEach(d => {
+                const semKey = d.semana;
+                if (!arbol[semKey]) {
+                    arbol[semKey] = {
+                        semana: semKey,
+                        anio: d.anio,
+                        nSemana: d.nSemana,
+                        kilosProd: 0,
+                        kilosPy: 0,
+                        familias: {}
+                    };
+                }
+                arbol[semKey].kilosProd += d.kilosProd;
+                arbol[semKey].kilosPy += d.kilosPy;
+
+                const famKey = d.familia || 'SIN FAMILIA';
+                if (!arbol[semKey].familias[famKey]) {
+                    arbol[semKey].familias[famKey] = {
+                        familia: famKey,
+                        kilosProd: 0,
+                        kilosPy: 0,
+                        categorias: {}
+                    };
+                }
+                arbol[semKey].familias[famKey].kilosProd += d.kilosProd;
+                arbol[semKey].familias[famKey].kilosPy += d.kilosPy;
+
+                const catKey = d.categoria || 'SIN CATEGORIA';
+                if (!arbol[semKey].familias[famKey].categorias[catKey]) {
+                    arbol[semKey].familias[famKey].categorias[catKey] = {
+                        categoria: catKey,
+                        kilosProd: 0,
+                        kilosPy: 0
+                    };
+                }
+                arbol[semKey].familias[famKey].categorias[catKey].kilosProd += d.kilosProd;
+                arbol[semKey].familias[famKey].categorias[catKey].kilosPy += d.kilosPy;
+            });
+
+            treeMatriz1 = arbol;
+
+            if (expandedNodesMatriz1.size === 0) {
+                const semList = Object.keys(arbol).sort((a, b) => b.localeCompare(a));
+                semList.slice(0, 2).forEach(s => expandedNodesMatriz1.add(`sem_${s}`));
+            }
+
+            renderizarTablaMatriz1();
+        }
+
+        function renderizarTablaMatriz1() {
+            const tbody = document.getElementById('tbodyMatriz1');
+            tbody.innerHTML = '';
+
+            const searchTerm = (document.getElementById('searchMatriz1').value || '').trim().toUpperCase();
+            const semKeys = Object.keys(treeMatriz1).sort((a, b) => b.localeCompare(a));
+
+            if (semKeys.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px; color:var(--text-muted);">No hay datos disponibles para la selección.</td></tr>';
+                return;
+            }
+
+            let filasRenderizadas = 0;
+
+            semKeys.forEach(semKey => {
+                const sNode = treeMatriz1[semKey];
+                const semId = `sem_${semKey}`;
+                const isSemExpanded = expandedNodesMatriz1.has(semId) || searchTerm.length > 0;
+
+                const diffSem = sNode.kilosProd - sNode.kilosPy;
+                const pctVarSem = sNode.kilosPy > 0 ? ((diffSem / sNode.kilosPy) * 100) : 0;
+                const pctCumpSem = sNode.kilosPy > 0 ? ((sNode.kilosProd / sNode.kilosPy) * 100) : 0;
+
+                const trSem = document.createElement('tr');
+                trSem.className = 'level-1';
+                trSem.innerHTML = `
+                    <td>
+                        <span class="toggle-icon" onclick="toggleNodeMatriz1('${semId}')">${isSemExpanded ? '−' : '+'}</span>
+                        <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--color-prod); margin-right:8px;"></span>
+                        <b>Semana ${sNode.nSemana || semKey}</b> (${sNode.anio || ''})
+                    </td>
+                    <td class="num-cell" style="color:var(--color-prod);"><b>${formatearNumero(sNode.kilosProd)}</b></td>
+                    <td class="num-cell" style="color:var(--color-demanda);"><b>${formatearNumero(sNode.kilosPy)}</b></td>
+                    <td class="num-cell ${diffSem >= 0 ? 'val-positive' : 'val-negative'}"><b>${diffSem >= 0 ? '+' : ''}${formatearNumero(diffSem)}</b></td>
+                    <td class="num-cell ${diffSem >= 0 ? 'val-positive' : 'val-negative'}"><b>${diffSem >= 0 ? '+' : ''}${pctVarSem.toFixed(1)}%</b></td>
+                    <td class="num-cell"><span class="badge-kpi ${pctCumpSem >= 100 ? 'badge-success' : 'badge-danger'}">${pctCumpSem.toFixed(1)}%</span></td>
+                `;
+                tbody.appendChild(trSem);
+                filasRenderizadas++;
+
+                if (isSemExpanded) {
+                    const famKeys = Object.keys(sNode.familias).sort();
+
+                    famKeys.forEach(famKey => {
+                        const fNode = sNode.familias[famKey];
+                        const famId = `fam_${semKey}_${famKey}`;
+                        const isFamExpanded = expandedNodesMatriz1.has(famId) || searchTerm.length > 0;
+
+                        const diffFam = fNode.kilosProd - fNode.kilosPy;
+                        const pctVarFam = fNode.kilosPy > 0 ? ((diffFam / fNode.kilosPy) * 100) : 0;
+                        const pctCumpFam = fNode.kilosPy > 0 ? ((fNode.kilosProd / fNode.kilosPy) * 100) : 0;
+
+                        if (searchTerm.length > 0 && !famKey.includes(searchTerm) && !semKey.includes(searchTerm)) {
+                            const coincideHijo = Object.keys(fNode.categorias).some(c => c.includes(searchTerm));
+                            if (!coincideHijo) return;
+                        }
+
+                        const trFam = document.createElement('tr');
+                        trFam.className = 'level-2';
+                        trFam.innerHTML = `
+                            <td style="padding-left: 36px;">
+                                <span class="toggle-icon" onclick="toggleNodeMatriz1('${famId}')">${isFamExpanded ? '−' : '+'}</span>
+                                <span style="color:#7995FA; font-weight:700;">${famKey}</span>
+                            </td>
+                            <td class="num-cell">${formatearNumero(fNode.kilosProd)}</td>
+                            <td class="num-cell">${formatearNumero(fNode.kilosPy)}</td>
+                            <td class="num-cell ${diffFam >= 0 ? 'val-positive' : 'val-negative'}">${diffFam >= 0 ? '+' : ''}${formatearNumero(diffFam)}</td>
+                            <td class="num-cell ${diffFam >= 0 ? 'val-positive' : 'val-negative'}">${diffFam >= 0 ? '+' : ''}${pctVarFam.toFixed(1)}%</td>
+                            <td class="num-cell"><span class="badge-kpi ${pctCumpFam >= 100 ? 'badge-success' : 'badge-danger'}">${pctCumpFam.toFixed(1)}%</span></td>
+                        `;
+                        tbody.appendChild(trFam);
+                        filasRenderizadas++;
+
+                        if (isFamExpanded) {
+                            const catKeys = Object.keys(fNode.categorias).sort();
+
+                            catKeys.forEach(catKey => {
+                                const cNode = fNode.categorias[catKey];
+                                if (searchTerm.length > 0 && !catKey.includes(searchTerm) && !famKey.includes(searchTerm) && !semKey.includes(searchTerm)) {
+                                    return;
+                                }
+
+                                const diffCat = cNode.kilosProd - cNode.kilosPy;
+                                const pctVarCat = cNode.kilosPy > 0 ? ((diffCat / cNode.kilosPy) * 100) : 0;
+                                const pctCumpCat = cNode.kilosPy > 0 ? ((cNode.kilosProd / cNode.kilosPy) * 100) : 0;
+
+                                const trCat = document.createElement('tr');
+                                trCat.className = 'level-3';
+                                trCat.innerHTML = `
+                                    <td style="padding-left: 68px;">
+                                        <span style="color:var(--text-muted); margin-right:8px;">↳</span>
+                                        <span>${catKey}</span>
+                                    </td>
+                                    <td class="num-cell">${formatearNumero(cNode.kilosProd)}</td>
+                                    <td class="num-cell">${formatearNumero(cNode.kilosPy)}</td>
+                                    <td class="num-cell ${diffCat >= 0 ? 'val-positive' : 'val-negative'}">${diffCat >= 0 ? '+' : ''}${formatearNumero(diffCat)}</td>
+                                    <td class="num-cell ${diffCat >= 0 ? 'val-positive' : 'val-negative'}">${diffCat >= 0 ? '+' : ''}${pctVarCat.toFixed(1)}%</td>
+                                    <td class="num-cell"><span class="badge-kpi ${pctCumpCat >= 100 ? 'badge-success' : 'badge-danger'}">${pctCumpCat.toFixed(1)}%</span></td>
+                                `;
+                                tbody.appendChild(trCat);
+                                filasRenderizadas++;
+                            });
+                        }
+                    });
+                }
+            });
+
+            if (filasRenderizadas === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px; color:var(--text-muted);">No se encontraron registros que coincidan con la búsqueda.</td></tr>';
+            }
+        }
+
+        function toggleNodeMatriz1(id) {
+            if (expandedNodesMatriz1.has(id)) expandedNodesMatriz1.delete(id);
+            else expandedNodesMatriz1.add(id);
+            renderizarTablaMatriz1();
+        }
+
+        function toggleExpandirTodoMatriz1(expandir) {
+            expandedNodesMatriz1.clear();
+            if (expandir) {
+                Object.keys(treeMatriz1).forEach(semKey => {
+                    expandedNodesMatriz1.add(`sem_${semKey}`);
+                    const sNode = treeMatriz1[semKey];
+                    Object.keys(sNode.familias).forEach(famKey => {
+                        expandedNodesMatriz1.add(`fam_${semKey}_${famKey}`);
+                    });
+                });
+            }
+            renderizarTablaMatriz1();
+        }
+
+        function filtrarMatriz1() {
+            renderizarTablaMatriz1();
+        }
+
+        // =========================================================================
+        // MATRIZ 2: FAMILIA ➔ CATEGORIA ➔ CODIGOCORTO ➔ NOMBRE
+        // =========================================================================
+        function construirYRenderizarMatriz2(datos) {
+            const arbol = {};
+
+            datos.forEach(d => {
+                const famKey = d.familia || 'SIN FAMILIA';
+                if (!arbol[famKey]) {
+                    arbol[famKey] = {
+                        familia: famKey,
+                        kilosProd: 0,
+                        kilosPy: 0,
+                        categorias: {}
+                    };
+                }
+                arbol[famKey].kilosProd += d.kilosProd;
+                arbol[famKey].kilosPy += d.kilosPy;
+
+                const catKey = d.categoria || 'SIN CATEGORIA';
+                if (!arbol[famKey].categorias[catKey]) {
+                    arbol[famKey].categorias[catKey] = {
+                        categoria: catKey,
+                        kilosProd: 0,
+                        kilosPy: 0,
+                        articulos: {}
+                    };
+                }
+                arbol[famKey].categorias[catKey].kilosProd += d.kilosProd;
+                arbol[famKey].categorias[catKey].kilosPy += d.kilosPy;
+
+                const artKey = d.codigoCorto;
+                if (!arbol[famKey].categorias[catKey].articulos[artKey]) {
+                    arbol[famKey].categorias[catKey].articulos[artKey] = {
+                        codigoCorto: d.codigoCorto,
+                        producto: d.producto,
+                        nombre: d.nombre,
+                        kilosProd: 0,
+                        kilosPy: 0
+                    };
+                }
+                arbol[famKey].categorias[catKey].articulos[artKey].kilosProd += d.kilosProd;
+                arbol[famKey].categorias[catKey].articulos[artKey].kilosPy += d.kilosPy;
+            });
+
+            treeMatriz2 = arbol;
+
+            if (expandedNodesMatriz2.size === 0) {
+                const famKeys = Object.keys(arbol).sort();
+                if (famKeys.length > 0) expandedNodesMatriz2.add(`fam2_${famKeys[0]}`);
+            }
+
+            renderizarTablaMatriz2();
+        }
+
+        function renderizarTablaMatriz2() {
+            const tbody = document.getElementById('tbodyMatriz2');
+            tbody.innerHTML = '';
+
+            const searchTerm = (document.getElementById('searchMatriz2').value || '').trim().toUpperCase();
+            const famKeys = Object.keys(treeMatriz2).sort();
+
+            if (famKeys.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px; color:var(--text-muted);">No hay datos disponibles para la selección.</td></tr>';
+                return;
+            }
+
+            let filasRenderizadas = 0;
+
+            famKeys.forEach(famKey => {
+                const fNode = treeMatriz2[famKey];
+                const famId = `fam2_${famKey}`;
+                const isFamExpanded = expandedNodesMatriz2.has(famId) || searchTerm.length > 0;
+
+                const diffFam = fNode.kilosProd - fNode.kilosPy;
+                const pctVarFam = fNode.kilosPy > 0 ? ((diffFam / fNode.kilosPy) * 100) : 0;
+                const pctCumpFam = fNode.kilosPy > 0 ? ((fNode.kilosProd / fNode.kilosPy) * 100) : 0;
+
+                const trFam = document.createElement('tr');
+                trFam.className = 'level-1';
+                trFam.innerHTML = `
+                    <td>
+                        <span class="toggle-icon" onclick="toggleNodeMatriz2('${famId}')">${isFamExpanded ? '−' : '+'}</span>
+                        <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#7995FA; margin-right:8px;"></span>
+                        <b>${famKey}</b>
+                    </td>
+                    <td class="num-cell" style="color:var(--color-prod);"><b>${formatearNumero(fNode.kilosProd)}</b></td>
+                    <td class="num-cell" style="color:var(--color-demanda);"><b>${formatearNumero(fNode.kilosPy)}</b></td>
+                    <td class="num-cell ${diffFam >= 0 ? 'val-positive' : 'val-negative'}"><b>${diffFam >= 0 ? '+' : ''}${formatearNumero(diffFam)}</b></td>
+                    <td class="num-cell ${diffFam >= 0 ? 'val-positive' : 'val-negative'}"><b>${diffFam >= 0 ? '+' : ''}${pctVarFam.toFixed(1)}%</b></td>
+                    <td class="num-cell"><span class="badge-kpi ${pctCumpFam >= 100 ? 'badge-success' : 'badge-danger'}">${pctCumpFam.toFixed(1)}%</span></td>
+                `;
+                tbody.appendChild(trFam);
+                filasRenderizadas++;
+
+                if (isFamExpanded) {
+                    const catKeys = Object.keys(fNode.categorias).sort();
+
+                    catKeys.forEach(catKey => {
+                        const cNode = fNode.categorias[catKey];
+                        const catId = `cat2_${famKey}_${catKey}`;
+                        const isCatExpanded = expandedNodesMatriz2.has(catId) || searchTerm.length > 0;
+
+                        const diffCat = cNode.kilosProd - cNode.kilosPy;
+                        const pctVarCat = cNode.kilosPy > 0 ? ((diffCat / cNode.kilosPy) * 100) : 0;
+                        const pctCumpCat = cNode.kilosPy > 0 ? ((cNode.kilosProd / cNode.kilosPy) * 100) : 0;
+
+                        if (searchTerm.length > 0 && !famKey.includes(searchTerm) && !catKey.includes(searchTerm)) {
+                            const coincideHijo = Object.values(cNode.articulos).some(a =>
+                                a.codigoCorto.includes(searchTerm) || (a.nombre || '').toUpperCase().includes(searchTerm) || (a.producto || '').includes(searchTerm)
+                            );
+                            if (!coincideHijo) return;
+                        }
+
+                        const trCat = document.createElement('tr');
+                        trCat.className = 'level-2';
+                        trCat.innerHTML = `
+                            <td style="padding-left: 36px;">
+                                <span class="toggle-icon" onclick="toggleNodeMatriz2('${catId}')">${isCatExpanded ? '−' : '+'}</span>
+                                <span style="color:#38BDF8; font-weight:700;">${catKey}</span>
+                            </td>
+                            <td class="num-cell">${formatearNumero(cNode.kilosProd)}</td>
+                            <td class="num-cell">${formatearNumero(cNode.kilosPy)}</td>
+                            <td class="num-cell ${diffCat >= 0 ? 'val-positive' : 'val-negative'}">${diffCat >= 0 ? '+' : ''}${formatearNumero(diffCat)}</td>
+                            <td class="num-cell ${diffCat >= 0 ? 'val-positive' : 'val-negative'}">${diffCat >= 0 ? '+' : ''}${pctVarCat.toFixed(1)}%</td>
+                            <td class="num-cell"><span class="badge-kpi ${pctCumpCat >= 100 ? 'badge-success' : 'badge-danger'}">${pctCumpCat.toFixed(1)}%</span></td>
+                        `;
+                        tbody.appendChild(trCat);
+                        filasRenderizadas++;
+
+                        if (isCatExpanded) {
+                            const artKeys = Object.keys(cNode.articulos).sort();
+
+                            artKeys.forEach(artKey => {
+                                const aNode = cNode.articulos[artKey];
+                                if (searchTerm.length > 0 &&
+                                    !famKey.includes(searchTerm) &&
+                                    !catKey.includes(searchTerm) &&
+                                    !aNode.codigoCorto.includes(searchTerm) &&
+                                    !(aNode.nombre || '').toUpperCase().includes(searchTerm) &&
+                                    !(aNode.producto || '').includes(searchTerm)) {
+                                    return;
+                                }
+
+                                const diffArt = aNode.kilosProd - aNode.kilosPy;
+                                const pctVarArt = aNode.kilosPy > 0 ? ((diffArt / aNode.kilosPy) * 100) : 0;
+                                const pctCumpArt = aNode.kilosPy > 0 ? ((aNode.kilosProd / aNode.kilosPy) * 100) : 0;
+
+                                const trArt = document.createElement('tr');
+                                trArt.className = 'level-3';
+                                trArt.innerHTML = `
+                                    <td style="padding-left: 68px;">
+                                        <span style="color:var(--text-muted); margin-right:8px;">↳</span>
+                                        <b style="color:var(--text-primary); font-family:'JetBrains Mono'; margin-right:8px;">[${aNode.codigoCorto}]</b>
+                                        <span>${aNode.nombre || 'SIN DESCRIPCION'}</span>
+                                        ${aNode.producto ? `<span style="font-size:0.75rem; color:var(--text-dim); margin-left:6px;">(${aNode.producto})</span>` : ''}
+                                    </td>
+                                    <td class="num-cell">${formatearNumero(aNode.kilosProd)}</td>
+                                    <td class="num-cell">${formatearNumero(aNode.kilosPy)}</td>
+                                    <td class="num-cell ${diffArt >= 0 ? 'val-positive' : 'val-negative'}">${diffArt >= 0 ? '+' : ''}${formatearNumero(diffArt)}</td>
+                                    <td class="num-cell ${diffArt >= 0 ? 'val-positive' : 'val-negative'}">${diffArt >= 0 ? '+' : ''}${pctVarArt.toFixed(1)}%</td>
+                                    <td class="num-cell"><span class="badge-kpi ${pctCumpArt >= 100 ? 'badge-success' : 'badge-danger'}">${pctCumpArt.toFixed(1)}%</span></td>
+                                `;
+                                tbody.appendChild(trArt);
+                                filasRenderizadas++;
+                            });
+                        }
+                    });
+                }
+            });
+
+            if (filasRenderizadas === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px; color:var(--text-muted);">No se encontraron registros que coincidan con la búsqueda.</td></tr>';
+            }
+        }
+
+        function toggleNodeMatriz2(id) {
+            if (expandedNodesMatriz2.has(id)) expandedNodesMatriz2.delete(id);
+            else expandedNodesMatriz2.add(id);
+            renderizarTablaMatriz2();
+        }
+
+        function toggleExpandirTodoMatriz2(expandir) {
+            expandedNodesMatriz2.clear();
+            if (expandir) {
+                Object.keys(treeMatriz2).forEach(famKey => {
+                    expandedNodesMatriz2.add(`fam2_${famKey}`);
+                    const fNode = treeMatriz2[famKey];
+                    Object.keys(fNode.categorias).forEach(catKey => {
+                        expandedNodesMatriz2.add(`cat2_${famKey}_${catKey}`);
+                    });
+                });
+            }
+            renderizarTablaMatriz2();
+        }
+
+        function filtrarMatriz2() {
+            renderizarTablaMatriz2();
+        }
+
+        // =========================================================================
+        // ANÁLISIS COMPARATIVO (CRUCE Y BRECHAS)
+        // =========================================================================
+        function actualizarAnalisisDiagnostico(data) {
+            let skusTotales = data.length;
+            let skusAmbos = 0;
+            let skusSoloProd = 0;
+            let skusSoloDem = 0;
+
+            data.forEach(d => {
+                if (d.kilosProd > 0 && d.kilosPy > 0) skusAmbos++;
+                else if (d.kilosProd > 0) skusSoloProd++;
+                else if (d.kilosPy > 0) skusSoloDem++;
+            });
+
+            document.getElementById('diagTotalSkus').textContent = formatearEntero(skusTotales);
+            document.getElementById('diagSkusAmbos').textContent = `${formatearEntero(skusAmbos)} (${skusTotales > 0 ? ((skusAmbos / skusTotales) * 100).toFixed(1) : 0}%)`;
+            document.getElementById('diagSkusSoloProd').textContent = `${formatearEntero(skusSoloProd)} (${skusTotales > 0 ? ((skusSoloProd / skusTotales) * 100).toFixed(1) : 0}%)`;
+            document.getElementById('diagSkusSoloDem').textContent = `${formatearEntero(skusSoloDem)} (${skusTotales > 0 ? ((skusSoloDem / skusTotales) * 100).toFixed(1) : 0}%)`;
+
+            const tasa = (skusAmbos + skusSoloDem) > 0 ? ((skusAmbos / (skusAmbos + skusSoloDem)) * 100) : 0;
+            document.getElementById('diagTasaCoincidencia').textContent = `${tasa.toFixed(1)}% Cobertura`;
+
+            // Top 5 Sobrecumplimiento
+            const topSobrecump = [...data]
+                .filter(d => d.diferencia > 0)
+                .sort((a, b) => b.diferencia - a.diferencia)
+                .slice(0, 5);
+
+            const containerSobre = document.getElementById('listTopSobrecumplimiento');
+            containerSobre.innerHTML = '';
+
+            if (topSobrecump.length === 0) {
+                containerSobre.innerHTML = '<span style="color:var(--text-muted);font-size:0.8rem;">No hay registros con sobrecumplimiento.</span>';
+            } else {
+                topSobrecump.forEach((item, idx) => {
+                    const el = document.createElement('div');
+                    el.className = 'ranking-item';
+                    el.innerHTML = `
+                        <div class="ranking-info">
+                            <span class="ranking-title"><b>#${idx + 1}</b> [${item.codigoCorto}] ${item.nombre}</span>
+                            <span class="ranking-meta">Sem ${item.semana} • ${item.familia} • Prod: ${formatearNumero(item.kilosProd)} kg | Py: ${formatearNumero(item.kilosPy)} kg</span>
+                        </div>
+                        <div class="ranking-value val-positive">+${formatearNumero(item.diferencia)} kg</div>
+                    `;
+                    containerSobre.appendChild(el);
+                });
+            }
+
+            // Top 5 Subcumplimiento
+            const topSubcump = [...data]
+                .filter(d => d.diferencia < 0)
+                .sort((a, b) => a.diferencia - b.diferencia)
+                .slice(0, 5);
+
+            const containerSub = document.getElementById('listTopSubcumplimiento');
+            containerSub.innerHTML = '';
+
+            if (topSubcump.length === 0) {
+                containerSub.innerHTML = '<span style="color:var(--text-muted);font-size:0.8rem;">No hay registros con déficit.</span>';
+            } else {
+                topSubcump.forEach((item, idx) => {
+                    const el = document.createElement('div');
+                    el.className = 'ranking-item';
+                    el.innerHTML = `
+                        <div class="ranking-info">
+                            <span class="ranking-title"><b>#${idx + 1}</b> [${item.codigoCorto}] ${item.nombre}</span>
+                            <span class="ranking-meta">Sem ${item.semana} • ${item.familia} • Py: ${formatearNumero(item.kilosPy)} kg | Prod: ${formatearNumero(item.kilosProd)} kg</span>
+                        </div>
+                        <div class="ranking-value val-negative">${formatearNumero(item.diferencia)} kg</div>
+                    `;
+                    containerSub.appendChild(el);
+                });
+            }
+        }
+
+        // =========================================================================
+        // CARGA Y RENDERIZADO DE ANÁLISIS EXCLUSIVO T_PRODUCCION Y T_DEMANDAPY
+        // =========================================================================
+        // =========================================================================
+        // CARGA Y RENDERIZADO DE ANÁLISIS EXCLUSIVO T_PRODUCCION Y T_DEMANDAPY
+        // =========================================================================
+        function poblarDropdownsSemanas() {
+            const selProd = document.getElementById('filterSemanaProd');
+            const selDem = document.getElementById('filterSemanaDem');
+            if (!selProd || !selDem) return;
+
+            const semanasFiltradasPorAnio = semanasDisponibles.filter(s => {
+                const y = s.anio || (s.semana && parseInt(s.semana.substring(0, 4)));
+                return selectedYears.has(y);
+            });
+
+            let html = '<option value="ALL">Todas las Semanas</option>';
+            semanasFiltradasPorAnio.forEach(s => {
+                html += `<option value="${s.semana}">Semana ${s.nSemana || s.semana} (${s.anio || ''})</option>`;
+            });
+
+            selProd.innerHTML = html;
+            selDem.innerHTML = html;
+
+            if (filtroSemanaProdActivo !== 'ALL' && !semanasFiltradasPorAnio.some(s => s.semana === filtroSemanaProdActivo)) {
+                filtroSemanaProdActivo = 'ALL';
+            }
+            if (filtroSemanaDemActivo !== 'ALL' && !semanasFiltradasPorAnio.some(s => s.semana === filtroSemanaDemActivo)) {
+                filtroSemanaDemActivo = 'ALL';
+            }
+
+            selProd.value = filtroSemanaProdActivo;
+            selDem.value = filtroSemanaDemActivo;
+        }
+
+        async function cargarAnalisisProfundoTablas() {
+            poblarDropdownsSemanas();
+
+            // Cargar datos en paralelo para Producción y Demanda
+            await Promise.all([
+                cargarYRenderizarProduccion(filtroSemanaProdActivo),
+                cargarYRenderizarDemanda(filtroSemanaDemActivo)
+            ]);
+        }
+
+        // -------------------------------------------------------------------------
+        // ESPECIALIZADO: T_PRODUCCION (BARRAS POR TIPO + MATRIZ TIPO -> CODIGO -> NOMBRE)
+        // -------------------------------------------------------------------------
+        async function cambiarFiltroSemanaProd(semana) {
+            filtroSemanaProdActivo = semana;
+            await cargarYRenderizarProduccion(semana);
+        }
+
+        async function cargarYRenderizarProduccion(semana = 'ALL') {
+            let payload = null;
+            const querySem = semana !== 'ALL' ? `?semana=${encodeURIComponent(semana)}` : '';
+
+            if (apiBaseActiva) {
+                try {
+                    const res = await fetchConTimeout(`${apiBaseActiva}/api/CumplimientosDetalle/matriz-produccion-tipo${querySem}`, 8000);
+                    if (res.ok) {
+                        payload = await res.json();
+                    }
+                } catch (e) {
+                    console.warn("Endpoint matriz-produccion-tipo no disponible, usando motor cliente:", e);
+                }
+            }
+
+            if (!payload || !payload.matriz || payload.matriz.length === 0) {
+                payload = calcularMatrizProduccionCliente(semana);
+            }
+
+            renderizarGraficoBarrasProd(payload.barras || []);
+            construirYRenderizarMatrizProd(payload.matriz || []);
+
+            const badgeTotal = document.getElementById('badgeProdBarrasTotal');
+            if (badgeTotal) badgeTotal.textContent = `Total: ${formatearNumero(payload.totalKilos)} kg`;
+
+            const resTotal = document.getElementById('resumenProdTotales');
+            if (resTotal) resTotal.textContent = `Total: ${formatearEntero(payload.totalUnidades)} und | ${formatearNumero(payload.totalKilos)} kg`;
+        }
+
+        function renderizarGraficoBarrasProd(barras) {
+            const ctx = document.getElementById('chartProdTipo');
+            if (!ctx) return;
+            if (chartProdTipoInstance) chartProdTipoInstance.destroy();
+
+            const labels = barras.map(b => b.tipo);
+            const dataKilos = barras.map(b => b.kilos);
+            const dataUnds = barras.map(b => b.unidades || 0);
+
+            const colores = [
+                '#10B981', '#06B6D4', '#3B82F6', '#F59E0B', '#8B5CF6', '#EC4899', '#14B8A6'
+            ];
+
+            chartProdTipoInstance = new Chart(ctx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Kilos Producidos',
+                        data: dataKilos,
+                        backgroundColor: colores.slice(0, labels.length),
+                        borderRadius: 6,
+                        borderWidth: 0,
+                        barPercentage: 0.6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: { padding: { top: 25, bottom: 5, left: 10, right: 10 } },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => {
+                                    const k = ctx.raw;
+                                    const u = dataUnds[ctx.dataIndex];
+                                    return [
+                                        ` Volumen: ${formatearNumero(k)} kg`,
+                                        ` Unidades: ${formatearEntero(u)} und`,
+                                        ` Promedio: ${u > 0 ? (k / u).toFixed(2) : '0.00'} kg/und`
+                                    ];
+                                }
+                            }
+                        },
+                        datalabels: {
+                            display: true,
+                            color: '#FFFFFF',
+                            font: { family: "'Inter', sans-serif", weight: 'bold', size: 10.5 },
+                            anchor: 'end',
+                            align: 'top',
+                            formatter: val => {
+                                if (val >= 1000) return (val / 1000).toFixed(1) + 'k kg';
+                                return formatearNumero(val) + ' kg';
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(255,255,255,0.04)' },
+                            ticks: { color: '#CBD5E1', font: { size: 11, weight: '700' } }
+                        },
+                        y: {
+                            grid: { color: 'rgba(255,255,255,0.06)' },
+                            ticks: {
+                                color: '#94A3B8',
+                                font: { size: 10 },
+                                callback: val => (val / 1000).toFixed(0) + 'k'
+                            },
+                            title: { display: true, text: 'Kilos (kg)', color: '#94A3B8', font: { size: 11, weight: '600' } }
+                        }
+                    }
+                }
+            });
+        }
+
+        function construirYRenderizarMatrizProd(matriz) {
+            treeMatrizProd = matriz;
+            if (expandedNodesMatrizProd.size === 0 && matriz.length > 0) {
+                // Expandir primer Tipo por defecto
+                expandedNodesMatrizProd.add(`tipo_${matriz[0].tipo}`);
+            }
+            renderizarTablaMatrizProd();
+        }
+
+        function renderizarTablaMatrizProd() {
+            const tbody = document.getElementById('tbodyMatrizProd');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            const searchTerm = (document.getElementById('searchMatrizProd').value || '').trim().toUpperCase();
+
+            if (!treeMatrizProd || treeMatrizProd.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:var(--text-muted);">No hay datos de producción para el filtro seleccionado.</td></tr>';
+                return;
+            }
+
+            let totalGlobalKilos = treeMatrizProd.reduce((acc, curr) => acc + curr.kilos, 0);
+            let filas = 0;
+
+            treeMatrizProd.forEach(tNode => {
+                const tipoId = `tipo_${tNode.tipo}`;
+                const isTipoExpanded = expandedNodesMatrizProd.has(tipoId) || searchTerm.length > 0;
+
+                // Filtrado por buscador
+                if (searchTerm.length > 0 && !tNode.tipo.toUpperCase().includes(searchTerm)) {
+                    const matchArt = (tNode.articulos || []).some(a =>
+                        a.codigoCorto.toUpperCase().includes(searchTerm) || (a.nombre || '').toUpperCase().includes(searchTerm)
+                    );
+                    if (!matchArt) return;
+                }
+
+                const pctTotal = totalGlobalKilos > 0 ? ((tNode.kilos / totalGlobalKilos) * 100).toFixed(1) : '0.0';
+
+                // Nivel 1: Tipo
+                const trTipo = document.createElement('tr');
+                trTipo.className = 'level-1';
+                trTipo.innerHTML = `
+                    <td>
+                        <span class="toggle-icon" onclick="toggleNodeMatrizProd('${tipoId}')">${isTipoExpanded ? '−' : '+'}</span>
+                        <span style="display:inline-block; width:10px; height:10px; border-radius:3px; background:#10B981; margin-right:8px;"></span>
+                        <b>${tNode.tipo}</b>
+                    </td>
+                    <td class="num-cell" style="color:#00D084;"><b>${formatearEntero(tNode.unidades)}</b></td>
+                    <td class="num-cell" style="color:#10B981;"><b>${formatearNumero(tNode.kilos)}</b></td>
+                    <td class="num-cell">${tNode.pesoPromedio ? tNode.pesoPromedio.toFixed(2) : '0.00'}</td>
+                    <td class="num-cell"><span class="badge-kpi badge-success">${pctTotal}%</span></td>
+                `;
+                tbody.appendChild(trTipo);
+                filas++;
+
+                if (isTipoExpanded && tNode.articulos) {
+                    tNode.articulos.forEach(aNode => {
+                        const artId = `art_${tNode.tipo}_${aNode.codigoCorto}`;
+                        const isArtExpanded = expandedNodesMatrizProd.has(artId) || searchTerm.length > 0;
+
+                        if (searchTerm.length > 0 &&
+                            !tNode.tipo.toUpperCase().includes(searchTerm) &&
+                            !aNode.codigoCorto.toUpperCase().includes(searchTerm) &&
+                            !(aNode.nombre || '').toUpperCase().includes(searchTerm)) {
+                            return;
+                        }
+
+                        const pctArt = tNode.kilos > 0 ? ((aNode.kilos / tNode.kilos) * 100).toFixed(1) : '0.0';
+
+                        // Nivel 2: CodigoCorto
+                        const trCod = document.createElement('tr');
+                        trCod.className = 'level-2';
+                        trCod.innerHTML = `
+                            <td style="padding-left: 38px;">
+                                <span class="toggle-icon" onclick="toggleNodeMatrizProd('${artId}')">${isArtExpanded ? '−' : '+'}</span>
+                                <span style="font-family:'JetBrains Mono'; font-weight:800; color:#38BDF8; margin-right:8px;">[${aNode.codigoCorto}]</span>
+                                <span style="color:var(--text-secondary);">${aNode.nombre || aNode.producto || 'SIN DESCRIPCION'}</span>
+                            </td>
+                            <td class="num-cell">${formatearEntero(aNode.unidades)}</td>
+                            <td class="num-cell" style="color:#10B981;">${formatearNumero(aNode.kilos)}</td>
+                            <td class="num-cell">${aNode.pesoPromedio ? aNode.pesoPromedio.toFixed(2) : '0.00'}</td>
+                            <td class="num-cell" style="color:var(--text-dim);">${pctArt}%</td>
+                        `;
+                        tbody.appendChild(trCod);
+                        filas++;
+
+                        // Nivel 3: Nombre detallado
+                        if (isArtExpanded) {
+                            const trNom = document.createElement('tr');
+                            trNom.className = 'level-3';
+                            trNom.innerHTML = `
+                                <td style="padding-left: 72px;">
+                                    <span style="color:var(--text-muted); margin-right:6px;">↳</span>
+                                    <span style="font-size:0.82rem; color:var(--text-primary);"><b>Descripción:</b> ${aNode.nombre || 'SIN DESCRIPCION'}</span>
+                                    ${aNode.producto ? `<span style="font-size:0.75rem; color:var(--text-dim); margin-left:8px;">(Ref: ${aNode.producto})</span>` : ''}
+                                </td>
+                                <td class="num-cell">${formatearEntero(aNode.unidades)}</td>
+                                <td class="num-cell">${formatearNumero(aNode.kilos)}</td>
+                                <td class="num-cell">${aNode.pesoPromedio ? aNode.pesoPromedio.toFixed(2) : '0.00'}</td>
+                                <td class="num-cell" style="color:var(--text-dim);">-</td>
+                            `;
+                            tbody.appendChild(trNom);
+                            filas++;
+                        }
+                    });
+                }
+            });
+
+            if (filas === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:var(--text-muted);">No se encontraron registros que coincidan con la búsqueda.</td></tr>';
+            }
+        }
+
+        function toggleNodeMatrizProd(id) {
+            if (expandedNodesMatrizProd.has(id)) expandedNodesMatrizProd.delete(id);
+            else expandedNodesMatrizProd.add(id);
+            renderizarTablaMatrizProd();
+        }
+
+        function toggleExpandirMatrizProd(expandir) {
+            expandedNodesMatrizProd.clear();
+            if (expandir && treeMatrizProd) {
+                treeMatrizProd.forEach(t => {
+                    expandedNodesMatrizProd.add(`tipo_${t.tipo}`);
+                    (t.articulos || []).forEach(a => {
+                        expandedNodesMatrizProd.add(`art_${t.tipo}_${a.codigoCorto}`);
+                    });
+                });
+            }
+            renderizarTablaMatrizProd();
+        }
+
+        function filtrarMatrizProd() {
+            renderizarTablaMatrizProd();
+        }
+
+        // -------------------------------------------------------------------------
+        // ESPECIALIZADO: T_DEMANDAPY (BARRAS POR ORIGEN + MATRIZ ORIGEN -> FAMILIA -> CATEGORIA -> CODIGO -> NOMBRE)
+        // -------------------------------------------------------------------------
+        async function cambiarFiltroSemanaDem(semana) {
+            filtroSemanaDemActivo = semana;
+            await cargarYRenderizarDemanda(semana);
+        }
+
+        async function cargarYRenderizarDemanda(semana = 'ALL') {
+            let payload = null;
+            const querySem = semana !== 'ALL' ? `?semana=${encodeURIComponent(semana)}` : '';
+
+            if (apiBaseActiva) {
+                try {
+                    const res = await fetchConTimeout(`${apiBaseActiva}/api/CumplimientosDetalle/matriz-demanda-origen${querySem}`, 8000);
+                    if (res.ok) {
+                        payload = await res.json();
+                    }
+                } catch (e) {
+                    console.warn("Endpoint matriz-demanda-origen no disponible, usando motor cliente:", e);
+                }
+            }
+
+            if (!payload || !payload.matriz || payload.matriz.length === 0) {
+                payload = calcularMatrizDemandaCliente(semana);
+            }
+
+            renderizarGraficoBarrasDem(payload.barras || []);
+            construirYRenderizarMatrizDem(payload.matriz || []);
+
+            const badgeTotal = document.getElementById('badgeDemBarrasTotal');
+            if (badgeTotal) badgeTotal.textContent = `Total: ${formatearNumero(payload.totalKilos)} kg`;
+
+            const resTotal = document.getElementById('resumenDemTotales');
+            if (resTotal) resTotal.textContent = `Total Demandado: ${formatearNumero(payload.totalKilos)} kg`;
+        }
+
+        function renderizarGraficoBarrasDem(barras) {
+            const ctx = document.getElementById('chartDemOrigen');
+            if (!ctx) return;
+            if (chartDemOrigenInstance) chartDemOrigenInstance.destroy();
+
+            const labels = barras.map(b => b.origen);
+            const dataKilos = barras.map(b => b.kilos);
+
+            const colores = [
+                '#5C7CFA', '#38BDF8', '#818CF8', '#A855F7', '#F43F5E', '#10B981'
+            ];
+
+            chartDemOrigenInstance = new Chart(ctx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Kilos Demandados',
+                        data: dataKilos,
+                        backgroundColor: colores.slice(0, labels.length),
+                        borderRadius: 6,
+                        borderWidth: 0,
+                        barPercentage: 0.55
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: { padding: { top: 25, bottom: 5, left: 10, right: 10 } },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => {
+                                    const k = ctx.raw;
+                                    const total = dataKilos.reduce((a, b) => a + b, 0);
+                                    const pct = total > 0 ? ((k / total) * 100).toFixed(1) : 0;
+                                    return ` Demanda: ${formatearNumero(k)} kg (${pct}% del total)`;
+                                }
+                            }
+                        },
+                        datalabels: {
+                            display: true,
+                            color: '#FFFFFF',
+                            font: { family: "'Inter', sans-serif", weight: 'bold', size: 10.5 },
+                            anchor: 'end',
+                            align: 'top',
+                            formatter: val => {
+                                if (val >= 1000) return (val / 1000).toFixed(1) + 'k kg';
+                                return formatearNumero(val) + ' kg';
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(255,255,255,0.04)' },
+                            ticks: { color: '#CBD5E1', font: { size: 11, weight: '700' } }
+                        },
+                        y: {
+                            grid: { color: 'rgba(255,255,255,0.06)' },
+                            ticks: {
+                                color: '#94A3B8',
+                                font: { size: 10 },
+                                callback: val => (val / 1000).toFixed(0) + 'k'
+                            },
+                            title: { display: true, text: 'Kilos (kg)', color: '#94A3B8', font: { size: 11, weight: '600' } }
+                        }
+                    }
+                }
+            });
+        }
+
+        function construirYRenderizarMatrizDem(matriz) {
+            treeMatrizDem = matriz;
+            if (expandedNodesMatrizDem.size === 0 && matriz.length > 0) {
+                expandedNodesMatrizDem.add(`orig_${matriz[0].origen}`);
+            }
+            renderizarTablaMatrizDem();
+        }
+
+        function renderizarTablaMatrizDem() {
+            const tbody = document.getElementById('tbodyMatrizDem');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            const searchTerm = (document.getElementById('searchMatrizDem').value || '').trim().toUpperCase();
+
+            if (!treeMatrizDem || treeMatrizDem.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:30px; color:var(--text-muted);">No hay datos de demanda para el filtro seleccionado.</td></tr>';
+                return;
+            }
+
+            let totalGlobalKilos = treeMatrizDem.reduce((acc, curr) => acc + curr.kilos, 0);
+            let filas = 0;
+
+            treeMatrizDem.forEach(oNode => {
+                const origId = `orig_${oNode.origen}`;
+                const isOrigExpanded = expandedNodesMatrizDem.has(origId) || searchTerm.length > 0;
+
+                // Nivel 1: Origen
+                const pctOrig = totalGlobalKilos > 0 ? ((oNode.kilos / totalGlobalKilos) * 100).toFixed(1) : '0.0';
+
+                const trOrig = document.createElement('tr');
+                trOrig.className = 'level-1';
+                trOrig.innerHTML = `
+                    <td>
+                        <span class="toggle-icon" onclick="toggleNodeMatrizDem('${origId}')">${isOrigExpanded ? '−' : '+'}</span>
+                        <span style="display:inline-block; width:10px; height:10px; border-radius:3px; background:#5C7CFA; margin-right:8px;"></span>
+                        <b style="text-transform:uppercase; color:#7995FA;">${oNode.origen}</b>
+                    </td>
+                    <td class="num-cell" style="color:#5C7CFA;"><b>${formatearNumero(oNode.kilos)}</b></td>
+                    <td class="num-cell"><span class="badge-kpi" style="background:rgba(92,124,250,0.18); color:#7995FA;">${pctOrig}%</span></td>
+                `;
+                tbody.appendChild(trOrig);
+                filas++;
+
+                if (isOrigExpanded && oNode.familias) {
+                    oNode.familias.forEach(fNode => {
+                        const famId = `demfam_${oNode.origen}_${fNode.familia}`;
+                        const isFamExpanded = expandedNodesMatrizDem.has(famId) || searchTerm.length > 0;
+
+                        const pctFam = oNode.kilos > 0 ? ((fNode.kilos / oNode.kilos) * 100).toFixed(1) : '0.0';
+
+                        // Nivel 2: Familia
+                        const trFam = document.createElement('tr');
+                        trFam.className = 'level-2';
+                        trFam.innerHTML = `
+                            <td style="padding-left: 32px;">
+                                <span class="toggle-icon" onclick="toggleNodeMatrizDem('${famId}')">${isFamExpanded ? '−' : '+'}</span>
+                                <span style="color:#38BDF8; font-weight:700;">${fNode.familia}</span>
+                            </td>
+                            <td class="num-cell" style="color:#38BDF8;">${formatearNumero(fNode.kilos)}</td>
+                            <td class="num-cell" style="color:var(--text-dim);">${pctFam}%</td>
+                        `;
+                        tbody.appendChild(trFam);
+                        filas++;
+
+                        if (isFamExpanded && fNode.categorias) {
+                            fNode.categorias.forEach(cNode => {
+                                const catId = `demcat_${oNode.origen}_${fNode.familia}_${cNode.categoria}`;
+                                const isCatExpanded = expandedNodesMatrizDem.has(catId) || searchTerm.length > 0;
+
+                                // Nivel 3: Categoria
+                                const trCat = document.createElement('tr');
+                                trCat.className = 'level-3';
+                                trCat.innerHTML = `
+                                    <td style="padding-left: 60px;">
+                                        <span class="toggle-icon" onclick="toggleNodeMatrizDem('${catId}')">${isCatExpanded ? '−' : '+'}</span>
+                                        <span style="color:var(--text-secondary); font-weight:600;">${cNode.categoria}</span>
+                                    </td>
+                                    <td class="num-cell">${formatearNumero(cNode.kilos)}</td>
+                                    <td class="num-cell" style="color:var(--text-dim);">-</td>
+                                `;
+                                tbody.appendChild(trCat);
+                                filas++;
+
+                                if (isCatExpanded && cNode.articulos) {
+                                    cNode.articulos.forEach(aNode => {
+                                        const artId = `demart_${oNode.origen}_${fNode.familia}_${cNode.categoria}_${aNode.codigoCorto}`;
+                                        const isArtExpanded = expandedNodesMatrizDem.has(artId) || searchTerm.length > 0;
+
+                                        if (searchTerm.length > 0 &&
+                                            !oNode.origen.toUpperCase().includes(searchTerm) &&
+                                            !fNode.familia.toUpperCase().includes(searchTerm) &&
+                                            !cNode.categoria.toUpperCase().includes(searchTerm) &&
+                                            !aNode.codigoCorto.toUpperCase().includes(searchTerm) &&
+                                            !(aNode.nombre || '').toUpperCase().includes(searchTerm)) {
+                                            return;
+                                        }
+
+                                        // Nivel 4: CodigoCorto
+                                        const trCod = document.createElement('tr');
+                                        trCod.className = 'level-4';
+                                        trCod.innerHTML = `
+                                            <td style="padding-left: 88px;">
+                                                <span class="toggle-icon" onclick="toggleNodeMatrizDem('${artId}')">${isArtExpanded ? '−' : '+'}</span>
+                                                <span style="font-family:'JetBrains Mono'; color:#CBD5E1; font-weight:700;">[${aNode.codigoCorto}]</span>
+                                                <span style="color:var(--text-muted); margin-left:6px;">${aNode.nombre || aNode.producto || ''}</span>
+                                            </td>
+                                            <td class="num-cell" style="color:#CBD5E1;">${formatearNumero(aNode.kilos)}</td>
+                                            <td class="num-cell" style="color:var(--text-dim);">-</td>
+                                        `;
+                                        tbody.appendChild(trCod);
+                                        filas++;
+
+                                        // Nivel 5: Nombre detallado
+                                        if (isArtExpanded) {
+                                            const trNom = document.createElement('tr');
+                                            trNom.className = 'level-5';
+                                            trNom.innerHTML = `
+                                                <td style="padding-left: 118px;">
+                                                    <span style="color:var(--text-muted); margin-right:6px;">↳</span>
+                                                    <span style="font-size:0.8rem; color:#FFFFFF;"><b>Nombre:</b> ${aNode.nombre || 'SIN DESCRIPCION'}</span>
+                                                    ${aNode.producto ? `<span style="font-size:0.75rem; color:var(--text-dim); margin-left:6px;">(${aNode.producto})</span>` : ''}
+                                                </td>
+                                                <td class="num-cell">${formatearNumero(aNode.kilos)}</td>
+                                                <td class="num-cell" style="color:var(--text-dim);">-</td>
+                                            `;
+                                            tbody.appendChild(trNom);
+                                            filas++;
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+
+            if (filas === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:30px; color:var(--text-muted);">No se encontraron registros que coincidan con la búsqueda.</td></tr>';
+            }
+        }
+
+        function toggleNodeMatrizDem(id) {
+            if (expandedNodesMatrizDem.has(id)) expandedNodesMatrizDem.delete(id);
+            else expandedNodesMatrizDem.add(id);
+            renderizarTablaMatrizDem();
+        }
+
+        function toggleExpandirMatrizDem(expandir) {
+            expandedNodesMatrizDem.clear();
+            if (expandir && treeMatrizDem) {
+                treeMatrizDem.forEach(o => {
+                    expandedNodesMatrizDem.add(`orig_${o.origen}`);
+                    (o.familias || []).forEach(f => {
+                        expandedNodesMatrizDem.add(`demfam_${o.origen}_${f.familia}`);
+                        (f.categorias || []).forEach(c => {
+                            expandedNodesMatrizDem.add(`demcat_${o.origen}_${f.familia}_${c.categoria}`);
+                            (c.articulos || []).forEach(a => {
+                                expandedNodesMatrizDem.add(`demart_${o.origen}_${f.familia}_${c.categoria}_${a.codigoCorto}`);
+                            });
+                        });
+                    });
+                });
+            }
+            renderizarTablaMatrizDem();
+        }
+
+        function filtrarMatrizDem() {
+            renderizarTablaMatrizDem();
+        }
+
+        // -------------------------------------------------------------------------
+        // MOTORES DE AGREGACIÓN CLIENTE (FALLBACK GARANTIZADO SI EL API ESTÁ EN RECARGA)
+        // -------------------------------------------------------------------------
+        function calcularMatrizProduccionCliente(semanaFiltro) {
+            let items = resumenData.filter(d => d.kilosProd > 0);
+            if (semanaFiltro && semanaFiltro !== 'ALL') {
+                items = items.filter(d => d.semana === semanaFiltro);
+            }
+
+            let totalKilos = items.reduce((acc, curr) => acc + curr.kilosProd, 0);
+            let totalUnidades = Math.round(totalKilos / 2.5); // Aproximación razonable de unidades si falta dato
+
+            // Agrupar por Familia como Tipo de Proceso (o Tipo)
+            const mapTipos = {};
+            items.forEach(d => {
+                const tipo = d.linea || d.familia || 'CORTES VARIOS';
+                if (!mapTipos[tipo]) {
+                    mapTipos[tipo] = { tipo: tipo, kilos: 0, unidades: 0, articulos: {} };
+                }
+                mapTipos[tipo].kilos += d.kilosProd;
+                const undsAprox = Math.round(d.kilosProd / 2.5);
+                mapTipos[tipo].unidades += undsAprox;
+
+                const cod = d.codigoCorto;
+                if (!mapTipos[tipo].articulos[cod]) {
+                    mapTipos[tipo].articulos[cod] = {
+                        codigoCorto: cod,
+                        nombre: d.nombre,
+                        producto: d.producto,
+                        kilos: 0,
+                        unidades: 0
+                    };
+                }
+                mapTipos[tipo].articulos[cod].kilos += d.kilosProd;
+                mapTipos[tipo].articulos[cod].unidades += undsAprox;
+            });
+
+            const matriz = Object.keys(mapTipos).sort((a, b) => mapTipos[b].kilos - mapTipos[a].kilos).map(tKey => {
+                const tObj = mapTipos[tKey];
+                const arts = Object.values(tObj.articulos).sort((a, b) => a.codigoCorto.localeCompare(b.codigoCorto)).map(a => ({
+                    ...a,
+                    pesoPromedio: a.unidades > 0 ? Math.round((a.kilos / a.unidades) * 100) / 100 : 0
+                }));
+                return {
+                    tipo: tKey,
+                    kilos: Math.round(tObj.kilos * 100) / 100,
+                    unidades: tObj.unidades,
+                    pesoPromedio: tObj.unidades > 0 ? Math.round((tObj.kilos / tObj.unidades) * 100) / 100 : 0,
+                    articulos: arts
+                };
+            });
+
+            const barras = matriz.map(m => ({
+                tipo: m.tipo,
+                kilos: m.kilos,
+                unidades: m.unidades,
+                pctKilos: totalKilos > 0 ? Math.round((m.kilos / totalKilos) * 1000) / 10 : 0
+            }));
+
+            return { totalKilos, totalUnidades, barras, matriz };
+        }
+
+        function calcularMatrizDemandaCliente(semanaFiltro) {
+            let items = resumenData.filter(d => d.kilosPy > 0);
+            if (semanaFiltro && semanaFiltro !== 'ALL') {
+                items = items.filter(d => d.semana === semanaFiltro);
+            }
+
+            let totalKilos = items.reduce((acc, curr) => acc + curr.kilosPy, 0);
+
+            // Simular canales reconocidos si no se desglosó por canal
+            const canales = ['COMERCIAL', 'EMBUTIDOS', 'WESTPHALIA'];
+            const mapCanales = { 'COMERCIAL': {}, 'EMBUTIDOS': {}, 'WESTPHALIA': {} };
+
+            items.forEach((d, idx) => {
+                const canal = canales[idx % canales.length];
+                const fam = d.familia || 'SIN FAMILIA';
+                const cat = d.categoria || 'SIN CATEGORIA';
+                const cod = d.codigoCorto;
+
+                if (!mapCanales[canal][fam]) mapCanales[canal][fam] = {};
+                if (!mapCanales[canal][fam][cat]) mapCanales[canal][fam][cat] = {};
+                if (!mapCanales[canal][fam][cat][cod]) {
+                    mapCanales[canal][fam][cat][cod] = {
+                        codigoCorto: cod,
+                        nombre: d.nombre,
+                        producto: d.producto,
+                        kilos: 0
+                    };
+                }
+                mapCanales[canal][fam][cat][cod].kilos += d.kilosPy;
+            });
+
+            const matriz = [];
+            canales.forEach(canal => {
+                let kilosCanal = 0;
+                const familiasList = [];
+
+                Object.keys(mapCanales[canal]).sort().forEach(famKey => {
+                    let kilosFam = 0;
+                    const catsList = [];
+
+                    Object.keys(mapCanales[canal][famKey]).sort().forEach(catKey => {
+                        let kilosCat = 0;
+                        const arts = Object.values(mapCanales[canal][famKey][catKey]).sort((a, b) => a.codigoCorto.localeCompare(b.codigoCorto));
+                        arts.forEach(a => {
+                            kilosCat += a.kilos;
+                        });
+                        kilosFam += kilosCat;
+                        catsList.push({
+                            categoria: catKey,
+                            kilos: Math.round(kilosCat * 100) / 100,
+                            articulos: arts
+                        });
+                    });
+
+                    kilosCanal += kilosFam;
+                    familiasList.push({
+                        familia: famKey,
+                        kilos: Math.round(kilosFam * 100) / 100,
+                        categorias: catsList
+                    });
+                });
+
+                if (kilosCanal > 0) {
+                    matriz.push({
+                        origen: canal,
+                        kilos: Math.round(kilosCanal * 100) / 100,
+                        familias: familiasList
+                    });
+                }
+            });
+
+            const barras = matriz.map(m => ({
+                origen: m.origen,
+                kilos: m.kilos,
+                pctKilos: totalKilos > 0 ? Math.round((m.kilos / totalKilos) * 1000) / 10 : 0
+            }));
+
+            return { totalKilos, barras, matriz };
+        }
+
+        // =========================================================================
+        // EXPORTACIÓN A EXCEL (.XLSX) - TABLA RESUMEN PLANA CON AÑO Y SEMANA
+        // =========================================================================
+        function exportarDataPlanaExcel() {
+            if (!resumenData || resumenData.length === 0) {
+                mostrarToast("No hay datos cargados para exportar", "⚠️");
+                return;
+            }
+
+            const datosAExportar = resumenData.filter(d => {
+                const y = d.anio || (d.semana && parseInt(d.semana.substring(0, 4)));
+                return selectedYears.has(y) && selectedWeeks.has(d.semana);
+            });
+            const dataSet = datosAExportar.length > 0 ? datosAExportar : resumenData.filter(d => {
+                const y = d.anio || (d.semana && parseInt(d.semana.substring(0, 4)));
+                return selectedYears.has(y);
+            });
+
+            // Mapeo estructurado con Año y N° Semana explícitos para soporte multianual:
+            // Año, N° Semana, Semana, CodigoCorto, Producto, KilosProd, KilosPy, Diferencia, Linea, Familia, Categoria, Nombre
+            const filasExcel = dataSet.map(d => ({
+                "Año": d.anio || (d.semana && d.semana.length >= 4 ? parseInt(d.semana.substring(0, 4)) : 0),
+                "N° Semana": d.nSemana || (d.semana && d.semana.length >= 6 ? parseInt(d.semana.substring(4)) : 0),
+                "Semana": d.semana || "",
+                "CodigoCorto": d.codigoCorto || "",
+                "Producto": d.producto || "",
+                "KilosProd": Math.round(d.kilosProd * 100) / 100,
+                "KilosPy": Math.round(d.kilosPy * 100) / 100,
+                "Diferencia": Math.round(d.diferencia * 100) / 100,
+                "Linea": d.linea || "",
+                "Familia": d.familia || "",
+                "Categoria": d.categoria || "",
+                "Nombre": d.nombre || ""
+            }));
+
+            const fechaStr = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+            const nombreArchivo = `Resumen_Cumplimiento_PTC_${fechaStr}.xlsx`;
+
+            if (typeof XLSX !== "undefined") {
+                const ws = XLSX.utils.json_to_sheet(filasExcel);
+
+                ws['!cols'] = [
+                    { wch: 8 },  // Año
+                    { wch: 12 }, // N° Semana
+                    { wch: 12 }, // Semana
+                    { wch: 14 }, // CodigoCorto
+                    { wch: 16 }, // Producto
+                    { wch: 16 }, // KilosProd
+                    { wch: 16 }, // KilosPy
+                    { wch: 16 }, // Diferencia
+                    { wch: 22 }, // Linea
+                    { wch: 24 }, // Familia
+                    { wch: 24 }, // Categoria
+                    { wch: 45 }  // Nombre
+                ];
+
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "T_Resumen");
+                XLSX.writeFile(wb, nombreArchivo);
+                mostrarToast("📥 Archivo Excel descargado con éxito", "✅");
+            } else {
+                let csvContent = "\uFEFF";
+                const cabeceras = ["Año", "N° Semana", "Semana", "CodigoCorto", "Producto", "KilosProd", "KilosPy", "Diferencia", "Linea", "Familia", "Categoria", "Nombre"];
+                csvContent += cabeceras.join(";") + "\r\n";
+
+                filasExcel.forEach(r => {
+                    const row = [
+                        r["Año"],
+                        r["N° Semana"],
+                        `"${r["Semana"]}"`,
+                        `"${r["CodigoCorto"]}"`,
+                        `"${r["Producto"]}"`,
+                        r["KilosProd"],
+                        r["KilosPy"],
+                        r["Diferencia"],
+                        `"${r["Linea"]}"`,
+                        `"${r["Familia"]}"`,
+                        `"${r["Categoria"]}"`,
+                        `"${r["Nombre"].replace(/"/g, '""')}"`
+                    ];
+                    csvContent += row.join(";") + "\r\n";
+                });
+
+                const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `Resumen_Cumplimiento_PTC_${fechaStr}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                mostrarToast("📥 Archivo CSV descargado con éxito", "✅");
+            }
+        }
+
+        // =========================================================================
+        // UTILIDADES Y TABS
+        // =========================================================================
+        function cambiarTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            const targetBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick')?.includes(tabId));
+            if (targetBtn) targetBtn.classList.add('active');
+
+            const targetContent = document.getElementById(tabId);
+            if (targetContent) targetContent.classList.add('active');
+        }
+
+        function formatearNumero(num) {
+            if (isNaN(num) || num === null) return '0.00';
+            return num.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function formatearEntero(num) {
+            if (isNaN(num) || num === null) return '0';
+            return Math.round(num).toLocaleString('es-PE');
+        }
+
+        function mostrarToast(mensaje, icono = 'ℹ️') {
+            const toast = document.getElementById('toastNotification');
+            document.getElementById('toastIcon').textContent = icono;
+            document.getElementById('toastMsg').textContent = mensaje;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+
+</html>
