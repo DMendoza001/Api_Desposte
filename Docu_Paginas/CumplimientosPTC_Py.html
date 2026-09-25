@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Cumplimiento PTC - Detalle SKU, SubPlanta y Familias</title>
+    <title>Dashboard Cumplimiento PTC Py - Detalle SKU, SubPlanta y Familias</title>
 
     <!-- Fuentes e Iconos Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -966,7 +966,7 @@
                         <span class="badge-tag badge-tag-py">Proyectado (Py)</span>
                     </div>
                     <div class="header-subtitle">
-                        Análisis comparativo y profundo: Resumen Producción (<b>T_Produccion</b>) vs Demanda Proyectada
+                        Análisis comparativo y profundo: Resumen Producción (<b>T_ResProd_Py</b>) vs Demanda Proyectada
                         (<b>T_DemandaPy</b>) con desglose multicriterio por <b>SubPlanta</b>
                     </div>
                 </div>
@@ -1102,7 +1102,7 @@
                 </div>
                 <div class="kpi-value" id="kpiKilosProd">0<span class="kpi-unit">kg</span></div>
                 <div class="kpi-footer">
-                    <span>Tabla: T_Produccion</span>
+                    <span>Tabla: T_ResProd_Py</span>
                     <span class="badge-kpi badge-success" id="kpiProdBadge">Real</span>
                 </div>
             </div>
@@ -1188,7 +1188,7 @@
         <section class="chart-card">
             <div class="chart-top-bar">
                 <div class="powerbi-title">
-                    VENTAS Y PRODUCCIÓN POR SEMANA (T_Produccion vs T_DemandaPy)
+                    VENTAS Y PRODUCCIÓN POR SEMANA (T_ResProd_Py vs T_DemandaPy)
                 </div>
 
                 <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
@@ -1258,14 +1258,14 @@
                     Cruce & Brechas (Prod vs Demanda + SubPlantas)
                 </button>
 
-                <!-- PESTAÑA: ANÁLISIS EXCLUSIVO T_PRODUCCION -->
+                <!-- PESTAÑA: ANÁLISIS EXCLUSIVO T_RESPROD_PY -->
                 <button class="tab-btn tab-prod" onclick="cambiarTab('tabAnalisisProd')">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
                         <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
                         <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
                     </svg>
-                    Análisis T_Produccion (Barras por SubPlanta + Matriz)
+                    Análisis T_ResProd_Py (Barras por SubPlanta + Matriz)
                 </button>
 
                 <!-- PESTAÑA: ANÁLISIS EXCLUSIVO T_DEMANDAPY -->
@@ -1379,7 +1379,7 @@
                 </div>
             </div>
 
-            <!-- CONTENIDO TAB 3: CRUCE Y BRECHAS (T_PRODUCCION VS T_DEMANDAPY + DESGLOSE SUBPLANTAS) -->
+            <!-- CONTENIDO TAB 3: CRUCE Y BRECHAS (T_RESPROD_PY VS T_DEMANDAPY + DESGLOSE SUBPLANTAS) -->
             <div id="tabAnalisisCruce" class="tab-content" style="margin-top:16px;">
                 <div class="analysis-grid">
                     <div class="analysis-card">
@@ -1487,7 +1487,7 @@
                 </div>
             </div>
 
-            <!-- CONTENIDO TAB 4: ANÁLISIS EXCLUSIVO T_PRODUCCION (BARRAS POR SUBPLANTA + MATRIZ JERÁRQUICA) -->
+            <!-- CONTENIDO TAB 4: ANÁLISIS EXCLUSIVO T_RESPROD_PY (BARRAS POR SUBPLANTA + MATRIZ JERÁRQUICA) -->
             <div id="tabAnalisisProd" class="tab-content" style="margin-top:16px;">
                 <div style="display:flex; flex-direction:column; gap:20px;">
                     <!-- Barra de Filtro por Semana y SubPlanta para Producción -->
@@ -1530,7 +1530,7 @@
                                     Producción Real por SubPlanta (Kilos)
                                 </h3>
                                 <p style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">
-                                    Distribución en base al campo <b>SubPlanta</b> (DESPOSTE, CHULETAS, MENUDO) en <b>T_Produccion</b>
+                                    Distribución en base al campo <b>SubPlanta</b> (DESPOSTE, CHULETAS, MENUDO) en <b>T_ResProd_Py</b>
                                 </p>
                             </div>
                             <span id="badgeProdBarrasTotal" class="badge-tag"
@@ -1682,7 +1682,7 @@
                 "http://127.0.0.1:8080",
                 "http://127.0.0.1:5000"
             ],
-            controllerPath: "/api/CumplimientosDetalle"
+            controllerPath: "/api/CumplimientosDetallePy"
         };
 
         let apiBaseActiva = null;
@@ -1705,7 +1705,7 @@
 
         let chartComparativo = null;
 
-        // Variables para Análisis T_Produccion
+        // Variables para Análisis T_ResProd_Py
         let treeMatrizProd = [];
         let expandedNodesMatrizProd = new Set();
         let chartProdTipoInstance = null;
@@ -1761,9 +1761,9 @@
             // Probar ruta alternativa CumplimientosDetalleControllerPy
             for (const base of APP_CONFIG.hosts) {
                 try {
-                    const res = await fetchConTimeout(`${base}/api/CumplimientosDetalleController/semanas`, 1500);
+                    const res = await fetchConTimeout(`${base}/api/CumplimientosDetalleControllerPy/semanas`, 1500);
                     if (res.ok) {
-                        APP_CONFIG.controllerPath = "/api/CumplimientosDetalleController";
+                        APP_CONFIG.controllerPath = "/api/CumplimientosDetalleControllerPy";
                         return base;
                     }
                 } catch (e) { }
@@ -1780,7 +1780,7 @@
                 apiBaseActiva = await detectarServidorApi();
 
                 if (!apiBaseActiva) {
-                    throw new Error("No se pudo conectar con el backend de CumplimientosDetalle en los puertos 8080 ni 5000.");
+                    throw new Error("No se pudo conectar con el backend de CumplimientosDetallePy en los puertos 8080 ni 5000.");
                 }
 
                 statusBadge.innerHTML = `<span class="status-dot"></span><span>En Línea (${apiBaseActiva.replace('http://', '')})</span>`;
@@ -1800,7 +1800,7 @@
         }
 
         async function recargarDatosAPI(forzarRecarga = false) {
-            mostrarToast("Cargando datos desde T_Produccion y T_DemandaPy...", "⏳");
+            mostrarToast("Cargando datos desde T_ResProd_Py y T_DemandaPy...", "⏳");
             try {
                 const resSemanas = await fetchConTimeout(`${apiBaseActiva}${APP_CONFIG.controllerPath}/semanas`);
                 if (!resSemanas.ok) throw new Error("Error al obtener semanas");
@@ -1847,7 +1847,7 @@
                 construirSelectorSubPlantas();
                 construirSelectorSemanas();
                 seleccionarFiltroRapido(currentQuickMode);
-                mostrarToast("Datos actualizados correctamente con T_Produccion y T_DemandaPy", "✅");
+                mostrarToast("Datos actualizados correctamente con T_ResProd_Py y T_DemandaPy", "✅");
 
             } catch (err) {
                 console.error("Error al recargar datos:", err);
@@ -3082,7 +3082,7 @@
         }
 
         // =========================================================================
-        // CARGA Y RENDERIZADO DE ANÁLISIS EXCLUSIVO T_PRODUCCION Y T_DEMANDAPY
+        // CARGA Y RENDERIZADO DE ANÁLISIS EXCLUSIVO T_RESPROD_PY Y T_DEMANDAPY
         // =========================================================================
         function poblarDropdownsSemanas() {
             const selProd = document.getElementById('filterSemanaProd');
@@ -3131,7 +3131,7 @@
         }
 
         // -------------------------------------------------------------------------
-        // ESPECIALIZADO: T_PRODUCCION (BARRAS POR SUBPLANTA + MATRIZ SUBPLANTA -> FAMILIA -> SKU)
+        // ESPECIALIZADO: T_RESPROD_PY (BARRAS POR SUBPLANTA + MATRIZ SUBPLANTA -> FAMILIA -> SKU)
         // -------------------------------------------------------------------------
         async function cambiarFiltroSemanaProd(semana) {
             filtroSemanaProdActivo = semana;
@@ -3824,7 +3824,7 @@
             }));
 
             const fechaStr = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-            const nombreArchivo = `Resumen_Cumplimiento_PTC_${fechaStr}.xlsx`;
+            const nombreArchivo = `Resumen_Cumplimiento_PTC_Py_${fechaStr}.xlsx`;
 
             if (typeof XLSX !== "undefined") {
                 const ws = XLSX.utils.json_to_sheet(filasExcel);
@@ -3845,7 +3845,7 @@
                 ];
 
                 const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, ws, "T_Resumen");
+                XLSX.utils.book_append_sheet(wb, ws, "T_Resumen_Py");
                 XLSX.writeFile(wb, nombreArchivo);
                 mostrarToast("📥 Archivo Excel descargado con éxito", "✅");
             } else {

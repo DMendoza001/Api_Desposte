@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard de Rendimiento Operativo de Chuletas - Desposte</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --navy-peony: #223A5E;
+      --cyan-blue: #1295C1;
+      --cool-blue: #9DBED5;
+      --blue-sapphire: #10587F;
+      --foggy-dew: #CBCFCB;
+      --lagoon: #43928E;
+      --teal-blue: #007D7E;
+      --aegean-blue: #4E6E81;
+
+      --bg-canvas: #F1F5F9;
+      --bg-card: #FFFFFF;
+      --border-ui: #E2E8F0;
+      --text-dark: #0F172A;
+      --text-muted: #64748B;
+      --success: #10B981;
+      --warning: #F59E0B;
+      --danger: #EF4444;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-canvas);
+      color: var(--text-dark);
+      padding: 20px 24px;
+      min-height: 100vh;
+    }
+
+    /* Header */
+    header {
+      background: linear-gradient(135deg, var(--navy-peony) 0%, var(--blue-sapphire) 100%);
+      color: #FFFFFF;
+      padding: 22px 28px;
+      border-radius: 12px;
+      margin-bottom: 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .header-info h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-info p {
+      font-size: 0.88rem;
+      color: var(--cool-blue);
+      margin-top: 4px;
+      font-weight: 400;
+    }
+
+    .header-status {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(8px);
+    }
+
+    .status-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background-color: #94A3B8;
+      display: inline-block;
+    }
+
+    .status-dot.online {
+      background-color: #10B981;
+      box-shadow: 0 0 8px #10B981;
+    }
+
+    .status-dot.loading {
+      background-color: #F59E0B;
+      animation: pulseDot 1s infinite alternate;
+    }
+
+    .status-dot.error {
+      background-color: #EF4444;
+    }
+
+    @keyframes pulseDot {
+      from {
+        transform: scale(0.85);
+        opacity: 0.6;
+      }
+
+      to {
+        transform: scale(1.2);
+        opacity: 1;
+      }
+    }
+
+    /* Panel de Filtros */
+    .filter-panel {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-ui);
+      padding: 20px 24px;
+      border-radius: 12px;
+      margin-bottom: 22px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: flex-end;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .filter-group label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: var(--navy-peony);
+    }
+
+    .filter-group input,
+    .filter-group select {
+      border: 1px solid var(--border-ui);
+      padding: 9px 13px;
+      border-radius: 8px;
+      outline: none;
+      background: #FFFFFF;
+      color: var(--text-dark);
+      font-size: 0.85rem;
+      font-weight: 500;
+      min-width: 170px;
+      transition: all 0.2s ease;
+    }
+
+    .filter-group input:focus,
+    .filter-group select:focus {
+      border-color: var(--cyan-blue);
+      box-shadow: 0 0 0 3px rgba(18, 149, 193, 0.15);
+    }
+
+    /* Botones de acción */
+    .btn-action-group {
+      display: flex;
+      gap: 10px;
+      margin-left: auto;
+      align-items: center;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--cyan-blue) 0%, var(--blue-sapphire) 100%);
+      color: #FFFFFF;
+      border: none;
+      padding: 9px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, var(--blue-sapphire) 0%, var(--navy-peony) 100%);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn-reset {
+      background-color: #F8FAFC;
+      color: var(--text-muted);
+      border: 1px solid var(--border-ui);
+      padding: 9px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .btn-reset:hover {
+      background-color: #EEF2F6;
+      color: var(--text-dark);
+    }
+
+    /* Indicadores Clave (KPIs) */
+    .kpi-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .kpi-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-ui);
+      border-top: 4px solid var(--cyan-blue);
+      padding: 18px 22px;
+      border-radius: 10px;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .kpi-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .kpi-value {
+      font-size: 1.7rem;
+      font-weight: 800;
+      color: var(--navy-peony);
+      letter-spacing: -0.02em;
+    }
+
+    .kpi-sub {
+      font-size: 0.78rem;
+      color: var(--aegean-blue);
+      margin-top: 5px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* Gráficos */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1.8fr 1.2fr;
+      gap: 20px;
+      margin-bottom: 22px;
+    }
+
+    @media (max-width: 1024px) {
+      .charts-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .chart-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-ui);
+      padding: 22px;
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-ui);
+    }
+
+    .chart-header h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--navy-peony);
+    }
+
+    .chart-header .badge-info {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--cyan-blue);
+      background: rgba(18, 149, 193, 0.1);
+      padding: 4px 10px;
+      border-radius: 9999px;
+    }
+
+    .chart-container {
+      position: relative;
+      height: 330px;
+      width: 100%;
+    }
+
+    /* Tablas */
+    .table-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-ui);
+      padding: 22px;
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 22px;
+    }
+
+    .table-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .table-header h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--navy-peony);
+    }
+
+    .table-search {
+      position: relative;
+      min-width: 250px;
+    }
+
+    .table-search input {
+      width: 100%;
+      border: 1px solid var(--border-ui);
+      padding: 8px 12px 8px 32px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      outline: none;
+    }
+
+    .table-search input:focus {
+      border-color: var(--cyan-blue);
+    }
+
+    .table-search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+      max-height: 480px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    th {
+      background-color: var(--navy-peony);
+      color: #FFFFFF;
+      padding: 12px 14px;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      text-align: left;
+      font-weight: 600;
+      font-size: 0.8rem;
+      letter-spacing: 0.02em;
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-ui);
+      font-variant-numeric: tabular-nums;
+    }
+
+    tr:nth-child(even) {
+      background-color: #F8FAFC;
+    }
+
+    tr:hover {
+      background-color: #F1F5F9;
+    }
+
+    .badge-rend {
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-weight: 700;
+      display: inline-block;
+      font-size: 0.8rem;
+    }
+
+    .badge-good {
+      background-color: #DCFCE7;
+      color: #166534;
+    }
+
+    .badge-mid {
+      background-color: #FEF3C7;
+      color: #92400E;
+    }
+
+    .badge-low {
+      background-color: #FEE2E2;
+      color: #991B1B;
+    }
+
+    .badge-tag {
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      background: #E2E8F0;
+      color: #334155;
+    }
+
+    /* Modal / Overlay de Carga */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(4px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .loading-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .loading-box {
+      background: #FFFFFF;
+      padding: 30px 40px;
+      border-radius: 14px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      max-width: 420px;
+      width: 90%;
+    }
+
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid #E2E8F0;
+      border-top-color: var(--cyan-blue);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .loading-box h4 {
+      font-size: 1.1rem;
+      color: var(--navy-peony);
+      margin-bottom: 6px;
+      font-weight: 700;
+    }
+
+    .loading-box p {
+      font-size: 0.84rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Toast Notification */
+    .toast-notification {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #0F172A;
+      color: #FFFFFF;
+      padding: 12px 20px;
+      border-radius: 8px;
+      box-shadow: var(--shadow-lg);
+      font-size: 0.86rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 10000;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .toast-notification.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Overlay de Carga -->
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-box">
+      <div class="spinner"></div>
+      <h4 id="loadingTitle">Consultando Datos</h4>
+      <p id="loadingMessage">Ejecutando Desposte.dbo.Sp_Informe_Prod_Chuletas en SQL Server...</p>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header>
+    <div class="header-info">
+      <h1>📊 Control de Rendimiento - Chuletas y Desposte</h1>
+      <p>Kilos Origen (TTra 13) vs. Kilos Resultado (TTra 4 excl. Harinas y Merma) | Fuente: ProdChuletasController</p>
+    </div>
+    <div class="header-status">
+      <div id="apiStatusBadge" class="status-badge">
+        <span class="status-dot"></span>
+        <span id="apiStatusText">Conectando...</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Panel de Filtros -->
+  <section class="filter-panel">
+    <div class="filter-group">
+      <label for="fechaInicio">Fecha Inicial:</label>
+      <input type="date" id="fechaInicio" value="2026-01-01">
+    </div>
+
+    <div class="filter-group">
+      <label for="fechaFin">Fecha Final:</label>
+      <input type="date" id="fechaFin" value="2026-08-31">
+    </div>
+
+    <!-- NUEVO FILTRO: Tipo de Proceso (solicitado expresamente por el usuario) -->
+    <div class="filter-group">
+      <label for="tipoFilter">Tipo de Proceso (Tipo):</label>
+      <select id="tipoFilter">
+        <option value="ALL">-- Todos los Tipos --</option>
+      </select>
+    </div>
+
+    <!-- Filtro Tipo de Chuleta -->
+    <div class="filter-group">
+      <label for="tipoChuletaFilter">Tipo Chuleta:</label>
+      <select id="tipoChuletaFilter">
+        <option value="ALL">-- Todos (Fresco/Congelado) --</option>
+      </select>
+    </div>
+
+    <!-- Filtro Plantilla -->
+    <div class="filter-group">
+      <label for="plantillaFilter">Plantilla (NPlantilla):</label>
+      <select id="plantillaFilter">
+        <option value="ALL">-- Todas las Plantillas --</option>
+      </select>
+    </div>
+
+    <!-- Filtro Temporal -->
+    <div class="filter-group">
+      <label for="temporalFilter">Serie Temporal:</label>
+      <select id="temporalFilter">
+        <option value="diario">Diario</option>
+        <option value="semanal" selected>Semanal</option>
+        <option value="mensual">Mensual</option>
+        <option value="anual">Año</option>
+      </select>
+    </div>
+
+    <!-- Botones de Acción -->
+    <div class="btn-action-group">
+      <button class="btn-primary" id="btnConsultar" onclick="consultarApi(false)">
+        <span>🔍</span> Consultar API
+      </button>
+      <button class="btn-reset" onclick="resetFilters()">
+        ↺ Reestablecer
+      </button>
+    </div>
+  </section>
+
+  <!-- Indicadores Clave (KPIs) -->
+  <section class="kpi-container">
+    <div class="kpi-card" style="border-top-color: var(--navy-peony);">
+      <div class="kpi-title">Kilos Origen (TTra 13)</div>
+      <div class="kpi-value" id="kpiOrigen">0.00 kg</div>
+      <div class="kpi-sub">Total Materia Prima Entrada</div>
+    </div>
+    <div class="kpi-card" style="border-top-color: var(--cyan-blue);">
+      <div class="kpi-title">Kilos Resultado (TTra 4 Útiles)</div>
+      <div class="kpi-value" id="kpiResultado">0.00 kg</div>
+      <div class="kpi-sub">Chuletas y Cortes Comerciales</div>
+    </div>
+    <div class="kpi-card" style="border-top-color: var(--teal-blue);">
+      <div class="kpi-title">Rendimiento Ponderado</div>
+      <div class="kpi-value" id="kpiRendimiento">0.00%</div>
+      <div class="kpi-sub" id="kpiRendimientoSub">Resultado / Origen</div>
+    </div>
+    <div class="kpi-card" style="border-top-color: var(--aegean-blue);">
+      <div class="kpi-title">Mermas y Harinas</div>
+      <div class="kpi-value" id="kpiPerdida">0.00 kg</div>
+      <div class="kpi-sub" id="kpiPerdidaPct">0.00% de la MP</div>
+    </div>
+    <div class="kpi-card" style="border-top-color: #8B5CF6;">
+      <div class="kpi-title">Volumen Total Procesado</div>
+      <div class="kpi-value" id="kpiVolumenTotal">0.00 kg</div>
+      <div class="kpi-sub" id="kpiRegistros">0 registros analizados</div>
+    </div>
+  </section>
+
+  <!-- Gráficos -->
+  <section class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-header">
+        <h3 id="chartTimeSeriesTitle">Evolución Temporal del Rendimiento (Semanal)</h3>
+        <span class="badge-info" id="chartTimeSeriesBadge">Rendimiento vs. Origen</span>
+      </div>
+      <div class="chart-container">
+        <canvas id="chartTemporal"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-header">
+        <h3>Rendimiento por Plantilla</h3>
+        <span class="badge-info">Ordenado por % Rendimiento</span>
+      </div>
+      <div class="chart-container">
+        <canvas id="chartPlantillas"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tabla de Resumen por Plantilla -->
+  <section class="table-card">
+    <div class="table-header">
+      <h3>📋 Desglose Operativo por Plantilla de Producción</h3>
+      <div class="table-search">
+        <span class="table-search-icon">🔍</span>
+        <input type="text" id="tableSearchInput" placeholder="Buscar por plantilla, tipo, código..."
+          oninput="filtrarTablaTexto()">
+      </div>
+    </div>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Cód.</th>
+            <th>Nombre de Plantilla (NPlantilla)</th>
+            <th>Tipo Proceso</th>
+            <th>Tipo Chuleta</th>
+            <th style="text-align: right;">Kilos Origen (kg)</th>
+            <th style="text-align: right;">Kilos Resultado (kg)</th>
+            <th style="text-align: right;">Harinas (kg)</th>
+            <th style="text-align: right;">Merma (kg)</th>
+            <th style="text-align: right;">Rendimiento (%)</th>
+          </tr>
+        </thead>
+        <tbody id="tablePlantillasBody">
+          <tr>
+            <td colspan="9" style="text-align:center; padding: 24px; color: var(--text-muted);">Cargando información...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Notificación Toast -->
+  <div id="toastNotification" class="toast-notification">
+    <span id="toastIcon">ℹ️</span>
+    <span id="toastMsg">Mensaje</span>
+  </div>
+
+  <script>
+    // =========================================================================
+    // ⚙️ CONFIGURACIÓN DE CONEXIÓN CON AUTO-DETECCIÓN DE ENDPOINT
+    // =========================================================================
+    const APP_CONFIG = {
+      hosts: [
+        "http://RAEVSALL001:8080",
+        "http://localhost:8080",
+        "http://RAEVSALL001:5000",
+        "http://localhost:5000",
+        "http://localhost:5050",
+        "http://127.0.0.1:8080",
+        "http://127.0.0.1:5000"
+      ],
+      controllerPath: "/api/ProdChuletas"
+    };
+
+    let apiBaseActiva = null;
+    let rawData = [];
+    let enrichedData = [];
+    let filteredData = [];
+    let chartTemporalObj = null;
+    let chartPlantillasObj = null;
+
+    // =========================================================================
+    // 🚀 INICIALIZACIÓN
+    // =========================================================================
+    window.addEventListener('DOMContentLoaded', async () => {
+      setupEvents();
+      await inicializarConexionApi();
+    });
+
+    function setupEvents() {
+      // Filtros locales (no re-ejecutan el SP en SQL, son instantáneos en memoria)
+      document.getElementById('tipoFilter').addEventListener('change', applyFilters);
+      document.getElementById('tipoChuletaFilter').addEventListener('change', applyFilters);
+      document.getElementById('plantillaFilter').addEventListener('change', applyFilters);
+      document.getElementById('temporalFilter').addEventListener('change', renderTemporalChart);
+
+      // Si el usuario cambia las fechas y presiona Enter en el input
+      document.getElementById('fechaInicio').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') consultarApi(false);
+      });
+      document.getElementById('fechaFin').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') consultarApi(false);
+      });
+    }
+
+    // =========================================================================
+    // 🌐 COMUNICACIÓN CON LA API
+    // =========================================================================
+    async function fetchConTimeout(url, timeoutMs = 120000) {
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        const response = await fetch(url, { signal: controller.signal });
+        clearTimeout(id);
+        return response;
+      } catch (err) {
+        clearTimeout(id);
+        throw err;
+      }
+    }
+
+    async function detectarServidorApi() {
+      // 1. Probar el mismo origen si está servido por el backend
+      if (window.location.protocol.startsWith('http')) {
+        try {
+          const res = await fetchConTimeout(`${window.location.origin}${APP_CONFIG.controllerPath}/probar-conexion`, 2000);
+          if (res.ok) return window.location.origin;
+        } catch (e) { }
+      }
+
+      // 2. Probar los hosts de la lista
+      for (const base of APP_CONFIG.hosts) {
+        try {
+          const res = await fetchConTimeout(`${base}${APP_CONFIG.controllerPath}/probar-conexion`, 2500);
+          if (res.ok) return base;
+        } catch (e) { }
+      }
+
+      // 3. Intento de fallback llamando directamente al endpoint raíz
+      for (const base of APP_CONFIG.hosts) {
+        try {
+          const res = await fetchConTimeout(`${base}${APP_CONFIG.controllerPath}`, 3000);
+          if (res.ok) return base;
+        } catch (e) { }
+      }
+
+      return null;
+    }
+
+    async function inicializarConexionApi() {
+      actualizarEstadoUI('loading', 'Detectando API...');
+      mostrarCargando(true, 'Conectando con Backend', 'Detectando servidor de API Desposte en la red...');
+
+      try {
+        apiBaseActiva = await detectarServidorApi();
+
+        if (!apiBaseActiva) {
+          // Si no detecta automáticamente, usa el primero como predeterminado
+          apiBaseActiva = APP_CONFIG.hosts[0];
+          console.warn("No se detectó API activa en el sondeo rápido, usando host predeterminado:", apiBaseActiva);
+        }
+
+        actualizarEstadoUI('online', `En Línea (${apiBaseActiva.replace('http://', '')})`);
+        await consultarApi(false);
+
+      } catch (err) {
+        console.error("Error al inicializar conexión:", err);
+        actualizarEstadoUI('error', 'Error de Conexión');
+        mostrarToast(`⚠️ No se pudo conectar a la API: ${err.message}`);
+        mostrarCargando(false);
+      }
+    }
+
+    async function consultarApi(forzarRecarga = false) {
+      const fIni = document.getElementById('fechaInicio').value || '2026-01-01';
+      const fFin = document.getElementById('fechaFin').value || '2026-08-31';
+
+      if (!apiBaseActiva) {
+        apiBaseActiva = APP_CONFIG.hosts[0];
+      }
+
+      mostrarCargando(
+        true,
+        'Consultando SQL Server',
+        `Ejecutando Sp_Informe_Prod_Chuletas para el periodo ${fIni} al ${fFin}...`
+      );
+      actualizarEstadoUI('loading', 'Consultando SP...');
+
+      const url = `${apiBaseActiva}${APP_CONFIG.controllerPath}?fechaInicio=${encodeURIComponent(fIni)}&fechaFin=${encodeURIComponent(fFin)}&recargar=${forzarRecarga}`;
+
+      try {
+        // Timeout de hasta 10 minutos para dar tiempo a SQL Server en rangos muy amplios
+        const res = await fetchConTimeout(url, 600000);
+
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        }
+
+        const json = await res.json();
+
+        // Soporta respuesta directa o envuelta en { exito: true, datos: [...] }
+        const items = Array.isArray(json) ? json : (json.datos || []);
+
+        if (items.length === 0) {
+          mostrarToast('ℹ️ La consulta se ejecutó correctamente pero no arrojó registros para este rango.');
+        } else {
+          mostrarToast(`✅ ${items.length} registros cargados desde ProdChuletasController`);
+        }
+
+        rawData = items;
+        procesarDatos(items);
+        actualizarEstadoUI('online', `En Línea (${apiBaseActiva.replace('http://', '')})`);
+
+      } catch (err) {
+        console.error("Error al consultar API:", err);
+        actualizarEstadoUI('error', 'Error en consulta');
+        mostrarToast(`❌ Error al consultar API: ${err.message}`);
+      } finally {
+        mostrarCargando(false);
+      }
+    }
+
+    // =========================================================================
+    // 🛠️ PROCESAMIENTO Y ENRIQUECIMIENTO DE DATOS
+    // =========================================================================
+    function parseDate(val) {
+      if (!val) return new Date();
+      if (typeof val === 'number') {
+        const utc_days = Math.floor(val - 25569);
+        const utc_value = utc_days * 86400;
+        const d = new Date(utc_value * 1000);
+        return new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+      }
+      if (typeof val === 'string') {
+        const clean = val.split('T')[0];
+        const parts = clean.split('-');
+        if (parts.length === 3) {
+          return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+        }
+        return new Date(val);
+      }
+      return new Date(val);
+    }
+
+    function formatYMD(d) {
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    function getISOWeek(d) {
+      const target = new Date(d.valueOf());
+      const dayNr = (d.getDay() + 6) % 7;
+      target.setDate(target.getDate() - dayNr + 3);
+      const firstThursday = target.valueOf();
+      target.setMonth(0, 1);
+      if (target.getDay() !== 4) target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
+      return 1 + Math.ceil((firstThursday - target) / 604800000);
+    }
+
+    function procesarDatos(items) {
+      enrichedData = items.map(d => {
+        // Normalización case-insensitive
+        const fechaRaw = d.fechaOrden || d.FechaOrden || d.fechaOrdenStr || d.FechaOrdenStr;
+        const dObj = parseDate(fechaRaw);
+        const yyyy = dObj.getFullYear();
+        const mm = String(dObj.getMonth() + 1).padStart(2, '0');
+        const week = getISOWeek(dObj);
+
+        return {
+          ...d,
+          // Normalizar nombres de campos clave
+          Tipo: (d.tipo || d.Tipo || '').trim(),
+          TipoChuleta: (d.tipoChuleta || d.TipoChuleta || '').trim(),
+          Plantilla: d.plantilla ?? d.Plantilla ?? 0,
+          NPlantilla: (d.nPlantilla || d.NPlantilla || '').trim(),
+          Ttra: d.ttra ?? d.Ttra ?? 0,
+          NTtra: (d.nTtra || d.NTtra || '').trim(),
+          Producto: (d.producto || d.Producto || '').trim(),
+          CodigoCorto: (d.codigoCorto || d.CodigoCorto || '').trim(),
+          Nombre: (d.nombre || d.Nombre || '').trim(),
+          TipoInforme: (d.tipoInforme || d.TipoInforme || '').trim(),
+          Unidades: Number(d.unidades ?? d.Unidades) || 0,
+          Kilos: Number(d.kilos ?? d.Kilos) || 0,
+          CostoTotal: Number(d.costoTotal ?? d.CostoTotal) || 0,
+          VentaTotal: Number(d.ventaTotal ?? d.VentaTotal) || 0,
+
+          // Campos para series temporales
+          _dateObj: dObj,
+          _ymd: formatYMD(dObj),
+          _dia: formatYMD(dObj),
+          _semana: `${yyyy}-S${String(week).padStart(2, '0')}`,
+          _mes: `${yyyy}-${mm}`,
+          _anual: `${yyyy}`
+        };
+      });
+
+      poblarFiltrosDinamicos();
+      applyFilters();
+    }
+
+    // =========================================================================
+    // 🎛️ FILTROS DINÁMICOS (Tipo, TipoChuleta, Plantilla)
+    // =========================================================================
+    function poblarFiltrosDinamicos() {
+      // 1. Filtro Tipo (solicitado expresamente)
+      const selectTipo = document.getElementById('tipoFilter');
+      const valTipoActual = selectTipo.value;
+      const tipos = [...new Set(enrichedData.map(d => d.Tipo))].filter(Boolean).sort();
+
+      selectTipo.innerHTML = '<option value="ALL">-- Todos los Tipos --</option>';
+      tipos.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t;
+        opt.textContent = t;
+        selectTipo.appendChild(opt);
+      });
+      if (tipos.includes(valTipoActual)) selectTipo.value = valTipoActual;
+
+      // 2. Filtro TipoChuleta (Fresco / Congelado / etc.)
+      const selectTipoChuleta = document.getElementById('tipoChuletaFilter');
+      const valChuletaActual = selectTipoChuleta.value;
+      const tiposChuleta = [...new Set(enrichedData.map(d => d.TipoChuleta))].filter(Boolean).sort();
+
+      selectTipoChuleta.innerHTML = '<option value="ALL">-- Todos (Fresco/Congelado) --</option>';
+      tiposChuleta.forEach(tc => {
+        const opt = document.createElement('option');
+        opt.value = tc;
+        opt.textContent = tc;
+        selectTipoChuleta.appendChild(opt);
+      });
+      if (tiposChuleta.includes(valChuletaActual)) selectTipoChuleta.value = valChuletaActual;
+
+      // 3. Filtro Plantilla
+      const selectPlantilla = document.getElementById('plantillaFilter');
+      const valPlanActual = selectPlantilla.value;
+      const plantillas = [...new Set(enrichedData.map(d => d.NPlantilla))].filter(Boolean).sort();
+
+      selectPlantilla.innerHTML = '<option value="ALL">-- Todas las Plantillas --</option>';
+      plantillas.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p;
+        opt.textContent = p;
+        selectPlantilla.appendChild(opt);
+      });
+      if (plantillas.includes(valPlanActual)) selectPlantilla.value = valPlanActual;
+    }
+
+    function applyFilters() {
+      const tipoSel = document.getElementById('tipoFilter').value;
+      const chuletaSel = document.getElementById('tipoChuletaFilter').value;
+      const plantillaSel = document.getElementById('plantillaFilter').value;
+
+      filteredData = enrichedData.filter(d => {
+        const matchTipo = (tipoSel === 'ALL') || (d.Tipo === tipoSel);
+        const matchChuleta = (chuletaSel === 'ALL') || (d.TipoChuleta === chuletaSel);
+        const matchPlan = (plantillaSel === 'ALL') || (d.NPlantilla === plantillaSel);
+        return matchTipo && matchChuleta && matchPlan;
+      });
+
+      updateDashboard();
+    }
+
+    function resetFilters() {
+      document.getElementById('tipoFilter').value = 'ALL';
+      document.getElementById('tipoChuletaFilter').value = 'ALL';
+      document.getElementById('plantillaFilter').value = 'ALL';
+      document.getElementById('temporalFilter').value = 'semanal';
+      document.getElementById('tableSearchInput').value = '';
+      applyFilters();
+    }
+
+    // =========================================================================
+    // 🧮 CÁLCULO DE MÉTRICAS Y RENDIMIENTO
+    // =========================================================================
+    function calculateMetrics(dataset) {
+      let origen = 0;
+      let resultado = 0;
+      let harina = 0;
+      let merma = 0;
+      let totalKilos = 0;
+
+      dataset.forEach(d => {
+        const k = Number(d.Kilos) || 0;
+        totalKilos += k;
+        const info = (d.TipoInforme || '').toUpperCase();
+
+        // Kilos Origen: ttra == 13 o NTtra == 'ORIGEN'
+        if (d.Ttra === 13 || d.NTtra === 'ORIGEN') {
+          origen += k;
+        }
+
+        // Kilos Resultado: ttra == 4 o NTtra == 'RESULTADO'
+        if (d.Ttra === 4 || d.NTtra === 'RESULTADO') {
+          if (info.includes('HARINA')) {
+            harina += k;
+          } else if (info.includes('MERMA')) {
+            merma += k;
+          } else {
+            resultado += k;
+          }
+        }
+      });
+
+      const rend = origen > 0 ? (resultado / origen) * 100 : 0;
+      return {
+        origen,
+        resultado,
+        harina,
+        merma,
+        perdida: (harina + merma),
+        rendimiento: rend,
+        totalKilos
+      };
+    }
+
+    // =========================================================================
+    // 📊 ACTUALIZACIÓN DEL DASHBOARD
+    // =========================================================================
+    function updateDashboard() {
+      updateKPIs();
+      renderTemporalChart();
+      renderPlantillasChart();
+      renderPlantillasTable();
+    }
+
+    function updateKPIs() {
+      const m = calculateMetrics(filteredData);
+
+      document.getElementById('kpiOrigen').textContent = m.origen.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' kg';
+      document.getElementById('kpiResultado').textContent = m.resultado.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' kg';
+      document.getElementById('kpiRendimiento').textContent = m.rendimiento.toFixed(2) + '%';
+      document.getElementById('kpiPerdida').textContent = m.perdida.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' kg';
+
+      const pct = m.origen > 0 ? ((m.perdida / m.origen) * 100).toFixed(2) : '0.00';
+      document.getElementById('kpiPerdidaPct').textContent = `${pct}% de la Materia Prima`;
+
+      document.getElementById('kpiVolumenTotal').textContent = m.totalKilos.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' kg';
+      document.getElementById('kpiRegistros').textContent = `${filteredData.length.toLocaleString('es-PE')} registros filtrados`;
+    }
+
+    // =========================================================================
+    // 📈 GRÁFICO TEMPORAL (Diario / Semanal / Mensual / Anual)
+    // =========================================================================
+    function renderTemporalChart() {
+      const mode = document.getElementById('temporalFilter').value;
+      const fieldMap = {
+        diario: '_dia',
+        semanal: '_semana',
+        mensual: '_mes',
+        anual: '_anual'
+      };
+      const titleMap = {
+        diario: 'Diaria',
+        semanal: 'Semanal',
+        mensual: 'Mensual',
+        anual: 'Anual'
+      };
+
+      document.getElementById('chartTimeSeriesTitle').textContent = `Evolución Temporal del Rendimiento (${titleMap[mode]})`;
+
+      const timeField = fieldMap[mode];
+      const groups = {};
+
+      filteredData.forEach(d => {
+        const key = d[timeField];
+        if (!key) return;
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(d);
+      });
+
+      const sortedKeys = Object.keys(groups).sort();
+      const rendValues = sortedKeys.map(k => calculateMetrics(groups[k]).rendimiento.toFixed(2));
+      const origenValues = sortedKeys.map(k => calculateMetrics(groups[k]).origen.toFixed(2));
+      const resultadoValues = sortedKeys.map(k => calculateMetrics(groups[k]).resultado.toFixed(2));
+
+      if (chartTemporalObj) chartTemporalObj.destroy();
+
+      const ctx = document.getElementById('chartTemporal').getContext('2d');
+      chartTemporalObj = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: sortedKeys,
+          datasets: [
+            {
+              label: 'Rendimiento (%)',
+              data: rendValues,
+              borderColor: '#1295C1',
+              backgroundColor: 'rgba(18, 149, 193, 0.12)',
+              borderWidth: 3,
+              pointBackgroundColor: '#223A5E',
+              pointBorderColor: '#FFFFFF',
+              pointBorderWidth: 1.5,
+              pointRadius: 4,
+              pointHoverRadius: 6,
+              fill: true,
+              tension: 0.25,
+              yAxisID: 'y'
+            },
+            {
+              type: 'bar',
+              label: 'Kilos Origen',
+              data: origenValues,
+              backgroundColor: 'rgba(34, 58, 94, 0.65)',
+              borderRadius: 4,
+              yAxisID: 'y1'
+            },
+            {
+              type: 'bar',
+              label: 'Kilos Resultado',
+              data: resultadoValues,
+              backgroundColor: 'rgba(0, 125, 126, 0.65)',
+              borderRadius: 4,
+              yAxisID: 'y1'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { position: 'top', labels: { boxWidth: 12, font: { family: 'Inter', size: 11, weight: 600 } } },
+            tooltip: {
+              backgroundColor: '#0F172A',
+              titleFont: { family: 'Inter', size: 12 },
+              bodyFont: { family: 'Inter', size: 11 },
+              padding: 10,
+              callbacks: {
+                label: (ctx) => {
+                  if (ctx.dataset.yAxisID === 'y') {
+                    return ` Rendimiento: ${ctx.raw}%`;
+                  }
+                  return ` ${ctx.dataset.label}: ${Number(ctx.raw).toLocaleString('es-PE')} kg`;
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100,
+              ticks: { callback: v => v + '%', font: { family: 'Inter', size: 10 } },
+              title: { display: true, text: 'Rendimiento %', font: { family: 'Inter', size: 11, weight: 600 } },
+              grid: { color: '#F1F5F9' }
+            },
+            y1: {
+              beginAtZero: true,
+              position: 'right',
+              grid: { drawOnChartArea: false },
+              ticks: { callback: v => Number(v).toLocaleString('es-PE'), font: { family: 'Inter', size: 10 } },
+              title: { display: true, text: 'Kilos (kg)', font: { family: 'Inter', size: 11, weight: 600 } }
+            },
+            x: {
+              ticks: { font: { family: 'Inter', size: 10 } },
+              grid: { display: false }
+            }
+          }
+        }
+      });
+    }
+
+    // =========================================================================
+    // 📊 GRÁFICO POR PLANTILLA
+    // =========================================================================
+    function renderPlantillasChart() {
+      const pMap = {};
+      filteredData.forEach(d => {
+        const key = d.NPlantilla || 'Sin Nombre';
+        if (!pMap[key]) pMap[key] = [];
+        pMap[key].push(d);
+      });
+
+      const metrics = Object.entries(pMap).map(([name, rows]) => {
+        const m = calculateMetrics(rows);
+        return { name, ...m };
+      })
+        .filter(p => p.origen > 0)
+        .sort((a, b) => b.rendimiento - a.rendimiento)
+        .slice(0, 15); // Top 15 plantillas
+
+      const labels = metrics.map(p => p.name.length > 22 ? p.name.substring(0, 22) + '...' : p.name);
+      const dataRend = metrics.map(p => p.rendimiento.toFixed(2));
+
+      if (chartPlantillasObj) chartPlantillasObj.destroy();
+
+      const ctx = document.getElementById('chartPlantillas').getContext('2d');
+      chartPlantillasObj = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Rendimiento %',
+            data: dataRend,
+            backgroundColor: dataRend.map(r => r >= 85 ? '#10B981' : (r >= 75 ? '#F59E0B' : '#EF4444')),
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          indexAxis: 'y',
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#0F172A',
+              callbacks: {
+                label: ctx => ` Rendimiento: ${ctx.raw}%`
+              }
+            }
+          },
+          scales: {
+            x: {
+              beginAtZero: true,
+              max: 100,
+              ticks: { callback: v => v + '%', font: { family: 'Inter', size: 10 } },
+              grid: { color: '#F1F5F9' }
+            },
+            y: {
+              ticks: { font: { family: 'Inter', size: 10 } },
+              grid: { display: false }
+            }
+          }
+        }
+      });
+    }
+
+    // =========================================================================
+    // 📋 TABLA DETALLADA POR PLANTILLA
+    // =========================================================================
+    function renderPlantillasTable() {
+      const tbody = document.getElementById('tablePlantillasBody');
+      tbody.innerHTML = '';
+
+      const pMap = {};
+      filteredData.forEach(d => {
+        const id = d.Plantilla;
+        if (!pMap[id]) {
+          pMap[id] = {
+            id: d.Plantilla,
+            name: d.NPlantilla,
+            tipo: d.Tipo,
+            tipoChuleta: d.TipoChuleta,
+            rows: []
+          };
+        }
+        pMap[id].rows.push(d);
+      });
+
+      const list = Object.values(pMap).sort((a, b) => a.id - b.id);
+
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding: 24px; color: var(--text-muted);">No hay registros que coincidan con los filtros seleccionados.</td></tr>`;
+        return;
+      }
+
+      list.forEach(p => {
+        const m = calculateMetrics(p.rows);
+        let badgeClass = 'badge-good';
+        if (m.rendimiento < 75) badgeClass = 'badge-low';
+        else if (m.rendimiento < 85) badgeClass = 'badge-mid';
+
+        const tr = document.createElement('tr');
+        tr.dataset.search = `${p.id} ${p.name} ${p.tipo} ${p.tipoChuleta}`.toLowerCase();
+        tr.innerHTML = `
+          <td><strong>${p.id || '-'}</strong></td>
+          <td><strong>${p.name || 'Sin Nombre'}</strong></td>
+          <td><span class="badge-tag">${p.tipo || '-'}</span></td>
+          <td><span class="badge-tag" style="background: rgba(18, 149, 193, 0.12); color: var(--blue-sapphire);">${p.tipoChuleta || '-'}</span></td>
+          <td style="text-align: right; font-weight: 600;">${m.origen.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+          <td style="text-align: right; font-weight: 600; color: var(--teal-blue);">${m.resultado.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+          <td style="text-align: right; color: var(--text-muted);">${m.harina.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+          <td style="text-align: right; color: var(--danger);">${m.merma.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+          <td style="text-align: right;"><span class="badge-rend ${badgeClass}">${m.rendimiento.toFixed(2)}%</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function filtrarTablaTexto() {
+      const q = (document.getElementById('tableSearchInput').value || '').trim().toLowerCase();
+      const rows = document.querySelectorAll('#tablePlantillasBody tr');
+      rows.forEach(r => {
+        if (!q) {
+          r.style.display = '';
+          return;
+        }
+        const text = r.dataset.search || '';
+        r.style.display = text.includes(q) ? '' : 'none';
+      });
+    }
+
+    // =========================================================================
+    // 💡 INTERFAZ Y HELPERS (Toasts, Spinners, Estado)
+    // =========================================================================
+    function actualizarEstadoUI(tipo, texto) {
+      const dot = document.querySelector('.status-dot');
+      const txt = document.getElementById('apiStatusText');
+      dot.className = `status-dot ${tipo}`;
+      txt.textContent = texto;
+    }
+
+    function mostrarCargando(visible, titulo = 'Cargando', mensaje = 'Por favor espere...') {
+      const overlay = document.getElementById('loadingOverlay');
+      if (visible) {
+        document.getElementById('loadingTitle').textContent = titulo;
+        document.getElementById('loadingMessage').textContent = mensaje;
+        overlay.classList.add('active');
+      } else {
+        overlay.classList.remove('active');
+      }
+    }
+
+    function mostrarToast(mensaje, duracionMs = 4000) {
+      const toast = document.getElementById('toastNotification');
+      const msgEl = document.getElementById('toastMsg');
+      msgEl.textContent = mensaje;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, duracionMs);
+    }
+  </script>
+</body>
+
+</html>

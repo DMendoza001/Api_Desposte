@@ -6,22 +6,23 @@ namespace ApiDesposte.Controllers.Excel
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class CumplimientosDetalleController : ControllerBase
+    [Route("api/CumplimientosDetallePy")]
+    public class CumplimientosDetalleControllerPy : ControllerBase
     {
-        private const string HojaProduccion = "Produccion";
-        private const string TablaProduccion = "T_Produccion";
+        private const string HojaResProdPy = "ResProd_Py";
+        private const string TablaResProdPy = "T_ResProd_Py";
 
         private const string HojaDemandaPy = "DemandaPy";
         private const string TablaDemandaPy = "T_DemandaPy";
 
         private const string HojaAuxiliares = "Auxiliares";
-        private const string TablaArticuloVentas = "T_ArticuloVentas";
         private const string TablaCodigoRelacion = "T_CodigoRelacion";
+        private const string TablaArticuloVentas = "T_ArticuloVentas";
 
         // Cache en memoria para evitar relecturas continuas de disco al filtrar
-        private static List<CumplimientoDetalleResumenDto>? _cacheResumen = null;
-        private static List<ProduccionDetalleItemDto>? _cacheProduccionItems = null;
-        private static List<DemandaDetalleItemDto>? _cacheDemandaItems = null;
+        private static List<CumplimientoPyResumenDto>? _cacheResumen = null;
+        private static List<ResProdPyItemDto>? _cacheProdItems = null;
+        private static List<DemandaPyItemDto>? _cacheDemandaItems = null;
         private static DateTime _cacheTimestamp = DateTime.MinValue;
         private static readonly object _cacheLock = new();
         private static readonly TimeSpan CacheDuracion = TimeSpan.FromSeconds(45);
@@ -149,10 +150,10 @@ namespace ApiDesposte.Controllers.Excel
         }
 
         /// <summary>
-        /// Genera la tabla resumen consolidada agrupando T_Produccion y T_DemandaPy por (Semana, CodigoCorto)
-        /// incorporando el campo SubPlanta (sub area) y cruzando con T_ArticuloVentas y T_CodigoRelacion.
+        /// Genera la tabla resumen consolidada agrupando T_ResProd_Py y T_DemandaPy por (Semana, CodigoCorto)
+        /// incorporando el campo SubPlanta y cruzando con T_CodigoRelacion y auxiliares.
         /// </summary>
-        private List<CumplimientoDetalleResumenDto> GenerarResumenConsolidado(bool forzarRecarga = false)
+        private List<CumplimientoPyResumenDto> GenerarResumenConsolidado(bool forzarRecarga = false)
         {
             lock (_cacheLock)
             {
@@ -170,40 +171,12 @@ namespace ApiDesposte.Controllers.Excel
                 using var workbook = CargarWorkbookEnMemoria(rutaExcel);
 
                 // 1. CARGAR TABLAS AUXILIARES
-                var dicArticuloVentas = new Dictionary<string, ArticuloVentaAuxDto>(StringComparer.OrdinalIgnoreCase);
-                var dicCodigoRelacion = new Dictionary<string, CodigoRelacionAuxDto>(StringComparer.OrdinalIgnoreCase);
+                var dicCodigoRelacion = new Dictionary<string, CodigoRelacionPyAuxDto>(StringComparer.OrdinalIgnoreCase);
+                var dicArticuloVentas = new Dictionary<string, ArticuloVentasPyAuxDto>(StringComparer.OrdinalIgnoreCase);
 
                 if (workbook.Worksheets.TryGetWorksheet(HojaAuxiliares, out var wsAux))
                 {
-                    // T_ArticuloVentas: CodigoVenta -> NLinea, NFamilia, NCategoria, Nombre
-                    var tablaArt = ObtenerTabla(wsAux, TablaArticuloVentas);
-                    if (tablaArt != null)
-                    {
-                        int colCodVenta = BuscarIndiceColumna(tablaArt, "CodigoVenta", "Codigoventa", "Codigo_Venta");
-                        int colNombre = BuscarIndiceColumna(tablaArt, "Nombre", "Descripcion");
-                        int colLinea = BuscarIndiceColumna(tablaArt, "NLinea", "Linea", "NombreLinea");
-                        int colFamilia = BuscarIndiceColumna(tablaArt, "NFamilia", "Familia", "NombreFamilia");
-                        int colCategoria = BuscarIndiceColumna(tablaArt, "NCategoria", "Categoria", "NombreCategoria");
-
-                        foreach (var fila in tablaArt.DataRange.Rows())
-                        {
-                            if (fila.IsEmpty()) continue;
-                            string codVenta = ObtenerValorCeldaTexto(fila, colCodVenta);
-                            if (string.IsNullOrWhiteSpace(codVenta)) continue;
-
-                            var aux = new ArticuloVentaAuxDto
-                            {
-                                CodigoVenta = codVenta,
-                                Nombre = ObtenerValorCeldaTexto(fila, colNombre),
-                                NLinea = ObtenerValorCeldaTexto(fila, colLinea),
-                                NFamilia = ObtenerValorCeldaTexto(fila, colFamilia),
-                                NCategoria = ObtenerValorCeldaTexto(fila, colCategoria)
-                            };
-                            dicArticuloVentas[codVenta] = aux;
-                        }
-                    }
-
-                    // T_CodigoRelacion: CodigoCorto -> Nombre, CodigoArticulo
+                    // T_CodigoRelacion: CodigoCorto -> Nombre, CodigoArticulo, TipoCong
                     var tablaRel = ObtenerTabla(wsAux, TablaCodigoRelacion);
                     if (tablaRel != null)
                     {
@@ -217,33 +190,57 @@ namespace ApiDesposte.Controllers.Excel
                             string codCorto = ObtenerValorCeldaTexto(fila, colCodCorto);
                             if (string.IsNullOrWhiteSpace(codCorto)) continue;
 
-                            var rel = new CodigoRelacionAuxDto
+                            dicCodigoRelacion[codCorto] = new CodigoRelacionPyAuxDto
                             {
                                 CodigoCorto = codCorto,
                                 CodigoArticulo = ObtenerValorCeldaTexto(fila, colCodArt),
                                 Nombre = ObtenerValorCeldaTexto(fila, colNombre)
                             };
-                            dicCodigoRelacion[codCorto] = rel;
+                        }
+                    }
+
+                    // T_ArticuloVentas: CodigoVenta -> NLinea, NFamilia, NCategoria, Nombre
+                    var tablaArt = ObtenerTabla(wsAux, TablaArticuloVentas);
+                    if (tablaArt != null)
+                    {
+                        int colCodVenta = BuscarIndiceColumna(tablaArt, "CodigoVenta", "Codigoventa");
+                        int colNombre = BuscarIndiceColumna(tablaArt, "Nombre", "Descripcion");
+                        int colLinea = BuscarIndiceColumna(tablaArt, "NLinea", "Linea");
+                        int colFamilia = BuscarIndiceColumna(tablaArt, "NFamilia", "Familia");
+                        int colCategoria = BuscarIndiceColumna(tablaArt, "NCategoria", "Categoria");
+
+                        foreach (var fila in tablaArt.DataRange.Rows())
+                        {
+                            if (fila.IsEmpty()) continue;
+                            string codVenta = ObtenerValorCeldaTexto(fila, colCodVenta);
+                            if (string.IsNullOrWhiteSpace(codVenta)) continue;
+
+                            dicArticuloVentas[codVenta] = new ArticuloVentasPyAuxDto
+                            {
+                                CodigoVenta = codVenta,
+                                Nombre = ObtenerValorCeldaTexto(fila, colNombre),
+                                NLinea = ObtenerValorCeldaTexto(fila, colLinea),
+                                NFamilia = ObtenerValorCeldaTexto(fila, colFamilia),
+                                NCategoria = ObtenerValorCeldaTexto(fila, colCategoria)
+                            };
                         }
                     }
                 }
 
-                // 2. CARGAR T_Produccion
-                var prodItems = new List<ProduccionDetalleItemDto>();
-                var prodAgrupado = new Dictionary<string, AcumuladorProdDto>(StringComparer.OrdinalIgnoreCase);
+                // 2. CARGAR T_ResProd_Py (Hoja ResProd_Py)
+                var prodItems = new List<ResProdPyItemDto>();
+                var prodAgrupado = new Dictionary<string, AcumuladorProdPyDto>(StringComparer.OrdinalIgnoreCase);
 
-                if (workbook.Worksheets.TryGetWorksheet(HojaProduccion, out var wsProd))
+                if (workbook.Worksheets.TryGetWorksheet(HojaResProdPy, out var wsProd))
                 {
-                    var tablaProd = ObtenerTabla(wsProd, TablaProduccion);
+                    var tablaProd = ObtenerTabla(wsProd, TablaResProdPy);
                     if (tablaProd != null)
                     {
                         int colSemana = BuscarIndiceColumna(tablaProd, "Semana");
                         int colProducto = BuscarIndiceColumna(tablaProd, "Producto");
                         int colCodCorto = BuscarIndiceColumna(tablaProd, "CodigoCorto", "CodCorto");
                         int colNombre = BuscarIndiceColumna(tablaProd, "Nombre");
-                        int colUnidades = BuscarIndiceColumna(tablaProd, "Unidades", "Und", "Cantidad");
                         int colKilos = BuscarIndiceColumna(tablaProd, "Kilos", "Kgs");
-                        int colTipo = BuscarIndiceColumna(tablaProd, "Tipo", "TipoProceso");
                         int colLinea = BuscarIndiceColumna(tablaProd, "Linea", "NLinea");
                         int colFamilia = BuscarIndiceColumna(tablaProd, "Familia", "NFamilia");
                         int colCategoria = BuscarIndiceColumna(tablaProd, "Categoria", "NCategoria");
@@ -257,10 +254,8 @@ namespace ApiDesposte.Controllers.Excel
                             if (string.IsNullOrWhiteSpace(sem) || string.IsNullOrWhiteSpace(codCorto)) continue;
 
                             double kilos = ObtenerValorCeldaNumero(fila, colKilos);
-                            double unidades = ObtenerValorCeldaNumero(fila, colUnidades);
                             string prod = ObtenerValorCeldaTexto(fila, colProducto);
                             string nom = ObtenerValorCeldaTexto(fila, colNombre);
-                            string tipo = ObtenerValorCeldaTexto(fila, colTipo);
                             string lin = ObtenerValorCeldaTexto(fila, colLinea);
                             string fam = ObtenerValorCeldaTexto(fila, colFamilia);
                             string cat = ObtenerValorCeldaTexto(fila, colCategoria);
@@ -275,18 +270,23 @@ namespace ApiDesposte.Controllers.Excel
 
                             if (string.IsNullOrWhiteSpace(subPlanta)) subPlanta = "DESPOSTE";
 
-                            // Resolver datos auxiliares si faltan
+                            dicCodigoRelacion.TryGetValue(codCorto, out var rel);
+                            if (rel != null)
+                            {
+                                if (string.IsNullOrWhiteSpace(nom)) nom = rel.Nombre;
+                                if (string.IsNullOrWhiteSpace(prod)) prod = rel.CodigoArticulo;
+                            }
+
                             dicArticuloVentas.TryGetValue(codCorto, out var art);
                             if (art != null)
                             {
+                                if (string.IsNullOrWhiteSpace(nom)) nom = art.Nombre;
                                 if (string.IsNullOrWhiteSpace(lin)) lin = art.NLinea;
                                 if (string.IsNullOrWhiteSpace(fam)) fam = art.NFamilia;
                                 if (string.IsNullOrWhiteSpace(cat)) cat = art.NCategoria;
                             }
-                            dicCodigoRelacion.TryGetValue(codCorto, out var rel);
-                            if (rel != null && string.IsNullOrWhiteSpace(nom)) nom = rel.Nombre;
 
-                            prodItems.Add(new ProduccionDetalleItemDto
+                            prodItems.Add(new ResProdPyItemDto
                             {
                                 Semana = sem,
                                 Anio = anio,
@@ -295,10 +295,7 @@ namespace ApiDesposte.Controllers.Excel
                                 CodigoCorto = codCorto,
                                 Producto = prod,
                                 Nombre = nom,
-                                Unidades = Math.Round(unidades, 2),
                                 Kilos = Math.Round(kilos, 2),
-                                PesoPromedio = unidades > 0 ? Math.Round(kilos / unidades, 3) : 0,
-                                Tipo = string.IsNullOrWhiteSpace(tipo) ? "OTROS" : tipo.ToUpper(),
                                 Linea = lin,
                                 Familia = string.IsNullOrWhiteSpace(fam) ? "SIN FAMILIA" : fam,
                                 Categoria = string.IsNullOrWhiteSpace(cat) ? "SIN CATEGORIA" : cat
@@ -307,7 +304,7 @@ namespace ApiDesposte.Controllers.Excel
                             string key = $"{sem}|{codCorto}";
                             if (!prodAgrupado.TryGetValue(key, out var acum))
                             {
-                                acum = new AcumuladorProdDto
+                                acum = new AcumuladorProdPyDto
                                 {
                                     Semana = sem,
                                     CodigoCorto = codCorto,
@@ -332,9 +329,9 @@ namespace ApiDesposte.Controllers.Excel
                     }
                 }
 
-                // 3. CARGAR T_DemandaPy
-                var demItems = new List<DemandaDetalleItemDto>();
-                var demAgrupado = new Dictionary<string, AcumuladorDemDto>(StringComparer.OrdinalIgnoreCase);
+                // 3. CARGAR T_DemandaPy (Hoja DemandaPy)
+                var demItems = new List<DemandaPyItemDto>();
+                var demAgrupado = new Dictionary<string, AcumuladorDemPyDto>(StringComparer.OrdinalIgnoreCase);
 
                 if (workbook.Worksheets.TryGetWorksheet(HojaDemandaPy, out var wsDem))
                 {
@@ -377,17 +374,23 @@ namespace ApiDesposte.Controllers.Excel
 
                             if (string.IsNullOrWhiteSpace(subPlanta)) subPlanta = "DESPOSTE";
 
+                            dicCodigoRelacion.TryGetValue(codCorto, out var rel);
+                            if (rel != null)
+                            {
+                                if (string.IsNullOrWhiteSpace(nom)) nom = rel.Nombre;
+                                if (string.IsNullOrWhiteSpace(prod)) prod = rel.CodigoArticulo;
+                            }
+
                             dicArticuloVentas.TryGetValue(codCorto, out var art);
                             if (art != null)
                             {
+                                if (string.IsNullOrWhiteSpace(nom)) nom = art.Nombre;
                                 if (string.IsNullOrWhiteSpace(lin)) lin = art.NLinea;
                                 if (string.IsNullOrWhiteSpace(fam)) fam = art.NFamilia;
                                 if (string.IsNullOrWhiteSpace(cat)) cat = art.NCategoria;
                             }
-                            dicCodigoRelacion.TryGetValue(codCorto, out var rel);
-                            if (rel != null && string.IsNullOrWhiteSpace(nom)) nom = rel.Nombre;
 
-                            demItems.Add(new DemandaDetalleItemDto
+                            demItems.Add(new DemandaPyItemDto
                             {
                                 Semana = sem,
                                 Anio = anio,
@@ -406,7 +409,7 @@ namespace ApiDesposte.Controllers.Excel
                             string key = $"{sem}|{codCorto}";
                             if (!demAgrupado.TryGetValue(key, out var acum))
                             {
-                                acum = new AcumuladorDemDto
+                                acum = new AcumuladorDemPyDto
                                 {
                                     Semana = sem,
                                     CodigoCorto = codCorto,
@@ -435,7 +438,7 @@ namespace ApiDesposte.Controllers.Excel
                 var todasLasLlaves = new HashSet<string>(prodAgrupado.Keys, StringComparer.OrdinalIgnoreCase);
                 todasLasLlaves.UnionWith(demAgrupado.Keys);
 
-                var listaResumen = new List<CumplimientoDetalleResumenDto>(todasLasLlaves.Count);
+                var listaResumen = new List<CumplimientoPyResumenDto>(todasLasLlaves.Count);
 
                 foreach (var key in todasLasLlaves)
                 {
@@ -455,14 +458,10 @@ namespace ApiDesposte.Controllers.Excel
 
                     // Buscar en auxiliares: T_CodigoRelacion para Nombre y CodigoArticulo
                     dicCodigoRelacion.TryGetValue(codCorto, out var codRel);
-
-                    // Buscar en auxiliares: T_ArticuloVentas con llave CodigoVenta (coincide con CodigoCorto)
                     dicArticuloVentas.TryGetValue(codCorto, out var artVenta);
 
                     // Resolver Producto
                     string prod = pItem?.Producto ?? dItem?.Producto ?? codRel?.CodigoArticulo ?? "";
-
-                    // Si no encontró por CodigoCorto en T_ArticuloVentas, intentar por Producto como fallback
                     if (artVenta == null && !string.IsNullOrWhiteSpace(prod))
                     {
                         dicArticuloVentas.TryGetValue(prod, out artVenta);
@@ -487,8 +486,7 @@ namespace ApiDesposte.Controllers.Excel
                                      : !string.IsNullOrWhiteSpace(pItem?.Categoria) ? pItem!.Categoria
                                      : !string.IsNullOrWhiteSpace(dItem?.Categoria) ? dItem!.Categoria : "";
 
-                    int anio = 0;
-                    int nSemana = 0;
+                    int anio = 0, nSemana = 0;
                     if (!string.IsNullOrWhiteSpace(sem) && sem.Length >= 5)
                     {
                         int.TryParse(sem.Substring(0, 4), out anio);
@@ -498,7 +496,7 @@ namespace ApiDesposte.Controllers.Excel
                     double pctCumplimiento = kilosPy > 0 ? Math.Round((kilosProd / kilosPy) * 100.0, 2) : (kilosProd > 0 ? 100.0 : 0.0);
                     double pctVariacion = kilosPy > 0 ? Math.Round(((kilosProd - kilosPy) / kilosPy) * 100.0, 2) : 0.0;
 
-                    listaResumen.Add(new CumplimientoDetalleResumenDto
+                    listaResumen.Add(new CumplimientoPyResumenDto
                     {
                         Anio = anio,
                         NSemana = nSemana,
@@ -527,7 +525,7 @@ namespace ApiDesposte.Controllers.Excel
                     .ToList();
 
                 _cacheResumen = listaResumen;
-                _cacheProduccionItems = prodItems;
+                _cacheProdItems = prodItems;
                 _cacheDemandaItems = demItems;
                 _cacheTimestamp = DateTime.Now;
 
@@ -861,7 +859,7 @@ namespace ApiDesposte.Controllers.Excel
         }
 
         /// <summary>
-        /// Análisis comparativo consolidado general entre T_Produccion y T_DemandaPy
+        /// Análisis comparativo consolidado general entre T_ResProd_Py y T_DemandaPy
         /// </summary>
         [HttpGet("analisis")]
         public IActionResult ObtenerAnalisisComparativo([FromQuery] string? semana = null, [FromQuery] string? subPlanta = null)
@@ -989,9 +987,8 @@ namespace ApiDesposte.Controllers.Excel
         }
 
         /// <summary>
-        /// Análisis a profundidad exclusivo para T_Produccion:
-        /// Unidades producidas, Kilos, Peso Promedio por pieza, desglose por SubPlanta, desglose por Tipo (LINEAS, CONGELADO, TERCER CORTE, CHULETAS),
-        /// desglose por Familia, y Top 10 SKUs en Kilos y Unidades.
+        /// Análisis a profundidad exclusivo para T_ResProd_Py:
+        /// Kilos producidos, desglose por SubPlanta, desglose por Familia, y Top 10 SKUs en Kilos.
         /// </summary>
         [HttpGet("analisis-produccion")]
         public IActionResult ObtenerAnalisisProduccion([FromQuery] string? semana = null, [FromQuery] string? subPlanta = null)
@@ -999,7 +996,7 @@ namespace ApiDesposte.Controllers.Excel
             try
             {
                 GenerarResumenConsolidado();
-                var items = _cacheProduccionItems ?? new List<ProduccionDetalleItemDto>();
+                var items = _cacheProdItems ?? new List<ResProdPyItemDto>();
 
                 if (!string.IsNullOrWhiteSpace(semana))
                 {
@@ -1018,8 +1015,6 @@ namespace ApiDesposte.Controllers.Excel
                 }
 
                 double totalKilos = Math.Round(items.Sum(x => x.Kilos), 2);
-                double totalUnidades = Math.Round(items.Sum(x => x.Unidades), 2);
-                double pesoPromedioGlobal = totalUnidades > 0 ? Math.Round(totalKilos / totalUnidades, 3) : 0;
                 int totalRegistros = items.Count;
                 int totalSkus = items.Select(x => x.CodigoCorto).Distinct().Count();
 
@@ -1029,35 +1024,11 @@ namespace ApiDesposte.Controllers.Excel
                     .Select(g =>
                     {
                         double k = g.Sum(x => x.Kilos);
-                        double u = g.Sum(x => x.Unidades);
                         return new
                         {
                             SubPlanta = g.Key,
                             Kilos = Math.Round(k, 2),
-                            Unidades = Math.Round(u, 2),
-                            PesoPromedio = u > 0 ? Math.Round(k / u, 3) : 0,
                             PctKilos = totalKilos > 0 ? Math.Round((k / totalKilos) * 100, 2) : 0,
-                            TotalSkus = g.Select(x => x.CodigoCorto).Distinct().Count()
-                        };
-                    })
-                    .OrderByDescending(x => x.Kilos)
-                    .ToList();
-
-                // 2. Desglose por Tipo (LINEAS, CONGELADO, TERCER CORTE, CHULETAS)
-                var porTipo = items
-                    .GroupBy(x => x.Tipo)
-                    .Select(g =>
-                    {
-                        double k = g.Sum(x => x.Kilos);
-                        double u = g.Sum(x => x.Unidades);
-                        return new
-                        {
-                            Tipo = g.Key,
-                            Kilos = Math.Round(k, 2),
-                            Unidades = Math.Round(u, 2),
-                            PesoPromedio = u > 0 ? Math.Round(k / u, 3) : 0,
-                            PctKilos = totalKilos > 0 ? Math.Round((k / totalKilos) * 100, 2) : 0,
-                            PctUnidades = totalUnidades > 0 ? Math.Round((u / totalUnidades) * 100, 2) : 0,
                             TotalRegistros = g.Count(),
                             TotalSkus = g.Select(x => x.CodigoCorto).Distinct().Count()
                         };
@@ -1065,19 +1036,16 @@ namespace ApiDesposte.Controllers.Excel
                     .OrderByDescending(x => x.Kilos)
                     .ToList();
 
-                // 3. Desglose por Familia
+                // 2. Desglose por Familia
                 var porFamilia = items
                     .GroupBy(x => x.Familia)
                     .Select(g =>
                     {
                         double k = g.Sum(x => x.Kilos);
-                        double u = g.Sum(x => x.Unidades);
                         return new
                         {
                             Familia = g.Key,
                             Kilos = Math.Round(k, 2),
-                            Unidades = Math.Round(u, 2),
-                            PesoPromedio = u > 0 ? Math.Round(k / u, 3) : 0,
                             PctKilos = totalKilos > 0 ? Math.Round((k / totalKilos) * 100, 2) : 0,
                             TotalSkus = g.Select(x => x.CodigoCorto).Distinct().Count()
                         };
@@ -1085,84 +1053,43 @@ namespace ApiDesposte.Controllers.Excel
                     .OrderByDescending(x => x.Kilos)
                     .ToList();
 
-                // 4. Top 10 SKUs en Kilos
+                // 3. Top 10 SKUs en Kilos
                 var topSkusKilos = items
                     .GroupBy(x => new { x.CodigoCorto, x.Nombre, x.SubPlanta, x.Familia, x.Categoria })
-                    .Select(g =>
+                    .Select(g => new
                     {
-                        double k = g.Sum(x => x.Kilos);
-                        double u = g.Sum(x => x.Unidades);
-                        return new
-                        {
-                            CodigoCorto = g.Key.CodigoCorto,
-                            Nombre = g.Key.Nombre,
-                            SubPlanta = g.Key.SubPlanta,
-                            Familia = g.Key.Familia,
-                            Categoria = g.Key.Categoria,
-                            Kilos = Math.Round(k, 2),
-                            Unidades = Math.Round(u, 2),
-                            PesoPromedio = u > 0 ? Math.Round(k / u, 3) : 0
-                        };
+                        CodigoCorto = g.Key.CodigoCorto,
+                        Nombre = g.Key.Nombre,
+                        SubPlanta = g.Key.SubPlanta,
+                        Familia = g.Key.Familia,
+                        Categoria = g.Key.Categoria,
+                        Kilos = Math.Round(g.Sum(x => x.Kilos), 2)
                     })
                     .OrderByDescending(x => x.Kilos)
                     .Take(10)
                     .ToList();
 
-                // 5. Top 10 SKUs en Unidades
-                var topSkusUnidades = items
-                    .GroupBy(x => new { x.CodigoCorto, x.Nombre, x.SubPlanta, x.Familia, x.Categoria })
-                    .Select(g =>
-                    {
-                        double k = g.Sum(x => x.Kilos);
-                        double u = g.Sum(x => x.Unidades);
-                        return new
-                        {
-                            CodigoCorto = g.Key.CodigoCorto,
-                            Nombre = g.Key.Nombre,
-                            SubPlanta = g.Key.SubPlanta,
-                            Familia = g.Key.Familia,
-                            Categoria = g.Key.Categoria,
-                            Kilos = Math.Round(k, 2),
-                            Unidades = Math.Round(u, 2),
-                            PesoPromedio = u > 0 ? Math.Round(k / u, 3) : 0
-                        };
-                    })
-                    .OrderByDescending(x => x.Unidades)
-                    .Take(10)
-                    .ToList();
-
-                // 6. Evolución Semanal
+                // 4. Evolución Semanal
                 var evolucionSemanal = items
                     .GroupBy(x => new { x.Semana, x.Anio, x.NSemana })
                     .OrderBy(g => g.Key.Semana)
-                    .Select(g =>
+                    .Select(g => new
                     {
-                        double k = g.Sum(x => x.Kilos);
-                        double u = g.Sum(x => x.Unidades);
-                        return new
-                        {
-                            Semana = g.Key.Semana,
-                            Anio = g.Key.Anio,
-                            NSemana = g.Key.NSemana,
-                            Kilos = Math.Round(k, 2),
-                            Unidades = Math.Round(u, 2),
-                            PesoPromedio = u > 0 ? Math.Round(k / u, 3) : 0
-                        };
+                        Semana = g.Key.Semana,
+                        Anio = g.Key.Anio,
+                        NSemana = g.Key.NSemana,
+                        Kilos = Math.Round(g.Sum(x => x.Kilos), 2)
                     })
                     .ToList();
 
                 return Ok(new
                 {
                     TotalKilos = totalKilos,
-                    TotalUnidades = totalUnidades,
-                    PesoPromedioGlobal = pesoPromedioGlobal,
                     TotalRegistros = totalRegistros,
                     TotalSkus = totalSkus,
                     PorSubPlanta = porSubPlanta,
-                    PorTipo = porTipo,
                     PorFamilia = porFamilia,
                     TopSkusKilos = topSkusKilos,
-                    TopSkusUnidades = topSkusUnidades,
                     EvolucionSemanal = evolucionSemanal
                 });
             }
@@ -1183,7 +1110,7 @@ namespace ApiDesposte.Controllers.Excel
             try
             {
                 GenerarResumenConsolidado();
-                var items = _cacheDemandaItems ?? new List<DemandaDetalleItemDto>();
+                var items = _cacheDemandaItems ?? new List<DemandaPyItemDto>();
 
                 if (!string.IsNullOrWhiteSpace(semana))
                 {
@@ -1331,7 +1258,7 @@ namespace ApiDesposte.Controllers.Excel
         }
 
         /// <summary>
-        /// Obtiene los registros individuales de T_Produccion
+        /// Obtiene los registros individuales de T_ResProd_Py
         /// </summary>
         [HttpGet("produccion-items")]
         public IActionResult ObtenerProduccionItems([FromQuery] string? semana = null, [FromQuery] string? subPlanta = null)
@@ -1339,7 +1266,7 @@ namespace ApiDesposte.Controllers.Excel
             try
             {
                 GenerarResumenConsolidado();
-                var items = _cacheProduccionItems ?? new List<ProduccionDetalleItemDto>();
+                var items = _cacheProdItems ?? new List<ResProdPyItemDto>();
 
                 if (!string.IsNullOrWhiteSpace(semana))
                 {
@@ -1374,7 +1301,7 @@ namespace ApiDesposte.Controllers.Excel
             try
             {
                 GenerarResumenConsolidado();
-                var items = _cacheDemandaItems ?? new List<DemandaDetalleItemDto>();
+                var items = _cacheDemandaItems ?? new List<DemandaPyItemDto>();
 
                 if (!string.IsNullOrWhiteSpace(semana))
                 {
@@ -1401,114 +1328,16 @@ namespace ApiDesposte.Controllers.Excel
         }
 
         /// <summary>
-        /// Matriz T_Produccion: Gráfico de barras por Tipo (Kilos) y Matriz jerárquica Tipo -> CodigoCorto -> Nombre (Unidades, Kilos)
+        /// Matriz T_ResProd_Py: Gráfico de barras por SubPlanta (Kilos) y Matriz jerárquica SubPlanta -> Familia -> CodigoCorto -> Nombre (Kilos)
         /// </summary>
         [HttpGet("matriz-produccion-tipo")]
-        public IActionResult ObtenerMatrizProduccionTipo([FromQuery] string? semana = null, [FromQuery] string? subPlanta = null)
-        {
-            try
-            {
-                GenerarResumenConsolidado();
-                var items = _cacheProduccionItems ?? new List<ProduccionDetalleItemDto>();
-
-                if (!string.IsNullOrWhiteSpace(semana))
-                {
-                    var semFilter = semana.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                                          .Select(s => s.Trim().ToUpper())
-                                          .ToHashSet();
-                    items = items.Where(r => semFilter.Contains(r.Semana.ToUpper())).ToList();
-                }
-
-                if (!string.IsNullOrWhiteSpace(subPlanta))
-                {
-                    var spFilter = subPlanta.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                                            .Select(s => s.Trim().ToUpper())
-                                            .ToHashSet();
-                    items = items.Where(r => spFilter.Contains(r.SubPlanta.ToUpper())).ToList();
-                }
-
-                double totalKilosGlobal = items.Sum(x => x.Kilos);
-                double totalUnidadesGlobal = items.Sum(x => x.Unidades);
-
-                // Gráfico de barras por Tipo
-                var barras = items
-                    .GroupBy(x => string.IsNullOrWhiteSpace(x.Tipo) ? "OTROS" : x.Tipo.ToUpper())
-                    .Select(g =>
-                    {
-                        double k = Math.Round(g.Sum(x => x.Kilos), 2);
-                        double u = Math.Round(g.Sum(x => x.Unidades), 2);
-                        return new
-                        {
-                            Tipo = g.Key,
-                            Kilos = k,
-                            Unidades = u,
-                            PesoPromedio = u > 0 ? Math.Round(k / u, 3) : 0.0,
-                            PctKilos = totalKilosGlobal > 0 ? Math.Round((k / totalKilosGlobal) * 100.0, 2) : 0.0
-                        };
-                    })
-                    .OrderByDescending(x => x.Kilos)
-                    .ToList();
-
-                // Matriz jerárquica: Tipo -> CodigoCorto -> Nombre
-                var matriz = items
-                    .GroupBy(x => string.IsNullOrWhiteSpace(x.Tipo) ? "OTROS" : x.Tipo.ToUpper())
-                    .OrderByDescending(gTipo => gTipo.Sum(x => x.Kilos))
-                    .Select(gTipo =>
-                    {
-                        double kTipo = Math.Round(gTipo.Sum(x => x.Kilos), 2);
-                        double uTipo = Math.Round(gTipo.Sum(x => x.Unidades), 2);
-
-                        return new
-                        {
-                            Tipo = gTipo.Key,
-                            Kilos = kTipo,
-                            Unidades = uTipo,
-                            PesoPromedio = uTipo > 0 ? Math.Round(kTipo / uTipo, 3) : 0.0,
-                            Articulos = gTipo
-                                .GroupBy(x => new { x.CodigoCorto, x.Nombre, x.Producto, x.SubPlanta })
-                                .OrderBy(gArt => gArt.Key.CodigoCorto)
-                                .Select(gArt =>
-                                {
-                                    double kArt = Math.Round(gArt.Sum(x => x.Kilos), 2);
-                                    double uArt = Math.Round(gArt.Sum(x => x.Unidades), 2);
-                                    return new
-                                    {
-                                        CodigoCorto = gArt.Key.CodigoCorto,
-                                        Nombre = string.IsNullOrWhiteSpace(gArt.Key.Nombre) ? (gArt.Key.Producto ?? "SIN NOMBRE") : gArt.Key.Nombre,
-                                        Producto = gArt.Key.Producto,
-                                        SubPlanta = gArt.Key.SubPlanta,
-                                        Unidades = uArt,
-                                        Kilos = kArt,
-                                        PesoPromedio = uArt > 0 ? Math.Round(kArt / uArt, 3) : 0.0
-                                    };
-                                }).ToList()
-                        };
-                    }).ToList();
-
-                return Ok(new
-                {
-                    TotalKilos = Math.Round(totalKilosGlobal, 2),
-                    TotalUnidades = Math.Round(totalUnidadesGlobal, 2),
-                    Barras = barras,
-                    Matriz = matriz
-                });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { exito = false, error = ex.Message });
-            }
-        }
-
-        /// <summary>
-        /// Matriz T_Produccion: Gráfico de barras por SubPlanta (Kilos) y Matriz jerárquica SubPlanta -> Familia -> CodigoCorto -> Nombre (Kilos)
-        /// </summary>
         [HttpGet("matriz-produccion-subplanta")]
         public IActionResult ObtenerMatrizProduccionSubPlanta([FromQuery] string? semana = null, [FromQuery] string? subPlanta = null)
         {
             try
             {
                 GenerarResumenConsolidado();
-                var items = _cacheProduccionItems ?? new List<ProduccionDetalleItemDto>();
+                var items = _cacheProdItems ?? new List<ResProdPyItemDto>();
 
                 if (!string.IsNullOrWhiteSpace(semana))
                 {
@@ -1603,7 +1432,7 @@ namespace ApiDesposte.Controllers.Excel
             try
             {
                 GenerarResumenConsolidado();
-                var items = _cacheDemandaItems ?? new List<DemandaDetalleItemDto>();
+                var items = _cacheDemandaItems ?? new List<DemandaPyItemDto>();
 
                 if (!string.IsNullOrWhiteSpace(semana))
                 {
@@ -1698,7 +1527,7 @@ namespace ApiDesposte.Controllers.Excel
         }
     }
 
-    public class CumplimientoDetalleResumenDto
+    public class CumplimientoPyResumenDto
     {
         public int Anio { get; set; }
         public int NSemana { get; set; }
@@ -1717,7 +1546,7 @@ namespace ApiDesposte.Controllers.Excel
         public string Nombre { get; set; } = string.Empty;
     }
 
-    public class ProduccionDetalleItemDto
+    public class ResProdPyItemDto
     {
         public string Semana { get; set; } = string.Empty;
         public int Anio { get; set; }
@@ -1726,16 +1555,13 @@ namespace ApiDesposte.Controllers.Excel
         public string Producto { get; set; } = string.Empty;
         public string CodigoCorto { get; set; } = string.Empty;
         public string Nombre { get; set; } = string.Empty;
-        public double Unidades { get; set; }
         public double Kilos { get; set; }
-        public double PesoPromedio { get; set; }
-        public string Tipo { get; set; } = string.Empty;
         public string Linea { get; set; } = string.Empty;
         public string Familia { get; set; } = string.Empty;
         public string Categoria { get; set; } = string.Empty;
     }
 
-    public class DemandaDetalleItemDto
+    public class DemandaPyItemDto
     {
         public string Semana { get; set; } = string.Empty;
         public int Anio { get; set; }
@@ -1751,7 +1577,14 @@ namespace ApiDesposte.Controllers.Excel
         public string Categoria { get; set; } = string.Empty;
     }
 
-    internal class ArticuloVentaAuxDto
+    internal class CodigoRelacionPyAuxDto
+    {
+        public string CodigoCorto { get; set; } = string.Empty;
+        public string CodigoArticulo { get; set; } = string.Empty;
+        public string Nombre { get; set; } = string.Empty;
+    }
+
+    internal class ArticuloVentasPyAuxDto
     {
         public string CodigoVenta { get; set; } = string.Empty;
         public string Nombre { get; set; } = string.Empty;
@@ -1760,14 +1593,7 @@ namespace ApiDesposte.Controllers.Excel
         public string NCategoria { get; set; } = string.Empty;
     }
 
-    internal class CodigoRelacionAuxDto
-    {
-        public string CodigoCorto { get; set; } = string.Empty;
-        public string CodigoArticulo { get; set; } = string.Empty;
-        public string Nombre { get; set; } = string.Empty;
-    }
-
-    internal class AcumuladorProdDto
+    internal class AcumuladorProdPyDto
     {
         public string Semana { get; set; } = string.Empty;
         public string CodigoCorto { get; set; } = string.Empty;
@@ -1780,7 +1606,7 @@ namespace ApiDesposte.Controllers.Excel
         public double KilosProd { get; set; }
     }
 
-    internal class AcumuladorDemDto
+    internal class AcumuladorDemPyDto
     {
         public string Semana { get; set; } = string.Empty;
         public string CodigoCorto { get; set; } = string.Empty;
