@@ -12,6 +12,8 @@
     rel="stylesheet">
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- SheetJS para exportar a Excel (.xlsx) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
     :root {
       --navy-peony: #223A5E;
@@ -332,94 +334,372 @@
       width: 100%;
     }
 
-    /* Tablas */
-    .table-card {
+    /* =========================================================================
+       🗂️ ESTILOS DE MATRIZ JERÁRQUICA Y PESTAÑAS (Diario, Semanal, Mensual)
+       ========================================================================= */
+    .matrix-card {
       background-color: var(--bg-card);
       border: 1px solid var(--border-ui);
-      padding: 22px;
       border-radius: 12px;
       box-shadow: var(--shadow-sm);
       margin-bottom: 22px;
+      overflow: hidden;
     }
 
-    .table-header {
+    .matrix-header-bar {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-ui);
+      background: #FFFFFF;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .matrix-header-top {
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
       gap: 12px;
-      margin-bottom: 16px;
     }
 
-    .table-header h3 {
-      font-size: 1.05rem;
+    .matrix-header-top h3 {
+      font-size: 1.12rem;
       font-weight: 700;
       color: var(--navy-peony);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Pestañas de Vista Temporal */
+    .matrix-tabs-nav {
+      display: inline-flex;
+      background: #E2E8F0;
+      padding: 4px;
+      border-radius: 10px;
+      gap: 4px;
+    }
+
+    .matrix-tab-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.85rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .matrix-tab-btn:hover {
+      color: var(--navy-peony);
+      background: rgba(255, 255, 255, 0.55);
+    }
+
+    .matrix-tab-btn.active {
+      background: var(--navy-peony);
+      color: #FFFFFF;
+      box-shadow: 0 2px 6px rgba(34, 58, 94, 0.25);
+    }
+
+    .tab-badge {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      background: rgba(0, 0, 0, 0.08);
+      color: inherit;
+    }
+
+    .matrix-tab-btn.active .tab-badge {
+      background: rgba(255, 255, 255, 0.25);
+      color: #FFFFFF;
+    }
+
+    /* Barra de herramientas / Búsqueda y Acciones */
+    .matrix-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
     }
 
     .table-search {
       position: relative;
-      min-width: 250px;
+      min-width: 280px;
+      flex: 1;
+      max-width: 420px;
     }
 
     .table-search input {
       width: 100%;
       border: 1px solid var(--border-ui);
-      padding: 8px 12px 8px 32px;
+      padding: 8px 12px 8px 34px;
       border-radius: 8px;
       font-size: 0.85rem;
       outline: none;
+      transition: all 0.2s;
     }
 
     .table-search input:focus {
       border-color: var(--cyan-blue);
+      box-shadow: 0 0 0 3px rgba(18, 149, 193, 0.15);
     }
 
     .table-search-icon {
       position: absolute;
-      left: 10px;
+      left: 11px;
       top: 50%;
       transform: translateY(-50%);
       color: var(--text-muted);
       font-size: 0.85rem;
     }
 
-    .table-wrapper {
-      overflow-x: auto;
-      max-height: 480px;
+    .matrix-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
     }
 
-    table {
+    .btn-tool {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 13px;
+      border-radius: 7px;
+      border: 1px solid var(--border-ui);
+      background: #FFFFFF;
+      color: var(--navy-peony);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-tool:hover {
+      background: var(--bg-canvas);
+      border-color: var(--cyan-blue);
+      color: var(--blue-sapphire);
+      transform: translateY(-1px);
+    }
+
+    .btn-excel {
+      background: #F0FDF4;
+      border-color: #86EFAC;
+      color: #166534;
+      font-weight: 700;
+    }
+
+    .btn-excel:hover {
+      background: #166534;
+      border-color: #166534;
+      color: #FFFFFF;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 6px rgba(22, 101, 52, 0.25);
+    }
+
+    .btn-excel-flat {
+      background: #EFF6FF;
+      border-color: #93C5FD;
+      color: #1E40AF;
+      font-weight: 700;
+    }
+
+    .btn-excel-flat:hover {
+      background: #1E40AF;
+      border-color: #1E40AF;
+      color: #FFFFFF;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 6px rgba(30, 64, 175, 0.25);
+    }
+
+    /* Contenedor y Tabla */
+    .table-wrapper {
+      overflow-x: auto;
+      max-height: 580px;
+    }
+
+    .matrix-table {
       width: 100%;
-      border-collapse: collapse;
+      border-collapse: separate;
+      border-spacing: 0;
       font-size: 0.85rem;
     }
 
-    th {
+    .matrix-table th {
       background-color: var(--navy-peony);
       color: #FFFFFF;
       padding: 12px 14px;
       position: sticky;
       top: 0;
-      z-index: 2;
+      z-index: 10;
       text-align: left;
       font-weight: 600;
       font-size: 0.8rem;
       letter-spacing: 0.02em;
+      border-bottom: 2px solid rgba(0, 0, 0, 0.1);
     }
 
-    td {
-      padding: 10px 14px;
+    /* Fila Nivel 1: Periodo */
+    .row-periodo {
+      background: linear-gradient(90deg, #1E293B 0%, #334155 100%) !important;
+      color: #F8FAFC !important;
+      font-weight: 700;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s;
+    }
+
+    .row-periodo:hover {
+      background: linear-gradient(90deg, #0F172A 0%, #1E293B 100%) !important;
+    }
+
+    .row-periodo td {
+      border-bottom: 1px solid #475569;
+      padding: 11px 14px;
+    }
+
+    .periodo-title {
+      font-size: 0.92rem;
+      letter-spacing: -0.01em;
+      color: #FFFFFF;
+      font-weight: 700;
+    }
+
+    .periodo-count {
+      font-size: 0.73rem;
+      font-weight: 500;
+      opacity: 0.85;
+      margin-left: 8px;
+    }
+
+    /* Fila Nivel 2: TipoProceso */
+    .row-tipo {
+      background-color: #EBF3FA !important;
+      color: #0F172A !important;
+      font-weight: 600;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s;
+    }
+
+    .row-tipo:hover {
+      background-color: #DEEBF5 !important;
+    }
+
+    .row-tipo td {
+      border-bottom: 1px solid #CBD5E1;
+      padding: 9px 14px;
+    }
+
+    .tipo-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      background: #D0E4F3;
+      color: var(--blue-sapphire);
+      border: 1px solid #B8D6ED;
+    }
+
+    /* Fila Nivel 3: Plantilla */
+    .row-plantilla {
+      background-color: #FFFFFF !important;
+      color: #1E293B;
+      transition: background 0.12s;
+    }
+
+    .row-plantilla:nth-child(even) {
+      background-color: #F8FAFC !important;
+    }
+
+    .row-plantilla:hover {
+      background-color: #F1F5F9 !important;
+    }
+
+    .row-plantilla td {
       border-bottom: 1px solid var(--border-ui);
+      padding: 8px 14px;
+    }
+
+    .plantilla-code {
+      display: inline-block;
+      background: #E2E8F0;
+      color: #334155;
+      font-size: 0.74rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-right: 8px;
+      font-family: monospace;
+    }
+
+    .plantilla-name {
+      font-weight: 500;
+      color: var(--text-dark);
+    }
+
+    .chuleta-tag {
+      background: rgba(18, 149, 193, 0.12);
+      color: var(--blue-sapphire);
+      border: 1px solid rgba(18, 149, 193, 0.25);
+    }
+
+    /* Icono de expansión tipo árbol */
+    .tree-toggle-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      margin-right: 6px;
+      font-size: 10px;
+      background: rgba(255, 255, 255, 0.18);
+      color: inherit;
+      transition: transform 0.15s ease;
+    }
+
+    .row-tipo .tree-toggle-icon {
+      background: rgba(16, 88, 127, 0.12);
+      color: var(--blue-sapphire);
+    }
+
+    /* Total General en Footer */
+    .row-grand-total {
+      background: #0F172A !important;
+      color: #FFFFFF !important;
+      font-weight: 700;
+      position: sticky;
+      bottom: 0;
+      z-index: 8;
+      box-shadow: 0 -3px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    .row-grand-total td {
+      padding: 12px 14px;
+      border-top: 2px solid var(--cyan-blue);
+      border-bottom: none;
+    }
+
+    .num-col {
       font-variant-numeric: tabular-nums;
+      font-family: 'Inter', -apple-system, monospace;
     }
 
-    tr:nth-child(even) {
-      background-color: #F8FAFC;
-    }
-
-    tr:hover {
-      background-color: #F1F5F9;
+    .text-teal {
+      color: var(--teal-blue);
     }
 
     .badge-rend {
@@ -566,7 +846,7 @@
     <div class="header-status">
       <div id="apiStatusBadge" class="status-badge">
         <span class="status-dot"></span>
-        <span id="apiStatusText">Conectando...</span>
+        <span id="apiStatusText">Listo para consultar</span>
       </div>
     </div>
   </header>
@@ -575,12 +855,12 @@
   <section class="filter-panel">
     <div class="filter-group">
       <label for="fechaInicio">Fecha Inicial:</label>
-      <input type="date" id="fechaInicio" value="2026-01-01">
+      <input type="date" id="fechaInicio">
     </div>
 
     <div class="filter-group">
       <label for="fechaFin">Fecha Final:</label>
-      <input type="date" id="fechaFin" value="2026-08-31">
+      <input type="date" id="fechaFin">
     </div>
 
     <!-- NUEVO FILTRO: Tipo de Proceso (solicitado expresamente por el usuario) -->
@@ -621,7 +901,7 @@
     <!-- Botones de Acción -->
     <div class="btn-action-group">
       <button class="btn-primary" id="btnConsultar" onclick="consultarApi(false)">
-        <span>🔍</span> Consultar API
+        <span>🚀</span> Generar Reporte
       </button>
       <button class="btn-reset" onclick="resetFilters()">
         ↺ Reestablecer
@@ -681,37 +961,79 @@
     </div>
   </section>
 
-  <!-- Tabla de Resumen por Plantilla -->
-  <section class="table-card">
-    <div class="table-header">
-      <h3>📋 Desglose Operativo por Plantilla de Producción</h3>
-      <div class="table-search">
-        <span class="table-search-icon">🔍</span>
-        <input type="text" id="tableSearchInput" placeholder="Buscar por plantilla, tipo, código..."
-          oninput="filtrarTablaTexto()">
+  <!-- Matriz Jerárquica de Rendimiento Operativo (Periodo ➔ Tipo Proceso ➔ Plantilla) -->
+  <section class="matrix-card">
+    <div class="matrix-header-bar">
+      <div class="matrix-header-top">
+        <h3 id="matrixTitle">📆 Matriz Jerárquica Semanal (Semana ➔ Tipo Proceso ➔ Plantilla)</h3>
+
+        <!-- Pestañas de Frecuencia: Diaria, Semanal, Mensual -->
+        <div class="matrix-tabs-nav">
+          <button class="matrix-tab-btn" id="tabMatrizDiario" onclick="cambiarPestanaMatriz('diario')">
+            <span>📅</span>
+            <span>Diario</span>
+            <span class="tab-badge" id="badgeDiario">0</span>
+          </button>
+          <button class="matrix-tab-btn active" id="tabMatrizSemanal" onclick="cambiarPestanaMatriz('semanal')">
+            <span>📆</span>
+            <span>Semanal</span>
+            <span class="tab-badge" id="badgeSemanal">0</span>
+          </button>
+          <button class="matrix-tab-btn" id="tabMatrizMensual" onclick="cambiarPestanaMatriz('mensual')">
+            <span>📊</span>
+            <span>Mensual</span>
+            <span class="tab-badge" id="badgeMensual">0</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="matrix-toolbar">
+        <div class="table-search">
+          <span class="table-search-icon">🔍</span>
+          <input type="text" id="tableSearchInput" placeholder="Buscar periodo, tipo o plantilla..."
+            oninput="filtrarMatrizTexto()">
+        </div>
+        <div class="matrix-actions">
+          <button class="btn-tool" onclick="toggleExpandirTodo(true)" title="Expandir todos los periodos y procesos">
+            <span>📂</span> Expandir Todo
+          </button>
+          <button class="btn-tool" onclick="toggleExpandirTodo(false)" title="Colapsar a nivel de Periodo">
+            <span>📁</span> Colapsar Todo
+          </button>
+          <button class="btn-tool btn-excel-flat" onclick="exportarDataPlanaExcel()"
+            title="Descargar data plana del procedimiento almacenado Sp_Informe_Prod_Chuletas en Excel (.xlsx) sin totales">
+            <span>📄</span> Exportar Data Plana SP
+          </button>
+          <button class="btn-tool btn-excel" onclick="exportarMatrizExcel()"
+            title="Descargar datos de la matriz jerárquica con subtotales en Excel (.xlsx)">
+            <span>📊</span> Exportar Matriz
+          </button>
+        </div>
       </div>
     </div>
+
     <div class="table-wrapper">
-      <table>
+      <table class="matrix-table" id="matrixTable">
         <thead>
           <tr>
-            <th>Cód.</th>
-            <th>Nombre de Plantilla (NPlantilla)</th>
-            <th>Tipo Proceso</th>
-            <th>Tipo Chuleta</th>
-            <th style="text-align: right;">Kilos Origen (kg)</th>
-            <th style="text-align: right;">Kilos Resultado (kg)</th>
-            <th style="text-align: right;">Harinas (kg)</th>
-            <th style="text-align: right;">Merma (kg)</th>
-            <th style="text-align: right;">Rendimiento (%)</th>
+            <th style="min-width: 320px;">Jerarquía: Periodo / Tipo Proceso / Plantilla</th>
+            <th style="width: 130px;">Tipo Chuleta</th>
+            <th style="text-align: right; width: 130px;">Kilos Origen (kg)</th>
+            <th style="text-align: right; width: 130px;">Kilos Resultado (kg)</th>
+            <th style="text-align: right; width: 110px;">Harinas (kg)</th>
+            <th style="text-align: right; width: 110px;">Merma (kg)</th>
+            <th style="text-align: right; width: 125px;">Total Pérdida (kg)</th>
+            <th style="text-align: right; width: 125px;">Rendimiento (%)</th>
           </tr>
         </thead>
         <tbody id="tablePlantillasBody">
           <tr>
-            <td colspan="9" style="text-align:center; padding: 24px; color: var(--text-muted);">Cargando información...
+            <td colspan="8" style="text-align:center; padding: 28px; color: var(--text-muted);">
+              Cargando información de la matriz...
             </td>
           </tr>
         </tbody>
+        <tfoot id="tablePlantillasFoot"></tfoot>
       </table>
     </div>
   </section>
@@ -724,20 +1046,43 @@
 
   <script>
     // =========================================================================
-    // ⚙️ CONFIGURACIÓN DE CONEXIÓN CON AUTO-DETECCIÓN DE ENDPOINT
+    // ⚙️ CONFIGURACIÓN DE CONEXIÓN A LA API (Estilo appsettings.json)
     // =========================================================================
     const APP_CONFIG = {
-      hosts: [
-        "http://RAEVSALL001:8080",
-        "http://localhost:8080",
-        "http://RAEVSALL001:5000",
-        "http://localhost:5000",
-        "http://localhost:5050",
-        "http://127.0.0.1:8080",
-        "http://127.0.0.1:5000"
-      ],
-      controllerPath: "/api/ProdChuletas"
+      // Nombre del equipo donde corre tu API .NET
+      // 🏢 Oficina: "RAEVSALL001"
+      // 🏠 Casa: Cambiar aquí por el nombre de tu máquina en casa
+      servidor: "RAEVSALL001",
+
+      // Puertos a los que intentará conectarse en orden de prioridad
+      puertos: [8080, 5000],
+
+      // Endpoint del controlador SQL (ProdChuletasController)
+      rutaListar: "/api/ProdChuletas",
+
+      // Tiempo máximo de espera para la consulta SQL (20 segundos)
+      timeoutMs: 20000
     };
+
+    // Generación de Endpoints API apuntando al nombre del equipo
+    function generarEndpointsApi(rutaRelativa) {
+      const endpoints = [];
+      if (apiBaseActiva) {
+        endpoints.push(`${apiBaseActiva}${rutaRelativa}`);
+      }
+      for (const puerto of APP_CONFIG.puertos) {
+        const ep = `http://${APP_CONFIG.servidor}:${puerto}${rutaRelativa}`;
+        if (!endpoints.includes(ep)) endpoints.push(ep);
+      }
+      // Fallback a localhost si el servidor configurado no responde y es distinto de localhost
+      if (APP_CONFIG.servidor && APP_CONFIG.servidor.toLowerCase() !== 'localhost' && APP_CONFIG.servidor !== '127.0.0.1') {
+        for (const puerto of APP_CONFIG.puertos) {
+          const ep = `http://localhost:${puerto}${rutaRelativa}`;
+          if (!endpoints.includes(ep)) endpoints.push(ep);
+        }
+      }
+      return endpoints;
+    }
 
     let apiBaseActiva = null;
     let rawData = [];
@@ -746,12 +1091,89 @@
     let chartTemporalObj = null;
     let chartPlantillasObj = null;
 
+    // Estado de la Matriz Jerárquica
+    let modoMatrizActivo = 'semanal'; // 'diario', 'semanal', 'mensual'
+    const collapsedPeriodos = new Set();
+    const collapsedTipos = new Set();
+
     // =========================================================================
-    // 🚀 INICIALIZACIÓN
+    // 🚀 INICIALIZACIÓN Y ESTADO INICIAL VACÍO
     // =========================================================================
-    window.addEventListener('DOMContentLoaded', async () => {
+    function inicializarFechasPorDefecto() {
+      const hoy = new Date();
+      const hace7Dias = new Date();
+      hace7Dias.setDate(hoy.getDate() - 7);
+
+      const toYMD = (d) => {
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+      };
+
+      const fFinInput = document.getElementById('fechaFin');
+      const fIniInput = document.getElementById('fechaInicio');
+
+      if (fFinInput) fFinInput.value = toYMD(hoy);
+      if (fIniInput) fIniInput.value = toYMD(hace7Dias);
+    }
+
+    function inicializarDashboardVacio() {
+      actualizarEstadoUI('neutral', 'Listo para consultar');
+
+      // Reiniciar KPIs en 0
+      document.getElementById('kpiOrigen').textContent = '0.00 kg';
+      document.getElementById('kpiResultado').textContent = '0.00 kg';
+      document.getElementById('kpiRendimiento').textContent = '0.00%';
+      document.getElementById('kpiPerdida').textContent = '0.00 kg';
+      document.getElementById('kpiPerdidaPct').textContent = '0.00% de la MP';
+      document.getElementById('kpiVolumenTotal').textContent = '0.00 kg';
+      document.getElementById('kpiRegistros').textContent = '0 registros analizados';
+
+      // Limpiar gráficos
+      if (chartTemporalObj) {
+        chartTemporalObj.destroy();
+        chartTemporalObj = null;
+      }
+      if (chartPlantillasObj) {
+        chartPlantillasObj.destroy();
+        chartPlantillasObj = null;
+      }
+
+      // Reiniciar matriz con mensaje esperando generación
+      const tbody = document.getElementById('tablePlantillasBody');
+      const tfoot = document.getElementById('tablePlantillasFoot');
+      if (tbody) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" style="text-align: center; padding: 55px 20px; color: var(--text-muted);">
+              <div style="font-size: 2.2rem; margin-bottom: 10px;">📋</div>
+              <div style="font-weight: 700; font-size: 1.05rem; color: var(--navy-peony); margin-bottom: 6px;">
+                Dashboard listo para generar reporte
+              </div>
+              <div style="font-size: 0.85rem; max-width: 520px; margin: 0 auto; line-height: 1.5;">
+                Las fechas están configuradas para los últimos 7 días (Fecha Final: hoy, Fecha Inicial: hoy - 7 días).<br>
+                Ajuste el rango si lo requiere y haga clic en <strong style="color: var(--blue-sapphire);">"🚀 Generar Reporte"</strong> para cargar los datos.
+              </div>
+            </td>
+          </tr>
+        `;
+      }
+      if (tfoot) tfoot.innerHTML = '';
+
+      // Resetear contadores de pestañas
+      const bDia = document.getElementById('badgeDiario');
+      const bSem = document.getElementById('badgeSemanal');
+      const bMes = document.getElementById('badgeMensual');
+      if (bDia) bDia.textContent = '0';
+      if (bSem) bSem.textContent = '0';
+      if (bMes) bMes.textContent = '0';
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      inicializarFechasPorDefecto();
       setupEvents();
-      await inicializarConexionApi();
+      inicializarDashboardVacio();
     });
 
     function setupEvents() {
@@ -759,7 +1181,15 @@
       document.getElementById('tipoFilter').addEventListener('change', applyFilters);
       document.getElementById('tipoChuletaFilter').addEventListener('change', applyFilters);
       document.getElementById('plantillaFilter').addEventListener('change', applyFilters);
-      document.getElementById('temporalFilter').addEventListener('change', renderTemporalChart);
+
+      // Sincronizar temporalFilter del panel con la pestaña activa de la matriz
+      document.getElementById('temporalFilter').addEventListener('change', (e) => {
+        const v = e.target.value;
+        if (['diario', 'semanal', 'mensual'].includes(v)) {
+          cambiarPestanaMatriz(v, false);
+        }
+        renderTemporalChart();
+      });
 
       // Si el usuario cambia las fechas y presiona Enter en el input
       document.getElementById('fechaInicio').addEventListener('keypress', (e) => {
@@ -773,7 +1203,7 @@
     // =========================================================================
     // 🌐 COMUNICACIÓN CON LA API
     // =========================================================================
-    async function fetchConTimeout(url, timeoutMs = 120000) {
+    async function fetchConTimeout(url, timeoutMs = 20000) {
       const controller = new AbortController();
       const id = setTimeout(() => controller.abort(), timeoutMs);
       try {
@@ -786,64 +1216,13 @@
       }
     }
 
-    async function detectarServidorApi() {
-      // 1. Probar el mismo origen si está servido por el backend
-      if (window.location.protocol.startsWith('http')) {
-        try {
-          const res = await fetchConTimeout(`${window.location.origin}${APP_CONFIG.controllerPath}/probar-conexion`, 2000);
-          if (res.ok) return window.location.origin;
-        } catch (e) { }
-      }
-
-      // 2. Probar los hosts de la lista
-      for (const base of APP_CONFIG.hosts) {
-        try {
-          const res = await fetchConTimeout(`${base}${APP_CONFIG.controllerPath}/probar-conexion`, 2500);
-          if (res.ok) return base;
-        } catch (e) { }
-      }
-
-      // 3. Intento de fallback llamando directamente al endpoint raíz
-      for (const base of APP_CONFIG.hosts) {
-        try {
-          const res = await fetchConTimeout(`${base}${APP_CONFIG.controllerPath}`, 3000);
-          if (res.ok) return base;
-        } catch (e) { }
-      }
-
-      return null;
-    }
-
-    async function inicializarConexionApi() {
-      actualizarEstadoUI('loading', 'Detectando API...');
-      mostrarCargando(true, 'Conectando con Backend', 'Detectando servidor de API Desposte en la red...');
-
-      try {
-        apiBaseActiva = await detectarServidorApi();
-
-        if (!apiBaseActiva) {
-          // Si no detecta automáticamente, usa el primero como predeterminado
-          apiBaseActiva = APP_CONFIG.hosts[0];
-          console.warn("No se detectó API activa en el sondeo rápido, usando host predeterminado:", apiBaseActiva);
-        }
-
-        actualizarEstadoUI('online', `En Línea (${apiBaseActiva.replace('http://', '')})`);
-        await consultarApi(false);
-
-      } catch (err) {
-        console.error("Error al inicializar conexión:", err);
-        actualizarEstadoUI('error', 'Error de Conexión');
-        mostrarToast(`⚠️ No se pudo conectar a la API: ${err.message}`);
-        mostrarCargando(false);
-      }
-    }
-
     async function consultarApi(forzarRecarga = false) {
-      const fIni = document.getElementById('fechaInicio').value || '2026-01-01';
-      const fFin = document.getElementById('fechaFin').value || '2026-08-31';
+      const fIni = document.getElementById('fechaInicio').value;
+      const fFin = document.getElementById('fechaFin').value;
 
-      if (!apiBaseActiva) {
-        apiBaseActiva = APP_CONFIG.hosts[0];
+      if (!fIni || !fFin) {
+        mostrarToast("⚠️ Ingrese una Fecha Inicial y una Fecha Final válidas", 3500);
+        return;
       }
 
       mostrarCargando(
@@ -851,40 +1230,53 @@
         'Consultando SQL Server',
         `Ejecutando Sp_Informe_Prod_Chuletas para el periodo ${fIni} al ${fFin}...`
       );
-      actualizarEstadoUI('loading', 'Consultando SP...');
+      actualizarEstadoUI('loading', `Conectando con ${APP_CONFIG.servidor}...`);
 
-      const url = `${apiBaseActiva}${APP_CONFIG.controllerPath}?fechaInicio=${encodeURIComponent(fIni)}&fechaFin=${encodeURIComponent(fFin)}&recargar=${forzarRecarga}`;
+      const queryParams = `?fechaInicio=${encodeURIComponent(fIni)}&fechaFin=${encodeURIComponent(fFin)}&recargar=${forzarRecarga}`;
 
-      try {
-        // Timeout de hasta 10 minutos para dar tiempo a SQL Server en rangos muy amplios
-        const res = await fetchConTimeout(url, 600000);
-
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-        }
-
-        const json = await res.json();
-
-        // Soporta respuesta directa o envuelta en { exito: true, datos: [...] }
-        const items = Array.isArray(json) ? json : (json.datos || []);
-
-        if (items.length === 0) {
-          mostrarToast('ℹ️ La consulta se ejecutó correctamente pero no arrojó registros para este rango.');
-        } else {
-          mostrarToast(`✅ ${items.length} registros cargados desde ProdChuletasController`);
-        }
-
-        rawData = items;
-        procesarDatos(items);
-        actualizarEstadoUI('online', `En Línea (${apiBaseActiva.replace('http://', '')})`);
-
-      } catch (err) {
-        console.error("Error al consultar API:", err);
-        actualizarEstadoUI('error', 'Error en consulta');
-        mostrarToast(`❌ Error al consultar API: ${err.message}`);
-      } finally {
-        mostrarCargando(false);
+      // Asegurar que use el endpoint de Chuletas incluso si se configuró rutaListar genérica
+      let ruta = APP_CONFIG.rutaListar || "/api/ProdChuletas";
+      if (ruta.includes("costosproduccion")) {
+        ruta = "/api/ProdChuletas";
       }
+
+      const endpoints = generarEndpointsApi(`${ruta}${queryParams}`);
+      let dataCargada = false;
+
+      for (const url of endpoints) {
+        try {
+          const res = await fetchConTimeout(url, APP_CONFIG.timeoutMs || 20000);
+
+          if (res.ok) {
+            const json = await res.json();
+            // Soporta respuesta directa o envuelta en { exito: true, datos: [...] }
+            const items = Array.isArray(json) ? json : (json.datos || []);
+            const urlObj = new URL(url);
+
+            apiBaseActiva = `${urlObj.protocol}//${urlObj.host}`;
+            rawData = items;
+            procesarDatos(items);
+
+            actualizarEstadoUI('online', `En Línea (${urlObj.host}) - ${items.length} reg.`);
+            if (items.length === 0) {
+              mostrarToast('ℹ️ Conexión exitosa, pero no arrojó registros para este rango.');
+            } else {
+              mostrarToast(`✅ ${items.length} registros cargados desde ProdChuletasController`);
+            }
+            dataCargada = true;
+            break;
+          }
+        } catch (err) {
+          console.warn(`Intento fallido en ${url}:`, err.message);
+        }
+      }
+
+      if (!dataCargada) {
+        actualizarEstadoUI('error', `Sin conexión con ${APP_CONFIG.servidor}`);
+        mostrarToast(`❌ No se pudo conectar a la API en ${APP_CONFIG.servidor} (Puertos ${APP_CONFIG.puertos.join('/')}).`);
+      }
+
+      mostrarCargando(false);
     }
 
     // =========================================================================
@@ -1030,12 +1422,18 @@
     }
 
     function resetFilters() {
+      inicializarFechasPorDefecto();
       document.getElementById('tipoFilter').value = 'ALL';
       document.getElementById('tipoChuletaFilter').value = 'ALL';
       document.getElementById('plantillaFilter').value = 'ALL';
       document.getElementById('temporalFilter').value = 'semanal';
       document.getElementById('tableSearchInput').value = '';
-      applyFilters();
+      if (enrichedData && enrichedData.length > 0) {
+        applyFilters();
+      } else {
+        inicializarDashboardVacio();
+      }
+      mostrarToast("Filtros reestablecidos", 2000);
     }
 
     // =========================================================================
@@ -1089,7 +1487,7 @@
       updateKPIs();
       renderTemporalChart();
       renderPlantillasChart();
-      renderPlantillasTable();
+      renderMatrizJerarquica();
     }
 
     function updateKPIs() {
@@ -1232,6 +1630,14 @@
     // 📊 GRÁFICO POR PLANTILLA
     // =========================================================================
     function renderPlantillasChart() {
+      if (!filteredData || filteredData.length === 0) {
+        if (chartPlantillasObj) {
+          chartPlantillasObj.destroy();
+          chartPlantillasObj = null;
+        }
+        return;
+      }
+
       const pMap = {};
       filteredData.forEach(d => {
         const key = d.NPlantilla || 'Sin Nombre';
@@ -1294,69 +1700,717 @@
     }
 
     // =========================================================================
-    // 📋 TABLA DETALLADA POR PLANTILLA
+    // 📋 MATRIZ JERÁRQUICA: Periodo ➔ TipoProceso ➔ NPlantilla
     // =========================================================================
-    function renderPlantillasTable() {
-      const tbody = document.getElementById('tablePlantillasBody');
-      tbody.innerHTML = '';
+    function formatKg(val) {
+      return Number(val || 0).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
 
-      const pMap = {};
-      filteredData.forEach(d => {
-        const id = d.Plantilla;
-        if (!pMap[id]) {
-          pMap[id] = {
-            id: d.Plantilla,
-            name: d.NPlantilla,
-            tipo: d.Tipo,
-            tipoChuleta: d.TipoChuleta,
-            rows: []
-          };
+    function formatPeriodoNombre(modo, key) {
+      if (!key || key === 'SIN_FECHA') return 'Sin Fecha Registrada';
+      if (modo === 'diario') {
+        const parts = key.split('-');
+        if (parts.length === 3) {
+          const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+          const diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+          const diaNombre = diasSemana[d.getDay()];
+          return `${key} (${diaNombre})`;
         }
-        pMap[id].rows.push(d);
+        return key;
+      } else if (modo === 'semanal') {
+        const parts = key.split('-S');
+        if (parts.length === 2) {
+          return `Semana ${parts[1]} (${parts[0]})`;
+        }
+        return key;
+      } else if (modo === 'mensual') {
+        const parts = key.split('-');
+        if (parts.length === 2) {
+          const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+          const mIdx = parseInt(parts[1], 10) - 1;
+          const mesNombre = (mIdx >= 0 && mIdx < 12) ? meses[mIdx] : parts[1];
+          return `${mesNombre} ${parts[0]}`;
+        }
+        return key;
+      }
+      return key;
+    }
+
+    function getRendimientoBadge(rendimiento) {
+      let badgeClass = 'badge-good';
+      if (rendimiento < 75) badgeClass = 'badge-low';
+      else if (rendimiento < 85) badgeClass = 'badge-mid';
+      return `<span class="badge-rend ${badgeClass}">${Number(rendimiento || 0).toFixed(2)}%</span>`;
+    }
+
+    function actualizarBadgesPestanas() {
+      const dias = new Set(filteredData.map(d => d._dia).filter(Boolean)).size;
+      const semanas = new Set(filteredData.map(d => d._semana).filter(Boolean)).size;
+      const meses = new Set(filteredData.map(d => d._mes).filter(Boolean)).size;
+
+      const bDia = document.getElementById('badgeDiario');
+      const bSem = document.getElementById('badgeSemanal');
+      const bMes = document.getElementById('badgeMensual');
+
+      if (bDia) bDia.textContent = dias;
+      if (bSem) bSem.textContent = semanas;
+      if (bMes) bMes.textContent = meses;
+    }
+
+    function agruparDatosJerarquicos(data, timeField) {
+      const periodoMap = new Map();
+
+      data.forEach(d => {
+        const pKey = d[timeField] || 'SIN_FECHA';
+        if (!periodoMap.has(pKey)) {
+          periodoMap.set(pKey, {
+            pKey,
+            pLabel: formatPeriodoNombre(modoMatrizActivo, pKey),
+            rows: [],
+            tiposMap: new Map()
+          });
+        }
+        const pObj = periodoMap.get(pKey);
+        pObj.rows.push(d);
+
+        const tKey = d.Tipo || 'SIN TIPO';
+        if (!pObj.tiposMap.has(tKey)) {
+          pObj.tiposMap.set(tKey, {
+            tKey,
+            rows: [],
+            plantillasMap: new Map()
+          });
+        }
+        const tObj = pObj.tiposMap.get(tKey);
+        tObj.rows.push(d);
+
+        const planKey = `${d.Plantilla || 0}__${d.NPlantilla || 'Sin Nombre'}__${d.TipoChuleta || ''}`;
+        if (!tObj.plantillasMap.has(planKey)) {
+          tObj.plantillasMap.set(planKey, {
+            id: d.Plantilla || 0,
+            name: d.NPlantilla || 'Sin Nombre',
+            tipoChuleta: d.TipoChuleta || '',
+            rows: []
+          });
+        }
+        tObj.plantillasMap.get(planKey).rows.push(d);
       });
 
-      const list = Object.values(pMap).sort((a, b) => a.id - b.id);
+      return periodoMap;
+    }
 
-      if (list.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding: 24px; color: var(--text-muted);">No hay registros que coincidan con los filtros seleccionados.</td></tr>`;
+    function cambiarPestanaMatriz(modo, sincronizarFiltro = true) {
+      modoMatrizActivo = modo;
+
+      // Actualizar botón activo de pestañas
+      document.querySelectorAll('.matrix-tab-btn').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.getElementById(`tabMatriz${modo.charAt(0).toUpperCase() + modo.slice(1)}`);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      // Sincronizar select temporal si se llamó desde la pestaña
+      if (sincronizarFiltro) {
+        const tempSelect = document.getElementById('temporalFilter');
+        if (tempSelect && tempSelect.value !== modo) {
+          tempSelect.value = modo;
+          renderTemporalChart();
+        }
+      }
+
+      // Actualizar título de la matriz
+      const titulos = {
+        diario: '📅 Matriz Jerárquica Diaria (Día ➔ Tipo Proceso ➔ Plantilla)',
+        semanal: '📆 Matriz Jerárquica Semanal (Semana ➔ Tipo Proceso ➔ Plantilla)',
+        mensual: '📊 Matriz Jerárquica Mensual (Mes ➔ Tipo Proceso ➔ Plantilla)'
+      };
+      const titleEl = document.getElementById('matrixTitle');
+      if (titleEl) titleEl.textContent = titulos[modo] || 'Matriz Jerárquica';
+
+      renderMatrizJerarquica();
+    }
+
+    function renderMatrizJerarquica() {
+      const tbody = document.getElementById('tablePlantillasBody');
+      const tfoot = document.getElementById('tablePlantillasFoot');
+      if (!tbody) return;
+
+      actualizarBadgesPestanas();
+
+      const timeFieldMap = {
+        diario: '_dia',
+        semanal: '_semana',
+        mensual: '_mes'
+      };
+      const timeField = timeFieldMap[modoMatrizActivo] || '_semana';
+
+      if (!filteredData || filteredData.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 36px; color: var(--text-muted); font-size: 0.9rem;">❌ No hay registros que coincidan con los filtros seleccionados.</td></tr>`;
+        if (tfoot) tfoot.innerHTML = '';
         return;
       }
 
-      list.forEach(p => {
-        const m = calculateMetrics(p.rows);
-        let badgeClass = 'badge-good';
-        if (m.rendimiento < 75) badgeClass = 'badge-low';
-        else if (m.rendimiento < 85) badgeClass = 'badge-mid';
+      const periodoMap = agruparDatosJerarquicos(filteredData, timeField);
+      const sortedPeriodos = Array.from(periodoMap.keys()).sort();
 
-        const tr = document.createElement('tr');
-        tr.dataset.search = `${p.id} ${p.name} ${p.tipo} ${p.tipoChuleta}`.toLowerCase();
-        tr.innerHTML = `
-          <td><strong>${p.id || '-'}</strong></td>
-          <td><strong>${p.name || 'Sin Nombre'}</strong></td>
-          <td><span class="badge-tag">${p.tipo || '-'}</span></td>
-          <td><span class="badge-tag" style="background: rgba(18, 149, 193, 0.12); color: var(--blue-sapphire);">${p.tipoChuleta || '-'}</span></td>
-          <td style="text-align: right; font-weight: 600;">${m.origen.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-          <td style="text-align: right; font-weight: 600; color: var(--teal-blue);">${m.resultado.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-          <td style="text-align: right; color: var(--text-muted);">${m.harina.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-          <td style="text-align: right; color: var(--danger);">${m.merma.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-          <td style="text-align: right;"><span class="badge-rend ${badgeClass}">${m.rendimiento.toFixed(2)}%</span></td>
+      let tbodyHtml = '';
+
+      sortedPeriodos.forEach(pKey => {
+        const pObj = periodoMap.get(pKey);
+        const pM = calculateMetrics(pObj.rows);
+        const isPCollapsed = collapsedPeriodos.has(pKey);
+        const iconPeriodo = isPCollapsed ? '▶' : '▼';
+
+        // 1. Fila de Nivel 1: PERIODO
+        tbodyHtml += `
+          <tr class="row-periodo ${isPCollapsed ? 'collapsed' : ''}" onclick="toggleColapsoPeriodo('${pKey}')" data-period="${pKey}">
+            <td>
+              <span class="tree-toggle-icon">${iconPeriodo}</span>
+              <span class="periodo-title">📅 ${pObj.pLabel}</span>
+              <span class="periodo-count">${pObj.tiposMap.size} tipos | ${pObj.rows.length} regs</span>
+            </td>
+            <td><span class="badge-tag" style="background: rgba(255,255,255,0.22); color:#FFF;">Subtotal</span></td>
+            <td class="text-right num-col">${formatKg(pM.origen)}</td>
+            <td class="text-right num-col">${formatKg(pM.resultado)}</td>
+            <td class="text-right num-col" style="color: #CBD5E1;">${formatKg(pM.harina)}</td>
+            <td class="text-right num-col" style="color: #FCA5A5;">${formatKg(pM.merma)}</td>
+            <td class="text-right num-col">${formatKg(pM.perdida)}</td>
+            <td class="text-right">${getRendimientoBadge(pM.rendimiento)}</td>
+          </tr>
         `;
-        tbody.appendChild(tr);
+
+        // 2. Filas de Nivel 2: TIPO PROCESO
+        const sortedTipos = Array.from(pObj.tiposMap.values()).sort((a, b) => a.tKey.localeCompare(b.tKey));
+
+        sortedTipos.forEach(tObj => {
+          const tM = calculateMetrics(tObj.rows);
+          const tFullKey = `${pKey}___${tObj.tKey}`;
+          const isTCollapsed = collapsedTipos.has(tFullKey);
+          const iconTipo = isTCollapsed ? '▶' : '▼';
+          const displayTipoStyle = isPCollapsed ? 'display: none;' : '';
+
+          tbodyHtml += `
+            <tr class="row-tipo ${isTCollapsed ? 'collapsed' : ''}" onclick="toggleColapsoTipo('${tFullKey}')" 
+                data-parent-period="${pKey}" data-tipo-key="${tFullKey}" style="${displayTipoStyle}">
+              <td style="padding-left: 28px;">
+                <span class="tree-toggle-icon">${iconTipo}</span>
+                <span class="tipo-badge">🏷️ Tipo: ${tObj.tKey}</span>
+                <span class="periodo-count">${tObj.plantillasMap.size} plantillas</span>
+              </td>
+              <td><span class="badge-tag" style="background: rgba(16,88,127,0.12); color: var(--blue-sapphire);">Subtotal Tipo</span></td>
+              <td class="text-right num-col font-bold">${formatKg(tM.origen)}</td>
+              <td class="text-right num-col font-bold text-teal">${formatKg(tM.resultado)}</td>
+              <td class="text-right num-col text-muted">${formatKg(tM.harina)}</td>
+              <td class="text-right num-col text-danger">${formatKg(tM.merma)}</td>
+              <td class="text-right num-col font-bold">${formatKg(tM.perdida)}</td>
+              <td class="text-right">${getRendimientoBadge(tM.rendimiento)}</td>
+            </tr>
+          `;
+
+          // 3. Filas de Nivel 3: NPLANTILLA
+          const sortedPlantillas = Array.from(tObj.plantillasMap.values()).sort((a, b) => a.id - b.id);
+          const displayPlantillaStyle = (isPCollapsed || isTCollapsed) ? 'display: none;' : '';
+
+          sortedPlantillas.forEach(plan => {
+            const planM = calculateMetrics(plan.rows);
+            const searchStr = `${pObj.pLabel} ${tObj.tKey} ${plan.id} ${plan.name} ${plan.tipoChuleta}`.toLowerCase();
+
+            tbodyHtml += `
+              <tr class="row-plantilla" data-parent-period="${pKey}" data-parent-tipo="${tFullKey}" data-search="${searchStr}" style="${displayPlantillaStyle}">
+                <td style="padding-left: 52px;">
+                  <span class="plantilla-code">${plan.id || '-'}</span>
+                  <span class="plantilla-name">${plan.name}</span>
+                </td>
+                <td>
+                  ${plan.tipoChuleta ? `<span class="badge-tag chuleta-tag">${plan.tipoChuleta}</span>` : '<span style="color:#94A3B8;">-</span>'}
+                </td>
+                <td class="text-right num-col">${formatKg(planM.origen)}</td>
+                <td class="text-right num-col text-teal">${formatKg(planM.resultado)}</td>
+                <td class="text-right num-col text-muted">${formatKg(planM.harina)}</td>
+                <td class="text-right num-col text-danger">${formatKg(planM.merma)}</td>
+                <td class="text-right num-col">${formatKg(planM.perdida)}</td>
+                <td class="text-right">${getRendimientoBadge(planM.rendimiento)}</td>
+              </tr>
+            `;
+          });
+        });
       });
+
+      tbody.innerHTML = tbodyHtml;
+
+      // 4. Fila Total General Consolidado
+      const globalM = calculateMetrics(filteredData);
+      if (tfoot) {
+        tfoot.innerHTML = `
+          <tr class="row-grand-total">
+            <td colspan="2">
+              <span style="font-size: 0.95rem;">🏆 TOTAL GENERAL CONSOLIDADO</span>
+              <span style="font-size: 0.75rem; font-weight: normal; opacity: 0.8; margin-left: 8px;">(${sortedPeriodos.length} periodos | ${filteredData.length.toLocaleString('es-PE')} registros)</span>
+            </td>
+            <td class="text-right num-col">${formatKg(globalM.origen)}</td>
+            <td class="text-right num-col" style="color: var(--cool-blue);">${formatKg(globalM.resultado)}</td>
+            <td class="text-right num-col" style="color: #CBD5E1;">${formatKg(globalM.harina)}</td>
+            <td class="text-right num-col" style="color: #FCA5A5;">${formatKg(globalM.merma)}</td>
+            <td class="text-right num-col">${formatKg(globalM.perdida)}</td>
+            <td class="text-right">${getRendimientoBadge(globalM.rendimiento)}</td>
+          </tr>
+        `;
+      }
     }
 
-    function filtrarTablaTexto() {
+    function toggleColapsoPeriodo(pKey) {
+      if (collapsedPeriodos.has(pKey)) {
+        collapsedPeriodos.delete(pKey);
+      } else {
+        collapsedPeriodos.add(pKey);
+      }
+      renderMatrizJerarquica();
+    }
+
+    function toggleColapsoTipo(tFullKey) {
+      if (collapsedTipos.has(tFullKey)) {
+        collapsedTipos.delete(tFullKey);
+      } else {
+        collapsedTipos.add(tFullKey);
+      }
+      renderMatrizJerarquica();
+    }
+
+    function toggleExpandirTodo(expandir) {
+      if (expandir) {
+        collapsedPeriodos.clear();
+        collapsedTipos.clear();
+      } else {
+        const timeFieldMap = { diario: '_dia', semanal: '_semana', mensual: '_mes' };
+        const timeField = timeFieldMap[modoMatrizActivo] || '_semana';
+        filteredData.forEach(d => {
+          const pKey = d[timeField] || 'SIN_FECHA';
+          collapsedPeriodos.add(pKey);
+          const tKey = d.Tipo || 'SIN TIPO';
+          collapsedTipos.add(`${pKey}___${tKey}`);
+        });
+      }
+      renderMatrizJerarquica();
+    }
+
+    function filtrarMatrizTexto() {
       const q = (document.getElementById('tableSearchInput').value || '').trim().toLowerCase();
       const rows = document.querySelectorAll('#tablePlantillasBody tr');
+
+      if (!q) {
+        renderMatrizJerarquica();
+        return;
+      }
+
+      const periodosQueCoinciden = new Set();
+      const tiposQueCoinciden = new Set();
+
       rows.forEach(r => {
-        if (!q) {
-          r.style.display = '';
-          return;
+        const text = (r.textContent || '').toLowerCase();
+        const matches = text.includes(q) || ((r.dataset.search || '').includes(q));
+        if (matches) {
+          if (r.classList.contains('row-plantilla')) {
+            periodosQueCoinciden.add(r.dataset.parentPeriod);
+            tiposQueCoinciden.add(r.dataset.parentTipo);
+          } else if (r.classList.contains('row-tipo')) {
+            periodosQueCoinciden.add(r.dataset.parentPeriod);
+            tiposQueCoinciden.add(r.dataset.tipoKey);
+          } else if (r.classList.contains('row-periodo')) {
+            periodosQueCoinciden.add(r.dataset.period);
+          }
         }
-        const text = r.dataset.search || '';
-        r.style.display = text.includes(q) ? '' : 'none';
+      });
+
+      rows.forEach(r => {
+        if (r.classList.contains('row-periodo')) {
+          r.style.display = periodosQueCoinciden.has(r.dataset.period) ? '' : 'none';
+        } else if (r.classList.contains('row-tipo')) {
+          const periodMatches = periodosQueCoinciden.has(r.dataset.parentPeriod);
+          const tipoMatches = tiposQueCoinciden.has(r.dataset.tipoKey);
+          r.style.display = (periodMatches && (tipoMatches || r.textContent.toLowerCase().includes(q))) ? '' : 'none';
+        } else if (r.classList.contains('row-plantilla')) {
+          const pMatches = periodosQueCoinciden.has(r.dataset.parentPeriod);
+          const tMatches = tiposQueCoinciden.has(r.dataset.parentTipo);
+          const selfMatches = (r.dataset.search || '').includes(q);
+          r.style.display = (pMatches && (tMatches || selfMatches)) ? '' : 'none';
+        }
       });
     }
+
+    // =========================================================================
+    // 📊 EXPORTACIÓN A EXCEL (.XLSX)
+    // =========================================================================
+    function exportarMatrizExcel() {
+      if (!filteredData || filteredData.length === 0) {
+        mostrarToast("⚠️ No hay datos filtrados para exportar", 3000);
+        return;
+      }
+
+      mostrarToast("⏳ Generando archivo Excel...", 2000);
+
+      const timeFieldMap = { diario: '_dia', semanal: '_semana', mensual: '_mes' };
+      const timeField = timeFieldMap[modoMatrizActivo] || '_semana';
+      const periodoMap = agruparDatosJerarquicos(filteredData, timeField);
+      const sortedPeriodos = Array.from(periodoMap.keys()).sort();
+
+      const filasJerarquia = [];
+      const filasPlana = [];
+
+      sortedPeriodos.forEach(pKey => {
+        const pObj = periodoMap.get(pKey);
+        const pM = calculateMetrics(pObj.rows);
+
+        // Fila Nivel 1: Subtotal Periodo
+        filasJerarquia.push({
+          "Nivel": "PERIODO",
+          "Periodo": pObj.pLabel,
+          "Tipo de Proceso": "(Todos los Procesos)",
+          "Cód. Plantilla": "-",
+          "Nombre de Plantilla": `SUBTOTAL ${pObj.pLabel.toUpperCase()}`,
+          "Tipo Chuleta": "-",
+          "Kilos Origen (kg)": Math.round(pM.origen * 100) / 100,
+          "Kilos Resultado (kg)": Math.round(pM.resultado * 100) / 100,
+          "Harinas (kg)": Math.round(pM.harina * 100) / 100,
+          "Merma (kg)": Math.round(pM.merma * 100) / 100,
+          "Total Pérdida (kg)": Math.round(pM.perdida * 100) / 100,
+          "Rendimiento (%)": Math.round(pM.rendimiento * 100) / 100
+        });
+
+        const sortedTipos = Array.from(pObj.tiposMap.values()).sort((a, b) => a.tKey.localeCompare(b.tKey));
+
+        sortedTipos.forEach(tObj => {
+          const tM = calculateMetrics(tObj.rows);
+
+          // Fila Nivel 2: Subtotal Tipo
+          filasJerarquia.push({
+            "Nivel": "TIPO_PROCESO",
+            "Periodo": pObj.pLabel,
+            "Tipo de Proceso": tObj.tKey,
+            "Cód. Plantilla": "-",
+            "Nombre de Plantilla": `SUBTOTAL TIPO ${tObj.tKey}`,
+            "Tipo Chuleta": "-",
+            "Kilos Origen (kg)": Math.round(tM.origen * 100) / 100,
+            "Kilos Resultado (kg)": Math.round(tM.resultado * 100) / 100,
+            "Harinas (kg)": Math.round(tM.harina * 100) / 100,
+            "Merma (kg)": Math.round(tM.merma * 100) / 100,
+            "Total Pérdida (kg)": Math.round(tM.perdida * 100) / 100,
+            "Rendimiento (%)": Math.round(tM.rendimiento * 100) / 100
+          });
+
+          const sortedPlantillas = Array.from(tObj.plantillasMap.values()).sort((a, b) => a.id - b.id);
+
+          sortedPlantillas.forEach(plan => {
+            const planM = calculateMetrics(plan.rows);
+
+            // Fila Nivel 3: Detalle Plantilla
+            filasJerarquia.push({
+              "Nivel": "PLANTILLA",
+              "Periodo": pObj.pLabel,
+              "Tipo de Proceso": tObj.tKey,
+              "Cód. Plantilla": plan.id || 0,
+              "Nombre de Plantilla": plan.name,
+              "Tipo Chuleta": plan.tipoChuleta || "-",
+              "Kilos Origen (kg)": Math.round(planM.origen * 100) / 100,
+              "Kilos Resultado (kg)": Math.round(planM.resultado * 100) / 100,
+              "Harinas (kg)": Math.round(planM.harina * 100) / 100,
+              "Merma (kg)": Math.round(planM.merma * 100) / 100,
+              "Total Pérdida (kg)": Math.round(planM.perdida * 100) / 100,
+              "Rendimiento (%)": Math.round(planM.rendimiento * 100) / 100
+            });
+
+            // Fila Plana para Tablas Dinámicas
+            filasPlana.push({
+              "Periodo Clave": pKey,
+              "Periodo": pObj.pLabel,
+              "Tipo de Proceso": tObj.tKey,
+              "Cód. Plantilla": plan.id || 0,
+              "Nombre de Plantilla": plan.name,
+              "Tipo Chuleta": plan.tipoChuleta || "-",
+              "Kilos Origen (kg)": Math.round(planM.origen * 100) / 100,
+              "Kilos Resultado (kg)": Math.round(planM.resultado * 100) / 100,
+              "Harinas (kg)": Math.round(planM.harina * 100) / 100,
+              "Merma (kg)": Math.round(planM.merma * 100) / 100,
+              "Total Pérdida (kg)": Math.round(planM.perdida * 100) / 100,
+              "Rendimiento (%)": Math.round(planM.rendimiento * 100) / 100
+            });
+          });
+        });
+      });
+
+      // Fila Total General Consolidado
+      const globalM = calculateMetrics(filteredData);
+      filasJerarquia.push({
+        "Nivel": "TOTAL_GENERAL",
+        "Periodo": "CONSOLIDADO",
+        "Tipo de Proceso": "TOTAL",
+        "Cód. Plantilla": "-",
+        "Nombre de Plantilla": "TOTAL GENERAL CONSOLIDADO",
+        "Tipo Chuleta": "-",
+        "Kilos Origen (kg)": Math.round(globalM.origen * 100) / 100,
+        "Kilos Resultado (kg)": Math.round(globalM.resultado * 100) / 100,
+        "Harinas (kg)": Math.round(globalM.harina * 100) / 100,
+        "Merma (kg)": Math.round(globalM.merma * 100) / 100,
+        "Total Pérdida (kg)": Math.round(globalM.perdida * 100) / 100,
+        "Rendimiento (%)": Math.round(globalM.rendimiento * 100) / 100
+      });
+
+      const fechaHoy = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+      const nombreArchivo = `Matriz_Rendimiento_${modoMatrizActivo.toUpperCase()}_${fechaHoy}.xlsx`;
+
+      if (typeof XLSX !== "undefined") {
+        const wb = XLSX.utils.book_new();
+
+        // 1. Hoja Matriz Jerárquica con subtotales
+        const wsJerarquia = XLSX.utils.json_to_sheet(filasJerarquia);
+        wsJerarquia['!cols'] = [
+          { wch: 14 }, // Nivel
+          { wch: 22 }, // Periodo
+          { wch: 18 }, // Tipo de Proceso
+          { wch: 14 }, // Cód. Plantilla
+          { wch: 36 }, // Nombre de Plantilla
+          { wch: 15 }, // Tipo Chuleta
+          { wch: 16 }, // Kilos Origen
+          { wch: 18 }, // Kilos Resultado
+          { wch: 14 }, // Harinas
+          { wch: 14 }, // Merma
+          { wch: 16 }, // Total Pérdida
+          { wch: 15 }  // Rendimiento (%)
+        ];
+        XLSX.utils.book_append_sheet(wb, wsJerarquia, "Matriz_Jerarquica");
+
+        // 2. Hoja Data Plana (para tablas dinámicas de Excel)
+        const wsPlana = XLSX.utils.json_to_sheet(filasPlana);
+        wsPlana['!cols'] = [
+          { wch: 15 }, // Periodo Clave
+          { wch: 22 }, // Periodo
+          { wch: 18 }, // Tipo de Proceso
+          { wch: 14 }, // Cód. Plantilla
+          { wch: 36 }, // Nombre de Plantilla
+          { wch: 15 }, // Tipo Chuleta
+          { wch: 16 }, // Kilos Origen
+          { wch: 18 }, // Kilos Resultado
+          { wch: 14 }, // Harinas
+          { wch: 14 }, // Merma
+          { wch: 16 }, // Total Pérdida
+          { wch: 15 }  // Rendimiento (%)
+        ];
+        XLSX.utils.book_append_sheet(wb, wsPlana, "Data_Plana");
+
+        XLSX.writeFile(wb, nombreArchivo);
+        mostrarToast(`📊 Archivo Excel (.xlsx) descargado exitosamente`);
+      } else {
+        // Fallback a formato HTML/XML Spreadsheet nativo de Excel (.xls)
+        exportarExcelFallback(filasJerarquia, nombreArchivo.replace('.xlsx', '.xls'));
+      }
+    }
+
+    function exportarExcelFallback(filas, nombreArchivo) {
+      if (filas.length === 0) return;
+      const headers = Object.keys(filas[0]);
+      let html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">`;
+      html += `<head><meta charset="utf-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Matriz_Rendimiento</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body>`;
+      html += `<table border="1"><thead><tr style="background:#223A5E;color:#FFFFFF;font-weight:bold;">`;
+      headers.forEach(h => html += `<th>${h}</th>`);
+      html += `</tr></thead><tbody>`;
+
+      filas.forEach(f => {
+        let style = "";
+        if (f.Nivel === "PERIODO") style = "background:#1E293B;color:#FFFFFF;font-weight:bold;";
+        else if (f.Nivel === "TIPO_PROCESO") style = "background:#EBF3FA;color:#0F172A;font-weight:bold;";
+        else if (f.Nivel === "TOTAL_GENERAL") style = "background:#0F172A;color:#FFFFFF;font-weight:bold;";
+
+        html += `<tr style="${style}">`;
+        headers.forEach(h => {
+          const val = f[h];
+          const isNum = typeof val === 'number';
+          html += `<td style="${isNum ? 'text-align:right;' : ''}">${val !== null && val !== undefined ? val : ''}</td>`;
+        });
+        html += `</tr>`;
+      });
+
+      html += `</tbody></table></body></html>`;
+
+      const blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = nombreArchivo;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      mostrarToast(`📊 Archivo Excel descargado exitosamente`);
+    }
+
+    // =========================================================================
+    // 📄 EXPORTACIÓN DE DATA PLANA DEL PROCEDIMIENTO ALMACENADO A EXCEL (.xlsx)
+    // =========================================================================
+    function exportarDataPlanaExcel() {
+      const dataAExportar = (filteredData && filteredData.length > 0) ? filteredData : rawData;
+
+      if (!dataAExportar || dataAExportar.length === 0) {
+        mostrarToast("⚠️ No hay datos cargados para exportar. Genere el reporte primero.", 3500);
+        return;
+      }
+
+      mostrarToast("⏳ Preparando data plana del Procedimiento Almacenado (sin totales)...", 2000);
+
+      // 1. Hoja Principal: Data Plana pura del Procedimiento Almacenado Desposte.dbo.Sp_Informe_Prod_Chuletas
+      // Estrictamente registro a registro, sin agrupaciones, sin subtotales y sin fila de total general.
+      const filasSpPlana = dataAExportar.map(d => {
+        const fechaRaw = d.fechaOrden || d.FechaOrden || d.fechaOrdenStr || d.FechaOrdenStr;
+        const fechaStr = d._ymd || (fechaRaw ? String(fechaRaw).split('T')[0] : '');
+        const kilos = Number(d.kilos ?? d.Kilos) || 0;
+        const unidades = Number(d.unidades ?? d.Unidades) || 0;
+        const costo = Number(d.costoTotal ?? d.CostoTotal) || 0;
+        const venta = Number(d.ventaTotal ?? d.VentaTotal) || 0;
+        const margen = Math.round((venta - costo) * 100) / 100;
+        const pctMargen = venta > 0 ? Math.round(((venta - costo) / venta) * 10000) / 100 : 0;
+        const costoKg = kilos > 0 ? Math.round((costo / kilos) * 1000) / 1000 : 0;
+        const ventaKg = kilos > 0 ? Math.round((venta / kilos) * 1000) / 1000 : 0;
+
+        return {
+          "FechaOrden": fechaStr,
+          "Tipo": (d.tipo || d.Tipo || '').trim(),
+          "TipoChuleta": (d.tipoChuleta || d.TipoChuleta || '').trim(),
+          "Plantilla": d.plantilla ?? d.Plantilla ?? 0,
+          "NPlantilla": (d.nPlantilla || d.NPlantilla || '').trim(),
+          "Ttra": d.ttra ?? d.Ttra ?? 0,
+          "NTtra": (d.nTtra || d.NTtra || '').trim(),
+          "Producto": (d.producto || d.Producto || '').trim(),
+          "CodigoCorto": (d.codigoCorto || d.CodigoCorto || '').trim(),
+          "Nombre": (d.nombre || d.Nombre || '').trim(),
+          "TipoInforme": (d.tipoInforme || d.TipoInforme || '').trim(),
+          "Unidades": Math.round(unidades * 100) / 100,
+          "Kilos": Math.round(kilos * 100) / 100,
+          "CostoTotal": Math.round(costo * 100) / 100,
+          "VentaTotal": Math.round(venta * 100) / 100,
+          "MargenBruto": margen,
+          "PctMargen": pctMargen,
+          "CostoPorKilo": costoKg,
+          "VentaPorKilo": ventaKg
+        };
+      });
+
+      // 2. Hoja 2 de Apoyo: Resumen Plano por Periodo + Proceso + Plantilla (SIN TOTALES)
+      const filasPlanaResumen = [];
+      const timeField = modoMatrizActivo === 'diario' ? '_dia' : (modoMatrizActivo === 'semanal' ? '_semana' : '_mes');
+      const periodosMap = new Map();
+
+      dataAExportar.forEach(d => {
+        const pKey = d[timeField] || 'SIN_FECHA';
+        if (!periodosMap.has(pKey)) {
+          periodosMap.set(pKey, {
+            pLabel: formatPeriodoNombre(modoMatrizActivo, pKey),
+            tiposMap: new Map()
+          });
+        }
+        const pObj = periodosMap.get(pKey);
+        const tKey = d.Tipo || 'SIN_TIPO';
+        if (!pObj.tiposMap.has(tKey)) {
+          pObj.tiposMap.set(tKey, new Map());
+        }
+        const plantillasMap = pObj.tiposMap.get(tKey);
+        const planKey = `${d.Plantilla}_${d.NPlantilla}`;
+        if (!plantillasMap.has(planKey)) {
+          plantillasMap.set(planKey, {
+            id: d.Plantilla,
+            name: d.NPlantilla,
+            tipoChuleta: d.TipoChuleta,
+            rows: []
+          });
+        }
+        plantillasMap.get(planKey).rows.push(d);
+      });
+
+      const sortedPeriodos = Array.from(periodosMap.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+
+      sortedPeriodos.forEach(([pKey, pObj]) => {
+        const sortedTipos = Array.from(pObj.tiposMap.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+        sortedTipos.forEach(([tKey, plantillasMap]) => {
+          const sortedPlantillas = Array.from(plantillasMap.values()).sort((a, b) => a.id - b.id);
+          sortedPlantillas.forEach(plan => {
+            const planM = calculateMetrics(plan.rows);
+
+            filasPlanaResumen.push({
+              "Periodo Clave": pKey,
+              "Periodo": pObj.pLabel,
+              "Tipo de Proceso": tKey,
+              "Cód. Plantilla": plan.id || 0,
+              "Nombre de Plantilla": plan.name || "-",
+              "Tipo Chuleta": plan.tipoChuleta || "-",
+              "Kilos Origen (kg)": Math.round(planM.origen * 100) / 100,
+              "Kilos Resultado (kg)": Math.round(planM.resultado * 100) / 100,
+              "Harinas (kg)": Math.round(planM.harina * 100) / 100,
+              "Merma (kg)": Math.round(planM.merma * 100) / 100,
+              "Total Pérdida (kg)": Math.round(planM.perdida * 100) / 100,
+              "Rendimiento (%)": Math.round(planM.rendimiento * 100) / 100
+            });
+          });
+        });
+      });
+
+      const fIni = document.getElementById('fechaInicio')?.value || '';
+      const fFin = document.getElementById('fechaFin')?.value || '';
+      const rangoStr = (fIni && fFin) ? `_${fIni.replace(/-/g, '')}_al_${fFin.replace(/-/g, '')}` : `_${new Date().toISOString().slice(0, 10).replace(/-/g, '')}`;
+      const nombreArchivo = `Data_Plana_Sp_Informe_Prod_Chuletas${rangoStr}.xlsx`;
+
+      if (typeof XLSX !== "undefined") {
+        const wb = XLSX.utils.book_new();
+
+        // Hoja 1 Principal: Data Plana pura del Stored Procedure (SIN TOTALES)
+        const wsSp = XLSX.utils.json_to_sheet(filasSpPlana);
+        wsSp['!cols'] = [
+          { wch: 13 }, // FechaOrden
+          { wch: 20 }, // Tipo
+          { wch: 14 }, // TipoChuleta
+          { wch: 12 }, // Plantilla
+          { wch: 34 }, // NPlantilla
+          { wch: 10 }, // Ttra
+          { wch: 14 }, // NTtra
+          { wch: 14 }, // Producto
+          { wch: 14 }, // CodigoCorto
+          { wch: 36 }, // Nombre
+          { wch: 14 }, // TipoInforme
+          { wch: 12 }, // Unidades
+          { wch: 14 }, // Kilos
+          { wch: 14 }, // CostoTotal
+          { wch: 14 }, // VentaTotal
+          { wch: 14 }, // MargenBruto
+          { wch: 12 }, // PctMargen
+          { wch: 14 }, // CostoPorKilo
+          { wch: 14 }  // VentaPorKilo
+        ];
+        XLSX.utils.book_append_sheet(wb, wsSp, "Sp_Informe_Prod_Chuletas");
+
+        // Hoja 2 de Apoyo: Resumen Plano por Plantilla (SIN TOTALES)
+        const wsResumen = XLSX.utils.json_to_sheet(filasPlanaResumen);
+        wsResumen['!cols'] = [
+          { wch: 15 }, // Periodo Clave
+          { wch: 24 }, // Periodo
+          { wch: 20 }, // Tipo de Proceso
+          { wch: 14 }, // Cód. Plantilla
+          { wch: 36 }, // Nombre de Plantilla
+          { wch: 15 }, // Tipo Chuleta
+          { wch: 16 }, // Kilos Origen
+          { wch: 18 }, // Kilos Resultado
+          { wch: 14 }, // Harinas
+          { wch: 14 }, // Merma
+          { wch: 16 }, // Total Pérdida
+          { wch: 15 }  // Rendimiento (%)
+        ];
+        XLSX.utils.book_append_sheet(wb, wsResumen, "Resumen_Plano_Plantillas");
+
+        XLSX.writeFile(wb, nombreArchivo);
+        mostrarToast(`📄 Data Plana del SP descargada (${filasSpPlana.length} filas sin totales)`);
+      } else {
+        // Fallback a .xls puro sin totales
+        exportarExcelFallback(filasSpPlana, nombreArchivo.replace('.xlsx', '.xls'));
+      }
+    }
+
+    // Alias para compatibilidad
+    const exportarMatrizCSV = exportarMatrizExcel;
+
+    // Alias para compatibilidad
+    const renderPlantillasTable = renderMatrizJerarquica;
 
     // =========================================================================
     // 💡 INTERFAZ Y HELPERS (Toasts, Spinners, Estado)
