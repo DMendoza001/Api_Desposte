@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Cumplimiento PTC Py - Detalle SKU, SubPlanta y Familias</title>
+    <title>Dashboard Cumplimiento PTC - Programa de Produccion vs Proyeccion Comercial</title>
 
     <!-- Fuentes e Iconos Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,64 +18,78 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
     <!-- SheetJS para exportar a Excel (.xlsx) -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-
     <style>
         :root {
-            --bg-main: #0B111E;
-            --bg-card: #152034;
-            --bg-card-hover: #1B2943;
-            --bg-card-alt: #10192A;
-            --border-card: #20314E;
-            --border-subtle: rgba(255, 255, 255, 0.08);
+            --navy-peony: #223A5E;
+            --cyan-blue: #1295C1;
+            --cool-blue: #9DBED5;
+            --blue-sapphire: #10587F;
+            --foggy-dew: #CBCFCB;
+            --lagoon: #43928E;
+            --teal-blue: #007D7E;
+            --aegean-blue: #4E6E81;
 
-            /* Series de datos */
-            --color-prod: #10B981;
-            --color-prod-light: rgba(16, 185, 129, 0.15);
-            --color-demanda: #6366F1;
-            --color-demanda-light: rgba(99, 102, 241, 0.15);
+            --bg-canvas: #F1F5F9;
+            --bg-card: #FFFFFF;
+            --border-ui: #E2E8F0;
+            --text-dark: #0F172A;
+            --text-muted: #64748B;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+
+            /* Compatibility aliases */
+            --bg-main: var(--bg-canvas);
+            --bg-card-hover: #F8FAFC;
+            --bg-card-alt: #F8FAFC;
+            --border-card: var(--border-ui);
+            --border-subtle: var(--border-ui);
+
+            /* Series de datos adaptadas a la paleta de RendimientosChuletas */
+            --color-prod: #007D7E;
+            --color-prod-light: rgba(0, 125, 126, 0.12);
+            --color-demanda: #1295C1;
+            --color-demanda-light: rgba(18, 149, 193, 0.12);
 
             /* SubPlanta badges */
-            --color-subplanta: #F59E0B;
-            --color-subplanta-light: rgba(245, 158, 11, 0.15);
+            --color-subplanta: #10587F;
+            --color-subplanta-light: rgba(16, 88, 127, 0.12);
             --color-desposte: #10B981;
-            --color-chuletas: #EC4899;
-            --color-menudo: #38BDF8;
+            --color-chuletas: #1295C1;
+            --color-menudo: #43928E;
 
-            /* Semáforo y Alertas */
-            --status-success: #00D084;
+            /* SemÃ¡foro y Alertas */
+            --status-success: #10B981;
             --status-warning: #F59E0B;
             --status-danger: #EF4444;
-            --status-info: #38BDF8;
+            --status-info: #1295C1;
 
-            /* Tipografía */
-            --text-primary: #FFFFFF;
-            --text-secondary: #CBD5E1;
-            --text-muted: #94A3B8;
+            /* TipografÃ­a */
+            --text-primary: #0F172A;
+            --text-secondary: #334155;
             --text-dim: #64748B;
 
             /* Sombras y bordes */
             --radius-sm: 8px;
             --radius-md: 12px;
-            --radius-lg: 16px;
-            --shadow-card: 0 8px 30px -4px rgba(0, 0, 0, 0.5);
+            --radius-lg: 12px;
+            --shadow-card: var(--shadow-sm);
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: var(--bg-main);
-            background-image:
-                radial-gradient(circle at 10% 10%, rgba(16, 185, 129, 0.09) 0%, transparent 45%),
-                radial-gradient(circle at 90% 10%, rgba(99, 102, 241, 0.09) 0%, transparent 45%),
-                radial-gradient(circle at 50% 85%, rgba(245, 158, 11, 0.06) 0%, transparent 60%);
-            background-attachment: fixed;
-            color: var(--text-primary);
-            padding: 24px;
+            background-color: var(--bg-canvas);
+            color: var(--text-dark);
+            padding: 20px 24px;
             min-height: 100vh;
         }
 
@@ -86,16 +100,16 @@
         }
 
         ::-webkit-scrollbar-track {
-            background: var(--bg-main);
+            background: var(--bg-canvas);
         }
 
         ::-webkit-scrollbar-thumb {
-            background: var(--border-card);
+            background: #CBD5E1;
             border-radius: 4px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: #2E4770;
+            background: var(--cool-blue);
         }
 
         .dashboard-container {
@@ -108,18 +122,19 @@
 
         /* HEADER */
         .dashboard-header {
-            background: linear-gradient(135deg, var(--bg-card) 0%, #101827 100%);
-            border: 1px solid var(--border-card);
-            border-radius: var(--radius-lg);
-            padding: 20px 24px;
+            background: linear-gradient(135deg, var(--navy-peony) 0%, var(--blue-sapphire) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 22px 28px;
             display: flex;
             flex-wrap: wrap;
             justify-content: space-between;
             align-items: center;
             gap: 16px;
-            box-shadow: var(--shadow-card);
+            box-shadow: var(--shadow-lg);
             position: relative;
             overflow: hidden;
+            color: #FFFFFF;
         }
 
         .dashboard-header::before {
@@ -129,7 +144,7 @@
             left: 0;
             right: 0;
             height: 3px;
-            background: linear-gradient(90deg, var(--color-prod), var(--color-subplanta), var(--color-demanda));
+            background: linear-gradient(90deg, var(--cyan-blue), var(--lagoon), var(--teal-blue));
         }
 
         .header-title-group {
@@ -139,23 +154,24 @@
         }
 
         .header-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: var(--radius-md);
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(245, 158, 11, 0.25));
-            border: 1px solid rgba(16, 185, 129, 0.4);
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(8px);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #10B981;
+            color: #FFFFFF;
             flex-shrink: 0;
         }
 
         .header-title {
             font-size: 1.45rem;
-            font-weight: 800;
+            font-weight: 700;
             letter-spacing: -0.02em;
-            color: var(--text-primary);
+            color: #FFFFFF;
             display: flex;
             align-items: center;
             gap: 12px;
@@ -169,21 +185,26 @@
             text-transform: uppercase;
             padding: 4px 10px;
             border-radius: 6px;
-            background: rgba(16, 185, 129, 0.15);
-            color: var(--color-prod);
-            border: 1px solid rgba(16, 185, 129, 0.35);
+            background: rgba(255, 255, 255, 0.18);
+            color: #FFFFFF;
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
         .badge-tag-py {
-            background: rgba(245, 158, 11, 0.18);
-            color: #F59E0B;
-            border: 1px solid rgba(245, 158, 11, 0.35);
+            background: rgba(245, 158, 11, 0.25);
+            color: #FEF3C7;
+            border: 1px solid rgba(245, 158, 11, 0.45);
         }
 
         .header-subtitle {
-            font-size: 0.85rem;
-            color: var(--text-muted);
+            font-size: 0.86rem;
+            color: var(--cool-blue);
             margin-top: 4px;
+            font-weight: 400;
+        }
+
+        .header-subtitle b {
+            color: #FFFFFF;
         }
 
         .header-actions {
@@ -196,72 +217,96 @@
         .status-badge {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 7px;
             font-size: 0.8rem;
             padding: 6px 14px;
             border-radius: 9999px;
-            background: rgba(16, 185, 129, 0.12);
-            color: var(--status-success);
-            border: 1px solid rgba(16, 185, 129, 0.25);
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(8px);
+            color: #FFFFFF;
             font-weight: 600;
         }
 
         .status-dot {
-            width: 8px;
-            height: 8px;
+            width: 9px;
+            height: 9px;
             border-radius: 50%;
-            background-color: var(--status-success);
-            box-shadow: 0 0 8px var(--status-success);
+            background-color: #94A3B8;
+            display: inline-block;
+        }
+
+        .status-dot.online {
+            background-color: #10B981;
+            box-shadow: 0 0 8px #10B981;
+        }
+
+        .status-dot.loading {
+            background-color: #F59E0B;
+        }
+
+        .status-dot.error {
+            background-color: #EF4444;
         }
 
         .btn {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 8px 16px;
+            padding: 9px 16px;
             border-radius: var(--radius-sm);
             font-size: 0.84rem;
             font-weight: 600;
             cursor: pointer;
-            border: 1px solid var(--border-card);
-            background: var(--bg-card);
-            color: var(--text-primary);
+            border: 1px solid var(--border-ui);
+            background: #FFFFFF;
+            color: var(--navy-peony);
             transition: all 0.2s ease;
         }
 
         .btn:hover {
-            background: var(--bg-card-hover);
-            border-color: #385078;
+            background: #F1F5F9;
+            border-color: var(--cyan-blue);
+            color: var(--blue-sapphire);
+            transform: translateY(-1px);
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-            border-color: #059669;
+            background: linear-gradient(135deg, var(--cyan-blue) 0%, var(--blue-sapphire) 100%);
+            border: none;
             color: #FFFFFF;
+            box-shadow: var(--shadow-sm);
         }
 
         .btn-primary:hover {
-            background: linear-gradient(135deg, #059669 0%, #047857 100%);
-            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
-        }
-
-        .btn-excel {
-            background: linear-gradient(135deg, #0D9488 0%, #047857 100%);
-            border-color: #10B981;
+            background: linear-gradient(135deg, var(--blue-sapphire) 0%, var(--navy-peony) 100%);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
             color: #FFFFFF;
         }
 
+        .btn-excel {
+            background: #F0FDF4;
+            border: 1px solid #86EFAC;
+            color: #166534;
+            font-weight: 700;
+        }
+
         .btn-excel:hover {
-            box-shadow: 0 4px 14px rgba(13, 148, 136, 0.35);
+            background: #166534;
+            border-color: #166534;
+            color: #FFFFFF;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(22, 101, 52, 0.25);
         }
 
         /* CARD GENERAL */
         .card {
             background: var(--bg-card);
-            border: 1px solid var(--border-card);
-            border-radius: var(--radius-md);
-            padding: 18px 20px;
-            box-shadow: var(--shadow-card);
+            border: 1px solid var(--border-ui);
+            border-radius: 12px;
+            padding: 20px 24px;
+            box-shadow: var(--shadow-sm);
         }
 
         /* FILTROS SECTION */
@@ -277,10 +322,11 @@
         .filter-title {
             font-size: 0.92rem;
             font-weight: 700;
-            color: var(--text-primary);
+            color: var(--navy-peony);
             display: flex;
             align-items: center;
             gap: 8px;
+            letter-spacing: -0.01em;
         }
 
         .filter-quick-actions {
@@ -291,10 +337,10 @@
         }
 
         .filter-quick-btn {
-            background: var(--bg-card-alt);
-            border: 1px solid var(--border-card);
+            background: #F8FAFC;
+            border: 1px solid var(--border-ui);
             color: var(--text-muted);
-            padding: 5px 12px;
+            padding: 6px 13px;
             border-radius: 6px;
             font-size: 0.78rem;
             font-weight: 600;
@@ -303,20 +349,23 @@
         }
 
         .filter-quick-btn:hover {
-            color: var(--text-primary);
-            border-color: #3B5784;
+            color: var(--text-dark);
+            background: #EEF2F6;
+            border-color: #CBD5E1;
         }
 
         .filter-quick-btn.active {
-            background: rgba(16, 185, 129, 0.18);
-            border-color: var(--color-prod);
-            color: var(--color-prod);
+            background: var(--navy-peony);
+            border-color: var(--navy-peony);
+            color: #FFFFFF;
+            box-shadow: 0 2px 5px rgba(34, 58, 94, 0.25);
         }
 
         .filter-quick-btn.active-subplanta {
-            background: rgba(245, 158, 11, 0.2);
-            border-color: var(--color-subplanta);
-            color: var(--color-subplanta);
+            background: var(--blue-sapphire);
+            border-color: var(--blue-sapphire);
+            color: #FFFFFF;
+            box-shadow: 0 2px 5px rgba(16, 88, 127, 0.25);
         }
 
         /* PILLS CONTAINERS */
@@ -342,9 +391,9 @@
             font-size: 0.82rem;
             font-weight: 600;
             cursor: pointer;
-            background: #111A2C;
-            border: 1px solid var(--border-card);
-            color: var(--text-secondary);
+            background: #FFFFFF;
+            border: 1px solid var(--border-ui);
+            color: var(--text-dark);
             transition: all 0.15s ease;
             user-select: none;
         }
@@ -352,24 +401,24 @@
         .year-pill:hover,
         .subplanta-pill:hover,
         .week-pill:hover {
-            border-color: #3D5A8A;
-            background: #16243D;
-            color: var(--text-primary);
+            border-color: var(--cool-blue);
+            background: #F8FAFC;
+            color: var(--navy-peony);
         }
 
         .year-pill.selected {
-            background: rgba(99, 102, 241, 0.22);
-            border-color: var(--color-demanda);
-            color: #A5B4FC;
+            background: rgba(18, 149, 193, 0.12);
+            border-color: var(--cyan-blue);
+            color: var(--blue-sapphire);
             font-weight: 700;
         }
 
         .subplanta-pill.selected {
-            background: rgba(245, 158, 11, 0.22);
-            border-color: var(--color-subplanta);
-            color: #FCD34D;
+            background: #EBF3FA;
+            border-color: var(--blue-sapphire);
+            color: var(--navy-peony);
             font-weight: 700;
-            box-shadow: 0 0 10px rgba(245, 158, 11, 0.2);
+            box-shadow: 0 1px 4px rgba(16, 88, 127, 0.15);
         }
 
         .subplanta-pill .sp-dot {
@@ -380,10 +429,11 @@
         }
 
         .week-pill.selected {
-            background: rgba(16, 185, 129, 0.22);
-            border-color: var(--color-prod);
-            color: #6EE7B7;
+            background: linear-gradient(135deg, var(--cyan-blue) 0%, var(--blue-sapphire) 100%);
+            border-color: var(--blue-sapphire);
+            color: #FFFFFF;
             font-weight: 700;
+            box-shadow: 0 2px 6px rgba(18, 149, 193, 0.25);
         }
 
         .week-pill.has-demanda {
@@ -391,19 +441,28 @@
         }
 
         .week-pill.has-demanda::after {
-            content: '●';
-            color: #6366F1;
+            content: 'â—';
+            color: var(--cyan-blue);
             font-size: 0.65rem;
             margin-left: 2px;
         }
 
+        .week-pill.selected.has-demanda::after {
+            color: #FDE68A;
+        }
+
         .pill-badge-count {
-            background: rgba(255, 255, 255, 0.09);
+            background: #E2E8F0;
             font-size: 0.72rem;
             padding: 2px 7px;
             border-radius: 12px;
             color: var(--text-muted);
-            font-family: 'JetBrains Mono', monospace;
+            font-family: 'Inter', monospace;
+        }
+
+        .week-pill.selected .pill-badge-count {
+            background: rgba(255, 255, 255, 0.25);
+            color: #FFFFFF;
         }
 
         .selection-summary-bar {
@@ -414,9 +473,13 @@
             color: var(--text-muted);
             margin-top: 10px;
             padding-top: 8px;
-            border-top: 1px solid var(--border-subtle);
+            border-top: 1px solid var(--border-ui);
             flex-wrap: wrap;
             gap: 8px;
+        }
+
+        .selection-summary-bar b {
+            color: var(--navy-peony);
         }
 
         /* KPI GRID */
@@ -428,31 +491,22 @@
 
         .kpi-card {
             background: var(--bg-card);
-            border: 1px solid var(--border-card);
-            border-radius: var(--radius-md);
-            padding: 18px 20px;
-            box-shadow: var(--shadow-card);
+            border: 1px solid var(--border-ui);
+            border-top: 4px solid var(--kpi-accent, var(--cyan-blue));
+            border-radius: 10px;
+            padding: 18px 22px;
+            box-shadow: var(--shadow-sm);
             position: relative;
             overflow: hidden;
             display: flex;
             flex-direction: column;
             gap: 8px;
-            transition: transform 0.2s ease, border-color 0.2s ease;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
         .kpi-card:hover {
             transform: translateY(-2px);
-            border-color: #385078;
-        }
-
-        .kpi-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 4px;
-            bottom: 0;
-            background: var(--kpi-accent, #10B981);
+            box-shadow: var(--shadow-md);
         }
 
         .kpi-top {
@@ -462,8 +516,8 @@
         }
 
         .kpi-label {
-            font-size: 0.82rem;
-            font-weight: 600;
+            font-size: 0.75rem;
+            font-weight: 700;
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.04em;
@@ -479,10 +533,10 @@
         }
 
         .kpi-value {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 1.75rem;
+            font-family: 'Inter', -apple-system, sans-serif;
+            font-size: 1.7rem;
             font-weight: 800;
-            color: var(--text-primary);
+            color: var(--navy-peony);
             letter-spacing: -0.02em;
             display: flex;
             align-items: baseline;
@@ -500,9 +554,10 @@
             justify-content: space-between;
             align-items: center;
             font-size: 0.78rem;
-            color: var(--text-dim);
+            color: var(--aegean-blue);
             padding-top: 6px;
-            border-top: 1px solid var(--border-subtle);
+            border-top: 1px solid var(--border-ui);
+            font-weight: 500;
         }
 
         .badge-kpi {
@@ -510,42 +565,42 @@
             border-radius: 6px;
             font-weight: 700;
             font-size: 0.75rem;
-            font-family: 'JetBrains Mono', monospace;
+            font-family: 'Inter', monospace;
         }
 
         .badge-success {
-            background: rgba(0, 208, 132, 0.15);
-            color: var(--status-success);
-            border: 1px solid rgba(0, 208, 132, 0.35);
+            background-color: #DCFCE7;
+            color: #166534;
+            border: 1px solid #86EFAC;
         }
 
         .badge-warning {
-            background: rgba(245, 158, 11, 0.15);
-            color: var(--status-warning);
-            border: 1px solid rgba(245, 158, 11, 0.35);
+            background-color: #FEF3C7;
+            color: #92400E;
+            border: 1px solid #FCD34D;
         }
 
         .badge-danger {
-            background: rgba(239, 68, 68, 0.15);
-            color: var(--status-danger);
-            border: 1px solid rgba(239, 68, 68, 0.35);
+            background-color: #FEE2E2;
+            color: #991B1B;
+            border: 1px solid #FCA5A5;
         }
 
         .val-positive {
-            color: #00D084 !important;
+            color: #166534 !important;
         }
 
         .val-negative {
-            color: #EF4444 !important;
+            color: #991B1B !important;
         }
 
         /* CHART CARD */
         .chart-card {
             background: var(--bg-card);
-            border: 1px solid var(--border-card);
-            border-radius: var(--radius-md);
-            padding: 18px 20px;
-            box-shadow: var(--shadow-card);
+            border: 1px solid var(--border-ui);
+            border-radius: 12px;
+            padding: 22px;
+            box-shadow: var(--shadow-sm);
             display: flex;
             flex-direction: column;
             gap: 14px;
@@ -557,13 +612,15 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-ui);
         }
 
         .powerbi-title {
-            font-size: 0.95rem;
-            font-weight: 800;
-            letter-spacing: 0.03em;
-            color: var(--text-primary);
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            color: var(--navy-peony);
             text-transform: uppercase;
             display: flex;
             align-items: center;
@@ -586,51 +643,56 @@
 
         /* TABS HEADER */
         .tabs-header {
-            display: flex;
-            gap: 6px;
+            display: inline-flex;
+            background: #E2E8F0;
+            padding: 4px;
+            border-radius: 10px;
+            gap: 4px;
+            border: none;
             overflow-x: auto;
-            border-bottom: 2px solid var(--border-card);
-            padding-bottom: 6px;
+            max-width: 100%;
         }
 
         .tab-btn {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 10px 18px;
-            border-radius: var(--radius-sm) var(--radius-sm) 0 0;
-            font-size: 0.86rem;
-            font-weight: 700;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
             cursor: pointer;
             background: transparent;
             border: none;
             color: var(--text-muted);
-            transition: all 0.2s ease;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
             white-space: nowrap;
         }
 
         .tab-btn:hover {
-            color: var(--text-primary);
-            background: rgba(255, 255, 255, 0.04);
+            color: var(--navy-peony);
+            background: rgba(255, 255, 255, 0.55);
         }
 
         .tab-btn.active {
-            color: var(--text-primary);
-            background: var(--bg-card);
-            border: 1px solid var(--border-card);
-            border-bottom: 2px solid #10B981;
+            color: #FFFFFF;
+            background: var(--navy-peony);
+            box-shadow: 0 2px 6px rgba(34, 58, 94, 0.25);
         }
 
         .tab-btn.tab-prod.active {
-            border-bottom-color: #10B981;
+            background: var(--navy-peony);
+            color: #FFFFFF;
         }
 
         .tab-btn.tab-demanda.active {
-            border-bottom-color: #6366F1;
+            background: var(--blue-sapphire);
+            color: #FFFFFF;
         }
 
         .tab-btn.tab-subplanta.active {
-            border-bottom-color: #F59E0B;
+            background: var(--teal-blue);
+            color: #FFFFFF;
         }
 
         .tab-content {
@@ -644,10 +706,10 @@
         /* MATRIX TABLES */
         .matrix-card {
             background: var(--bg-card);
-            border: 1px solid var(--border-card);
-            border-radius: var(--radius-md);
-            padding: 18px 20px;
-            box-shadow: var(--shadow-card);
+            border: 1px solid var(--border-ui);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--shadow-sm);
             overflow: hidden;
         }
 
@@ -664,97 +726,129 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            background: #111A2C;
-            border: 1px solid var(--border-card);
-            padding: 6px 14px;
-            border-radius: var(--radius-sm);
+            background: #FFFFFF;
+            border: 1px solid var(--border-ui);
+            padding: 8px 14px;
+            border-radius: 8px;
             width: 320px;
             max-width: 100%;
+            transition: all 0.2s ease;
         }
 
         .search-box:focus-within {
-            border-color: #10B981;
+            border-color: var(--cyan-blue);
+            box-shadow: 0 0 0 3px rgba(18, 149, 193, 0.15);
         }
 
         .search-icon {
-            color: var(--text-dim);
+            color: var(--text-muted);
         }
 
         .search-input {
             background: transparent;
             border: none;
             outline: none;
-            color: var(--text-primary);
-            font-size: 0.84rem;
+            color: var(--text-dark);
+            font-size: 0.85rem;
             width: 100%;
         }
 
         .table-responsive {
             width: 100%;
             overflow-x: auto;
+            border: 1px solid var(--border-ui);
+            border-radius: 8px;
         }
 
         .matrix-table {
             width: 100%;
-            border-collapse: collapse;
-            font-size: 0.84rem;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 0.85rem;
             text-align: left;
         }
 
         .matrix-table th {
-            background: #0E1626;
-            color: var(--text-secondary);
-            font-weight: 700;
-            padding: 10px 14px;
-            border-bottom: 2px solid var(--border-card);
+            background-color: var(--navy-peony);
+            color: #FFFFFF;
+            font-weight: 600;
+            padding: 12px 14px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            border-bottom: 2px solid rgba(0, 0, 0, 0.1);
             white-space: nowrap;
+            letter-spacing: 0.02em;
         }
 
         .matrix-table th.num-col,
         .matrix-table td.num-cell {
             text-align: right;
-            font-family: 'JetBrains Mono', monospace;
+            font-variant-numeric: tabular-nums;
+            font-family: 'Inter', -apple-system, monospace;
         }
 
         .matrix-table td {
             padding: 9px 14px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border-ui);
+            color: var(--text-dark);
             vertical-align: middle;
         }
 
         .matrix-table tr:hover td {
-            background: rgba(255, 255, 255, 0.03);
+            background-color: #F1F5F9;
         }
 
-        /* NIVELES JERARQUICOS */
+        /* NIVELES JERARQUICOS IDENTICOS A RENDIMIENTOS CHULETAS */
         .level-1 td {
-            background: rgba(16, 26, 44, 0.7);
+            background: linear-gradient(90deg, #1E293B 0%, #334155 100%) !important;
+            color: #F8FAFC !important;
             font-weight: 700;
-            color: var(--text-primary);
-            border-top: 1px solid rgba(255, 255, 255, 0.07);
+            border-bottom: 1px solid #475569 !important;
+        }
+
+        .level-1:hover td {
+            background: linear-gradient(90deg, #0F172A 0%, #1E293B 100%) !important;
         }
 
         .level-subplanta td {
-            background: rgba(245, 158, 11, 0.06);
-            font-weight: 700;
-            color: #FCD34D;
+            background-color: #EBF3FA !important;
+            color: #0F172A !important;
+            font-weight: 600;
+            border-bottom: 1px solid #CBD5E1 !important;
+        }
+
+        .level-subplanta:hover td {
+            background-color: #DEEBF5 !important;
         }
 
         .level-2 td {
-            background: rgba(22, 34, 56, 0.4);
+            background-color: #FFFFFF !important;
+            color: var(--navy-peony) !important;
             font-weight: 600;
         }
 
+        .level-2:hover td {
+            background-color: #F1F5F9 !important;
+        }
+
         .level-3 td {
-            background: transparent;
-            color: var(--text-secondary);
+            background-color: #FFFFFF !important;
+            color: var(--text-dark) !important;
+        }
+
+        .level-3:hover td {
+            background-color: #F8FAFC !important;
         }
 
         .level-4 td {
-            background: transparent;
+            background-color: #FFFFFF !important;
             font-size: 0.8rem;
-            color: var(--text-muted);
+            color: var(--text-muted) !important;
+        }
+
+        .level-4:hover td {
+            background-color: #F8FAFC !important;
         }
 
         .toggle-icon {
@@ -764,54 +858,60 @@
             width: 18px;
             height: 18px;
             border-radius: 4px;
-            background: rgba(255, 255, 255, 0.08);
-            color: var(--text-primary);
+            background: rgba(16, 88, 127, 0.12);
+            color: var(--blue-sapphire);
             font-family: monospace;
             font-size: 0.75rem;
+            font-weight: 700;
             cursor: pointer;
             margin-right: 8px;
             user-select: none;
-            transition: background 0.15s ease;
+            transition: all 0.15s ease;
+        }
+
+        .level-1 .toggle-icon {
+            background: rgba(255, 255, 255, 0.2);
+            color: #FFFFFF;
         }
 
         .toggle-icon:hover {
-            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
         }
 
         .tag-subplanta {
             display: inline-flex;
             align-items: center;
             gap: 5px;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 0.73rem;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 0.78rem;
             font-weight: 700;
             letter-spacing: 0.03em;
             text-transform: uppercase;
         }
 
         .tag-desposte {
-            background: rgba(16, 185, 129, 0.15);
-            color: #10B981;
-            border: 1px solid rgba(16, 185, 129, 0.35);
+            background: #DCFCE7;
+            color: #166534;
+            border: 1px solid #86EFAC;
         }
 
         .tag-chuletas {
-            background: rgba(236, 72, 153, 0.15);
-            color: #F472B6;
-            border: 1px solid rgba(236, 72, 153, 0.35);
+            background: rgba(18, 149, 193, 0.12);
+            color: var(--blue-sapphire);
+            border: 1px solid rgba(18, 149, 193, 0.25);
         }
 
         .tag-menudo {
-            background: rgba(56, 189, 248, 0.15);
-            color: #38BDF8;
-            border: 1px solid rgba(56, 189, 248, 0.35);
+            background: #E0F2FE;
+            color: #0369A1;
+            border: 1px solid #BAE6FD;
         }
 
         .tag-otros {
-            background: rgba(148, 163, 184, 0.15);
-            color: #94A3B8;
-            border: 1px solid rgba(148, 163, 184, 0.35);
+            background: #F1F5F9;
+            color: #475569;
+            border: 1px solid #CBD5E1;
         }
 
         /* ANALYSIS GRID (TAB 3) */
@@ -823,10 +923,10 @@
 
         .analysis-card {
             background: var(--bg-card);
-            border: 1px solid var(--border-card);
-            border-radius: var(--radius-md);
-            padding: 18px 20px;
-            box-shadow: var(--shadow-card);
+            border: 1px solid var(--border-ui);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--shadow-sm);
             display: flex;
             flex-direction: column;
             gap: 12px;
@@ -834,10 +934,11 @@
 
         .analysis-card h4 {
             font-size: 0.95rem;
-            font-weight: 800;
+            font-weight: 700;
             display: flex;
             align-items: center;
             gap: 8px;
+            color: var(--navy-peony);
         }
 
         .ranking-list {
@@ -847,14 +948,20 @@
         }
 
         .ranking-item {
-            background: #111A2C;
-            border: 1px solid var(--border-card);
+            background: #F8FAFC;
+            border: 1px solid var(--border-ui);
             border-radius: 8px;
-            padding: 10px 12px;
+            padding: 10px 14px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             gap: 10px;
+            transition: all 0.15s ease;
+        }
+
+        .ranking-item:hover {
+            background: #F1F5F9;
+            border-color: var(--cool-blue);
         }
 
         .ranking-info {
@@ -866,7 +973,7 @@
         .ranking-title {
             font-size: 0.82rem;
             font-weight: 700;
-            color: var(--text-primary);
+            color: var(--text-dark);
         }
 
         .ranking-meta {
@@ -875,10 +982,11 @@
         }
 
         .ranking-value {
-            font-family: 'JetBrains Mono', monospace;
+            font-family: 'Inter', monospace;
             font-size: 0.86rem;
             font-weight: 800;
             white-space: nowrap;
+            color: var(--navy-peony);
         }
 
         /* TAB FILTER BARS */
@@ -888,10 +996,10 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 12px;
-            background: #111A2C;
-            border: 1px solid var(--border-card);
-            padding: 12px 16px;
-            border-radius: var(--radius-md);
+            background: #F8FAFC;
+            border: 1px solid var(--border-ui);
+            padding: 12px 18px;
+            border-radius: 10px;
         }
 
         .tab-filter-group {
@@ -902,19 +1010,21 @@
         }
 
         .filter-select {
-            background: #0E1626;
-            border: 1px solid #2B426B;
-            color: var(--text-primary);
-            padding: 7px 12px;
-            border-radius: var(--radius-sm);
+            background: #FFFFFF;
+            border: 1px solid var(--border-ui);
+            color: var(--text-dark);
+            padding: 8px 13px;
+            border-radius: 8px;
             font-size: 0.85rem;
             font-weight: 600;
             outline: none;
             cursor: pointer;
+            transition: all 0.2s ease;
         }
 
         .filter-select:focus {
-            border-color: #10B981;
+            border-color: var(--cyan-blue);
+            box-shadow: 0 0 0 3px rgba(18, 149, 193, 0.15);
         }
 
         /* TOAST NOTIFICATION */
@@ -922,21 +1032,21 @@
             position: fixed;
             bottom: 24px;
             right: 24px;
-            background: #16243D;
-            border: 1px solid #2B426B;
-            border-radius: 10px;
-            padding: 12px 18px;
+            background: #0F172A;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 12px 20px;
             display: flex;
             align-items: center;
             gap: 10px;
-            color: var(--text-primary);
-            font-size: 0.85rem;
-            font-weight: 600;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            color: #FFFFFF;
+            font-size: 0.86rem;
+            font-weight: 500;
+            box-shadow: var(--shadow-lg);
             transform: translateY(120%);
             opacity: 0;
             transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            z-index: 9999;
+            z-index: 10000;
         }
 
         .toast-notification.show {
@@ -961,13 +1071,9 @@
                 </div>
                 <div>
                     <div class="header-title">
-                        Dashboard Cumplimiento PTC - Detalle SKU, SubPlanta y Familias
-                        <span class="badge-tag">Planta Desposte</span>
-                        <span class="badge-tag badge-tag-py">Proyectado (Py)</span>
-                    </div>
-                    <div class="header-subtitle">
-                        Análisis comparativo y profundo: Resumen Producción (<b>T_ResProd_Py</b>) vs Demanda Proyectada
-                        (<b>T_DemandaPy</b>) con desglose multicriterio por <b>SubPlanta</b>
+                        Dashboard Cumplimiento PTC - Programa de Produccion vs Proyeccion Comercial
+                        <span class="badge-tag">PTC</span>
+                        <span class="badge-tag badge-tag-py">Proyeccion Comercial</span>
                     </div>
                 </div>
             </div>
@@ -1025,7 +1131,7 @@
 
             <!-- 2. NUEVO: FILTRO POR SUBPLANTA (MULTI-SELECCIÓN DINÁMICA) -->
             <div class="filter-section-header">
-                <div class="filter-title" style="color: #F59E0B;">
+                <div class="filter-title" style="color: var(--blue-sapphire);">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
                         <path d="M3 21h18"></path>
@@ -1083,7 +1189,8 @@
 
             <div class="selection-summary-bar">
                 <span id="selectedWeeksSummary">Cargando filtros y semanas disponibles...</span>
-                <span style="font-size:0.75rem; color:var(--text-dim);">Tip: Puedes combinar selección de Años, SubPlantas y Semanas simultáneamente.</span>
+                <span style="font-size:0.75rem; color:var(--text-dim);">Tip: Puedes combinar selección de Años,
+                    SubPlantas y Semanas simultáneamente.</span>
             </div>
         </section>
 
@@ -1122,7 +1229,7 @@
                 <div class="kpi-footer">
                     <span>Tabla: T_DemandaPy</span>
                     <span class="badge-kpi"
-                        style="background:rgba(99, 102, 241, 0.15); color:#A5B4FC; border:1px solid rgba(99, 102, 241, 0.35);"
+                        style="background:#EBF3FA; color:var(--blue-sapphire); border:1px solid #CBD5E1;"
                         id="kpiDemandaBadge">Plan</span>
                 </div>
             </div>
@@ -1130,7 +1237,7 @@
             <div class="kpi-card" style="--kpi-accent: var(--status-info);">
                 <div class="kpi-top">
                     <span class="kpi-label">Diferencia Neta (Prod - Py)</span>
-                    <div class="kpi-icon" style="color:#38BDF8; background:rgba(56, 189, 248, 0.15);">
+                    <div class="kpi-icon" style="color:var(--cyan-blue); background:rgba(18, 149, 193, 0.12);">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -1148,7 +1255,7 @@
             <div class="kpi-card" style="--kpi-accent: var(--status-success);">
                 <div class="kpi-top">
                     <span class="kpi-label">% Cumplimiento Global</span>
-                    <div class="kpi-icon" style="color:#00D084; background:rgba(0, 208, 132, 0.15);">
+                    <div class="kpi-icon" style="color:#10B981; background:rgba(16, 185, 129, 0.12);">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
@@ -1166,7 +1273,7 @@
             <div class="kpi-card" style="--kpi-accent: var(--color-subplanta);">
                 <div class="kpi-top">
                     <span class="kpi-label">SubPlantas & SKUs</span>
-                    <div class="kpi-icon" style="color:#F59E0B; background:rgba(245, 158, 11, 0.15);">
+                    <div class="kpi-icon" style="color:var(--blue-sapphire); background:rgba(16, 88, 127, 0.12);">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M3 21h18"></path>
@@ -1179,7 +1286,7 @@
                 <div class="kpi-footer">
                     <span id="kpiSubPlantasBreakdown">SubPlantas: 0 activas</span>
                     <span class="badge-kpi"
-                        style="background:rgba(245, 158, 11, 0.15); color:#FCD34D;">Consolidado</span>
+                        style="background:#EBF3FA; color:var(--navy-peony); border:1px solid #CBD5E1;">Consolidado</span>
                 </div>
             </div>
         </section>
@@ -1198,15 +1305,15 @@
                                 style="width:12px; height:12px; border-radius:50%; background:#F59E0B; display:inline-block;"></span>
                             <span id="lblLegendAnterior">Tn_Anterior (Demanda)</span>
                         </span>
-                        <span class="legend-pill-item" style="color:#93C5FD;">
+                        <span class="legend-pill-item" style="color:var(--navy-peony);">
                             <span
-                                style="width:12px; height:12px; border-radius:50%; background:#1E293B; border:2px solid #FFFFFF; display:inline-block;"></span>
+                                style="width:12px; height:12px; border-radius:50%; background:var(--navy-peony); border:2px solid #FFFFFF; display:inline-block;"></span>
                             <span id="lblLegendActual">Tn_Actual (Producción)</span>
                         </span>
                     </div>
 
                     <div
-                        style="display:flex; gap:4px; align-items:center; background:#0E1626; padding:3px 6px; border-radius:6px; border:1px solid var(--border-card);">
+                        style="display:flex; gap:4px; align-items:center; background:#E2E8F0; padding:3px 4px; border-radius:8px; border:1px solid var(--border-ui);">
                         <button class="filter-quick-btn active" id="btnUnitTn"
                             style="padding:3px 8px; font-size:0.75rem;" onclick="cambiarUnidadGrafico('Tn')">Tn</button>
                         <button class="filter-quick-btn" id="btnUnitKg" style="padding:3px 8px; font-size:0.75rem;"
@@ -1290,7 +1397,8 @@
                                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                             </svg>
                             <input type="text" id="searchMatriz1" class="search-input"
-                                placeholder="Buscar semana, subplanta, familia, categoría..." oninput="filtrarMatriz1()">
+                                placeholder="Buscar semana, subplanta, familia, categoría..."
+                                oninput="filtrarMatriz1()">
                         </div>
 
                         <div style="display:flex; gap:8px;">
@@ -1309,9 +1417,10 @@
                         <table class="matrix-table" id="tbMatriz1">
                             <thead>
                                 <tr>
-                                    <th style="min-width:340px;">Jerarquía (Semana ➔ SubPlanta ➔ Familia ➔ Categoría)</th>
+                                    <th style="min-width:340px;">Jerarquía (Semana ➔ SubPlanta ➔ Familia ➔ Categoría)
+                                    </th>
                                     <th class="num-col" style="color:#10B981;">KG Producción</th>
-                                    <th class="num-col" style="color:#6366F1;">KG DemandaPy</th>
+                                    <th class="num-col">KG DemandaPy</th>
                                     <th class="num-col">Variación (kg)</th>
                                     <th class="num-col">% Variación</th>
                                     <th class="num-col">% Cumplimiento</th>
@@ -1340,7 +1449,8 @@
                                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                             </svg>
                             <input type="text" id="searchMatriz2" class="search-input"
-                                placeholder="Buscar subplanta, código, nombre, categoría, familia..." oninput="filtrarMatriz2()">
+                                placeholder="Buscar subplanta, código, nombre, categoría, familia..."
+                                oninput="filtrarMatriz2()">
                         </div>
 
                         <div style="display:flex; gap:8px; align-items:center;">
@@ -1359,9 +1469,10 @@
                         <table class="matrix-table" id="tbMatriz2">
                             <thead>
                                 <tr>
-                                    <th style="min-width:380px;">Estructura (SubPlanta ➔ Familia ➔ Categoría ➔ Código ➔ Nombre)</th>
+                                    <th style="min-width:380px;">Estructura (SubPlanta ➔ Familia ➔ Categoría ➔ Código ➔
+                                        Nombre)</th>
                                     <th class="num-col" style="color:#10B981;">KG Producción</th>
-                                    <th class="num-col" style="color:#6366F1;">KG DemandaPy</th>
+                                    <th class="num-col">KG DemandaPy</th>
                                     <th class="num-col">Variación (kg)</th>
                                     <th class="num-col">% Variación</th>
                                     <th class="num-col">% Cumplimiento</th>
@@ -1400,28 +1511,29 @@
                             <div
                                 style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border-subtle);">
                                 <span style="color:var(--text-muted);">SKUs Coincidentes (Prod y Demanda):</span>
-                                <b id="diagSkusAmbos" style="color:#00D084; font-family:'JetBrains Mono';">0</b>
+                                <b id="diagSkusAmbos" style="color:#166534; font-family:'Inter', monospace;">0</b>
                             </div>
                             <div
                                 style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border-subtle);">
                                 <span style="color:var(--text-muted);">SKUs Solo con Producción:</span>
-                                <b id="diagSkusSoloProd" style="color:#38BDF8; font-family:'JetBrains Mono';">0</b>
+                                <b id="diagSkusSoloProd"
+                                    style="color:var(--cyan-blue); font-family:'Inter', monospace;">0</b>
                             </div>
                             <div
                                 style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border-subtle);">
                                 <span style="color:var(--text-muted);">SKUs Solo con Demanda:</span>
-                                <b id="diagSkusSoloDem" style="color:#EF4444; font-family:'JetBrains Mono';">0</b>
+                                <b id="diagSkusSoloDem" style="color:#DC2626; font-family:'Inter', monospace;">0</b>
                             </div>
                             <div style="display:flex; justify-content:space-between; padding:8px 0;">
                                 <span style="color:var(--text-muted);">Tasa de Coincidencia de SKUs:</span>
                                 <b id="diagTasaCoincidencia"
-                                    style="font-family:'JetBrains Mono'; color:#A5B4FC;">0.0%</b>
+                                    style="font-family:'Inter', monospace; color:var(--navy-peony);">0.0%</b>
                             </div>
                         </div>
                     </div>
 
                     <div class="analysis-card">
-                        <h4 style="color:#00D084;">
+                        <h4 style="color:#166534;">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="m18 15-6-6-6 6"></path>
@@ -1434,7 +1546,7 @@
                     </div>
 
                     <div class="analysis-card">
-                        <h4 style="color:#EF4444;">
+                        <h4 style="color:#991B1B;">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="m6 9 6 6 6-6"></path>
@@ -1450,16 +1562,19 @@
                 <!-- DESGLOSE COMPARATIVO POR SUBPLANTA -->
                 <div class="matrix-card" style="margin-top: 16px;">
                     <div class="matrix-toolbar">
-                        <h4 style="color: #F59E0B; font-size: 0.95rem; font-weight: 800; display:flex; align-items:center; gap:8px;">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                stroke-linecap="round" stroke-linejoin="round">
+                        <h4
+                            style="color: var(--navy-peony); font-size: 0.95rem; font-weight: 700; display:flex; align-items:center; gap:8px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M3 21h18"></path>
                                 <path d="M5 21V7l8-4v18"></path>
                                 <path d="M19 21V11l-6-4"></path>
                             </svg>
                             Desglose de Desempeño por SubPlanta
                         </h4>
-                        <span id="badgeSubPlantaResumenTotal" class="badge-tag badge-tag-py">3 SubPlantas</span>
+                        <span id="badgeSubPlantaResumenTotal" class="badge-tag"
+                            style="background:#EBF3FA; color:var(--blue-sapphire); border:1px solid #CBD5E1;">3
+                            SubPlantas</span>
                     </div>
 
                     <div class="table-responsive">
@@ -1468,7 +1583,7 @@
                                 <tr>
                                     <th>SubPlanta</th>
                                     <th class="num-col" style="color:#10B981;">KG Producción</th>
-                                    <th class="num-col" style="color:#6366F1;">KG DemandaPy</th>
+                                    <th class="num-col">KG DemandaPy</th>
                                     <th class="num-col">Variación (kg)</th>
                                     <th class="num-col">% Cumplimiento</th>
                                     <th class="num-col">Total SKUs</th>
@@ -1499,7 +1614,8 @@
                                 <option value="ALL">Todas las Semanas</option>
                             </select>
 
-                            <span style="font-size:0.85rem; font-weight:700; color:#F59E0B; margin-left: 8px;">🏭 SubPlanta:</span>
+                            <span style="font-size:0.85rem; font-weight:700; color:#F59E0B; margin-left: 8px;">🏭
+                                SubPlanta:</span>
                             <select id="filterSubPlantaProd" class="filter-select"
                                 onchange="cambiarFiltroSubPlantaProd(this.value)">
                                 <option value="ALL">Todas las SubPlantas</option>
@@ -1523,18 +1639,22 @@
 
                     <!-- Gráfico de Barras por SubPlanta (Kilos) -->
                     <div class="matrix-card">
-                        <div class="chart-header" style="margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
+                        <div class="chart-header"
+                            style="margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
                             <div>
-                                <h3 style="color:#10B981; display:flex; align-items:center; gap:8px;">
-                                    <span style="width:10px; height:10px; border-radius:50%; background:#10B981;"></span>
+                                <h3 style="color:var(--navy-peony); display:flex; align-items:center; gap:8px;">
+                                    <span
+                                        style="width:10px; height:10px; border-radius:50%; background:var(--cyan-blue);"></span>
                                     Producción Real por SubPlanta (Kilos)
                                 </h3>
                                 <p style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">
-                                    Distribución en base al campo <b>SubPlanta</b> (DESPOSTE, CHULETAS, MENUDO) en <b>T_ResProd_Py</b>
+                                    Distribución en base al campo <b>SubPlanta</b> (DESPOSTE, CHULETAS, MENUDO) en
+                                    <b>T_ResProd_Py</b>
                                 </p>
                             </div>
                             <span id="badgeProdBarrasTotal" class="badge-tag"
-                                style="background:rgba(16,185,129,0.18); color:#10B981;">Total: 0 kg</span>
+                                style="background:rgba(18, 149, 193, 0.12); color:var(--blue-sapphire); border:1px solid rgba(18, 149, 193, 0.25);">Total:
+                                0 kg</span>
                         </div>
                         <div style="height:280px; position:relative;">
                             <canvas id="chartProdTipo"></canvas>
@@ -1548,20 +1668,23 @@
                                 Matriz: SubPlanta ➔ Familia ➔ Categoría ➔ CódigoCorto ➔ Nombre (Kilos)
                             </h4>
                             <span id="resumenProdTotales"
-                                style="font-size:0.82rem; color:var(--text-muted); font-family:'JetBrains Mono';">Total: 0 kg</span>
+                                style="font-size:0.82rem; color:var(--text-muted); font-family:'JetBrains Mono';">Total:
+                                0 kg</span>
                         </div>
                         <div class="table-responsive">
                             <table class="matrix-table" id="tbMatrizProd">
                                 <thead>
                                     <tr>
-                                        <th style="min-width:380px;">Estructura (SubPlanta ➔ Familia ➔ Categoría ➔ Código ➔ Nombre)</th>
-                                        <th class="num-col" style="color:#10B981;">Kilos Producidos</th>
+                                        <th style="min-width:380px;">Estructura (SubPlanta ➔ Familia ➔ Categoría ➔
+                                            Código ➔ Nombre)</th>
+                                        <th class="num-col">Kilos Producidos</th>
                                         <th class="num-col">% Participación</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tbodyMatrizProd">
                                     <tr>
-                                        <td colspan="3" style="text-align:center; padding:30px; color:var(--text-muted);">
+                                        <td colspan="3"
+                                            style="text-align:center; padding:30px; color:var(--text-muted);">
                                             Cargando matriz de producción...
                                         </td>
                                     </tr>
@@ -1584,7 +1707,8 @@
                                 <option value="ALL">Todas las Semanas</option>
                             </select>
 
-                            <span style="font-size:0.85rem; font-weight:700; color:#F59E0B; margin-left: 8px;">🏭 SubPlanta:</span>
+                            <span style="font-size:0.85rem; font-weight:700; color:#F59E0B; margin-left: 8px;">🏭
+                                SubPlanta:</span>
                             <select id="filterSubPlantaDem" class="filter-select"
                                 onchange="cambiarFiltroSubPlantaDem(this.value)">
                                 <option value="ALL">Todas las SubPlantas</option>
@@ -1609,18 +1733,22 @@
 
                     <!-- Gráfico de Barras por Origen / SubPlanta (Kilos) -->
                     <div class="matrix-card">
-                        <div class="chart-header" style="margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
+                        <div class="chart-header"
+                            style="margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
                             <div>
-                                <h3 style="color:#6366F1; display:flex; align-items:center; gap:8px;">
-                                    <span style="width:10px; height:10px; border-radius:50%; background:#6366F1;"></span>
+                                <h3 style="color:var(--navy-peony); display:flex; align-items:center; gap:8px;">
+                                    <span
+                                        style="width:10px; height:10px; border-radius:50%; background:var(--blue-sapphire);"></span>
                                     Demanda Proyectada por Canal / Origen (Kilos)
                                 </h3>
                                 <p style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">
-                                    Distribución en base al campo <b>Origen</b> (COMERCIAL, EMBUTIDOS, WESTPHALIA) en <b>T_DemandaPy</b>
+                                    Distribución en base al campo <b>Origen</b> (COMERCIAL, EMBUTIDOS, WESTPHALIA) en
+                                    <b>T_DemandaPy</b>
                                 </p>
                             </div>
                             <span id="badgeDemBarrasTotal" class="badge-tag"
-                                style="background:rgba(99,102,241,0.18); color:#A5B4FC;">Total: 0 kg</span>
+                                style="background:rgba(16, 88, 127, 0.12); color:var(--blue-sapphire); border:1px solid rgba(16, 88, 127, 0.25);">Total:
+                                0 kg</span>
                         </div>
                         <div style="height:280px; position:relative;">
                             <canvas id="chartDemOrigen"></canvas>
@@ -1634,20 +1762,23 @@
                                 Matriz: Origen ➔ SubPlanta ➔ Familia ➔ Categoría ➔ CódigoCorto ➔ Nombre (Kilos)
                             </h4>
                             <span id="resumenDemTotales"
-                                style="font-size:0.82rem; color:var(--text-muted); font-family:'JetBrains Mono';">Total: 0 kg</span>
+                                style="font-size:0.82rem; color:var(--text-muted); font-family:'JetBrains Mono';">Total:
+                                0 kg</span>
                         </div>
                         <div class="table-responsive">
                             <table class="matrix-table" id="tbMatrizDem">
                                 <thead>
                                     <tr>
-                                        <th style="min-width:420px;">Estructura (Origen ➔ SubPlanta ➔ Familia ➔ Categoría ➔ Código ➔ Nombre)</th>
-                                        <th class="num-col" style="color:#6366F1;">Kilos Demandados</th>
+                                        <th style="min-width:420px;">Estructura (Origen ➔ SubPlanta ➔ Familia ➔
+                                            Categoría ➔ Código ➔ Nombre)</th>
+                                        <th class="num-col">Kilos Demandados</th>
                                         <th class="num-col">% Participación</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tbodyMatrizDem">
                                     <tr>
-                                        <td colspan="3" style="text-align:center; padding:30px; color:var(--text-muted);">
+                                        <td colspan="3"
+                                            style="text-align:center; padding:30px; color:var(--text-muted);">
                                             Cargando matriz de demanda...
                                         </td>
                                     </tr>
@@ -1728,12 +1859,12 @@
             if (typeof ChartDataLabels !== 'undefined') {
                 Chart.register(ChartDataLabels);
             }
-            Chart.defaults.color = '#94A3B8';
+            Chart.defaults.color = '#64748B';
             Chart.defaults.font.family = "'Inter', sans-serif";
-            Chart.defaults.plugins.tooltip.backgroundColor = '#0B1322';
+            Chart.defaults.plugins.tooltip.backgroundColor = '#0F172A';
             Chart.defaults.plugins.tooltip.titleColor = '#FFFFFF';
             Chart.defaults.plugins.tooltip.bodyColor = '#CBD5E1';
-            Chart.defaults.plugins.tooltip.borderColor = '#20314E';
+            Chart.defaults.plugins.tooltip.borderColor = '#334155';
             Chart.defaults.plugins.tooltip.borderWidth = 1;
             Chart.defaults.plugins.tooltip.padding = 10;
         }
@@ -2162,7 +2293,7 @@
                 ? `Todas las Semanas (${selectedWeeks.size})`
                 : `${selectedWeeks.size} semana(s)`;
 
-            summaryEl.innerHTML = `Mostrando: Años <b>[${aniosList}]</b> • SubPlantas: <b style="color:#F59E0B;">[${subPlantasList}]</b> • <b>${semTxt}</b>`;
+            summaryEl.innerHTML = `Mostrando: Años <b>[${aniosList}]</b> • SubPlantas: <b style="color:var(--blue-sapphire);">[${subPlantasList}]</b> • <b>${semTxt}</b>`;
 
             // Filtrado integral por: Año + Semana + SubPlanta
             const filteredData = resumenData.filter(d => {
@@ -2303,9 +2434,9 @@
                         {
                             label: `${unidadGrafico}_Actual (Producción)`,
                             data: dataProd,
-                            borderColor: '#1E293B',
+                            borderColor: '#223A5E',
                             borderWidth: 3.2,
-                            pointBackgroundColor: '#1E293B',
+                            pointBackgroundColor: '#223A5E',
                             pointBorderColor: '#FFFFFF',
                             pointBorderWidth: 2,
                             pointRadius: 4.5,
@@ -2373,19 +2504,19 @@
                                 const idx = context.dataIndex;
                                 const prod = context.dataset.data[idx];
                                 const dem = context.chart.data.datasets[0].data[idx];
-                                return prod >= dem ? '#0D9488' : '#E11D48';
+                                return prod >= dem ? '#166534' : '#991B1B';
                             },
                             backgroundColor: context => {
                                 const idx = context.dataIndex;
                                 const prod = context.dataset.data[idx];
                                 const dem = context.chart.data.datasets[0].data[idx];
-                                return prod >= dem ? 'rgba(240, 253, 250, 0.95)' : 'rgba(254, 242, 242, 0.95)';
+                                return prod >= dem ? 'rgba(220, 252, 231, 0.95)' : 'rgba(254, 226, 226, 0.95)';
                             },
                             borderColor: context => {
                                 const idx = context.dataIndex;
                                 const prod = context.dataset.data[idx];
                                 const dem = context.chart.data.datasets[0].data[idx];
-                                return prod >= dem ? '#14B8A6' : '#F87171';
+                                return prod >= dem ? '#86EFAC' : '#FCA5A5';
                             },
                             borderWidth: 1,
                             borderRadius: 4,
@@ -2402,7 +2533,7 @@
                     },
                     scales: {
                         x: {
-                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            grid: { color: '#F1F5F9' },
                             ticks: { color: '#64748B', font: { size: 10.5, weight: '700' } },
                             title: {
                                 display: true,
@@ -2414,7 +2545,7 @@
                         y: {
                             type: 'linear',
                             position: 'left',
-                            grid: { color: 'rgba(255, 255, 255, 0.06)' },
+                            grid: { color: '#F1F5F9' },
                             ticks: {
                                 color: '#94A3B8',
                                 font: { size: 10.5, weight: '600' },
@@ -2534,8 +2665,8 @@
                         <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--color-prod); margin-right:8px;"></span>
                         <b>Semana ${sNode.nSemana || semKey}</b> (${sNode.anio || ''})
                     </td>
-                    <td class="num-cell" style="color:var(--color-prod);"><b>${formatearNumero(sNode.kilosProd)}</b></td>
-                    <td class="num-cell" style="color:var(--color-demanda);"><b>${formatearNumero(sNode.kilosPy)}</b></td>
+                    <td class="num-cell" style="color:#FFFFFF;"><b>${formatearNumero(sNode.kilosProd)}</b></td>
+                    <td class="num-cell" style="color:var(--cool-blue);"><b>${formatearNumero(sNode.kilosPy)}</b></td>
                     <td class="num-cell ${diffSem >= 0 ? 'val-positive' : 'val-negative'}"><b>${diffSem >= 0 ? '+' : ''}${formatearNumero(diffSem)}</b></td>
                     <td class="num-cell ${diffSem >= 0 ? 'val-positive' : 'val-negative'}"><b>${diffSem >= 0 ? '+' : ''}${pctVarSem.toFixed(1)}%</b></td>
                     <td class="num-cell"><span class="badge-kpi ${pctCumpSem >= 100 ? 'badge-success' : 'badge-danger'}">${pctCumpSem.toFixed(1)}%</span></td>
@@ -2563,8 +2694,8 @@
                         }
 
                         const spClass = spKey.includes('DESPOSTE') ? 'tag-desposte'
-                                      : (spKey.includes('CHULETA') ? 'tag-chuletas'
-                                      : (spKey.includes('MENUDO') ? 'tag-menudo' : 'tag-otros'));
+                            : (spKey.includes('CHULETA') ? 'tag-chuletas'
+                                : (spKey.includes('MENUDO') ? 'tag-menudo' : 'tag-otros'));
 
                         const trSp = document.createElement('tr');
                         trSp.className = 'level-subplanta';
@@ -2573,8 +2704,8 @@
                                 <span class="toggle-icon" onclick="toggleNodeMatriz1('${spId}')">${isSpExpanded ? '−' : '+'}</span>
                                 <span class="tag-subplanta ${spClass}">${spKey}</span>
                             </td>
-                            <td class="num-cell" style="color:var(--color-prod); font-weight:700;">${formatearNumero(spNode.kilosProd)}</td>
-                            <td class="num-cell" style="color:var(--color-demanda); font-weight:700;">${formatearNumero(spNode.kilosPy)}</td>
+                            <td class="num-cell" style="color:var(--navy-peony); font-weight:700;">${formatearNumero(spNode.kilosProd)}</td>
+                            <td class="num-cell" style="color:var(--blue-sapphire); font-weight:700;">${formatearNumero(spNode.kilosPy)}</td>
                             <td class="num-cell ${diffSp >= 0 ? 'val-positive' : 'val-negative'} font-weight:700;">${diffSp >= 0 ? '+' : ''}${formatearNumero(diffSp)}</td>
                             <td class="num-cell ${diffSp >= 0 ? 'val-positive' : 'val-negative'} font-weight:700;">${diffSp >= 0 ? '+' : ''}${pctVarSp.toFixed(1)}%</td>
                             <td class="num-cell"><span class="badge-kpi ${pctCumpSp >= 100 ? 'badge-success' : 'badge-danger'}">${pctCumpSp.toFixed(1)}%</span></td>
@@ -2604,7 +2735,7 @@
                                 trFam.innerHTML = `
                                     <td style="padding-left: 54px;">
                                         <span class="toggle-icon" onclick="toggleNodeMatriz1('${famId}')">${isFamExpanded ? '−' : '+'}</span>
-                                        <span style="color:#A5B4FC; font-weight:700;">${famKey}</span>
+                                        <span style="color:var(--navy-peony); font-weight:700;">${famKey}</span>
                                     </td>
                                     <td class="num-cell">${formatearNumero(fNode.kilosProd)}</td>
                                     <td class="num-cell">${formatearNumero(fNode.kilosPy)}</td>
@@ -2779,8 +2910,8 @@
                 const pctCumpSp = spNode.kilosPy > 0 ? ((spNode.kilosProd / spNode.kilosPy) * 100) : 0;
 
                 const spClass = spKey.includes('DESPOSTE') ? 'tag-desposte'
-                              : (spKey.includes('CHULETA') ? 'tag-chuletas'
-                              : (spKey.includes('MENUDO') ? 'tag-menudo' : 'tag-otros'));
+                    : (spKey.includes('CHULETA') ? 'tag-chuletas'
+                        : (spKey.includes('MENUDO') ? 'tag-menudo' : 'tag-otros'));
 
                 const trSp = document.createElement('tr');
                 trSp.className = 'level-1';
@@ -2789,8 +2920,8 @@
                         <span class="toggle-icon" onclick="toggleNodeMatriz2('${spId}')">${isSpExpanded ? '−' : '+'}</span>
                         <span class="tag-subplanta ${spClass}" style="font-size:0.82rem; padding:3px 10px;">${spKey}</span>
                     </td>
-                    <td class="num-cell" style="color:var(--color-prod);"><b>${formatearNumero(spNode.kilosProd)}</b></td>
-                    <td class="num-cell" style="color:var(--color-demanda);"><b>${formatearNumero(spNode.kilosPy)}</b></td>
+                    <td class="num-cell" style="color:#FFFFFF;"><b>${formatearNumero(spNode.kilosProd)}</b></td>
+                    <td class="num-cell" style="color:var(--cool-blue);"><b>${formatearNumero(spNode.kilosPy)}</b></td>
                     <td class="num-cell ${diffSp >= 0 ? 'val-positive' : 'val-negative'}"><b>${diffSp >= 0 ? '+' : ''}${formatearNumero(diffSp)}</b></td>
                     <td class="num-cell ${diffSp >= 0 ? 'val-positive' : 'val-negative'}"><b>${diffSp >= 0 ? '+' : ''}${pctVarSp.toFixed(1)}%</b></td>
                     <td class="num-cell"><span class="badge-kpi ${pctCumpSp >= 100 ? 'badge-success' : 'badge-danger'}">${pctCumpSp.toFixed(1)}%</span></td>
@@ -2824,7 +2955,7 @@
                         trFam.innerHTML = `
                             <td style="padding-left: 32px;">
                                 <span class="toggle-icon" onclick="toggleNodeMatriz2('${famId}')">${isFamExpanded ? '−' : '+'}</span>
-                                <span style="color:#A5B4FC; font-weight:700;">${famKey}</span>
+                                <span style="color:var(--navy-peony); font-weight:700;">${famKey}</span>
                             </td>
                             <td class="num-cell">${formatearNumero(fNode.kilosProd)}</td>
                             <td class="num-cell">${formatearNumero(fNode.kilosPy)}</td>
@@ -2859,7 +2990,7 @@
                                 trCat.innerHTML = `
                                     <td style="padding-left: 58px;">
                                         <span class="toggle-icon" onclick="toggleNodeMatriz2('${catId}')">${isCatExpanded ? '−' : '+'}</span>
-                                        <span style="color:#38BDF8; font-weight:700;">${catKey}</span>
+                                        <span style="color:var(--blue-sapphire); font-weight:700;">${catKey}</span>
                                     </td>
                                     <td class="num-cell">${formatearNumero(cNode.kilosProd)}</td>
                                     <td class="num-cell">${formatearNumero(cNode.kilosPy)}</td>
@@ -2894,7 +3025,7 @@
                                         trArt.innerHTML = `
                                             <td style="padding-left: 86px;">
                                                 <span style="color:var(--text-muted); margin-right:8px;">↳</span>
-                                                <b style="color:var(--text-primary); font-family:'JetBrains Mono'; margin-right:8px;">[${aNode.codigoCorto}]</b>
+                                                <b style="color:var(--text-dark); font-family:'Inter', monospace; margin-right:8px;">[${aNode.codigoCorto}]</b>
                                                 <span>${aNode.nombre || 'SIN DESCRIPCION'}</span>
                                                 ${aNode.producto ? `<span style="font-size:0.75rem; color:var(--text-dim); margin-left:6px;">(${aNode.producto})</span>` : ''}
                                             </td>
@@ -2988,7 +3119,7 @@
                     el.innerHTML = `
                         <div class="ranking-info">
                             <span class="ranking-title"><b>#${idx + 1}</b> [${item.codigoCorto}] ${item.nombre}</span>
-                            <span class="ranking-meta"><b style="color:#F59E0B;">${item.subPlanta}</b> • Sem ${item.semana} • ${item.familia} • Prod: ${formatearNumero(item.kilosProd)} kg | Py: ${formatearNumero(item.kilosPy)} kg</span>
+                            <span class="ranking-meta"><b style="color:var(--blue-sapphire);">${item.subPlanta}</b> • Sem ${item.semana} • ${item.familia} • Prod: ${formatearNumero(item.kilosProd)} kg | Py: ${formatearNumero(item.kilosPy)} kg</span>
                         </div>
                         <div class="ranking-value val-positive">+${formatearNumero(item.diferencia)} kg</div>
                     `;
@@ -3014,7 +3145,7 @@
                     el.innerHTML = `
                         <div class="ranking-info">
                             <span class="ranking-title"><b>#${idx + 1}</b> [${item.codigoCorto}] ${item.nombre}</span>
-                            <span class="ranking-meta"><b style="color:#F59E0B;">${item.subPlanta}</b> • Sem ${item.semana} • ${item.familia} • Py: ${formatearNumero(item.kilosPy)} kg | Prod: ${formatearNumero(item.kilosProd)} kg</span>
+                            <span class="ranking-meta"><b style="color:var(--blue-sapphire);">${item.subPlanta}</b> • Sem ${item.semana} • ${item.familia} • Py: ${formatearNumero(item.kilosPy)} kg | Prod: ${formatearNumero(item.kilosProd)} kg</span>
                         </div>
                         <div class="ranking-value val-negative">${formatearNumero(item.diferencia)} kg</div>
                     `;
@@ -3060,14 +3191,14 @@
                 const diff = item.kilosProd - item.kilosPy;
                 const pctCump = item.kilosPy > 0 ? (item.kilosProd / item.kilosPy) * 100 : 0;
                 const spClass = item.subPlanta.includes('DESPOSTE') ? 'tag-desposte'
-                              : (item.subPlanta.includes('CHULETA') ? 'tag-chuletas'
-                              : (item.subPlanta.includes('MENUDO') ? 'tag-menudo' : 'tag-otros'));
+                    : (item.subPlanta.includes('CHULETA') ? 'tag-chuletas'
+                        : (item.subPlanta.includes('MENUDO') ? 'tag-menudo' : 'tag-otros'));
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td><span class="tag-subplanta ${spClass}">${item.subPlanta}</span></td>
-                    <td class="num-cell" style="color:#10B981; font-weight:700;">${formatearNumero(item.kilosProd)}</td>
-                    <td class="num-cell" style="color:#6366F1; font-weight:700;">${formatearNumero(item.kilosPy)}</td>
+                    <td class="num-cell" style="color:var(--navy-peony); font-weight:700;">${formatearNumero(item.kilosProd)}</td>
+                    <td class="num-cell" style="color:var(--blue-sapphire); font-weight:700;">${formatearNumero(item.kilosPy)}</td>
                     <td class="num-cell ${diff >= 0 ? 'val-positive' : 'val-negative'}" font-weight:700;">${diff >= 0 ? '+' : ''}${formatearNumero(diff)}</td>
                     <td class="num-cell"><span class="badge-kpi ${pctCump >= 100 ? 'badge-success' : 'badge-danger'}">${pctCump.toFixed(1)}%</span></td>
                     <td class="num-cell">${item.skus.size} SKUs</td>
@@ -3184,7 +3315,7 @@
             const dataKilos = barras.map(b => b.kilos);
 
             const colores = [
-                '#10B981', '#EC4899', '#38BDF8', '#F59E0B', '#8B5CF6', '#06B6D4'
+                '#1295C1', '#223A5E', '#007D7E', '#43928E', '#4E6E81', '#10587F'
             ];
 
             chartProdTipoInstance = new Chart(ctx.getContext('2d'), {
@@ -3230,17 +3361,17 @@
                     },
                     scales: {
                         x: {
-                            grid: { color: 'rgba(255,255,255,0.04)' },
-                            ticks: { color: '#CBD5E1', font: { size: 11, weight: '700' } }
+                            grid: { color: '#F1F5F9' },
+                            ticks: { color: '#475569', font: { size: 11, weight: '600' } }
                         },
                         y: {
-                            grid: { color: 'rgba(255,255,255,0.06)' },
+                            grid: { color: '#F1F5F9' },
                             ticks: {
                                 color: '#94A3B8',
                                 font: { size: 10 },
                                 callback: val => (val / 1000).toFixed(0) + 'k'
                             },
-                            title: { display: true, text: 'Kilos (kg)', color: '#94A3B8', font: { size: 11, weight: '600' } }
+                            title: { display: true, text: 'Kilos (kg)', color: '#64748B', font: { size: 11, weight: '600' } }
                         }
                     }
                 }
@@ -3277,8 +3408,8 @@
 
                 const pctTotal = totalGlobalKilos > 0 ? ((spNode.kilos / totalGlobalKilos) * 100).toFixed(1) : '0.0';
                 const spClass = spKey.includes('DESPOSTE') ? 'tag-desposte'
-                              : (spKey.includes('CHULETA') ? 'tag-chuletas'
-                              : (spKey.includes('MENUDO') ? 'tag-menudo' : 'tag-otros'));
+                    : (spKey.includes('CHULETA') ? 'tag-chuletas'
+                        : (spKey.includes('MENUDO') ? 'tag-menudo' : 'tag-otros'));
 
                 const trSp = document.createElement('tr');
                 trSp.className = 'level-1';
@@ -3287,7 +3418,7 @@
                         <span class="toggle-icon" onclick="toggleNodeMatrizProd('${spId}')">${isSpExpanded ? '−' : '+'}</span>
                         <span class="tag-subplanta ${spClass}">${spKey}</span>
                     </td>
-                    <td class="num-cell" style="color:#10B981;"><b>${formatearNumero(spNode.kilos)}</b></td>
+                    <td class="num-cell" style="color:#FFFFFF;"><b>${formatearNumero(spNode.kilos)}</b></td>
                     <td class="num-cell"><span class="badge-kpi badge-success">${pctTotal}%</span></td>
                 `;
                 tbody.appendChild(trSp);
@@ -3304,9 +3435,9 @@
                         trFam.innerHTML = `
                             <td style="padding-left: 36px;">
                                 <span class="toggle-icon" onclick="toggleNodeMatrizProd('${famId}')">${isFamExpanded ? '−' : '+'}</span>
-                                <span style="color:#A5B4FC; font-weight:700;">${fNode.familia}</span>
+                                <span style="color:var(--navy-peony); font-weight:700;">${fNode.familia}</span>
                             </td>
-                            <td class="num-cell" style="color:#10B981;">${formatearNumero(fNode.kilos)}</td>
+                            <td class="num-cell" style="color:var(--navy-peony); font-weight:600;">${formatearNumero(fNode.kilos)}</td>
                             <td class="num-cell" style="color:var(--text-dim);">${pctFam}%</td>
                         `;
                         tbody.appendChild(trFam);
@@ -3322,7 +3453,7 @@
                                 trCat.innerHTML = `
                                     <td style="padding-left: 64px;">
                                         <span class="toggle-icon" onclick="toggleNodeMatrizProd('${catId}')">${isCatExpanded ? '−' : '+'}</span>
-                                        <span style="color:#38BDF8;">${cNode.categoria}</span>
+                                        <span style="color:var(--text-dark);">${cNode.categoria}</span>
                                     </td>
                                     <td class="num-cell">${formatearNumero(cNode.kilos)}</td>
                                     <td class="num-cell" style="color:var(--text-dim);">-</td>
@@ -3337,10 +3468,10 @@
                                         trArt.innerHTML = `
                                             <td style="padding-left: 92px;">
                                                 <span style="color:var(--text-muted); margin-right:6px;">↳</span>
-                                                <b style="color:var(--text-primary); font-family:'JetBrains Mono'; margin-right:8px;">[${aNode.codigoCorto}]</b>
+                                                <b style="color:var(--text-dark); font-family:'Inter', monospace; margin-right:8px;">[${aNode.codigoCorto}]</b>
                                                 <span>${aNode.nombre || aNode.producto || ''}</span>
                                             </td>
-                                            <td class="num-cell" style="color:#10B981;">${formatearNumero(aNode.kilos)}</td>
+                                            <td class="num-cell" style="color:var(--teal-blue);">${formatearNumero(aNode.kilos)}</td>
                                             <td class="num-cell" style="color:var(--text-dim);">-</td>
                                         `;
                                         tbody.appendChild(trArt);
@@ -3438,7 +3569,7 @@
             const dataKilos = barras.map(b => b.kilos);
 
             const colores = [
-                '#6366F1', '#38BDF8', '#818CF8', '#A855F7', '#EC4899', '#10B981'
+                '#10587F', '#1295C1', '#223A5E', '#4E6E81', '#43928E', '#007D7E'
             ];
 
             chartDemOrigenInstance = new Chart(ctx.getContext('2d'), {
@@ -3484,17 +3615,17 @@
                     },
                     scales: {
                         x: {
-                            grid: { color: 'rgba(255,255,255,0.04)' },
-                            ticks: { color: '#CBD5E1', font: { size: 11, weight: '700' } }
+                            grid: { color: '#F1F5F9' },
+                            ticks: { color: '#475569', font: { size: 11, weight: '600' } }
                         },
                         y: {
-                            grid: { color: 'rgba(255,255,255,0.06)' },
+                            grid: { color: '#F1F5F9' },
                             ticks: {
                                 color: '#94A3B8',
                                 font: { size: 10 },
                                 callback: val => (val / 1000).toFixed(0) + 'k'
                             },
-                            title: { display: true, text: 'Kilos (kg)', color: '#94A3B8', font: { size: 11, weight: '600' } }
+                            title: { display: true, text: 'Kilos (kg)', color: '#64748B', font: { size: 11, weight: '600' } }
                         }
                     }
                 }
@@ -3534,11 +3665,11 @@
                 trOrig.innerHTML = `
                     <td>
                         <span class="toggle-icon" onclick="toggleNodeMatrizDem('${origId}')">${isOrigExpanded ? '−' : '+'}</span>
-                        <span style="display:inline-block; width:10px; height:10px; border-radius:3px; background:#6366F1; margin-right:8px;"></span>
-                        <b style="text-transform:uppercase; color:#A5B4FC;">${oNode.origen}</b>
+                        <span style="display:inline-block; width:10px; height:10px; border-radius:3px; background:var(--cyan-blue); margin-right:8px;"></span>
+                        <b style="text-transform:uppercase; color:#FFFFFF;">${oNode.origen}</b>
                     </td>
-                    <td class="num-cell" style="color:#6366F1;"><b>${formatearNumero(oNode.kilos)}</b></td>
-                    <td class="num-cell"><span class="badge-kpi" style="background:rgba(99,102,241,0.18); color:#A5B4FC;">${pctOrig}%</span></td>
+                    <td class="num-cell" style="color:var(--cool-blue);"><b>${formatearNumero(oNode.kilos)}</b></td>
+                    <td class="num-cell"><span class="badge-kpi" style="background:rgba(255,255,255,0.2); color:#FFFFFF;">${pctOrig}%</span></td>
                 `;
                 tbody.appendChild(trOrig);
                 filas++;
@@ -3549,8 +3680,8 @@
                         const isSpExpanded = expandedNodesMatrizDem.has(spId) || searchTerm.length > 0;
 
                         const spClass = spNode.subPlanta.includes('DESPOSTE') ? 'tag-desposte'
-                                      : (spNode.subPlanta.includes('CHULETA') ? 'tag-chuletas'
-                                      : (spNode.subPlanta.includes('MENUDO') ? 'tag-menudo' : 'tag-otros'));
+                            : (spNode.subPlanta.includes('CHULETA') ? 'tag-chuletas'
+                                : (spNode.subPlanta.includes('MENUDO') ? 'tag-menudo' : 'tag-otros'));
 
                         const trSp = document.createElement('tr');
                         trSp.className = 'level-subplanta';
@@ -3559,7 +3690,7 @@
                                 <span class="toggle-icon" onclick="toggleNodeMatrizDem('${spId}')">${isSpExpanded ? '−' : '+'}</span>
                                 <span class="tag-subplanta ${spClass}">${spNode.subPlanta}</span>
                             </td>
-                            <td class="num-cell" style="color:#6366F1; font-weight:700;">${formatearNumero(spNode.kilos)}</td>
+                            <td class="num-cell" style="color:var(--blue-sapphire); font-weight:700;">${formatearNumero(spNode.kilos)}</td>
                             <td class="num-cell" style="color:var(--text-dim);">-</td>
                         `;
                         tbody.appendChild(trSp);
@@ -3575,9 +3706,9 @@
                                 trFam.innerHTML = `
                                     <td style="padding-left: 54px;">
                                         <span class="toggle-icon" onclick="toggleNodeMatrizDem('${famId}')">${isFamExpanded ? '−' : '+'}</span>
-                                        <span style="color:#38BDF8; font-weight:700;">${fNode.familia}</span>
+                                        <span style="color:var(--navy-peony); font-weight:700;">${fNode.familia}</span>
                                     </td>
-                                    <td class="num-cell" style="color:#38BDF8;">${formatearNumero(fNode.kilos)}</td>
+                                    <td class="num-cell" style="color:var(--navy-peony); font-weight:600;">${formatearNumero(fNode.kilos)}</td>
                                     <td class="num-cell" style="color:var(--text-dim);">-</td>
                                 `;
                                 tbody.appendChild(trFam);
@@ -3593,7 +3724,7 @@
                                         trCat.innerHTML = `
                                             <td style="padding-left: 80px;">
                                                 <span class="toggle-icon" onclick="toggleNodeMatrizDem('${catId}')">${isCatExpanded ? '−' : '+'}</span>
-                                                <span style="color:var(--text-secondary);">${cNode.categoria}</span>
+                                                <span style="color:var(--text-dark);">${cNode.categoria}</span>
                                             </td>
                                             <td class="num-cell">${formatearNumero(cNode.kilos)}</td>
                                             <td class="num-cell" style="color:var(--text-dim);">-</td>
@@ -3608,10 +3739,10 @@
                                                 trArt.innerHTML = `
                                                     <td style="padding-left: 108px;">
                                                         <span style="color:var(--text-muted); margin-right:6px;">↳</span>
-                                                        <b style="color:var(--text-primary); font-family:'JetBrains Mono'; margin-right:8px;">[${aNode.codigoCorto}]</b>
+                                                        <b style="color:var(--text-dark); font-family:'Inter', monospace; margin-right:8px;">[${aNode.codigoCorto}]</b>
                                                         <span>${aNode.nombre || aNode.producto || ''}</span>
                                                     </td>
-                                                    <td class="num-cell" style="color:#6366F1;">${formatearNumero(aNode.kilos)}</td>
+                                                    <td class="num-cell" style="color:var(--blue-sapphire);">${formatearNumero(aNode.kilos)}</td>
                                                     <td class="num-cell" style="color:var(--text-dim);">-</td>
                                                 `;
                                                 tbody.appendChild(trArt);
