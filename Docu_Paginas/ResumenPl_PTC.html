@@ -1,0 +1,1476 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Cumplimiento PTC - Real vs Planificación</title>
+
+    <!-- Fuentes e Iconos Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+
+    <!-- Chart.js y Plugins -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+    <!-- SheetJS para exportar a Excel (.xlsx) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <style>
+        :root {
+            --navy-peony: #223A5E;
+            --cyan-blue: #1295C1;
+            --cool-blue: #9DBED5;
+            --blue-sapphire: #10587F;
+            --foggy-dew: #CBCFCB;
+            --lagoon: #43928E;
+            --teal-blue: #007D7E;
+            --aegean-blue: #4E6E81;
+            --semana-custom: rgb(59, 102, 128);
+
+            --bg-canvas: #F1F5F9;
+            --bg-card: #FFFFFF;
+            --border-ui: #E2E8F0;
+            --text-dark: #0F172A;
+            --text-muted: #64748B;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+
+            --radius-sm: 8px;
+            --radius-md: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-canvas);
+            color: var(--text-dark);
+            padding: 20px 24px;
+            min-height: 100vh;
+        }
+
+        .dashboard-container {
+            max-width: 1780px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+        }
+
+        /* HEADER */
+        .dashboard-header {
+            background: linear-gradient(135deg, var(--navy-peony) 0%, var(--blue-sapphire) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 22px 28px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+            color: #FFFFFF;
+        }
+
+        .dashboard-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--cyan-blue), var(--lagoon), var(--teal-blue));
+        }
+
+        .header-title-group {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #FFFFFF;
+            flex-shrink: 0;
+        }
+
+        .header-title {
+            font-size: 1.45rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: #FFFFFF;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .badge-tag {
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.18);
+            color: #FFFFFF;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .header-subtitle {
+            font-size: 0.86rem;
+            color: var(--cool-blue);
+            margin-top: 4px;
+            font-weight: 400;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 0.8rem;
+            padding: 6px 14px;
+            border-radius: 9999px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(8px);
+            color: #FFFFFF;
+            font-weight: 600;
+        }
+
+        .status-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background-color: #94A3B8;
+            display: inline-block;
+        }
+
+        .status-dot.online {
+            background-color: #10B981;
+            box-shadow: 0 0 8px #10B981;
+        }
+
+        .status-dot.loading {
+            background-color: #F59E0B;
+            animation: pulse 1s infinite alternate;
+        }
+
+        .status-dot.error {
+            background-color: #EF4444;
+        }
+
+        @keyframes pulse {
+            from {
+                opacity: 0.4;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 0.84rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid var(--border-ui);
+            background: #FFFFFF;
+            color: var(--navy-peony);
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            background: #F1F5F9;
+            border-color: var(--cyan-blue);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--cyan-blue) 0%, var(--blue-sapphire) 100%);
+            border: none;
+            color: #FFFFFF;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--blue-sapphire) 0%, var(--navy-peony) 100%);
+            color: #FFFFFF;
+        }
+
+        .btn-excel {
+            background: #F0FDF4;
+            border: 1px solid #86EFAC;
+            color: #166534;
+            font-weight: 700;
+        }
+
+        .btn-excel:hover {
+            background: #166534;
+            border-color: #166534;
+            color: #FFFFFF;
+        }
+
+        /* CARD GENERAL */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-ui);
+            border-radius: 12px;
+            padding: 20px 24px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* FILTROS SECTION */
+        .filter-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .filter-title {
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: var(--navy-peony);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: -0.01em;
+        }
+
+        .filter-quick-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .filter-quick-btn {
+            background: #F8FAFC;
+            border: 1px solid var(--border-ui);
+            color: var(--text-muted);
+            padding: 6px 13px;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .filter-quick-btn:hover {
+            color: var(--text-dark);
+            background: #EEF2F6;
+        }
+
+        .filter-quick-btn.active {
+            background: var(--navy-peony);
+            border-color: var(--navy-peony);
+            color: #FFFFFF;
+        }
+
+        .filter-quick-btn.active-subplanta {
+            background: var(--blue-sapphire);
+            border-color: var(--blue-sapphire);
+            color: #FFFFFF;
+        }
+
+        .filter-quick-btn.active-semana {
+            background: var(--semana-custom);
+            border-color: var(--semana-custom);
+            color: #FFFFFF;
+        }
+
+        .years-pills-container,
+        .subplanta-pills-container,
+        .weeks-pills-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            max-height: 180px;
+            overflow-y: auto;
+            padding: 4px 2px;
+        }
+
+        .year-pill,
+        .subplanta-pill,
+        .week-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            background: #FFFFFF;
+            border: 1px solid var(--border-ui);
+            color: var(--text-dark);
+            transition: all 0.15s ease;
+            user-select: none;
+        }
+
+        .year-pill:hover,
+        .subplanta-pill:hover {
+            border-color: var(--cool-blue);
+            background: #F8FAFC;
+        }
+
+        .year-pill.selected {
+            background: rgba(18, 149, 193, 0.12);
+            border-color: var(--cyan-blue);
+            color: var(--blue-sapphire);
+            font-weight: 700;
+        }
+
+        .subplanta-pill.selected {
+            background: #EBF3FA;
+            border-color: var(--blue-sapphire);
+            color: var(--navy-peony);
+            font-weight: 700;
+        }
+
+        /* CONFIGURACIÓN EXACTA PARA BOTONES DE SEMANA: rgb(59,102,128) */
+        .week-pill:hover {
+            border-color: var(--semana-custom);
+            background: #F8FAFC;
+            color: var(--semana-custom);
+        }
+
+        .week-pill.selected {
+            background: var(--semana-custom) !important;
+            border-color: rgb(45, 78, 98) !important;
+            color: #FFFFFF !important;
+            font-weight: 700;
+            box-shadow: 0 2px 6px rgba(59, 102, 128, 0.35);
+        }
+
+        .pill-badge-count {
+            background: #E2E8F0;
+            font-size: 0.72rem;
+            padding: 2px 7px;
+            border-radius: 12px;
+            color: var(--text-muted);
+            font-family: monospace;
+        }
+
+        .week-pill.selected .pill-badge-count {
+            background: rgba(255, 255, 255, 0.25);
+            color: #FFFFFF;
+        }
+
+        .selection-summary-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px solid var(--border-ui);
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .selection-summary-bar b {
+            color: var(--navy-peony);
+        }
+
+        /* KPI GRID */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px;
+        }
+
+        .kpi-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-ui);
+            border-top: 4px solid var(--kpi-accent, var(--cyan-blue));
+            border-radius: 10px;
+            padding: 18px 22px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            transition: transform 0.2s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .kpi-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .kpi-value {
+            font-size: 1.7rem;
+            font-weight: 800;
+            color: var(--navy-peony);
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+        }
+
+        .kpi-unit {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .kpi-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.78rem;
+            color: var(--aegean-blue);
+            padding-top: 6px;
+            border-top: 1px solid var(--border-ui);
+            font-weight: 500;
+        }
+
+        .badge-kpi {
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.75rem;
+            font-family: monospace;
+        }
+
+        .badge-success {
+            background-color: #DCFCE7;
+            color: #166534;
+            border: 1px solid #86EFAC;
+        }
+
+        .badge-warning {
+            background-color: #FEF3C7;
+            color: #92400E;
+            border: 1px solid #FCD34D;
+        }
+
+        .badge-danger {
+            background-color: #FEE2E2;
+            color: #991B1B;
+            border: 1px solid #FCA5A5;
+        }
+
+        .val-positive {
+            color: #166534 !important;
+        }
+
+        .val-negative {
+            color: #991B1B !important;
+        }
+
+        /* GRÁFICO */
+        .chart-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-ui);
+            border-radius: 12px;
+            padding: 22px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .chart-top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-ui);
+        }
+
+        .chart-title {
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            color: var(--navy-peony);
+            text-transform: uppercase;
+        }
+
+        /* TABLA MATRIZ */
+        .matrix-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-ui);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+        }
+
+        .matrix-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #FFFFFF;
+            border: 1px solid var(--border-ui);
+            padding: 8px 14px;
+            border-radius: 8px;
+            width: 320px;
+        }
+
+        .search-box input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-dark);
+            font-size: 0.85rem;
+            width: 100%;
+        }
+
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            border: 1px solid var(--border-ui);
+            border-radius: 8px;
+        }
+
+        .matrix-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 0.85rem;
+            text-align: left;
+        }
+
+        .matrix-table th {
+            background-color: var(--navy-peony);
+            color: #FFFFFF;
+            font-weight: 600;
+            padding: 12px 14px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            white-space: nowrap;
+        }
+
+        .matrix-table th.num-col,
+        .matrix-table td.num-cell {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+            font-family: 'Inter', monospace;
+        }
+
+        .matrix-table td {
+            padding: 9px 14px;
+            border-bottom: 1px solid var(--border-ui);
+            color: var(--text-dark);
+        }
+
+        /* NIVEL 1: TOTALES SEMANALES CON COLOR SUAVE (MENOS OSCURO) */
+        .level-1 td {
+            background: #EBF3FA !important;
+            color: var(--navy-peony) !important;
+            font-weight: 700;
+            border-bottom: 2px solid #CBD5E1 !important;
+            border-top: 1px solid #CBD5E1 !important;
+        }
+
+        .level-1:hover td {
+            background: #DEEBF5 !important;
+        }
+
+        .level-2 td {
+            background-color: #FFFFFF !important;
+            color: var(--text-dark) !important;
+        }
+
+        .level-2:hover td {
+            background-color: #F1F5F9 !important;
+        }
+
+        .toggle-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            border-radius: 5px;
+            background: rgba(16, 88, 127, 0.12);
+            color: var(--blue-sapphire);
+            font-family: monospace;
+            font-size: 0.8rem;
+            font-weight: 800;
+            cursor: pointer;
+            margin-right: 8px;
+            user-select: none;
+            transition: all 0.15s ease;
+        }
+
+        .toggle-icon:hover {
+            background: var(--blue-sapphire);
+            color: #FFFFFF;
+        }
+
+        .tag-subplanta {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            background: #EBF3FA;
+            color: var(--blue-sapphire);
+            border: 1px solid #CBD5E1;
+        }
+
+        .toast-notification {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #0F172A;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #FFFFFF;
+            font-size: 0.86rem;
+            font-weight: 500;
+            box-shadow: var(--shadow-lg);
+            transform: translateY(120%);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 10000;
+        }
+
+        .toast-notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-container">
+
+        <!-- HEADER -->
+        <header class="dashboard-header">
+            <div class="header-title-group">
+                <div class="header-icon">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 3v18h18"></path>
+                        <path d="m19 9-5 5-4-4-3 3"></path>
+                    </svg>
+                </div>
+                <div>
+                    <div class="header-title">
+                        Dashboard Cumplimiento PTC - Real vs Planificación
+
+                    </div>
+                    <div class="header-subtitle">
+                        Comparativo: <b>PRODUCCION_REAL</b> vs <b>PROYECCION_COMERCIAL</b>, <b>PEDIDO_DISTRIBUCION</b> y
+                        <b>PROG_PRODUCCION</b>
+                    </div>
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <div class="status-badge" id="apiStatusBadge">
+                    <span class="status-dot"></span>
+                    <span id="apiStatusText">Buscando servidor...</span>
+                </div>
+
+                <button class="btn btn-excel" onclick="exportarExcel()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Exportar Excel
+                </button>
+
+                <button class="btn btn-primary" onclick="recargarDatosAPI(true)">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+                    </svg>
+                    Actualizar
+                </button>
+            </div>
+        </header>
+
+        <!-- FILTROS (AÑO, SUBPLANTA/GRUPO Y SEMANAS) -->
+        <section class="card">
+            <!-- 1. FILTRO AÑO -->
+            <div class="filter-section-header">
+                <div class="filter-title">1. Filtro General por Año (Multi-Selección)</div>
+                <div class="filter-quick-actions">
+                    <button class="filter-quick-btn active" id="btnQuickYearAll"
+                        onclick="seleccionarFiltroRapidoAnio('all')">Todos los Años</button>
+                </div>
+            </div>
+            <div class="years-pills-container" id="yearsPillsContainer"></div>
+
+            <div style="border-top: 1px solid var(--border-ui); margin: 14px 0 12px 0;"></div>
+
+            <!-- 2. FILTRO GRUPO / SUBPLANTA -->
+            <div class="filter-section-header">
+                <div class="filter-title" style="color: var(--blue-sapphire);">2. Filtro por Grupo / SubPlanta
+                    (Multi-Selección)</div>
+                <div class="filter-quick-actions">
+                    <button class="filter-quick-btn active-subplanta" id="btnQuickSpAll"
+                        onclick="seleccionarFiltroRapidoGrupo('all')">Todos los Grupos</button>
+                </div>
+            </div>
+            <div class="subplanta-pills-container" id="subplantaPillsContainer"></div>
+
+            <div style="border-top: 1px solid var(--border-ui); margin: 14px 0 12px 0;"></div>
+
+            <!-- 3. FILTRO SEMANAS -->
+            <div class="filter-section-header">
+                <div class="filter-title" style="color: var(--semana-custom);">3. Filtro por Semana (Multi-Selección
+                    Dinámica)</div>
+                <div class="filter-quick-actions">
+                    <button class="filter-quick-btn" id="btnQuickLatest"
+                        onclick="seleccionarFiltroRapidoSemana('latest')">Última Semana</button>
+                    <button class="filter-quick-btn active active-semana" id="btnQuickAll"
+                        onclick="seleccionarFiltroRapidoSemana('all')">Todas las Semanas</button>
+                </div>
+            </div>
+            <div class="weeks-pills-container" id="weeksPillsContainer"></div>
+
+            <div class="selection-summary-bar">
+                <span id="selectedWeeksSummary">Cargando filtros...</span>
+            </div>
+        </section>
+
+        <!-- KPIs COMPARATIVOS -->
+        <section class="kpi-grid">
+            <div class="kpi-card" style="--kpi-accent: var(--navy-peony);">
+                <span class="kpi-label">Producción Real Total</span>
+                <div class="kpi-value" id="kpiRealVal">0.00<span class="kpi-unit">kg</span></div>
+                <div class="kpi-footer">
+                    <span>Tipo: PRODUCCION_REAL</span>
+                    <span class="badge-kpi badge-success" id="kpiRealBadge">Ejecutado</span>
+                </div>
+            </div>
+
+            <div class="kpi-card" style="--kpi-accent: var(--cyan-blue);">
+                <span class="kpi-label">Vs Proyección Comercial</span>
+                <div class="kpi-value" id="kpiPctComercial">0.0<span class="kpi-unit">%</span></div>
+                <div class="kpi-footer">
+                    <span id="kpiDifComercial">Dif: 0.00 kg</span>
+                    <span id="kpiPlanComercial" class="badge-kpi">Py: 0.00 kg</span>
+                </div>
+            </div>
+
+            <div class="kpi-card" style="--kpi-accent: var(--teal-blue);">
+                <span class="kpi-label">Vs Pedido Distribución</span>
+                <div class="kpi-value" id="kpiPctDistribucion">0.0<span class="kpi-unit">%</span></div>
+                <div class="kpi-footer">
+                    <span id="kpiDifDistribucion">Dif: 0.00 kg</span>
+                    <span id="kpiPlanDistribucion" class="badge-kpi">Dist: 0.00 kg</span>
+                </div>
+            </div>
+
+            <div class="kpi-card" style="--kpi-accent: var(--lagoon);">
+                <span class="kpi-label">Vs Programa Producción</span>
+                <div class="kpi-value" id="kpiPctPrograma">0.0<span class="kpi-unit">%</span></div>
+                <div class="kpi-footer">
+                    <span id="kpiDifPrograma">Dif: 0.00 kg</span>
+                    <span id="kpiPlanPrograma" class="badge-kpi">Prog: 0.00 kg</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- GRÁFICO COMPARATIVO POR SEMANA (BARRAS CON ETIQUETAS) -->
+        <section class="chart-card">
+            <div class="chart-top-bar">
+                <div class="chart-title">Comparativo Semanal: Real vs Planes de Demanda y Programa (kg)</div>
+                <div
+                    style="display:flex; gap:4px; align-items:center; background:#E2E8F0; padding:3px 4px; border-radius:8px;">
+                    <button class="filter-quick-btn active" id="btnUnitTn" style="padding:3px 8px; font-size:0.75rem;"
+                        onclick="cambiarUnidadGrafico('Tn')">Tn</button>
+                    <button class="filter-quick-btn" id="btnUnitKg" style="padding:3px 8px; font-size:0.75rem;"
+                        onclick="cambiarUnidadGrafico('Kg')">Kg</button>
+                </div>
+            </div>
+            <div style="height:440px; margin-top:14px;">
+                <canvas id="chartComparativo"></canvas>
+            </div>
+        </section>
+
+        <!-- MATRIZ DETALLADA PIVOTADA -->
+        <section class="matrix-card">
+            <div class="matrix-toolbar">
+                <div class="search-box">
+                    <input type="text" id="searchMatriz" placeholder="Buscar semana o grupo..."
+                        oninput="filtrarMatriz()">
+                </div>
+                <div style="display:flex; gap:8px;">
+                    <button class="btn" style="padding:6px 12px; font-size:0.78rem;"
+                        onclick="toggleExpandirTodo(true)">⊞ Expandir Todo</button>
+                    <button class="btn" style="padding:6px 12px; font-size:0.78rem;"
+                        onclick="toggleExpandirTodo(false)">⊟ Contraer Todo</button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="matrix-table" id="tbMatriz">
+                    <thead>
+                        <tr>
+                            <th style="min-width:240px;">Semana / Grupo</th>
+                            <th class="num-col" style="color:#10B981;">Prod. Real (kg)</th>
+                            <th class="num-col">Proy. Comercial (kg)</th>
+                            <th class="num-col">% Cumpl. Com.</th>
+                            <th class="num-col">Ped. Distribución (kg)</th>
+                            <th class="num-col">% Cumpl. Dist.</th>
+                            <th class="num-col">Prog. Producción (kg)</th>
+                            <th class="num-col">% Cumpl. Prog.</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyMatriz">
+                        <tr>
+                            <td colspan="8" style="text-align:center; padding:30px; color:var(--text-muted);">Cargando
+                                información...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <!-- TOAST -->
+    <div id="toastNotification" class="toast-notification">
+        <span id="toastIcon">ℹ️</span>
+        <span id="toastMsg">Mensaje</span>
+    </div>
+
+    <script>
+        // =========================================================================
+        // ⚙️ CONFIGURACIÓN DE CONEXIÓN A LA API (Estilo appsettings.json)
+        // =========================================================================
+        const APP_CONFIG = {
+            servidor: "RAEVSALL001",
+            puertos: [8080, 5000],
+            rutaControlador: "/api/ResumenPl"
+        };
+
+        function generarBasesApi() {
+            const bases = [];
+            for (const puerto of APP_CONFIG.puertos) {
+                bases.push(`http://${APP_CONFIG.servidor}:${puerto}`);
+            }
+            if (APP_CONFIG.servidor && APP_CONFIG.servidor.toLowerCase() !== 'localhost' && APP_CONFIG.servidor !== '127.0.0.1') {
+                for (const puerto of APP_CONFIG.puertos) {
+                    const fallback = `http://localhost:${puerto}`;
+                    if (!bases.includes(fallback)) bases.push(fallback);
+                }
+                for (const puerto of APP_CONFIG.puertos) {
+                    const fallbackIp = `http://127.0.0.1:${puerto}`;
+                    if (!bases.includes(fallbackIp)) bases.push(fallbackIp);
+                }
+            }
+            return bases;
+        }
+
+        const BASE_HOSTS = generarBasesApi();
+
+        let apiBaseActiva = null;
+        let rawItems = [];
+        let selectedYears = new Set();
+        let selectedGroups = new Set();
+        let selectedWeeks = new Set();
+        let aniosDisponibles = [];
+        let gruposDisponibles = [];
+        let semanasDisponibles = [];
+
+        let chartInstance = null;
+        let unidadGrafico = 'Tn';
+        let expandedNodes = new Set();
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            initChartDefaults();
+            await inicializarDashboard();
+        });
+
+        function initChartDefaults() {
+            if (typeof ChartDataLabels !== 'undefined') {
+                Chart.register(ChartDataLabels);
+            }
+            Chart.defaults.color = '#64748B';
+            Chart.defaults.font.family = "'Inter', sans-serif";
+        }
+
+        async function fetchConTimeout(url, timeoutMs = 25000) {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+                const response = await fetch(url, {
+                    method: 'GET',
+                    mode: 'cors',
+                    signal: controller.signal
+                });
+                clearTimeout(id);
+                return response;
+            } catch (err) {
+                clearTimeout(id);
+                throw err;
+            }
+        }
+
+        async function detectarServidorApi() {
+            for (const base of BASE_HOSTS) {
+                try {
+                    const res = await fetchConTimeout(`${base}${APP_CONFIG.rutaControlador}/grupos`, 8000);
+                    if (res.ok) return base;
+                } catch (e) { }
+            }
+            return null;
+        }
+
+        async function inicializarDashboard() {
+            const statusBadge = document.getElementById('apiStatusBadge');
+            const statusText = document.getElementById('apiStatusText');
+            statusText.textContent = `Buscando ${APP_CONFIG.servidor}...`;
+            document.querySelector('.status-dot').className = 'status-dot loading';
+
+            try {
+                apiBaseActiva = await detectarServidorApi();
+
+                if (!apiBaseActiva) {
+                    throw new Error(`No se pudo conectar a ${APP_CONFIG.servidor} en puertos ${APP_CONFIG.puertos.join('/')}`);
+                }
+
+                const urlObj = new URL(apiBaseActiva);
+                statusBadge.innerHTML = `<span class="status-dot online"></span><span>En Línea (${urlObj.host})</span>`;
+                mostrarToast(`Conectado al servidor en ${urlObj.host}`, '✅');
+                await recargarDatosAPI(false);
+            } catch (err) {
+                console.error("Error al inicializar:", err);
+                statusBadge.innerHTML = `<span class="status-dot error"></span><span style="color:#EF4444">Sin Conexión</span>`;
+                mostrarToast(`Error de conexión: ${err.message}`, '⚠️');
+            }
+        }
+
+        async function recargarDatosAPI(forzar = false) {
+            mostrarToast("Leyendo tabla T_ResumenPL...", "⏳");
+            try {
+                const url = `${apiBaseActiva}${APP_CONFIG.rutaControlador}${forzar ? '?recargar=true' : ''}`;
+                const res = await fetchConTimeout(url, 30000);
+                if (!res.ok) throw new Error("Error al obtener datos desde la API");
+                const data = await res.json();
+
+                rawItems = (data || []).map(d => {
+                    const s = parseInt(d.semana || d.Semana, 10);
+                    const sStr = String(s);
+                    const anio = sStr.length >= 4 ? parseInt(sStr.substring(0, 4), 10) : 0;
+                    const nSem = sStr.length >= 6 ? parseInt(sStr.substring(4), 10) : 0;
+                    return {
+                        Semana: s,
+                        Anio: anio,
+                        NSemana: nSem,
+                        Grupo: (d.grupo || d.Grupo || 'OTROS').trim().toUpperCase(),
+                        Tipo: (d.tipo || d.Tipo || '').trim().toUpperCase(),
+                        Cantidad: d.cantidad !== null && d.cantidad !== undefined ? Number(d.cantidad) : (d.Cantidad !== null && d.Cantidad !== undefined ? Number(d.Cantidad) : null)
+                    };
+                });
+
+                aniosDisponibles = [...new Set(rawItems.map(d => d.Anio))].filter(Boolean).sort();
+                gruposDisponibles = [...new Set(rawItems.map(d => d.Grupo))].filter(Boolean).sort();
+                semanasDisponibles = [...new Set(rawItems.map(d => d.Semana))].filter(Boolean).sort((a, b) => a - b);
+
+                if (selectedYears.size === 0) aniosDisponibles.forEach(y => selectedYears.add(y));
+                if (selectedGroups.size === 0) gruposDisponibles.forEach(g => selectedGroups.add(g));
+                if (selectedWeeks.size === 0) semanasDisponibles.forEach(s => selectedWeeks.add(s));
+
+                construirPildorasAnio();
+                construirPildorasGrupo();
+                construirPildorasSemana();
+
+                actualizarVista();
+                mostrarToast(`Datos actualizados: ${rawItems.length} registros cargados`, "✅");
+            } catch (e) {
+                console.error(e);
+                mostrarToast(e.message, "❌");
+            }
+        }
+
+        // 1. PÍLDORAS AÑO
+        function construirPildorasAnio() {
+            const container = document.getElementById('yearsPillsContainer');
+            container.innerHTML = '';
+            aniosDisponibles.forEach(y => {
+                const count = rawItems.filter(d => d.Anio === y).length;
+                const pill = document.createElement('div');
+                pill.className = `year-pill ${selectedYears.has(y) ? 'selected' : ''}`;
+                pill.innerHTML = `<span>Año ${y}</span><span class="pill-badge-count">${count} reg</span>`;
+                pill.onclick = () => {
+                    if (selectedYears.has(y)) {
+                        if (selectedYears.size > 1) selectedYears.delete(y);
+                    } else selectedYears.add(y);
+                    construirPildorasAnio();
+                    construirPildorasSemana();
+                    actualizarVista();
+                };
+                container.appendChild(pill);
+            });
+            document.getElementById('btnQuickYearAll').classList.toggle('active', selectedYears.size === aniosDisponibles.length);
+        }
+
+        function seleccionarFiltroRapidoAnio(modo) {
+            selectedYears.clear();
+            aniosDisponibles.forEach(y => selectedYears.add(y));
+            construirPildorasAnio();
+            construirPildorasSemana();
+            actualizarVista();
+        }
+
+        // 2. PÍLDORAS GRUPO
+        function construirPildorasGrupo() {
+            const container = document.getElementById('subplantaPillsContainer');
+            container.innerHTML = '';
+            gruposDisponibles.forEach(g => {
+                const pill = document.createElement('div');
+                pill.className = `subplanta-pill ${selectedGroups.has(g) ? 'selected' : ''}`;
+                pill.innerHTML = `<span>${g}</span>`;
+                pill.onclick = () => {
+                    if (selectedGroups.has(g)) {
+                        if (selectedGroups.size > 1) selectedGroups.delete(g);
+                    } else selectedGroups.add(g);
+                    construirPildorasGrupo();
+                    actualizarVista();
+                };
+                container.appendChild(pill);
+            });
+            document.getElementById('btnQuickSpAll').classList.toggle('active-subplanta', selectedGroups.size === gruposDisponibles.length);
+        }
+
+        function seleccionarFiltroRapidoGrupo(modo) {
+            selectedGroups.clear();
+            gruposDisponibles.forEach(g => selectedGroups.add(g));
+            construirPildorasGrupo();
+            actualizarVista();
+        }
+
+        // 3. PÍLDORAS SEMANA (CON COLOR PERSONALIZADO rgb(59,102,128))
+        function construirPildorasSemana() {
+            const container = document.getElementById('weeksPillsContainer');
+            container.innerHTML = '';
+
+            const semanasValidas = semanasDisponibles.filter(s => {
+                const anio = parseInt(String(s).substring(0, 4), 10);
+                return selectedYears.has(anio);
+            });
+
+            semanasValidas.forEach(s => {
+                const pill = document.createElement('div');
+                pill.className = `week-pill ${selectedWeeks.has(s) ? 'selected' : ''}`;
+                pill.innerHTML = `<span>Sem ${s}</span>`;
+                pill.onclick = () => {
+                    if (selectedWeeks.has(s)) {
+                        if (selectedWeeks.size > 1) selectedWeeks.delete(s);
+                    } else selectedWeeks.add(s);
+                    construirPildorasSemana();
+                    actualizarVista();
+                };
+                container.appendChild(pill);
+            });
+        }
+
+        function seleccionarFiltroRapidoSemana(modo) {
+            selectedWeeks.clear();
+            const semanasValidas = semanasDisponibles.filter(s => {
+                const anio = parseInt(String(s).substring(0, 4), 10);
+                return selectedYears.has(anio);
+            });
+
+            if (modo === 'all') {
+                semanasValidas.forEach(s => selectedWeeks.add(s));
+            } else if (modo === 'latest') {
+                if (semanasValidas.length > 0) selectedWeeks.add(semanasValidas[semanasValidas.length - 1]);
+            }
+            construirPildorasSemana();
+            actualizarVista();
+        }
+
+        // PIVOTADO: AGRUPA POR (SEMANA, GRUPO)
+        function pivotarDatos() {
+            const filtrados = rawItems.filter(d =>
+                selectedYears.has(d.Anio) &&
+                selectedGroups.has(d.Grupo) &&
+                selectedWeeks.has(d.Semana)
+            );
+
+            const map = new Map();
+
+            filtrados.forEach(d => {
+                const key = `${d.Semana}_${d.Grupo}`;
+                if (!map.has(key)) {
+                    map.set(key, {
+                        Semana: d.Semana,
+                        Anio: d.Anio,
+                        NSemana: d.NSemana,
+                        Grupo: d.Grupo,
+                        PRODUCCION_REAL: 0,
+                        PROYECCION_COMERCIAL: 0,
+                        PEDIDO_DISTRIBUCION: 0,
+                        PROG_PRODUCCION: 0
+                    });
+                }
+                const obj = map.get(key);
+                if (d.Cantidad !== null && d.Cantidad !== undefined) {
+                    if (d.Tipo === 'PRODUCCION_REAL') obj.PRODUCCION_REAL += d.Cantidad;
+                    else if (d.Tipo === 'PROYECCION_COMERCIAL') obj.PROYECCION_COMERCIAL += d.Cantidad;
+                    else if (d.Tipo === 'PEDIDO_DISTRIBUCION') obj.PEDIDO_DISTRIBUCION += d.Cantidad;
+                    else if (d.Tipo === 'PROG_PRODUCCION') obj.PROG_PRODUCCION += d.Cantidad;
+                }
+            });
+
+            return Array.from(map.values()).sort((a, b) => a.Semana - b.Semana || a.Grupo.localeCompare(b.Grupo));
+        }
+
+        function formatKg(n) {
+            return (n || 0).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function calcPct(real, meta) {
+            if (!meta || meta === 0) return 0;
+            return (real / meta) * 100;
+        }
+
+        function badgeHtml(pct) {
+            let cls = 'badge-good';
+            if (pct < 85) cls = 'badge-low';
+            else if (pct < 98) cls = 'badge-mid';
+            return `<span class="badge-kpi ${cls}">${pct.toFixed(1)}%</span>`;
+        }
+
+        function actualizarVista() {
+            const summary = document.getElementById('selectedWeeksSummary');
+            summary.innerHTML = `Mostrando: Años <b>[${Array.from(selectedYears).join(', ')}]</b> • Grupos <b>[${selectedGroups.size} seleccionados]</b> • Semanas <b>[${selectedWeeks.size} seleccionadas]</b>`;
+
+            const dataPivot = pivotarDatos();
+
+            actualizarKPIs(dataPivot);
+            renderizarGrafico(dataPivot);
+            renderizarMatriz(dataPivot);
+        }
+
+        function actualizarKPIs(data) {
+            let real = 0, com = 0, dist = 0, prog = 0;
+
+            data.forEach(d => {
+                real += d.PRODUCCION_REAL;
+                com += d.PROYECCION_COMERCIAL;
+                dist += d.PEDIDO_DISTRIBUCION;
+                prog += d.PROG_PRODUCCION;
+            });
+
+            document.getElementById('kpiRealVal').innerHTML = `${formatKg(real)}<span class="kpi-unit">kg</span>`;
+
+            const pCom = calcPct(real, com);
+            const pDist = calcPct(real, dist);
+            const pProg = calcPct(real, prog);
+
+            document.getElementById('kpiPctComercial').innerHTML = `${pCom.toFixed(1)}<span class="kpi-unit">%</span>`;
+            document.getElementById('kpiPlanComercial').textContent = `Py: ${formatKg(com)} kg`;
+            document.getElementById('kpiDifComercial').textContent = `Dif: ${formatKg(real - com)} kg`;
+            document.getElementById('kpiDifComercial').className = real >= com ? 'val-positive' : 'val-negative';
+
+            document.getElementById('kpiPctDistribucion').innerHTML = `${pDist.toFixed(1)}<span class="kpi-unit">%</span>`;
+            document.getElementById('kpiPlanDistribucion').textContent = `Dist: ${formatKg(dist)} kg`;
+            document.getElementById('kpiDifDistribucion').textContent = `Dif: ${formatKg(real - dist)} kg`;
+            document.getElementById('kpiDifDistribucion').className = real >= dist ? 'val-positive' : 'val-negative';
+
+            document.getElementById('kpiPctPrograma').innerHTML = `${pProg.toFixed(1)}<span class="kpi-unit">%</span>`;
+            document.getElementById('kpiPlanPrograma').textContent = `Prog: ${formatKg(prog)} kg`;
+            document.getElementById('kpiDifPrograma').textContent = `Dif: ${formatKg(real - prog)} kg`;
+            document.getElementById('kpiDifPrograma').className = real >= prog ? 'val-positive' : 'val-negative';
+        }
+
+        function cambiarUnidadGrafico(u) {
+            unidadGrafico = u;
+            document.getElementById('btnUnitTn').classList.toggle('active', u === 'Tn');
+            document.getElementById('btnUnitKg').classList.toggle('active', u === 'Kg');
+            renderizarGrafico(pivotarDatos());
+        }
+
+        // =========================================================================
+        // 📊 RENDERIZADO DEL GRÁFICO DE BARRAS CON ETIQUETAS DE DATOS
+        // =========================================================================
+        function renderizarGrafico(data) {
+            const ctx = document.getElementById('chartComparativo').getContext('2d');
+            if (chartInstance) chartInstance.destroy();
+
+            const semanas = [...new Set(data.map(d => d.Semana))].sort((a, b) => a - b);
+            const factor = unidadGrafico === 'Tn' ? 1000 : 1;
+
+            const dReal = [], dCom = [], dDist = [], dProg = [];
+
+            semanas.forEach(s => {
+                const sub = data.filter(d => d.Semana === s);
+                dReal.push(Math.round(sub.reduce((acc, c) => acc + c.PRODUCCION_REAL, 0) / factor));
+                dCom.push(Math.round(sub.reduce((acc, c) => acc + c.PROYECCION_COMERCIAL, 0) / factor));
+                dDist.push(Math.round(sub.reduce((acc, c) => acc + c.PEDIDO_DISTRIBUCION, 0) / factor));
+                dProg.push(Math.round(sub.reduce((acc, c) => acc + c.PROG_PRODUCCION, 0) / factor));
+            });
+
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: semanas.map(s => `Semana ${s}`),
+                    datasets: [
+                        { label: 'Producción Real', data: dReal, backgroundColor: '#223A5E', borderRadius: 4 },
+                        { label: 'Proyección Comercial', data: dCom, backgroundColor: '#1295C1', borderRadius: 4 },
+                        { label: 'Pedido Distribución', data: dDist, backgroundColor: '#007D7E', borderRadius: 4 },
+                        { label: 'Prog. Producción', data: dProg, backgroundColor: '#4E6E81', borderRadius: 4 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            top: 36,
+                            bottom: 10
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                boxWidth: 14,
+                                font: { weight: 600, size: 11 }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => ` ${ctx.dataset.label}: ${ctx.raw.toLocaleString('es-PE')} ${unidadGrafico}`
+                            }
+                        },
+                        datalabels: {
+                            display: true,
+                            anchor: 'end',
+                            align: 'top',
+                            offset: 2,
+                            color: '#334155',
+                            font: {
+                                family: "'Inter', sans-serif",
+                                weight: '700',
+                                size: 9.5
+                            },
+                            formatter: val => {
+                                if (!val || val === 0) return '';
+                                if (unidadGrafico === 'Kg' && val >= 1000) {
+                                    return (val / 1000).toFixed(1) + 'k';
+                                }
+                                return Number(val).toLocaleString('es-PE');
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { weight: 600 } }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#F1F5F9' },
+                            ticks: { callback: v => `${v.toLocaleString('es-PE')} ${unidadGrafico}` }
+                        }
+                    }
+                }
+            });
+        }
+
+        // =========================================================================
+        // 📋 RENDERIZADO DE MATRIZ CON SUBDIVISIÓN CLARA Y COLOR MENOS OSCURO
+        // =========================================================================
+        function renderizarMatriz(data) {
+            const tbody = document.getElementById('tbodyMatriz');
+            tbody.innerHTML = '';
+
+            const term = (document.getElementById('searchMatriz').value || '').trim().toUpperCase();
+
+            const tree = {};
+            data.forEach(d => {
+                if (!tree[d.Semana]) {
+                    tree[d.Semana] = {
+                        semana: d.Semana,
+                        real: 0, com: 0, dist: 0, prog: 0,
+                        grupos: []
+                    };
+                }
+                tree[d.Semana].real += d.PRODUCCION_REAL;
+                tree[d.Semana].com += d.PROYECCION_COMERCIAL;
+                tree[d.Semana].dist += d.PEDIDO_DISTRIBUCION;
+                tree[d.Semana].prog += d.PROG_PRODUCCION;
+                tree[d.Semana].grupos.push(d);
+            });
+
+            const semKeys = Object.keys(tree).sort((a, b) => b.localeCompare(a));
+
+            if (semKeys.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:30px; color:var(--text-muted);">No hay datos que coincidan con la selección.</td></tr>';
+                return;
+            }
+
+            semKeys.forEach(sKey => {
+                const sNode = tree[sKey];
+                const sId = `sem_${sKey}`;
+                const isExpanded = expandedNodes.has(sId) || term.length > 0;
+
+                const pCom = calcPct(sNode.real, sNode.com);
+                const pDist = calcPct(sNode.real, sNode.dist);
+                const pProg = calcPct(sNode.real, sNode.prog);
+
+                const trSem = document.createElement('tr');
+                trSem.className = 'level-1';
+                trSem.innerHTML = `
+                    <td>
+                        <span class="toggle-icon" onclick="toggleNode('${sId}')">${isExpanded ? '−' : '+'}</span>
+                        <b style="color:var(--navy-peony);">Semana ${sKey}</b> 
+                        <span style="font-size:0.75rem; color:var(--text-muted); font-weight:normal; margin-left:6px;">(${sNode.grupos.length} grupos)</span>
+                    </td>
+                    <td class="num-cell" style="color:#007D7E;"><b>${formatKg(sNode.real)}</b></td>
+                    <td class="num-cell"><b>${formatKg(sNode.com)}</b></td>
+                    <td class="num-cell">${badgeHtml(pCom)}</td>
+                    <td class="num-cell"><b>${formatKg(sNode.dist)}</b></td>
+                    <td class="num-cell">${badgeHtml(pDist)}</td>
+                    <td class="num-cell"><b>${formatKg(sNode.prog)}</b></td>
+                    <td class="num-cell">${badgeHtml(pProg)}</td>
+                `;
+                tbody.appendChild(trSem);
+
+                if (isExpanded) {
+                    sNode.grupos.forEach(g => {
+                        if (term.length > 0 && !g.Grupo.includes(term) && !String(g.Semana).includes(term)) return;
+
+                        const gpCom = calcPct(g.PRODUCCION_REAL, g.PROYECCION_COMERCIAL);
+                        const gpDist = calcPct(g.PRODUCCION_REAL, g.PEDIDO_DISTRIBUCION);
+                        const gpProg = calcPct(g.PRODUCCION_REAL, g.PROG_PRODUCCION);
+
+                        const trG = document.createElement('tr');
+                        trG.className = 'level-2';
+                        trG.innerHTML = `
+                            <td style="padding-left: 36px;">
+                                <span class="tag-subplanta">${g.Grupo}</span>
+                            </td>
+                            <td class="num-cell" style="color:#007D7E; font-weight:600;">${formatKg(g.PRODUCCION_REAL)}</td>
+                            <td class="num-cell">${formatKg(g.PROYECCION_COMERCIAL)}</td>
+                            <td class="num-cell">${badgeHtml(gpCom)}</td>
+                            <td class="num-cell">${formatKg(g.PEDIDO_DISTRIBUCION)}</td>
+                            <td class="num-cell">${badgeHtml(gpDist)}</td>
+                            <td class="num-cell">${formatKg(g.PROG_PRODUCCION)}</td>
+                            <td class="num-cell">${badgeHtml(gpProg)}</td>
+                        `;
+                        tbody.appendChild(trG);
+                    });
+                }
+            });
+        }
+
+        function toggleNode(id) {
+            if (expandedNodes.has(id)) expandedNodes.delete(id);
+            else expandedNodes.add(id);
+            renderizarMatriz(pivotarDatos());
+        }
+
+        function toggleExpandirTodo(exp) {
+            expandedNodes.clear();
+            if (exp) {
+                semanasDisponibles.forEach(s => expandedNodes.add(`sem_${s}`));
+            }
+            renderizarMatriz(pivotarDatos());
+        }
+
+        function filtrarMatriz() {
+            renderizarMatriz(pivotarDatos());
+        }
+
+        function exportarExcel() {
+            const data = pivotarDatos();
+            if (data.length === 0) {
+                mostrarToast("No hay datos para exportar", "⚠️");
+                return;
+            }
+
+            const filas = data.map(d => ({
+                "Año": d.Anio,
+                "Semana": d.Semana,
+                "Grupo": d.Grupo,
+                "Producción Real (kg)": Math.round(d.PRODUCCION_REAL * 100) / 100,
+                "Proyección Comercial (kg)": Math.round(d.PROYECCION_COMERCIAL * 100) / 100,
+                "% Cumplimiento Comercial": calcPct(d.PRODUCCION_REAL, d.PROYECCION_COMERCIAL).toFixed(2),
+                "Pedido Distribución (kg)": Math.round(d.PEDIDO_DISTRIBUCION * 100) / 100,
+                "% Cumplimiento Distribución": calcPct(d.PRODUCCION_REAL, d.PEDIDO_DISTRIBUCION).toFixed(2),
+                "Programa Producción (kg)": Math.round(d.PROG_PRODUCCION * 100) / 100,
+                "% Cumplimiento Programa": calcPct(d.PRODUCCION_REAL, d.PROG_PRODUCCION).toFixed(2)
+            }));
+
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.json_to_sheet(filas);
+            XLSX.utils.book_append_sheet(wb, ws, "Real_vs_Planes_PTC");
+            XLSX.writeFile(wb, `Cumplimiento_PTC_ResumenPL_${new Date().toISOString().slice(0, 10)}.xlsx`);
+            mostrarToast("Archivo Excel descargado exitosamente", "✅");
+        }
+
+        function mostrarToast(msg, icon = 'ℹ️') {
+            const toast = document.getElementById('toastNotification');
+            document.getElementById('toastIcon').textContent = icon;
+            document.getElementById('toastMsg').textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3500);
+        }
+    </script>
+</body>
+
+</html>
