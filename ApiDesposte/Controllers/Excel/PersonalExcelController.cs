@@ -1,4 +1,4 @@
-using ClosedXML.Excel;
+﻿using ClosedXML.Excel;
 using Microsoft.AspNetCore.Mvc;
 using System.IO;
 
@@ -46,39 +46,7 @@ namespace ApiDesposte.Controllers.Excel
             }
         }
 
-        // 2. BUSCAR POR DNI
-        [HttpGet("buscar/{dni}")]
-        public IActionResult BuscarPorDni(string dni)
-        {
-            try
-            {
-                using (var stream = new FileStream(_rutaExcel, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                using (var workbook = new XLWorkbook(stream))
-                {
-                    var hoja = workbook.Worksheet(_nombreHoja);
-                    var tabla = hoja.Table(_nombreTabla);
-
-                    var fila = tabla.DataRange.Rows()
-                        .FirstOrDefault(r => r.Cell(1).Value.ToString().Trim() == dni.Trim());
-
-                    if (fila == null)
-                        return NotFound(new { exito = false, mensaje = "DNI no encontrado." });
-
-                    return Ok(new
-                    {
-                        Dni = fila.Cell(1).Value.ToString().Trim(),
-                        NombresApellidos = fila.Cell(2).Value.ToString().Trim(),
-                        Telefonos = fila.Cell(3).Value.ToString().Trim()
-                    });
-                }
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { exito = false, error = ex.Message });
-            }
-        }
-
-        // 3. CREAR REGISTRO Y FORZAR SINCRONIZACIÓN WEB
+        // 2. CREAR REGISTRO Y FORZAR SINCRONIZACIÓN WEB
         [HttpPost("crear")]
         public IActionResult Crear([FromBody] PersonaDto persona)
         {

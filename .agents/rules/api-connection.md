@@ -1,37 +1,80 @@
-# Reglas de Conexión a la API (Frontend / Informes HTML)
+# Regla General: Estándar de Conexión a la API (Frontend HTML)
 
-## 1. Detección Dinámica de Hosts
-- Ningún archivo HTML o script frontend debe hardcodear nombres fijos de equipos (e.g. `DMENDOZA`, `RAEVSALL001`) para permitir la portabilidad total del proyecto entre diferentes máquinas.
-- Se debe obtener el host actual dinámicamente mediante:
-  1. `window.location.hostname` (si se accede por red LAN o servidor web).
-  2. `localhost` y `127.0.0.1` como hosts locales estándar.
-  3. Rutas relativas (`/api/...`) para cuando la página sea servida directamente por el backend.
+Todos los archivos `.html` ubicados en `Docu_Paginas/` (o cualquier nuevo reporte/tablero web que se cree en el proyecto) **deben implementar obligatoriamente el patrón de conexión híbrida estándar** detallado en este documento.
 
-## 2. Orden de Prioridad de Puertos
-- **Prioridad 1:** Puerto `8080` (puerto preferente del servidor de desarrollo y producción).
-- **Prioridad 2:** Puerto `5000` (puerto secundario / fallback estándar de Kestrel/ASP.NET Core).
-- **Prioridad 3:** Ruta relativa directa (`""` o `/api/...`).
+---
 
-## 3. Manejo de Timeouts y Conexión Ágil
-- Los intentos de detección y sondeo de puertos deben tener un timeout corto (entre 1.5 y 3 segundos con `AbortController`) para que, en caso de que el puerto 8080 esté ocupado o apagado, la conexión pase inmediatamente al puerto 5000 sin demorar la experiencia del usuario.
+## 1. Principio del Patrón Híbrido
 
-## 4. Patrón Estándar de Generación de Bases / Endpoints
-```javascript
-function generarBasesApi() {
-    const hosts = [];
-    if (typeof window !== "undefined" && window.location && window.location.hostname && window.location.hostname !== "") {
-        hosts.push(window.location.hostname);
-    }
-    hosts.push("localhost", "127.0.0.1");
+El sistema debe operar de forma dual sin requerir cambios manuales ni romper dependencias:
+1. **Desarrollo y Portabilidad Local:** Si el archivo compartido `config.js` existe en la misma carpeta, la página toma dinámicamente el host y puertos configurados en `GLOBAL_CONFIG`.
+2. **Archivos Compartidos Autónomos:** Si se envía un archivo `.html` individual a un compañero o usuario final (sin `config.js`), el archivo debe funcionar de forma 100% autónoma usando los valores por defecto (`RAEVSALL001`, puertos `[8080, 5000]`).
 
-    const puertos = [8080, 5000];
-    const bases = [];
-    for (const puerto of puertos) {
-        for (const host of hosts) {
-            bases.push(`http://${host}:${puerto}`);
+---
+
+## 2. Bloque Estándar Obligatorio
+
+Todo archivo HTML que consuma datos de la API .NET debe incluir exactamente este bloque antes de su lógica de negocio:
+
+```html
+<!-- Configuración compartida de conexión a la API -->
+<script src="config.js"></script>
+
+<script>
+    // =========================================================================
+    // ⚙️ CONFIGURACIÓN DE CONEXIÓN A LA API (Híbrida: usa config.js si existe)
+    // =========================================================================
+    const APP_CONFIG = {
+        servidor: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.servidor) 
+                  ? GLOBAL_CONFIG.servidor 
+                  : "RAEVSALL001",
+        puertos: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.puertos) 
+                 ? GLOBAL_CONFIG.puertos 
+                 : [8080, 5000]
+    };
+
+    // Generación de servidores API apuntando al nombre del equipo
+    function generarBasesApi() {
+        if (typeof generarBasesApiGlobal === 'function') {
+            return generarBasesApiGlobal();
         }
+        const bases = [];
+        for (const puerto of APP_CONFIG.puertos) {
+            bases.push(`http://${APP_CONFIG.servidor}:${puerto}`);
+        }
+        return bases;
     }
-    bases.push(""); // Relativo
-    return Array.from(new Set(bases));
+```
+
+---
+
+## 3. Extensiones Específicas por Página
+
+Cualquier propiedad o endpoint adicional que requiera la página debe derivarse a partir del bloque base:
+
+### Caso A: Detección por Lista de Hosts (`hosts`)
+Para páginas que iteran buscando el host activo (e.g. `CumplimientosPTC.html`, `CumplimientosPTC_Py.html`):
+```javascript
+APP_CONFIG.hosts = generarBasesApi();
+APP_CONFIG.controllerPath = "/api/NombreDelControlador";
+```
+
+### Caso B: Generador de Endpoints Relativos (`generarEndpointsApi`)
+Para páginas que consultan directamente rutas relativas (e.g. `Informe_Costo_Produccion.html`, `RendimientosChuletas.html`):
+```javascript
+APP_CONFIG.rutaListar = "/api/Controlador/listar";
+APP_CONFIG.timeoutMs = 20000;
+
+function generarEndpointsApi(rutaRelativa) {
+    return generarBasesApi().map(base => `${base}${rutaRelativa}`);
 }
 ```
+
+---
+
+## 4. Archivo Central `config.js`
+
+El archivo `Docu_Paginas/config.js` define:
+- `servidor`: Nombre de equipo en red (e.g. `"RAEVSALL001"`) o `"localhost"`.
+- `puertos`: Lista priorizada de puertos `[8080, 5000]`.
+- Función `generarBasesApiGlobal()` con detección y fallbacks a `localhost` y `127.0.0.1`.

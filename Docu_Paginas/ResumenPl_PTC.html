@@ -28,7 +28,7 @@
             --lagoon: #43928E;
             --teal-blue: #007D7E;
             --aegean-blue: #4E6E81;
-            --semana-custom: rgb(59, 102, 128);
+            --semana-custom: #3B6680;
 
             --bg-canvas: #F1F5F9;
             --bg-card: #FFFFFF;
@@ -364,7 +364,7 @@
             font-weight: 700;
         }
 
-        /* CONFIGURACIÓN EXACTA PARA BOTONES DE SEMANA: rgb(59,102,128) */
+        /* CONFIGURACIÓN EXACTA PARA BOTONES DE SEMANA: #3B6680 */
         .week-pill:hover {
             border-color: var(--semana-custom);
             background: #F8FAFC;
@@ -373,7 +373,7 @@
 
         .week-pill.selected {
             background: var(--semana-custom) !important;
-            border-color: rgb(45, 78, 98) !important;
+            border-color: #2D4E62 !important;
             color: #FFFFFF !important;
             font-weight: 700;
             box-shadow: 0 2px 6px rgba(59, 102, 128, 0.35);
@@ -893,30 +893,31 @@
         <span id="toastMsg">Mensaje</span>
     </div>
 
+    <!-- Configuración compartida de conexión a la API -->
+    <script src="config.js"></script>
+
     <script>
         // =========================================================================
-        // ⚙️ CONFIGURACIÓN DE CONEXIÓN A LA API (Estilo appsettings.json)
+        // ⚙️ CONFIGURACIÓN DE CONEXIÓN A LA API (Híbrida: usa config.js si existe)
         // =========================================================================
         const APP_CONFIG = {
-            servidor: "RAEVSALL001",
-            puertos: [8080, 5000],
+            servidor: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.servidor) 
+                      ? GLOBAL_CONFIG.servidor 
+                      : "RAEVSALL001",
+            puertos: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.puertos) 
+                     ? GLOBAL_CONFIG.puertos 
+                     : [8080, 5000],
             rutaControlador: "/api/ResumenPl"
         };
 
+        // Generación de servidores API apuntando al nombre del equipo
         function generarBasesApi() {
+            if (typeof generarBasesApiGlobal === 'function') {
+                return generarBasesApiGlobal();
+            }
             const bases = [];
             for (const puerto of APP_CONFIG.puertos) {
                 bases.push(`http://${APP_CONFIG.servidor}:${puerto}`);
-            }
-            if (APP_CONFIG.servidor && APP_CONFIG.servidor.toLowerCase() !== 'localhost' && APP_CONFIG.servidor !== '127.0.0.1') {
-                for (const puerto of APP_CONFIG.puertos) {
-                    const fallback = `http://localhost:${puerto}`;
-                    if (!bases.includes(fallback)) bases.push(fallback);
-                }
-                for (const puerto of APP_CONFIG.puertos) {
-                    const fallbackIp = `http://127.0.0.1:${puerto}`;
-                    if (!bases.includes(fallbackIp)) bases.push(fallbackIp);
-                }
             }
             return bases;
         }

@@ -1,4 +1,4 @@
-using ClosedXML.Excel;
+﻿using ClosedXML.Excel;
 using Microsoft.AspNetCore.Mvc;
 using System.IO;
 
@@ -234,28 +234,6 @@ namespace ApiDesposte.Controllers.Excel
                 }
 
                 return Ok(datos);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { exito = false, error = ex.Message });
-            }
-        }
-
-        /// <summary>
-        /// Devuelve el catálogo de semanas disponibles en T_ResumenPL.
-        /// </summary>
-        [HttpGet("semanas")]
-        public IActionResult ObtenerSemanas()
-        {
-            try
-            {
-                var datos = CargarDatosTablaResumenPL();
-                var semanas = datos.Select(x => x.Semana)
-                                   .Distinct()
-                                   .OrderByDescending(s => s)
-                                   .ToList();
-
-                return Ok(semanas);
             }
             catch (Exception ex)
             {

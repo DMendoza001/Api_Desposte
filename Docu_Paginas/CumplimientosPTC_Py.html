@@ -28,6 +28,7 @@
             --lagoon: #43928E;
             --teal-blue: #007D7E;
             --aegean-blue: #4E6E81;
+            --semana-custom: #3B6680;
 
             --bg-canvas: #F1F5F9;
             --bg-card: #FFFFFF;
@@ -399,11 +400,17 @@
         }
 
         .year-pill:hover,
-        .subplanta-pill:hover,
-        .week-pill:hover {
+        .subplanta-pill:hover {
             border-color: var(--cool-blue);
             background: #F8FAFC;
             color: var(--navy-peony);
+        }
+
+        /* Configuración para botones de semana: #3B6680 */
+        .week-pill:hover {
+            border-color: var(--semana-custom);
+            background: #F8FAFC;
+            color: var(--semana-custom);
         }
 
         .year-pill.selected {
@@ -429,11 +436,11 @@
         }
 
         .week-pill.selected {
-            background: linear-gradient(135deg, var(--cyan-blue) 0%, var(--blue-sapphire) 100%);
-            border-color: var(--blue-sapphire);
-            color: #FFFFFF;
+            background: var(--semana-custom) !important;
+            border-color: #2D4E62 !important;
+            color: #FFFFFF !important;
             font-weight: 700;
-            box-shadow: 0 2px 6px rgba(18, 149, 193, 0.25);
+            box-shadow: 0 2px 6px rgba(59, 102, 128, 0.35);
         }
 
         .week-pill.has-demanda {
@@ -1798,23 +1805,36 @@
         <span id="toastMsg">Mensaje de notificación</span>
     </div>
 
+    <!-- Configuración compartida de conexión a la API -->
+    <script src="config.js"></script>
+
     <script>
         // =========================================================================
-        // CONFIGURACIÓN DE CONEXIÓN CON AUTO-DETECCIÓN DE ENDPOINT PY
+        // ⚙️ CONFIGURACIÓN DE CONEXIÓN A LA API (Híbrida: usa config.js si existe)
         // =========================================================================
         const APP_CONFIG = {
-            hosts: [
-                "http://RAEVSALL001:8080",
-                "http://RAEVSALL001:5000",
-                "http://localhost:8080",
-                "http://localhost:5000",
-                "http://localhost:5050",
-                "http://localhost:8085",
-                "http://127.0.0.1:8080",
-                "http://127.0.0.1:5000"
-            ],
-            controllerPath: "/api/CumplimientosDetallePy"
+            servidor: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.servidor) 
+                      ? GLOBAL_CONFIG.servidor 
+                      : "RAEVSALL001",
+            puertos: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.puertos) 
+                     ? GLOBAL_CONFIG.puertos 
+                     : [8080, 5000]
         };
+
+        // Generación de servidores API apuntando al nombre del equipo
+        function generarBasesApi() {
+            if (typeof generarBasesApiGlobal === 'function') {
+                return generarBasesApiGlobal();
+            }
+            const bases = [];
+            for (const puerto of APP_CONFIG.puertos) {
+                bases.push(`http://${APP_CONFIG.servidor}:${puerto}`);
+            }
+            return bases;
+        }
+
+        APP_CONFIG.hosts = generarBasesApi();
+        APP_CONFIG.controllerPath = "/api/CumplimientosDetallePy";
 
         let apiBaseActiva = null;
         let resumenData = [];

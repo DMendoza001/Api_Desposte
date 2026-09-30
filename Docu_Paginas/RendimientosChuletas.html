@@ -1044,25 +1044,36 @@
     <span id="toastMsg">Mensaje</span>
   </div>
 
+  <!-- Configuración compartida de conexión a la API -->
+  <script src="config.js"></script>
+
   <script>
     // =========================================================================
-    // ⚙️ CONFIGURACIÓN DE CONEXIÓN A LA API (Estilo appsettings.json)
+    // ⚙️ CONFIGURACIÓN DE CONEXIÓN A LA API (Híbrida: usa config.js si existe)
     // =========================================================================
     const APP_CONFIG = {
-      // Nombre del equipo donde corre tu API .NET
-      // 🏢 Oficina: "RAEVSALL001"
-      // 🏠 Casa: Cambiar aquí por el nombre de tu máquina en casa
-      servidor: "RAEVSALL001",
-
-      // Puertos a los que intentará conectarse en orden de prioridad
-      puertos: [8080, 5000],
-
-      // Endpoint del controlador SQL (ProdChuletasController)
-      rutaListar: "/api/ProdChuletas",
-
-      // Tiempo máximo de espera para la consulta SQL (20 segundos)
-      timeoutMs: 20000
+      servidor: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.servidor) 
+                ? GLOBAL_CONFIG.servidor 
+                : "RAEVSALL001",
+      puertos: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.puertos) 
+               ? GLOBAL_CONFIG.puertos 
+               : [8080, 5000]
     };
+
+    // Generación de servidores API apuntando al nombre del equipo
+    function generarBasesApi() {
+      if (typeof generarBasesApiGlobal === 'function') {
+        return generarBasesApiGlobal();
+      }
+      const bases = [];
+      for (const puerto of APP_CONFIG.puertos) {
+        bases.push(`http://${APP_CONFIG.servidor}:${puerto}`);
+      }
+      return bases;
+    }
+
+    APP_CONFIG.rutaListar = "/api/ProdChuletas";
+    APP_CONFIG.timeoutMs = 20000;
 
     // Generación de Endpoints API apuntando al nombre del equipo
     function generarEndpointsApi(rutaRelativa) {
@@ -1070,17 +1081,10 @@
       if (apiBaseActiva) {
         endpoints.push(`${apiBaseActiva}${rutaRelativa}`);
       }
-      for (const puerto of APP_CONFIG.puertos) {
-        const ep = `http://${APP_CONFIG.servidor}:${puerto}${rutaRelativa}`;
+      generarBasesApi().forEach(base => {
+        const ep = `${base}${rutaRelativa}`;
         if (!endpoints.includes(ep)) endpoints.push(ep);
-      }
-      // Fallback a localhost si el servidor configurado no responde y es distinto de localhost
-      if (APP_CONFIG.servidor && APP_CONFIG.servidor.toLowerCase() !== 'localhost' && APP_CONFIG.servidor !== '127.0.0.1') {
-        for (const puerto of APP_CONFIG.puertos) {
-          const ep = `http://localhost:${puerto}${rutaRelativa}`;
-          if (!endpoints.includes(ep)) endpoints.push(ep);
-        }
-      }
+      });
       return endpoints;
     }
 
