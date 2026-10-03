@@ -372,6 +372,57 @@
       gap: 8px;
     }
 
+    /* Pestañas de Vista Temporal */
+    .matrix-tabs-nav {
+      display: inline-flex;
+      background: #E2E8F0;
+      padding: 4px;
+      border-radius: 10px;
+      gap: 4px;
+    }
+
+    .matrix-tab-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.85rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .matrix-tab-btn:hover {
+      color: var(--navy-peony);
+      background: rgba(255, 255, 255, 0.55);
+    }
+
+    .matrix-tab-btn.active {
+      background: var(--navy-peony);
+      color: #FFFFFF;
+      box-shadow: 0 2px 6px rgba(34, 58, 94, 0.25);
+    }
+
+    .tab-badge {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      background: rgba(0, 0, 0, 0.08);
+      color: inherit;
+    }
+
+    .matrix-tab-btn.active .tab-badge {
+      background: rgba(255, 255, 255, 0.25);
+      color: #FFFFFF;
+    }
+
+    /* Barra de herramientas / Búsqueda y Acciones */
     .matrix-toolbar {
       display: flex;
       justify-content: space-between;
@@ -497,41 +548,42 @@
       border-bottom: 2px solid rgba(0, 0, 0, 0.1);
     }
 
-    /* Fila Nivel 1: TIPO */
-    .row-tipo {
-      background: linear-gradient(90deg, #1E293B 0%, #334155 100%) !important;
-      color: #F8FAFC !important;
+    /* Fila Nivel 1: PERIODO */
+    .row-periodo {
+      background: linear-gradient(90deg, #1E293B 0%, #29384D 100%) !important;
+      color: #FFFFFF !important;
       font-weight: 700;
       cursor: pointer;
       user-select: none;
       transition: background 0.15s;
     }
 
-    .row-tipo:hover {
+    .row-periodo:hover {
       background: linear-gradient(90deg, #0F172A 0%, #1E293B 100%) !important;
     }
 
-    .row-tipo td {
-      border-bottom: 1px solid #475569;
+    .row-periodo td {
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
       padding: 11px 14px;
     }
 
-    .tipo-title {
-      font-size: 0.92rem;
-      letter-spacing: -0.01em;
-      color: #FFFFFF;
+    .periodo-title {
       font-weight: 700;
+      font-size: 0.95rem;
+      color: #F8FAFC;
+      letter-spacing: -0.01em;
     }
 
-    .tipo-count {
+    .periodo-count {
       font-size: 0.74rem;
-      font-weight: 500;
-      opacity: 0.85;
+      opacity: 0.75;
+      font-weight: 400;
       margin-left: 8px;
     }
 
-    /* Fila Nivel 2: TIPO CHULETA */
-    .row-chuleta {
+    /* Fila Nivel 2: TIPO */
+    .row-tipo {
       background-color: #EBF3FA !important;
       color: #0F172A !important;
       font-weight: 600;
@@ -540,16 +592,16 @@
       transition: background 0.15s;
     }
 
-    .row-chuleta:hover {
+    .row-tipo:hover {
       background-color: #DEEBF5 !important;
     }
 
-    .row-chuleta td {
+    .row-tipo td {
       border-bottom: 1px solid #CBD5E1;
       padding: 9px 14px;
     }
 
-    .chuleta-badge {
+    .tipo-badge {
       display: inline-flex;
       align-items: center;
       gap: 5px;
@@ -562,7 +614,39 @@
       border: 1px solid #B8D6ED;
     }
 
-    /* Fila Nivel 3: PLANTILLA-NPLANTILLA */
+    /* Fila Nivel 3: TIPO CHULETA */
+    .row-chuleta {
+      background-color: #F8FAFC !important;
+      color: #1E293B !important;
+      font-weight: 600;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s;
+    }
+
+    .row-chuleta:hover {
+      background-color: #F1F5F9 !important;
+    }
+
+    .row-chuleta td {
+      border-bottom: 1px solid #E2E8F0;
+      padding: 8px 14px;
+    }
+
+    .chuleta-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 2px 9px;
+      border-radius: 6px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      background: rgba(18, 149, 193, 0.12);
+      color: var(--blue-sapphire);
+      border: 1px solid rgba(18, 149, 193, 0.25);
+    }
+
+    /* Fila Nivel 4: PLANTILLA-NPLANTILLA */
     .row-plantilla {
       background-color: #FFFFFF !important;
       color: #1E293B;
@@ -570,7 +654,7 @@
     }
 
     .row-plantilla:nth-child(even) {
-      background-color: #F8FAFC !important;
+      background-color: #FAFAFA !important;
     }
 
     .row-plantilla:hover {
@@ -619,9 +703,14 @@
       transition: transform 0.15s ease;
     }
 
-    .row-chuleta .tree-toggle-icon {
+    .row-tipo .tree-toggle-icon {
       background: rgba(16, 88, 127, 0.12);
       color: var(--blue-sapphire);
+    }
+
+    .row-chuleta .tree-toggle-icon {
+      background: rgba(18, 149, 193, 0.15);
+      color: var(--cyan-blue);
     }
 
     /* Total General en Footer */
@@ -920,24 +1009,43 @@
     </div>
   </section>
 
-  <!-- Matriz Jerárquica: Tipo ➔ TipoChuleta ➔ Plantilla - NPlantilla -->
+  <!-- Matriz Jerárquica: Periodo ➔ Tipo ➔ Tipo Chuleta ➔ Plantilla - NPlantilla -->
   <section class="matrix-card">
     <div class="matrix-header-bar">
       <div class="matrix-header-top">
-        <h3 id="matrixTitle">🥩 Matriz Jerárquica de Rendimiento (Tipo ➔ Tipo Chuleta ➔ Plantilla - NPlantilla)</h3>
+        <h3 id="matrixTitle">📆 Matriz Jerárquica Semanal (Semana ➔ Tipo ➔ Tipo Chuleta ➔ Plantilla)</h3>
+
+        <!-- Pestañas de Frecuencia: Diaria, Semanal, Mensual -->
+        <div class="matrix-tabs-nav">
+          <button class="matrix-tab-btn" id="tabMatrizDiario" onclick="cambiarPestanaMatriz('diario')">
+            <span>📅</span>
+            <span>Diario</span>
+            <span class="tab-badge" id="badgeDiario">0</span>
+          </button>
+          <button class="matrix-tab-btn active" id="tabMatrizSemanal" onclick="cambiarPestanaMatriz('semanal')">
+            <span>📆</span>
+            <span>Semanal</span>
+            <span class="tab-badge" id="badgeSemanal">0</span>
+          </button>
+          <button class="matrix-tab-btn" id="tabMatrizMensual" onclick="cambiarPestanaMatriz('mensual')">
+            <span>📊</span>
+            <span>Mensual</span>
+            <span class="tab-badge" id="badgeMensual">0</span>
+          </button>
+        </div>
       </div>
 
       <div class="matrix-toolbar">
         <div class="table-search">
           <span class="table-search-icon">🔍</span>
-          <input type="text" id="tableSearchInput" placeholder="Buscar tipo, tipo chuleta o plantilla..."
+          <input type="text" id="tableSearchInput" placeholder="Buscar periodo, tipo, chuleta o plantilla..."
             oninput="filtrarMatrizTexto()">
         </div>
         <div class="matrix-actions">
-          <button class="btn-tool" onclick="toggleExpandirTodo(true)" title="Expandir todos los niveles">
+          <button class="btn-tool" onclick="toggleExpandirTodo(true)" title="Expandir todos los periodos y procesos">
             <span>📂</span> Expandir Todo
           </button>
-          <button class="btn-tool" onclick="toggleExpandirTodo(false)" title="Colapsar a nivel de Tipo">
+          <button class="btn-tool" onclick="toggleExpandirTodo(false)" title="Colapsar a nivel de Periodo">
             <span>📁</span> Colapsar Todo
           </button>
           <button class="btn-tool btn-excel-flat" onclick="exportarDataPlanaExcel()"
@@ -956,7 +1064,7 @@
       <table class="matrix-table" id="matrixTable">
         <thead>
           <tr>
-            <th style="min-width: 360px;">Jerarquía: Tipo / Tipo Chuleta / Plantilla - NPlantilla</th>
+            <th style="min-width: 360px;">Jerarquía: Periodo / Tipo / Tipo Chuleta / Plantilla - NPlantilla</th>
             <th style="text-align: right; width: 140px;">Kilos Origen (kg)</th>
             <th style="text-align: right; width: 140px;">Kilos Resultado (kg)</th>
             <th style="text-align: right; width: 120px;">Harinas (kg)</th>
@@ -991,12 +1099,12 @@
     // ⚙️ CONFIGURACIÓN DE CONEXIÓN A LA API (Híbrida: usa config.js si existe)
     // =========================================================================
     const APP_CONFIG = {
-      servidor: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.servidor) 
-                ? GLOBAL_CONFIG.servidor 
-                : "RAEVSALL001",
-      puertos: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.puertos) 
-               ? GLOBAL_CONFIG.puertos 
-               : [8080, 5000]
+      servidor: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.servidor)
+        ? GLOBAL_CONFIG.servidor
+        : "RAEVSALL001",
+      puertos: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.puertos)
+        ? GLOBAL_CONFIG.puertos
+        : [8080, 5000]
     };
 
     // Generación de servidores API apuntando al nombre del equipo
@@ -1033,7 +1141,9 @@
     let chartTemporalObj = null;
     let chartPlantillasObj = null;
 
-    // Estado de colapso de la Matriz Jerárquica
+    // Estado de la Matriz Jerárquica
+    let modoMatrizActivo = 'semanal'; // 'diario', 'semanal', 'mensual'
+    const collapsedPeriodos = new Set();
     const collapsedTipos = new Set();
     const collapsedChuletas = new Set();
 
@@ -1098,6 +1208,14 @@
         `;
       }
       if (tfoot) tfoot.innerHTML = '';
+
+      // Resetear contadores de pestañas
+      const bDia = document.getElementById('badgeDiario');
+      const bSem = document.getElementById('badgeSemanal');
+      const bMes = document.getElementById('badgeMensual');
+      if (bDia) bDia.textContent = '0';
+      if (bSem) bSem.textContent = '0';
+      if (bMes) bMes.textContent = '0';
     }
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -1111,7 +1229,12 @@
       document.getElementById('tipoChuletaFilter').addEventListener('change', applyFilters);
       document.getElementById('plantillaFilter').addEventListener('change', applyFilters);
 
-      document.getElementById('temporalFilter').addEventListener('change', () => {
+      // Sincronizar temporalFilter del panel con la pestaña activa de la matriz
+      document.getElementById('temporalFilter').addEventListener('change', (e) => {
+        const v = e.target.value;
+        if (['diario', 'semanal', 'mensual'].includes(v)) {
+          cambiarPestanaMatriz(v, false);
+        }
         renderTemporalChart();
       });
 
@@ -1338,6 +1461,7 @@
       document.getElementById('tipoChuletaFilter').value = 'ALL';
       document.getElementById('plantillaFilter').value = 'ALL';
       document.getElementById('temporalFilter').value = 'semanal';
+      cambiarPestanaMatriz('semanal', false);
       document.getElementById('tableSearchInput').value = '';
       if (enrichedData && enrichedData.length > 0) {
         applyFilters();
@@ -1606,10 +1730,40 @@
     }
 
     // =========================================================================
-    // 🥩 MATRIZ JERÁRQUICA: Tipo ➔ TipoChuleta ➔ Plantilla - NPlantilla
+    // 🥩 MATRIZ JERÁRQUICA: Periodo ➔ Tipo ➔ Tipo Chuleta ➔ Plantilla - NPlantilla
     // =========================================================================
     function formatKg(val) {
       return Number(val || 0).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function formatPeriodoNombre(modo, key) {
+      if (!key || key === 'SIN_FECHA') return 'Sin Fecha Registrada';
+      if (modo === 'diario') {
+        const parts = key.split('-');
+        if (parts.length === 3) {
+          const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+          const diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+          const diaNombre = diasSemana[d.getDay()];
+          return `${key} (${diaNombre})`;
+        }
+        return key;
+      } else if (modo === 'semanal') {
+        const parts = key.split('-S');
+        if (parts.length === 2) {
+          return `Semana ${parts[1]} (${parts[0]})`;
+        }
+        return key;
+      } else if (modo === 'mensual') {
+        const parts = key.split('-');
+        if (parts.length === 2) {
+          const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+          const mIdx = parseInt(parts[1], 10) - 1;
+          const mesNombre = (mIdx >= 0 && mIdx < 12) ? meses[mIdx] : parts[1];
+          return `${mesNombre} ${parts[0]}`;
+        }
+        return key;
+      }
+      return key;
     }
 
     function getRendimientoBadge(rendimiento) {
@@ -1619,24 +1773,80 @@
       return `<span class="badge-rend ${badgeClass}">${Number(rendimiento || 0).toFixed(2)}%</span>`;
     }
 
-    // Agrupador jerárquico modificado: Tipo ➔ TipoChuleta ➔ Plantilla-NPlantilla
-    function agruparDatosJerarquicos(data) {
-      const tipoMap = new Map();
+    function actualizarBadgesPestanas() {
+      const dias = new Set(filteredData.map(d => d._dia).filter(Boolean)).size;
+      const semanas = new Set(filteredData.map(d => d._semana).filter(Boolean)).size;
+      const meses = new Set(filteredData.map(d => d._mes).filter(Boolean)).size;
+
+      const bDia = document.getElementById('badgeDiario');
+      const bSem = document.getElementById('badgeSemanal');
+      const bMes = document.getElementById('badgeMensual');
+
+      if (bDia) bDia.textContent = dias;
+      if (bSem) bSem.textContent = semanas;
+      if (bMes) bMes.textContent = meses;
+    }
+
+    function cambiarPestanaMatriz(modo, sincronizarFiltro = true) {
+      modoMatrizActivo = modo;
+
+      // Actualizar botón activo de pestañas
+      document.querySelectorAll('.matrix-tab-btn').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.getElementById(`tabMatriz${modo.charAt(0).toUpperCase() + modo.slice(1)}`);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      // Sincronizar select temporal si se llamó desde la pestaña
+      if (sincronizarFiltro) {
+        const tempSelect = document.getElementById('temporalFilter');
+        if (tempSelect && tempSelect.value !== modo) {
+          tempSelect.value = modo;
+          renderTemporalChart();
+        }
+      }
+
+      // Actualizar título de la matriz
+      const titulos = {
+        diario: '📅 Matriz Jerárquica Diaria (Día ➔ Tipo ➔ Tipo Chuleta ➔ Plantilla)',
+        semanal: '📆 Matriz Jerárquica Semanal (Semana ➔ Tipo ➔ Tipo Chuleta ➔ Plantilla)',
+        mensual: '📊 Matriz Jerárquica Mensual (Mes ➔ Tipo ➔ Tipo Chuleta ➔ Plantilla)'
+      };
+      const titleEl = document.getElementById('matrixTitle');
+      if (titleEl) titleEl.textContent = titulos[modo] || 'Matriz Jerárquica';
+
+      renderMatrizJerarquica();
+    }
+
+    // Agrupador jerárquico 4 niveles: Periodo ➔ Tipo ➔ Tipo Chuleta ➔ Plantilla - NPlantilla
+    function agruparDatosJerarquicos(data, timeField) {
+      const periodoMap = new Map();
 
       data.forEach(d => {
-        // Nivel 1: Tipo
+        // Nivel 1: Periodo (Día, Semana o Mes)
+        const pKey = d[timeField] || 'SIN_FECHA';
+        if (!periodoMap.has(pKey)) {
+          periodoMap.set(pKey, {
+            pKey,
+            pLabel: formatPeriodoNombre(modoMatrizActivo, pKey),
+            rows: [],
+            tiposMap: new Map()
+          });
+        }
+        const pObj = periodoMap.get(pKey);
+        pObj.rows.push(d);
+
+        // Nivel 2: Tipo
         const tKey = d.Tipo || 'SIN TIPO';
-        if (!tipoMap.has(tKey)) {
-          tipoMap.set(tKey, {
+        if (!pObj.tiposMap.has(tKey)) {
+          pObj.tiposMap.set(tKey, {
             tKey,
             rows: [],
             chuletasMap: new Map()
           });
         }
-        const tObj = tipoMap.get(tKey);
+        const tObj = pObj.tiposMap.get(tKey);
         tObj.rows.push(d);
 
-        // Nivel 2: TipoChuleta
+        // Nivel 3: Tipo Chuleta
         const cKey = d.TipoChuleta || 'SIN CLASIFICAR';
         if (!tObj.chuletasMap.has(cKey)) {
           tObj.chuletasMap.set(cKey, {
@@ -1648,7 +1858,7 @@
         const cObj = tObj.chuletasMap.get(cKey);
         cObj.rows.push(d);
 
-        // Nivel 3: Plantilla-NPlantilla (Combinado)
+        // Nivel 4: Plantilla - NPlantilla (Combinado)
         const planKey = `${d.Plantilla || 0} - ${d.NPlantilla || 'Sin Nombre'}`;
         if (!cObj.plantillasMap.has(planKey)) {
           cObj.plantillasMap.set(planKey, {
@@ -1661,7 +1871,7 @@
         cObj.plantillasMap.get(planKey).rows.push(d);
       });
 
-      return tipoMap;
+      return periodoMap;
     }
 
     function renderMatrizJerarquica() {
@@ -1669,105 +1879,142 @@
       const tfoot = document.getElementById('tablePlantillasFoot');
       if (!tbody) return;
 
+      actualizarBadgesPestanas();
+
+      const timeFieldMap = {
+        diario: '_dia',
+        semanal: '_semana',
+        mensual: '_mes'
+      };
+      const timeField = timeFieldMap[modoMatrizActivo] || '_semana';
+
       if (!filteredData || filteredData.length === 0) {
         tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 36px; color: var(--text-muted); font-size: 0.9rem;">❌ No hay registros que coincidan con los filtros seleccionados.</td></tr>`;
         if (tfoot) tfoot.innerHTML = '';
         return;
       }
 
-      const tipoMap = agruparDatosJerarquicos(filteredData);
-      const sortedTipos = Array.from(tipoMap.keys()).sort();
+      const periodoMap = agruparDatosJerarquicos(filteredData, timeField);
+      const sortedPeriodos = Array.from(periodoMap.keys()).sort();
 
       let tbodyHtml = '';
 
-      sortedTipos.forEach(tKey => {
-        const tObj = tipoMap.get(tKey);
-        const tM = calculateMetrics(tObj.rows);
-        const isTCollapsed = collapsedTipos.has(tKey);
-        const iconTipo = isTCollapsed ? '▶' : '▼';
+      sortedPeriodos.forEach(pKey => {
+        const pObj = periodoMap.get(pKey);
+        const pM = calculateMetrics(pObj.rows);
+        const isPCollapsed = collapsedPeriodos.has(pKey);
+        const iconPeriodo = isPCollapsed ? '▶' : '▼';
 
-        // 1. Fila de Nivel 1: TIPO
+        // 1. Fila de Nivel 1: PERIODO
         tbodyHtml += `
-          <tr class="row-tipo ${isTCollapsed ? 'collapsed' : ''}" onclick="toggleColapsoTipo('${tKey}')" data-tipo="${tKey}">
+          <tr class="row-periodo ${isPCollapsed ? 'collapsed' : ''}" onclick="toggleColapsoPeriodo('${pKey}')" data-period="${pKey}">
             <td>
-              <span class="tree-toggle-icon">${iconTipo}</span>
-              <span class="tipo-title">🏷️ Tipo: ${tKey}</span>
-              <span class="tipo-count">${tObj.chuletasMap.size} tipos chuleta | ${tObj.rows.length} regs</span>
+              <span class="tree-toggle-icon">${iconPeriodo}</span>
+              <span class="periodo-title">📅 ${pObj.pLabel}</span>
+              <span class="periodo-count">${pObj.tiposMap.size} tipos | ${pObj.rows.length} regs</span>
             </td>
-            <td class="text-right num-col">${formatKg(tM.origen)}</td>
-            <td class="text-right num-col">${formatKg(tM.resultado)}</td>
-            <td class="text-right num-col" style="color: #CBD5E1;">${formatKg(tM.harina)}</td>
-            <td class="text-right num-col" style="color: #FCA5A5;">${formatKg(tM.merma)}</td>
-            <td class="text-right num-col">${formatKg(tM.perdida)}</td>
-            <td class="text-right">${getRendimientoBadge(tM.rendimiento)}</td>
+            <td class="text-right num-col">${formatKg(pM.origen)}</td>
+            <td class="text-right num-col">${formatKg(pM.resultado)}</td>
+            <td class="text-right num-col" style="color: #CBD5E1;">${formatKg(pM.harina)}</td>
+            <td class="text-right num-col" style="color: #FCA5A5;">${formatKg(pM.merma)}</td>
+            <td class="text-right num-col">${formatKg(pM.perdida)}</td>
+            <td class="text-right">${getRendimientoBadge(pM.rendimiento)}</td>
           </tr>
         `;
 
-        // 2. Filas de Nivel 2: TIPO CHULETA
-        const sortedChuletas = Array.from(tObj.chuletasMap.values()).sort((a, b) => a.cKey.localeCompare(b.cKey));
+        // 2. Filas de Nivel 2: TIPO
+        const sortedTipos = Array.from(pObj.tiposMap.values()).sort((a, b) => a.tKey.localeCompare(b.tKey));
 
-        sortedChuletas.forEach(cObj => {
-          const cM = calculateMetrics(cObj.rows);
-          const cFullKey = `${tKey}___${cObj.cKey}`;
-          const isCCollapsed = collapsedChuletas.has(cFullKey);
-          const iconChuleta = isCCollapsed ? '▶' : '▼';
-          const displayChuletaStyle = isTCollapsed ? 'display: none;' : '';
+        sortedTipos.forEach(tObj => {
+          const tM = calculateMetrics(tObj.rows);
+          const tFullKey = `${pKey}___${tObj.tKey}`;
+          const isTCollapsed = collapsedTipos.has(tFullKey);
+          const iconTipo = isTCollapsed ? '▶' : '▼';
+          const displayTipoStyle = isPCollapsed ? 'display: none;' : '';
 
           tbodyHtml += `
-            <tr class="row-chuleta ${isCCollapsed ? 'collapsed' : ''}" onclick="toggleColapsoChuleta('${cFullKey}')" 
-                data-parent-tipo="${tKey}" data-chuleta-key="${cFullKey}" style="${displayChuletaStyle}">
+            <tr class="row-tipo ${isTCollapsed ? 'collapsed' : ''}" onclick="toggleColapsoTipo('${tFullKey}')" 
+                data-parent-period="${pKey}" data-tipo-key="${tFullKey}" style="${displayTipoStyle}">
               <td style="padding-left: 28px;">
-                <span class="tree-toggle-icon">${iconChuleta}</span>
-                <span class="chuleta-badge">❄️ Tipo Chuleta: ${cObj.cKey}</span>
-                <span class="tipo-count">${cObj.plantillasMap.size} plantillas</span>
+                <span class="tree-toggle-icon">${iconTipo}</span>
+                <span class="tipo-badge">🏷️ Tipo: ${tObj.tKey}</span>
+                <span class="tipo-count">${tObj.chuletasMap.size} tipos chuleta</span>
               </td>
-              <td class="text-right num-col font-bold">${formatKg(cM.origen)}</td>
-              <td class="text-right num-col font-bold text-teal">${formatKg(cM.resultado)}</td>
-              <td class="text-right num-col text-muted">${formatKg(cM.harina)}</td>
-              <td class="text-right num-col text-danger">${formatKg(cM.merma)}</td>
-              <td class="text-right num-col font-bold">${formatKg(cM.perdida)}</td>
-              <td class="text-right">${getRendimientoBadge(cM.rendimiento)}</td>
+              <td class="text-right num-col font-bold">${formatKg(tM.origen)}</td>
+              <td class="text-right num-col font-bold text-teal">${formatKg(tM.resultado)}</td>
+              <td class="text-right num-col text-muted">${formatKg(tM.harina)}</td>
+              <td class="text-right num-col text-danger">${formatKg(tM.merma)}</td>
+              <td class="text-right num-col font-bold">${formatKg(tM.perdida)}</td>
+              <td class="text-right">${getRendimientoBadge(tM.rendimiento)}</td>
             </tr>
           `;
 
-          // 3. Filas de Nivel 3: PLANTILLA-NPLANTILLA (Fila Combinada)
-          const sortedPlantillas = Array.from(cObj.plantillasMap.values()).sort((a, b) => a.id - b.id);
-          const displayPlantillaStyle = (isTCollapsed || isCCollapsed) ? 'display: none;' : '';
+          // 3. Filas de Nivel 3: TIPO CHULETA
+          const sortedChuletas = Array.from(tObj.chuletasMap.values()).sort((a, b) => a.cKey.localeCompare(b.cKey));
 
-          sortedPlantillas.forEach(plan => {
-            const planM = calculateMetrics(plan.rows);
-            const searchStr = `${tKey} ${cObj.cKey} ${plan.planKey}`.toLowerCase();
+          sortedChuletas.forEach(cObj => {
+            const cM = calculateMetrics(cObj.rows);
+            const cFullKey = `${tFullKey}___${cObj.cKey}`;
+            const isCCollapsed = collapsedChuletas.has(cFullKey);
+            const iconChuleta = isCCollapsed ? '▶' : '▼';
+            const displayChuletaStyle = (isPCollapsed || isTCollapsed) ? 'display: none;' : '';
 
             tbodyHtml += `
-              <tr class="row-plantilla" data-parent-tipo="${tKey}" data-parent-chuleta="${cFullKey}" data-search="${searchStr}" style="${displayPlantillaStyle}">
-                <td style="padding-left: 52px;">
-                  <div class="plantilla-tag-composite">
-                    <span class="plantilla-code">${plan.id || '-'}</span>
-                    <span class="plantilla-name">${plan.name}</span>
-                  </div>
+              <tr class="row-chuleta ${isCCollapsed ? 'collapsed' : ''}" onclick="toggleColapsoChuleta('${cFullKey}')" 
+                  data-parent-period="${pKey}" data-parent-tipo="${tFullKey}" data-chuleta-key="${cFullKey}" style="${displayChuletaStyle}">
+                <td style="padding-left: 48px;">
+                  <span class="tree-toggle-icon">${iconChuleta}</span>
+                  <span class="chuleta-badge">❄️ Tipo Chuleta: ${cObj.cKey}</span>
+                  <span class="tipo-count">${cObj.plantillasMap.size} plantillas</span>
                 </td>
-                <td class="text-right num-col">${formatKg(planM.origen)}</td>
-                <td class="text-right num-col text-teal">${formatKg(planM.resultado)}</td>
-                <td class="text-right num-col text-muted">${formatKg(planM.harina)}</td>
-                <td class="text-right num-col text-danger">${formatKg(planM.merma)}</td>
-                <td class="text-right num-col">${formatKg(planM.perdida)}</td>
-                <td class="text-right">${getRendimientoBadge(planM.rendimiento)}</td>
+                <td class="text-right num-col font-bold">${formatKg(cM.origen)}</td>
+                <td class="text-right num-col font-bold text-teal">${formatKg(cM.resultado)}</td>
+                <td class="text-right num-col text-muted">${formatKg(cM.harina)}</td>
+                <td class="text-right num-col text-danger">${formatKg(cM.merma)}</td>
+                <td class="text-right num-col font-bold">${formatKg(cM.perdida)}</td>
+                <td class="text-right">${getRendimientoBadge(cM.rendimiento)}</td>
               </tr>
             `;
+
+            // 4. Filas de Nivel 4: PLANTILLA-NPLANTILLA (Fila Combinada)
+            const sortedPlantillas = Array.from(cObj.plantillasMap.values()).sort((a, b) => a.id - b.id);
+            const displayPlantillaStyle = (isPCollapsed || isTCollapsed || isCCollapsed) ? 'display: none;' : '';
+
+            sortedPlantillas.forEach(plan => {
+              const planM = calculateMetrics(plan.rows);
+              const searchStr = `${pObj.pLabel} ${tObj.tKey} ${cObj.cKey} ${plan.planKey}`.toLowerCase();
+
+              tbodyHtml += `
+                <tr class="row-plantilla" data-parent-period="${pKey}" data-parent-tipo="${tFullKey}" data-parent-chuleta="${cFullKey}" data-search="${searchStr}" style="${displayPlantillaStyle}">
+                  <td style="padding-left: 68px;">
+                    <div class="plantilla-tag-composite">
+                      <span class="plantilla-code">${plan.id || '-'}</span>
+                      <span class="plantilla-name">${plan.name}</span>
+                    </div>
+                  </td>
+                  <td class="text-right num-col">${formatKg(planM.origen)}</td>
+                  <td class="text-right num-col text-teal">${formatKg(planM.resultado)}</td>
+                  <td class="text-right num-col text-muted">${formatKg(planM.harina)}</td>
+                  <td class="text-right num-col text-danger">${formatKg(planM.merma)}</td>
+                  <td class="text-right num-col">${formatKg(planM.perdida)}</td>
+                  <td class="text-right">${getRendimientoBadge(planM.rendimiento)}</td>
+                </tr>
+              `;
+            });
           });
         });
       });
 
       tbody.innerHTML = tbodyHtml;
 
-      // 4. Fila Total General Consolidado
+      // 5. Fila Total General Consolidado
       const globalM = calculateMetrics(filteredData);
       if (tfoot) {
         tfoot.innerHTML = `
           <tr class="row-grand-total">
             <td>
               <span style="font-size: 0.95rem;">🏆 TOTAL GENERAL CONSOLIDADO</span>
-              <span style="font-size: 0.75rem; font-weight: normal; opacity: 0.8; margin-left: 8px;">(${sortedTipos.length} tipos | ${filteredData.length.toLocaleString('es-PE')} registros)</span>
+              <span style="font-size: 0.75rem; font-weight: normal; opacity: 0.8; margin-left: 8px;">(${sortedPeriodos.length} periodos | ${filteredData.length.toLocaleString('es-PE')} registros)</span>
             </td>
             <td class="text-right num-col">${formatKg(globalM.origen)}</td>
             <td class="text-right num-col" style="color: var(--cool-blue);">${formatKg(globalM.resultado)}</td>
@@ -1780,11 +2027,20 @@
       }
     }
 
-    function toggleColapsoTipo(tKey) {
-      if (collapsedTipos.has(tKey)) {
-        collapsedTipos.delete(tKey);
+    function toggleColapsoPeriodo(pKey) {
+      if (collapsedPeriodos.has(pKey)) {
+        collapsedPeriodos.delete(pKey);
       } else {
-        collapsedTipos.add(tKey);
+        collapsedPeriodos.add(pKey);
+      }
+      renderMatrizJerarquica();
+    }
+
+    function toggleColapsoTipo(tFullKey) {
+      if (collapsedTipos.has(tFullKey)) {
+        collapsedTipos.delete(tFullKey);
+      } else {
+        collapsedTipos.add(tFullKey);
       }
       renderMatrizJerarquica();
     }
@@ -1800,14 +2056,20 @@
 
     function toggleExpandirTodo(expandir) {
       if (expandir) {
+        collapsedPeriodos.clear();
         collapsedTipos.clear();
         collapsedChuletas.clear();
       } else {
+        const timeFieldMap = { diario: '_dia', semanal: '_semana', mensual: '_mes' };
+        const timeField = timeFieldMap[modoMatrizActivo] || '_semana';
         filteredData.forEach(d => {
+          const pKey = d[timeField] || 'SIN_FECHA';
+          collapsedPeriodos.add(pKey);
           const tKey = d.Tipo || 'SIN TIPO';
-          collapsedTipos.add(tKey);
+          const tFullKey = `${pKey}___${tKey}`;
+          collapsedTipos.add(tFullKey);
           const cKey = d.TipoChuleta || 'SIN CLASIFICAR';
-          collapsedChuletas.add(`${tKey}___${cKey}`);
+          collapsedChuletas.add(`${tFullKey}___${cKey}`);
         });
       }
       renderMatrizJerarquica();
@@ -1822,6 +2084,7 @@
         return;
       }
 
+      const periodosQueCoinciden = new Set();
       const tiposQueCoinciden = new Set();
       const chuletasQueCoinciden = new Set();
 
@@ -1830,29 +2093,40 @@
         const matches = text.includes(q) || ((r.dataset.search || '').includes(q));
         if (matches) {
           if (r.classList.contains('row-plantilla')) {
+            periodosQueCoinciden.add(r.dataset.parentPeriod);
             tiposQueCoinciden.add(r.dataset.parentTipo);
             chuletasQueCoinciden.add(r.dataset.parentChuleta);
           } else if (r.classList.contains('row-chuleta')) {
+            periodosQueCoinciden.add(r.dataset.parentPeriod);
             tiposQueCoinciden.add(r.dataset.parentTipo);
             chuletasQueCoinciden.add(r.dataset.chuletaKey);
           } else if (r.classList.contains('row-tipo')) {
-            tiposQueCoinciden.add(r.dataset.tipo);
+            periodosQueCoinciden.add(r.dataset.parentPeriod);
+            tiposQueCoinciden.add(r.dataset.tipoKey);
+          } else if (r.classList.contains('row-periodo')) {
+            periodosQueCoinciden.add(r.dataset.period);
           }
         }
       });
 
       rows.forEach(r => {
-        if (r.classList.contains('row-tipo')) {
-          r.style.display = tiposQueCoinciden.has(r.dataset.tipo) ? '' : 'none';
+        if (r.classList.contains('row-periodo')) {
+          r.style.display = periodosQueCoinciden.has(r.dataset.period) ? '' : 'none';
+        } else if (r.classList.contains('row-tipo')) {
+          const pMatch = periodosQueCoinciden.has(r.dataset.parentPeriod);
+          const tMatch = tiposQueCoinciden.has(r.dataset.tipoKey);
+          r.style.display = (pMatch && (tMatch || r.textContent.toLowerCase().includes(q))) ? '' : 'none';
         } else if (r.classList.contains('row-chuleta')) {
-          const tipoMatches = tiposQueCoinciden.has(r.dataset.parentTipo);
-          const chuletaMatches = chuletasQueCoinciden.has(r.dataset.chuletaKey);
-          r.style.display = (tipoMatches && (chuletaMatches || r.textContent.toLowerCase().includes(q))) ? '' : 'none';
+          const pMatch = periodosQueCoinciden.has(r.dataset.parentPeriod);
+          const tMatch = tiposQueCoinciden.has(r.dataset.parentTipo);
+          const cMatch = chuletasQueCoinciden.has(r.dataset.chuletaKey);
+          r.style.display = (pMatch && tMatch && (cMatch || r.textContent.toLowerCase().includes(q))) ? '' : 'none';
         } else if (r.classList.contains('row-plantilla')) {
-          const tMatches = tiposQueCoinciden.has(r.dataset.parentTipo);
-          const cMatches = chuletasQueCoinciden.has(r.dataset.parentChuleta);
-          const selfMatches = (r.dataset.search || '').includes(q);
-          r.style.display = (tMatches && (cMatches || selfMatches)) ? '' : 'none';
+          const pMatch = periodosQueCoinciden.has(r.dataset.parentPeriod);
+          const tMatch = tiposQueCoinciden.has(r.dataset.parentTipo);
+          const cMatch = chuletasQueCoinciden.has(r.dataset.parentChuleta);
+          const selfMatch = (r.dataset.search || '').includes(q);
+          r.style.display = (pMatch && tMatch && cMatch && selfMatch) ? '' : 'none';
         }
       });
     }
@@ -1868,81 +2142,109 @@
 
       mostrarToast("⏳ Generando archivo Excel...", 2000);
 
-      const tipoMap = agruparDatosJerarquicos(filteredData);
-      const sortedTipos = Array.from(tipoMap.keys()).sort();
+      const timeFieldMap = { diario: '_dia', semanal: '_semana', mensual: '_mes' };
+      const timeField = timeFieldMap[modoMatrizActivo] || '_semana';
+      const periodoMap = agruparDatosJerarquicos(filteredData, timeField);
+      const sortedPeriodos = Array.from(periodoMap.keys()).sort();
 
       const filasJerarquia = [];
       const filasPlana = [];
 
-      sortedTipos.forEach(tKey => {
-        const tObj = tipoMap.get(tKey);
-        const tM = calculateMetrics(tObj.rows);
+      sortedPeriodos.forEach(pKey => {
+        const pObj = periodoMap.get(pKey);
+        const pM = calculateMetrics(pObj.rows);
 
-        // Fila Nivel 1: Subtotal Tipo
+        // Fila Nivel 1: Subtotal Periodo
         filasJerarquia.push({
-          "Nivel": "TIPO",
-          "Tipo": tKey,
+          "Nivel": "PERIODO",
+          "Periodo": pObj.pLabel,
+          "Tipo": "(Todos)",
           "Tipo Chuleta": "(Todos)",
-          "Plantilla - NPlantilla": `SUBTOTAL ${tKey.toUpperCase()}`,
-          "Kilos Origen (kg)": Math.round(tM.origen * 100) / 100,
-          "Kilos Resultado (kg)": Math.round(tM.resultado * 100) / 100,
-          "Harinas (kg)": Math.round(tM.harina * 100) / 100,
-          "Merma (kg)": Math.round(tM.merma * 100) / 100,
-          "Total Pérdida (kg)": Math.round(tM.perdida * 100) / 100,
-          "Rendimiento (%)": Math.round(tM.rendimiento * 100) / 100
+          "Plantilla - NPlantilla": `SUBTOTAL ${pObj.pLabel.toUpperCase()}`,
+          "Kilos Origen (kg)": Math.round(pM.origen * 100) / 100,
+          "Kilos Resultado (kg)": Math.round(pM.resultado * 100) / 100,
+          "Harinas (kg)": Math.round(pM.harina * 100) / 100,
+          "Merma (kg)": Math.round(pM.merma * 100) / 100,
+          "Total Pérdida (kg)": Math.round(pM.perdida * 100) / 100,
+          "Rendimiento (%)": Math.round(pM.rendimiento * 100) / 100
         });
 
-        const sortedChuletas = Array.from(tObj.chuletasMap.values()).sort((a, b) => a.cKey.localeCompare(b.cKey));
+        const sortedTipos = Array.from(pObj.tiposMap.values()).sort((a, b) => a.tKey.localeCompare(b.tKey));
 
-        sortedChuletas.forEach(cObj => {
-          const cM = calculateMetrics(cObj.rows);
+        sortedTipos.forEach(tObj => {
+          const tM = calculateMetrics(tObj.rows);
+          const tFullKey = `${pKey}___${tObj.tKey}`;
 
-          // Fila Nivel 2: Subtotal Tipo Chuleta
+          // Fila Nivel 2: Subtotal Tipo
           filasJerarquia.push({
-            "Nivel": "TIPO_CHULETA",
-            "Tipo": tKey,
-            "Tipo Chuleta": cObj.cKey,
-            "Plantilla - NPlantilla": `SUBTOTAL ${cObj.cKey}`,
-            "Kilos Origen (kg)": Math.round(cM.origen * 100) / 100,
-            "Kilos Resultado (kg)": Math.round(cM.resultado * 100) / 100,
-            "Harinas (kg)": Math.round(cM.harina * 100) / 100,
-            "Merma (kg)": Math.round(cM.merma * 100) / 100,
-            "Total Pérdida (kg)": Math.round(cM.perdida * 100) / 100,
-            "Rendimiento (%)": Math.round(cM.rendimiento * 100) / 100
+            "Nivel": "TIPO",
+            "Periodo": pObj.pLabel,
+            "Tipo": tObj.tKey,
+            "Tipo Chuleta": "(Todos)",
+            "Plantilla - NPlantilla": `SUBTOTAL TIPO ${tObj.tKey}`,
+            "Kilos Origen (kg)": Math.round(tM.origen * 100) / 100,
+            "Kilos Resultado (kg)": Math.round(tM.resultado * 100) / 100,
+            "Harinas (kg)": Math.round(tM.harina * 100) / 100,
+            "Merma (kg)": Math.round(tM.merma * 100) / 100,
+            "Total Pérdida (kg)": Math.round(tM.perdida * 100) / 100,
+            "Rendimiento (%)": Math.round(tM.rendimiento * 100) / 100
           });
 
-          const sortedPlantillas = Array.from(cObj.plantillasMap.values()).sort((a, b) => a.id - b.id);
+          const sortedChuletas = Array.from(tObj.chuletasMap.values()).sort((a, b) => a.cKey.localeCompare(b.cKey));
 
-          sortedPlantillas.forEach(plan => {
-            const planM = calculateMetrics(plan.rows);
+          sortedChuletas.forEach(cObj => {
+            const cM = calculateMetrics(cObj.rows);
 
-            // Fila Nivel 3: Detalle Plantilla - NPlantilla
+            // Fila Nivel 3: Subtotal Tipo Chuleta
             filasJerarquia.push({
-              "Nivel": "PLANTILLA",
-              "Tipo": tKey,
+              "Nivel": "TIPO_CHULETA",
+              "Periodo": pObj.pLabel,
+              "Tipo": tObj.tKey,
               "Tipo Chuleta": cObj.cKey,
-              "Plantilla - NPlantilla": plan.planKey,
-              "Kilos Origen (kg)": Math.round(planM.origen * 100) / 100,
-              "Kilos Resultado (kg)": Math.round(planM.resultado * 100) / 100,
-              "Harinas (kg)": Math.round(planM.harina * 100) / 100,
-              "Merma (kg)": Math.round(planM.merma * 100) / 100,
-              "Total Pérdida (kg)": Math.round(planM.perdida * 100) / 100,
-              "Rendimiento (%)": Math.round(planM.rendimiento * 100) / 100
+              "Plantilla - NPlantilla": `SUBTOTAL ${cObj.cKey}`,
+              "Kilos Origen (kg)": Math.round(cM.origen * 100) / 100,
+              "Kilos Resultado (kg)": Math.round(cM.resultado * 100) / 100,
+              "Harinas (kg)": Math.round(cM.harina * 100) / 100,
+              "Merma (kg)": Math.round(cM.merma * 100) / 100,
+              "Total Pérdida (kg)": Math.round(cM.perdida * 100) / 100,
+              "Rendimiento (%)": Math.round(cM.rendimiento * 100) / 100
             });
 
-            // Fila Plana para Tablas Dinámicas
-            filasPlana.push({
-              "Tipo": tKey,
-              "Tipo Chuleta": cObj.cKey,
-              "Plantilla - NPlantilla": plan.planKey,
-              "Cód. Plantilla": plan.id || 0,
-              "Nombre Plantilla": plan.name,
-              "Kilos Origen (kg)": Math.round(planM.origen * 100) / 100,
-              "Kilos Resultado (kg)": Math.round(planM.resultado * 100) / 100,
-              "Harinas (kg)": Math.round(planM.harina * 100) / 100,
-              "Merma (kg)": Math.round(planM.merma * 100) / 100,
-              "Total Pérdida (kg)": Math.round(planM.perdida * 100) / 100,
-              "Rendimiento (%)": Math.round(planM.rendimiento * 100) / 100
+            const sortedPlantillas = Array.from(cObj.plantillasMap.values()).sort((a, b) => a.id - b.id);
+
+            sortedPlantillas.forEach(plan => {
+              const planM = calculateMetrics(plan.rows);
+
+              // Fila Nivel 4: Detalle Plantilla - NPlantilla
+              filasJerarquia.push({
+                "Nivel": "PLANTILLA",
+                "Periodo": pObj.pLabel,
+                "Tipo": tObj.tKey,
+                "Tipo Chuleta": cObj.cKey,
+                "Plantilla - NPlantilla": plan.planKey,
+                "Kilos Origen (kg)": Math.round(planM.origen * 100) / 100,
+                "Kilos Resultado (kg)": Math.round(planM.resultado * 100) / 100,
+                "Harinas (kg)": Math.round(planM.harina * 100) / 100,
+                "Merma (kg)": Math.round(planM.merma * 100) / 100,
+                "Total Pérdida (kg)": Math.round(planM.perdida * 100) / 100,
+                "Rendimiento (%)": Math.round(planM.rendimiento * 100) / 100
+              });
+
+              // Fila Plana para Tablas Dinámicas
+              filasPlana.push({
+                "Periodo": pObj.pLabel,
+                "Tipo": tObj.tKey,
+                "Tipo Chuleta": cObj.cKey,
+                "Plantilla - NPlantilla": plan.planKey,
+                "Cód. Plantilla": plan.id || 0,
+                "Nombre Plantilla": plan.name,
+                "Kilos Origen (kg)": Math.round(planM.origen * 100) / 100,
+                "Kilos Resultado (kg)": Math.round(planM.resultado * 100) / 100,
+                "Harinas (kg)": Math.round(planM.harina * 100) / 100,
+                "Merma (kg)": Math.round(planM.merma * 100) / 100,
+                "Total Pérdida (kg)": Math.round(planM.perdida * 100) / 100,
+                "Rendimiento (%)": Math.round(planM.rendimiento * 100) / 100
+              });
             });
           });
         });
@@ -1952,6 +2254,7 @@
       const globalM = calculateMetrics(filteredData);
       filasJerarquia.push({
         "Nivel": "TOTAL_GENERAL",
+        "Periodo": "CONSOLIDADO",
         "Tipo": "TOTAL",
         "Tipo Chuleta": "-",
         "Plantilla - NPlantilla": "TOTAL GENERAL CONSOLIDADO",
@@ -1964,7 +2267,7 @@
       });
 
       const fechaHoy = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-      const nombreArchivo = `Matriz_Rendimiento_Chuletas_${fechaHoy}.xlsx`;
+      const nombreArchivo = `Matriz_Rendimiento_${modoMatrizActivo.toUpperCase()}_${fechaHoy}.xlsx`;
 
       if (typeof XLSX !== "undefined") {
         const wb = XLSX.utils.book_new();
@@ -1972,6 +2275,7 @@
         const wsJerarquia = XLSX.utils.json_to_sheet(filasJerarquia);
         wsJerarquia['!cols'] = [
           { wch: 14 }, // Nivel
+          { wch: 20 }, // Periodo
           { wch: 18 }, // Tipo
           { wch: 18 }, // Tipo Chuleta
           { wch: 38 }, // Plantilla - NPlantilla
@@ -1986,6 +2290,7 @@
 
         const wsPlana = XLSX.utils.json_to_sheet(filasPlana);
         wsPlana['!cols'] = [
+          { wch: 20 }, // Periodo
           { wch: 18 }, // Tipo
           { wch: 18 }, // Tipo Chuleta
           { wch: 38 }, // Plantilla - NPlantilla
@@ -2018,7 +2323,8 @@
 
       filas.forEach(f => {
         let style = "";
-        if (f.Nivel === "TIPO") style = "background:#1E293B;color:#FFFFFF;font-weight:bold;";
+        if (f.Nivel === "PERIODO") style = "background:#1E293B;color:#FFFFFF;font-weight:bold;";
+        else if (f.Nivel === "TIPO") style = "background:#29384D;color:#FFFFFF;font-weight:bold;";
         else if (f.Nivel === "TIPO_CHULETA") style = "background:#EBF3FA;color:#0F172A;font-weight:bold;";
         else if (f.Nivel === "TOTAL_GENERAL") style = "background:#0F172A;color:#FFFFFF;font-weight:bold;";
 
