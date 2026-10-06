@@ -470,29 +470,35 @@
         }
 
         .badge-kpi {
+            display: inline-block;
             padding: 3px 8px;
             border-radius: 6px;
             font-weight: 700;
             font-size: 0.75rem;
-            font-family: monospace;
+            font-family: 'Inter', monospace;
+            text-align: center;
+            min-width: 48px;
         }
 
+        .badge-good,
         .badge-success {
-            background-color: #DCFCE7;
-            color: #166534;
-            border: 1px solid #86EFAC;
+            background-color: #DCFCE7 !important;
+            color: #166534 !important;
+            border: 1px solid #86EFAC !important;
         }
 
+        .badge-mid,
         .badge-warning {
-            background-color: #FEF3C7;
-            color: #92400E;
-            border: 1px solid #FCD34D;
+            background-color: #FEF3C7 !important;
+            color: #92400E !important;
+            border: 1px solid #FCD34D !important;
         }
 
+        .badge-low,
         .badge-danger {
-            background-color: #FEE2E2;
-            color: #991B1B;
-            border: 1px solid #FCA5A5;
+            background-color: #FEE2E2 !important;
+            color: #991B1B !important;
+            border: 1px solid #FCA5A5 !important;
         }
 
         .val-positive {
@@ -610,7 +616,7 @@
 
         /* NIVEL 1: TOTALES SEMANALES CON COLOR SUAVE (MENOS OSCURO) */
         .level-1 td {
-            background: #EBF3FA !important;
+            background-color: #EBF3FA !important;
             color: var(--navy-peony) !important;
             font-weight: 700;
             border-bottom: 2px solid #CBD5E1 !important;
@@ -618,7 +624,7 @@
         }
 
         .level-1:hover td {
-            background: #DEEBF5 !important;
+            background-color: #DEEBF5 !important;
         }
 
         .level-2 td {
@@ -628,6 +634,35 @@
 
         .level-2:hover td {
             background-color: #F1F5F9 !important;
+        }
+
+        /* =========================================================================
+           🏛️ DIVISIONES ENTRE GRUPOS DE COLUMNAS EN LA MATRIZ
+           ========================================================================= */
+
+        /* BORDES DIVISORES VERTICALES ENTRE GRUPOS */
+        .matrix-table th.col-group-com-start {
+            border-left: 2px solid rgba(255, 255, 255, 0.3) !important;
+        }
+
+        .matrix-table td.col-group-com-start {
+            border-left: 2px solid #CBD5E1 !important;
+        }
+
+        .matrix-table th.col-group-dist-start {
+            border-left: 2px solid rgba(255, 255, 255, 0.3) !important;
+        }
+
+        .matrix-table td.col-group-dist-start {
+            border-left: 2px solid #CBD5E1 !important;
+        }
+
+        .matrix-table th.col-group-prog-start {
+            border-left: 2px solid rgba(255, 255, 255, 0.3) !important;
+        }
+
+        .matrix-table td.col-group-prog-start {
+            border-left: 2px solid #CBD5E1 !important;
         }
 
         .toggle-icon {
@@ -868,12 +903,12 @@
                         <tr>
                             <th style="min-width:240px;">Semana / Grupo</th>
                             <th class="num-col" style="color:#10B981;">Prod. Real (kg)</th>
-                            <th class="num-col">Proy. Comercial (kg)</th>
-                            <th class="num-col">% Cumpl. Com.</th>
-                            <th class="num-col">Ped. Distribución (kg)</th>
-                            <th class="num-col">% Cumpl. Dist.</th>
-                            <th class="num-col">Prog. Producción (kg)</th>
-                            <th class="num-col">% Cumpl. Prog.</th>
+                            <th class="num-col th-com col-group-com-start">Proy. Comercial (kg)</th>
+                            <th class="num-col th-com">% Cumpl. Com.</th>
+                            <th class="num-col th-dist col-group-dist-start">Ped. Distribución (kg)</th>
+                            <th class="num-col th-dist">% Cumpl. Dist.</th>
+                            <th class="num-col th-prog col-group-prog-start">Prog. Producción (kg)</th>
+                            <th class="num-col th-prog">% Cumpl. Prog.</th>
                         </tr>
                     </thead>
                     <tbody id="tbodyMatriz">
@@ -901,12 +936,12 @@
         // ⚙️ CONFIGURACIÓN DE CONEXIÓN A LA API (Híbrida: usa config.js si existe)
         // =========================================================================
         const APP_CONFIG = {
-            servidor: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.servidor) 
-                      ? GLOBAL_CONFIG.servidor 
-                      : "RAEVSALL001",
-            puertos: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.puertos) 
-                     ? GLOBAL_CONFIG.puertos 
-                     : [8080, 5000],
+            servidor: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.servidor)
+                ? GLOBAL_CONFIG.servidor
+                : "RAEVSALL001",
+            puertos: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.puertos)
+                ? GLOBAL_CONFIG.puertos
+                : [8080, 5000],
             rutaControlador: "/api/ResumenPl"
         };
 
@@ -1182,15 +1217,25 @@
             return (n || 0).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
 
+        // Formato sin decimales para la matriz (redondeado a enteros con separador de miles)
+        function formatKgMatriz(n) {
+            if (n === null || n === undefined || isNaN(n)) return '0';
+            return Math.round(n).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        }
+
         function calcPct(real, meta) {
             if (!meta || meta === 0) return 0;
             return (real / meta) * 100;
         }
 
         function badgeHtml(pct) {
+            if (pct === null || pct === undefined || isNaN(pct) || !isFinite(pct)) {
+                return `<span class="badge-kpi badge-low">0.0%</span>`;
+            }
             let cls = 'badge-good';
             if (pct < 85) cls = 'badge-low';
             else if (pct < 98) cls = 'badge-mid';
+            // Con 1 decimal para los porcentajes
             return `<span class="badge-kpi ${cls}">${pct.toFixed(1)}%</span>`;
         }
 
@@ -1381,13 +1426,13 @@
                         <b style="color:var(--navy-peony);">Semana ${sKey}</b> 
                         <span style="font-size:0.75rem; color:var(--text-muted); font-weight:normal; margin-left:6px;">(${sNode.grupos.length} grupos)</span>
                     </td>
-                    <td class="num-cell" style="color:#007D7E;"><b>${formatKg(sNode.real)}</b></td>
-                    <td class="num-cell"><b>${formatKg(sNode.com)}</b></td>
-                    <td class="num-cell">${badgeHtml(pCom)}</td>
-                    <td class="num-cell"><b>${formatKg(sNode.dist)}</b></td>
-                    <td class="num-cell">${badgeHtml(pDist)}</td>
-                    <td class="num-cell"><b>${formatKg(sNode.prog)}</b></td>
-                    <td class="num-cell">${badgeHtml(pProg)}</td>
+                    <td class="num-cell" style="color:#007D7E;"><b>${formatKgMatriz(sNode.real)}</b></td>
+                    <td class="num-cell col-com col-group-com-start"><b>${formatKgMatriz(sNode.com)}</b></td>
+                    <td class="num-cell col-com">${badgeHtml(pCom)}</td>
+                    <td class="num-cell col-dist col-group-dist-start"><b>${formatKgMatriz(sNode.dist)}</b></td>
+                    <td class="num-cell col-dist">${badgeHtml(pDist)}</td>
+                    <td class="num-cell col-prog col-group-prog-start"><b>${formatKgMatriz(sNode.prog)}</b></td>
+                    <td class="num-cell col-prog">${badgeHtml(pProg)}</td>
                 `;
                 tbody.appendChild(trSem);
 
@@ -1405,13 +1450,13 @@
                             <td style="padding-left: 36px;">
                                 <span class="tag-subplanta">${g.Grupo}</span>
                             </td>
-                            <td class="num-cell" style="color:#007D7E; font-weight:600;">${formatKg(g.PRODUCCION_REAL)}</td>
-                            <td class="num-cell">${formatKg(g.PROYECCION_COMERCIAL)}</td>
-                            <td class="num-cell">${badgeHtml(gpCom)}</td>
-                            <td class="num-cell">${formatKg(g.PEDIDO_DISTRIBUCION)}</td>
-                            <td class="num-cell">${badgeHtml(gpDist)}</td>
-                            <td class="num-cell">${formatKg(g.PROG_PRODUCCION)}</td>
-                            <td class="num-cell">${badgeHtml(gpProg)}</td>
+                            <td class="num-cell" style="color:#007D7E; font-weight:600;">${formatKgMatriz(g.PRODUCCION_REAL)}</td>
+                            <td class="num-cell col-com col-group-com-start">${formatKgMatriz(g.PROYECCION_COMERCIAL)}</td>
+                            <td class="num-cell col-com">${badgeHtml(gpCom)}</td>
+                            <td class="num-cell col-dist col-group-dist-start">${formatKgMatriz(g.PEDIDO_DISTRIBUCION)}</td>
+                            <td class="num-cell col-dist">${badgeHtml(gpDist)}</td>
+                            <td class="num-cell col-prog col-group-prog-start">${formatKgMatriz(g.PROG_PRODUCCION)}</td>
+                            <td class="num-cell col-prog">${badgeHtml(gpProg)}</td>
                         `;
                         tbody.appendChild(trG);
                     });
@@ -1448,13 +1493,13 @@
                 "Año": d.Anio,
                 "Semana": d.Semana,
                 "Grupo": d.Grupo,
-                "Producción Real (kg)": Math.round(d.PRODUCCION_REAL * 100) / 100,
-                "Proyección Comercial (kg)": Math.round(d.PROYECCION_COMERCIAL * 100) / 100,
-                "% Cumplimiento Comercial": calcPct(d.PRODUCCION_REAL, d.PROYECCION_COMERCIAL).toFixed(2),
-                "Pedido Distribución (kg)": Math.round(d.PEDIDO_DISTRIBUCION * 100) / 100,
-                "% Cumplimiento Distribución": calcPct(d.PRODUCCION_REAL, d.PEDIDO_DISTRIBUCION).toFixed(2),
-                "Programa Producción (kg)": Math.round(d.PROG_PRODUCCION * 100) / 100,
-                "% Cumplimiento Programa": calcPct(d.PRODUCCION_REAL, d.PROG_PRODUCCION).toFixed(2)
+                "Producción Real (kg)": Math.round(d.PRODUCCION_REAL),
+                "Proyección Comercial (kg)": Math.round(d.PROYECCION_COMERCIAL),
+                "% Cumplimiento Comercial": Number(calcPct(d.PRODUCCION_REAL, d.PROYECCION_COMERCIAL).toFixed(1)),
+                "Pedido Distribución (kg)": Math.round(d.PEDIDO_DISTRIBUCION),
+                "% Cumplimiento Distribución": Number(calcPct(d.PRODUCCION_REAL, d.PEDIDO_DISTRIBUCION).toFixed(1)),
+                "Programa Producción (kg)": Math.round(d.PROG_PRODUCCION),
+                "% Cumplimiento Programa": Number(calcPct(d.PRODUCCION_REAL, d.PROG_PRODUCCION).toFixed(1))
             }));
 
             const wb = XLSX.utils.book_new();
