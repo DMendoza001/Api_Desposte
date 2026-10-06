@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Planificación de Demanda y Cerdos Requeridos</title>
+
+    <!-- Fuentes e Iconos Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+
+    <!-- Chart.js y Plugin de DataLabels -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+
+    <!-- Configuración compartida de conexión a la API -->
+    <script src="config.js"></script>
+
+    <style>
+        :root {
+            /* Fondos y Estructura */
+            --header-teal: #0E4F63;
+            --bg-dark-navy: #071F36;
+            --sidebar-dark: #041424;
+            --bg-dashboard: #D6DFE6;
+            --bg-card: #FFFFFF;
+
+            /* Series de Datos y Gráficos */
+            --chart-primary-teal: #008299;
+            --chart-dark-teal: #005766;
+            --chart-sage: #6C9E9F;
+            --chart-indigo: #5066A6;
+
+            /* Acento y Contornos */
+            --accent-yellow: #F5B921;
+            --border-card: #BAC8D3;
+            --text-dark: #1E293B;
+            --text-muted: #64748B;
+            --success: #10B981;
+            --danger: #EF4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dashboard);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Encabezado Principal */
+        .header {
+            background: linear-gradient(135deg, var(--bg-dark-navy) 0%, var(--header-teal) 100%);
+            color: #FFFFFF;
+            padding: 1.15rem 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: 0 4px 10px rgba(7, 31, 54, 0.15);
+            border-bottom: 3px solid var(--accent-yellow);
+        }
+
+        .header-title h1 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .header-title p {
+            font-size: 0.82rem;
+            color: var(--chart-sage);
+            margin-top: 0.2rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .header-controls {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.4rem 0.8rem;
+            border-radius: 0.45rem;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .filter-group label {
+            font-size: 0.82rem;
+            color: #FFFFFF;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        select,
+        input[type="number"] {
+            background-color: var(--sidebar-dark);
+            color: #FFFFFF;
+            border: 1px solid var(--chart-sage);
+            border-radius: 0.35rem;
+            padding: 0.4rem 0.75rem;
+            font-size: 0.85rem;
+            outline: none;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        select {
+            cursor: pointer;
+        }
+
+        input[type="number"] {
+            width: 95px;
+            text-align: right;
+        }
+
+        select:focus,
+        input[type="number"]:focus {
+            border-color: var(--accent-yellow);
+            box-shadow: 0 0 0 2px rgba(245, 185, 33, 0.3);
+        }
+
+        .btn-refresh {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            color: #FFFFFF;
+            padding: 0.45rem 0.75rem;
+            border-radius: 0.45rem;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: background 0.2s;
+        }
+
+        .btn-refresh:hover {
+            background: rgba(255, 255, 255, 0.22);
+        }
+
+        /* Estado de Conexión */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            font-size: 0.75rem;
+            padding: 0.3rem 0.65rem;
+            border-radius: 9999px;
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #E2E8F0;
+            font-weight: 600;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #F59E0B;
+            display: inline-block;
+        }
+
+        .status-dot.online {
+            background-color: var(--success);
+            box-shadow: 0 0 6px var(--success);
+        }
+
+        .status-dot.error {
+            background-color: var(--danger);
+            box-shadow: 0 0 6px var(--danger);
+        }
+
+        .status-dot.loading {
+            background-color: #F59E0B;
+            animation: pulse 1s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 0.4;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .main-container {
+            padding: 1.5rem 2rem;
+            flex: 1;
+        }
+
+        /* KPI Cards Grid */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .kpi-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: 0.5rem;
+            padding: 1.15rem 1.25rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(7, 31, 54, 0.05);
+            border-left: 5px solid var(--card-accent, var(--chart-primary-teal));
+        }
+
+        .kpi-label {
+            font-size: 0.73rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 0.4rem;
+            font-weight: 700;
+        }
+
+        .kpi-value {
+            font-size: 1.85rem;
+            font-weight: 800;
+            color: var(--bg-dark-navy);
+            line-height: 1.1;
+        }
+
+        .kpi-subtext {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.45rem;
+            font-weight: 500;
+        }
+
+        /* Layout Gráficos */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 1024px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: 0.5rem;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 2px 4px rgba(7, 31, 54, 0.05);
+        }
+
+        .chart-card h3 {
+            font-size: 0.96rem;
+            font-weight: 700;
+            color: var(--bg-dark-navy);
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-card);
+            padding-bottom: 0.5rem;
+        }
+
+        .chart-container {
+            position: relative;
+            flex: 1;
+            min-height: 310px;
+        }
+
+        /* Tabla Section */
+        .table-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: 0.5rem;
+            padding: 1.25rem;
+            box-shadow: 0 2px 4px rgba(7, 31, 54, 0.05);
+        }
+
+        .table-card h3 {
+            font-size: 0.96rem;
+            font-weight: 700;
+            color: var(--bg-dark-navy);
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--border-card);
+            padding-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.85rem;
+        }
+
+        th {
+            background-color: #EEF3F6;
+            color: var(--header-teal);
+            padding: 0.75rem 0.85rem;
+            font-weight: 700;
+            border-bottom: 2px solid var(--border-card);
+            text-transform: uppercase;
+            font-size: 0.74rem;
+            letter-spacing: 0.03em;
+        }
+
+        td {
+            padding: 0.75rem 0.85rem;
+            border-bottom: 1px solid var(--border-card);
+            color: var(--text-dark);
+        }
+
+        tr:hover td {
+            background-color: #F8FAFC;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.6rem;
+            border-radius: 0.25rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-critical {
+            background-color: #FEF3C7;
+            color: #92400E;
+            border: 1px solid var(--accent-yellow);
+        }
+
+        .badge-secondary {
+            background-color: #E0F2FE;
+            color: var(--chart-dark-teal);
+            border: 1px solid var(--chart-sage);
+        }
+
+        .num-align {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Toast Notification */
+        #toastNotification {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            padding: 0.75rem 1.25rem;
+            background: var(--bg-dark-navy);
+            color: #FFFFFF;
+            border-radius: 0.45rem;
+            border-left: 4px solid var(--accent-yellow);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            z-index: 9999;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        #toastNotification.show {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Encabezado Principal -->
+    <header class="header">
+        <div class="header-title">
+            <h1>🐖 Planificación de Demanda: Cerdos Requeridos</h1>
+            <p>
+                <span>PTC - Planta Trozado de Cerdos</span>
+                <span id="apiStatusBadge" class="status-badge">
+                    <span class="status-dot loading"></span>
+                    <span id="apiStatusText">Conectando...</span>
+                </span>
+            </p>
+        </div>
+
+        <div class="header-controls">
+            <!-- Filtro de Semanas -->
+            <div class="filter-group">
+                <label for="semanaFilter">Filtrar Vista:</label>
+                <select id="semanaFilter" onchange="actualizarDashboard()">
+                    <option value="ALL">Todas las Semanas (Consolidado)</option>
+                </select>
+            </div>
+
+            <!-- Textbox Peso Promedio del Cerdo -->
+            <div class="filter-group">
+                <label for="pesoPromedioInput">Peso Prom. Cerdo (Kg):</label>
+                <input type="number" id="pesoPromedioInput" value="83.5" step="0.1" min="1" max="300"
+                    title="Peso promedio en kg por cerdo faenado" oninput="actualizarDashboard()">
+            </div>
+
+            <!-- Botón Recargar API -->
+            <button class="btn-refresh" onclick="cargarDatosDesdeApi(true)"
+                title="Recargar datos directamente desde Excel / API .NET">
+                <span>🔄</span> Actualizar
+            </button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- Métricas KPI -->
+        <section class="kpi-grid">
+            <!-- KPI 1: Cerdos Requeridos (Faena) -->
+            <div class="kpi-card" style="--card-accent: var(--accent-yellow);">
+                <div class="kpi-label">Cerdos Requeridos (Faena)</div>
+                <div class="kpi-value" id="kpiCerdos">0</div>
+                <div class="kpi-subtext" id="kpiCerdosSub">Suma de cuellos de botella</div>
+            </div>
+
+            <!-- KPI 2: Kilos Calculados (Unidades × Peso Promedio) -->
+            <div class="kpi-card" style="--card-accent: var(--chart-primary-teal);">
+                <div class="kpi-label">Volumen Kilos Calculados</div>
+                <div class="kpi-value" id="kpiKilos">0 kg</div>
+                <div class="kpi-subtext" id="kpiKilosSub">Cerdos requeridos × Peso promedio</div>
+            </div>
+
+            <!-- KPI 3: Corte Determinante -->
+            <div class="kpi-card" style="--card-accent: var(--header-teal);">
+                <div class="kpi-label">Corte Determinante</div>
+                <div class="kpi-value" style="font-size: 1.15rem; line-height: 1.35; padding-top: 0.2rem;"
+                    id="kpiCorteCritico">-</div>
+                <div class="kpi-subtext">Corte cuello de botella con mayor exigencia</div>
+            </div>
+
+            <!-- KPI 4: Semana Pico -->
+            <div class="kpi-card" style="--card-accent: var(--chart-indigo);">
+                <div class="kpi-label">Semana Pico</div>
+                <div class="kpi-value" id="kpiSemanaPico">-</div>
+                <div class="kpi-subtext" id="kpiSemanaPicoSub">Máxima faena programada</div>
+            </div>
+        </section>
+
+        <!-- Gráficos Principales -->
+        <section class="charts-grid">
+            <div class="chart-card">
+                <h3>
+                    <span>Evolución Semanal de Cerdos Requeridos</span>
+                    <span id="badgePromedioCerdos" class="badge"
+                        style="background:#E0F2FE; color:#0369A1; font-size:0.75rem; border:1px solid #BAE6FD; font-weight:600; text-transform:none;">
+                        Promedio: <strong id="lblPromedioCerdos">-</strong> cerdos/sem
+                    </span>
+                </h3>
+                <div class="chart-container">
+                    <canvas id="chartTrend"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3>
+                    <span>Distribución de Volumen Demandado por Corte</span>
+                </h3>
+                <div class="chart-container">
+                    <canvas id="chartDoughnut"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Gráfico Comparativo de Cortes -->
+        <section class="charts-grid" style="grid-template-columns: 1fr; margin-bottom: 1.5rem;">
+            <div class="chart-card">
+                <h3>
+                    <span>Cerdos Equivalentes por Tipo de Corte vs Requerimiento Real Programado</span>
+                </h3>
+                <div class="chart-container" style="min-height: 330px;">
+                    <canvas id="chartCortes"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tabla Detalle Operativo -->
+        <section class="table-card">
+            <h3 id="tableTitle">
+                <span>Balance Operativo y Detalle de Cortes</span>
+                <span id="recordCount" style="font-size:0.78rem; color:var(--text-muted); font-weight:normal;">0
+                    registros</span>
+            </h3>
+            <div class="table-wrapper">
+                <table id="dataTable">
+                    <thead>
+                        <tr>
+                            <th>Semana</th>
+                            <th>Corte</th>
+                            <th class="num-align">Demanda (Kg)</th>
+                            <th class="num-align">Peso Prom (Kg)</th>
+                            <th class="num-align">Piezas Dem.</th>
+                            <th class="num-align">Factor/Cerdo</th>
+                            <th class="num-align">Cerdos Eq.</th>
+                            <th class="num-align">Estado / Rol</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toastNotification">
+        <span id="toastIcon">ℹ️</span>
+        <span id="toastMessage">Mensaje</span>
+    </div>
+
+    <script>
+        // =========================================================================
+        // ⚙️ CONFIGURACIÓN DE CONEXIÓN HÍBRIDA A LA API .NET
+        // =========================================================================
+        const APP_CONFIG = {
+            servidor: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.servidor)
+                ? GLOBAL_CONFIG.servidor
+                : "RAEVSALL001",
+            puertos: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.puertos)
+                ? GLOBAL_CONFIG.puertos
+                : [8080, 5000]
+        };
+
+        function generarBasesApi() {
+            if (typeof generarBasesApiGlobal === 'function') {
+                return generarBasesApiGlobal();
+            }
+            const bases = [];
+            for (const puerto of APP_CONFIG.puertos) {
+                bases.push(`http://${APP_CONFIG.servidor}:${puerto}`);
+            }
+            return bases;
+        }
+
+        APP_CONFIG.controllerPath = "/api/NumeroCerdos";
+        APP_CONFIG.timeoutMs = 15000;
+
+        // Estado global de datos
+        let apiBaseActiva = null;
+        let rawData = [];
+        let semanasUnicas = [];
+
+        // Instancias de Chart.js
+        Chart.register(ChartDataLabels);
+        let chartTrendInstance = null;
+        let chartDoughnutInstance = null;
+        let chartCortesInstance = null;
+
+        // Utilidad: Formatear números
+        function formatNumber(num) {
+            if (num === null || num === undefined || isNaN(num)) return "0";
+            return Math.round(num).toLocaleString("es-PE");
+        }
+
+        // Utilidad: Toast flotante
+        function mostrarToast(mensaje, icono = "ℹ️") {
+            const toast = document.getElementById("toastNotification");
+            document.getElementById("toastIcon").textContent = icono;
+            document.getElementById("toastMessage").textContent = mensaje;
+            toast.classList.add("show");
+            setTimeout(() => {
+                toast.classList.remove("show");
+            }, 3500);
+        }
+
+        // Utilidad: Fetch con timeout
+        async function fetchConTimeout(url, timeoutMs = 10000) {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+                const res = await fetch(url, { signal: controller.signal });
+                clearTimeout(id);
+                return res;
+            } catch (err) {
+                clearTimeout(id);
+                throw err;
+            }
+        }
+
+        // Detección automática del host API activo
+        async function detectarServidorApi() {
+            const bases = generarBasesApi();
+            for (const base of bases) {
+                try {
+                    const res = await fetchConTimeout(`${base}${APP_CONFIG.controllerPath}`, 3500);
+                    if (res.ok) {
+                        return base;
+                    }
+                } catch (e) {
+                    // Intentar con el siguiente candidato
+                }
+            }
+            return null;
+        }
+
+        // Carga de datos desde la API .NET (NumeroCerdosController)
+        async function cargarDatosDesdeApi(forzarRecarga = false) {
+            const statusBadge = document.getElementById("apiStatusBadge");
+            const statusText = document.getElementById("apiStatusText");
+
+            statusBadge.innerHTML = `<span class="status-dot loading"></span><span>Conectando...</span>`;
+
+            try {
+                if (!apiBaseActiva) {
+                    apiBaseActiva = await detectarServidorApi();
+                }
+
+                if (!apiBaseActiva) {
+                    throw new Error(`No se pudo conectar a ${APP_CONFIG.servidor} en puertos ${APP_CONFIG.puertos.join('/')}`);
+                }
+
+                const urlObj = new URL(apiBaseActiva);
+                const urlFinal = `${apiBaseActiva}${APP_CONFIG.controllerPath}`;
+
+                const res = await fetchConTimeout(urlFinal, APP_CONFIG.timeoutMs);
+                if (!res.ok) {
+                    throw new Error(`Error en respuesta HTTP: ${res.status} ${res.statusText}`);
+                }
+
+                const items = await res.json();
+                if (!Array.isArray(items) || items.length === 0) {
+                    throw new Error("La tabla T_PyCerdos no retornó registros.");
+                }
+
+                // Mapeo seguro y normalización de campos desde NumeroCerdosDto
+                rawData = items.map(d => ({
+                    semana: String(d.semana || d.Semana || ""),
+                    anio: Number(d.anio || d.Anio || 0),
+                    nSemana: Number(d.nSemana || d.NSemana || 0),
+                    codigoCorto: String(d.codigoCorto || d.CodigoCorto || ""),
+                    nombre: String(d.nombre || d.Nombre || ""),
+                    kilos: Number(d.kilos ?? d.Kilos ?? 0),
+                    wprom: Number(d.wprom ?? d.Wprom ?? 0),
+                    piezas: Number(d.piezas ?? d.Piezas ?? 0),
+                    factor: Number(d.factor ?? d.Factor ?? 0),
+                    nCerdos: Number(d.nCerdos ?? d.NCerdos ?? d["N.Cerdos"] ?? 0)
+                }));
+
+                // Ordenar rawData de menor a mayor por semana (numérico)
+                rawData.sort((a, b) => {
+                    const diffSem = (Number(a.semana) || 0) - (Number(b.semana) || 0);
+                    if (diffSem !== 0) return diffSem;
+                    return (b.nCerdos || 0) - (a.nCerdos || 0);
+                });
+
+                statusBadge.innerHTML = `<span class="status-dot online"></span><span>En Línea (${urlObj.host})</span>`;
+                mostrarToast(`Datos sincronizados: ${rawData.length} registros cargados`, "✅");
+
+                // Poblar selector de semanas
+                poblarSelectorSemanas();
+                actualizarDashboard();
+            } catch (err) {
+                console.error("Error al cargar datos desde API:", err);
+                statusBadge.innerHTML = `<span class="status-dot error"></span><span>Sin Conexión</span>`;
+                mostrarToast(`Error: ${err.message}`, "❌");
+
+                // Si falló y no hay datos previos, mostrar aviso
+                if (rawData.length === 0) {
+                    document.getElementById("tableBody").innerHTML = `
+            <tr>
+              <td colspan="8" style="text-align: center; padding: 2rem; color: var(--danger); font-weight: 600;">
+                ⚠️ No se pudo conectar a la API .NET (${err.message}).<br>
+                Verifique que la API esté iniciada en los puertos ${APP_CONFIG.puertos.join(' o ')}.
+              </td>
+            </tr>
+          `;
+                }
+            }
+        }
+
+        // Poblar dropdown de semanas ordenadas de menor a mayor
+        function poblarSelectorSemanas() {
+            semanasUnicas = [...new Set(rawData.map(d => d.semana))]
+                .filter(s => s)
+                .sort((a, b) => (Number(a) || 0) - (Number(b) || 0));
+
+            const semanaSelect = document.getElementById("semanaFilter");
+            const valorPrevio = semanaSelect.value;
+
+            semanaSelect.innerHTML = `<option value="ALL">Todas las Semanas (Consolidado)</option>`;
+            semanasUnicas.forEach(sem => {
+                const opt = document.createElement("option");
+                opt.value = sem;
+                opt.textContent = `Semana ${sem}`;
+                semanaSelect.appendChild(opt);
+            });
+
+            if (valorPrevio && (valorPrevio === "ALL" || semanasUnicas.includes(valorPrevio))) {
+                semanaSelect.value = valorPrevio;
+            }
+        }
+
+        // Actualizar KPIs, Gráficos y Tabla
+        function actualizarDashboard() {
+            if (!rawData || rawData.length === 0) return;
+
+            const semanaSelect = document.getElementById("semanaFilter");
+            const selected = semanaSelect.value;
+            const pesoPromedioInput = document.getElementById("pesoPromedioInput");
+            const pesoPromedio = parseFloat(pesoPromedioInput.value) || 83.5;
+
+            const filteredData = (selected === "ALL")
+                ? [...rawData]
+                : rawData.filter(d => d.semana === selected);
+
+            // Ordenar datos filtrados de menor a mayor por semana
+            filteredData.sort((a, b) => {
+                const diffSem = (Number(a.semana) || 0) - (Number(b.semana) || 0);
+                if (diffSem !== 0) return diffSem;
+                return (b.nCerdos || 0) - (a.nCerdos || 0);
+            });
+
+            // Mapear los cerdos cuello de botella por semana (máximo de cerdos requeridos entre cortes)
+            const cerdosPorSemana = {};
+            const cortesPorSemana = {};
+
+            rawData.forEach(d => {
+                if (!cerdosPorSemana[d.semana] || d.nCerdos > cerdosPorSemana[d.semana]) {
+                    cerdosPorSemana[d.semana] = d.nCerdos;
+                    cortesPorSemana[d.semana] = d.nombre;
+                }
+            });
+
+            const valoresCerdos = Object.values(cerdosPorSemana);
+            const promedioSemanal = valoresCerdos.length > 0
+                ? Math.round(valoresCerdos.reduce((a, b) => a + b, 0) / valoresCerdos.length)
+                : 0;
+
+            // -------------------------------------------------------------
+            // KPI 1: Cerdos Requeridos (Faena)
+            // -------------------------------------------------------------
+            let totalCerdos = 0;
+            if (selected === "ALL") {
+                totalCerdos = valoresCerdos.reduce((a, b) => a + b, 0);
+                document.getElementById("kpiCerdosSub").textContent = `Total acumulado | Promedio: ${formatNumber(promedioSemanal)} cerdos/sem`;
+            } else {
+                totalCerdos = cerdosPorSemana[selected] || 0;
+                const nombreCorte = cortesPorSemana[selected] ? cortesPorSemana[selected].split(' ')[0] : '-';
+                document.getElementById("kpiCerdosSub").textContent = `Corte: ${nombreCorte} | Promedio: ${formatNumber(promedioSemanal)} cerdos/sem`;
+            }
+            document.getElementById("kpiCerdos").textContent = formatNumber(totalCerdos);
+
+            // -------------------------------------------------------------
+            // KPI 2: Kilos Calculados = Unidades de Cerdo × Peso Promedio
+            // -------------------------------------------------------------
+            const kilosCalculados = totalCerdos * pesoPromedio;
+            document.getElementById("kpiKilos").textContent = `${formatNumber(kilosCalculados)} kg`;
+            document.getElementById("kpiKilosSub").textContent =
+                `${(kilosCalculados / 1000).toFixed(1)} tons (${formatNumber(totalCerdos)} cerdos × ${pesoPromedio.toFixed(1)} kg)`;
+
+            // -------------------------------------------------------------
+            // KPI 3: Corte Determinante
+            // -------------------------------------------------------------
+            const conteoCortes = {};
+            Object.keys(cerdosPorSemana).forEach(s => {
+                if (selected === "ALL" || selected === s) {
+                    const corte = cortesPorSemana[s];
+                    conteoCortes[corte] = (conteoCortes[corte] || 0) + 1;
+                }
+            });
+
+            const clavesCortes = Object.keys(conteoCortes);
+            let corteLider = "-";
+            if (clavesCortes.length > 0) {
+                corteLider = clavesCortes.reduce((a, b) => conteoCortes[a] > conteoCortes[b] ? a : b);
+                corteLider = corteLider
+                    .replace(" FRES - P.CORTE  3-14 KG", "")
+                    .replace(" ENTERO FRESCO P.CORTE (6-18KG)", "")
+                    .replace(" P. CORTE (06-16KG)", "")
+                    .replace(" P.CORTE (4-11 KG)", "");
+            }
+            document.getElementById("kpiCorteCritico").textContent = corteLider;
+
+            // -------------------------------------------------------------
+            // KPI 4: Semana Pico
+            // -------------------------------------------------------------
+            let semanaPico = semanasUnicas[0] || "-";
+            let maxCerdosPico = cerdosPorSemana[semanaPico] || 0;
+            semanasUnicas.forEach(s => {
+                if ((cerdosPorSemana[s] || 0) > maxCerdosPico) {
+                    maxCerdosPico = cerdosPorSemana[s];
+                    semanaPico = s;
+                }
+            });
+            document.getElementById("kpiSemanaPico").textContent = `Sem. ${semanaPico}`;
+            document.getElementById("kpiSemanaPicoSub").textContent = `${formatNumber(maxCerdosPico)} cerdos requeridos`;
+
+            // Contador de registros en tabla
+            document.getElementById("recordCount").textContent = `${filteredData.length} registros`;
+
+            // Renderizar Componentes Visuales
+            renderTrendChart(semanasUnicas, cerdosPorSemana, selected, promedioSemanal);
+            renderDoughnutChart(filteredData);
+            renderCortesChart(filteredData, selected, cerdosPorSemana);
+            renderTable(filteredData, cerdosPorSemana);
+        }
+
+        // Gráfico 1: Tendencia Semanal de Cerdos
+        function renderTrendChart(semanas, cerdosMap, selected, promedioSemanal) {
+            const ctx = document.getElementById("chartTrend").getContext("2d");
+            const labels = semanas.map(s => `Sem ${s}`);
+            const dataValues = semanas.map(s => Math.round(cerdosMap[s] || 0));
+            const backgroundColors = semanas.map(s => (selected !== "ALL" && selected === s) ? "#0E4F63" : "#008299");
+
+            // Actualizar etiqueta badge en la cabecera del gráfico
+            const lblProm = document.getElementById("lblPromedioCerdos");
+            if (lblProm) lblProm.textContent = formatNumber(promedioSemanal);
+
+            if (chartTrendInstance) chartTrendInstance.destroy();
+
+            chartTrendInstance = new Chart(ctx, {
+                type: "bar",
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            type: "line",
+                            label: "Tendencia Cerdos",
+                            data: dataValues,
+                            borderColor: "#F5B921",
+                            borderWidth: 2.5,
+                            pointBackgroundColor: "#F5B921",
+                            pointBorderColor: "#071F36",
+                            pointBorderWidth: 1.5,
+                            pointRadius: 4.5,
+                            fill: false,
+                            tension: 0.25,
+                            datalabels: {
+                                display: false
+                            }
+                        },
+                        {
+                            type: "line",
+                            label: `Promedio (${formatNumber(promedioSemanal)} cerdos)`,
+                            data: Array(labels.length).fill(promedioSemanal),
+                            borderColor: "#EF4444",
+                            borderWidth: 2,
+                            borderDash: [6, 4],
+                            pointRadius: 0,
+                            pointHoverRadius: 4,
+                            fill: false,
+                            tension: 0,
+                            datalabels: {
+                                display: false
+                            }
+                        },
+                        {
+                            type: "bar",
+                            label: "Cerdos Programados (Cuello Botella)",
+                            data: dataValues,
+                            backgroundColor: backgroundColors,
+                            borderRadius: 4,
+                            datalabels: {
+                                display: true,
+                                anchor: 'end',
+                                align: 'top',
+                                color: '#071F36',
+                                font: {
+                                    weight: '700',
+                                    size: 11
+                                },
+                                formatter: function (val) {
+                                    return formatNumber(val);
+                                }
+                            }
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            top: 25
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: "#1E293B",
+                                font: { weight: '600', size: 11 }
+                            }
+                        },
+                        tooltip: { enabled: true }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: "#1E293B", font: { weight: '600' } },
+                            grid: { color: "#BAC8D3", drawBorder: false }
+                        },
+                        y: {
+                            ticks: { color: "#64748B" },
+                            grid: { color: "#BAC8D3", drawBorder: false },
+                            grace: '10%'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Gráfico 2: Distribución de Volumen por Corte
+        function renderDoughnutChart(data) {
+            const ctx = document.getElementById("chartDoughnut").getContext("2d");
+            const kilosPorCorte = {};
+            data.forEach(d => {
+                const parts = d.nombre.split(' ');
+                const shortName = parts[0] + ' ' + (parts[1] || '');
+                kilosPorCorte[shortName] = (kilosPorCorte[shortName] || 0) + d.kilos;
+            });
+
+            const labels = Object.keys(kilosPorCorte);
+            const values = Object.values(kilosPorCorte).map(v => Math.round(v));
+            const totalVolumen = values.reduce((a, b) => a + b, 0);
+
+            const themeColors = [
+                "#008299", // Primary Teal
+                "#F5B921", // Accent Yellow
+                "#0E4F63", // Header Teal
+                "#5066A6", // Chart Indigo
+                "#6C9E9F", // Chart Sage
+                "#005766"  // Dark Teal
+            ];
+
+            if (chartDoughnutInstance) chartDoughnutInstance.destroy();
+
+            chartDoughnutInstance = new Chart(ctx, {
+                type: "doughnut",
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: themeColors,
+                        borderWidth: 2,
+                        borderColor: "#FFFFFF"
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: "right",
+                            labels: {
+                                color: "#1E293B",
+                                boxWidth: 12,
+                                font: { size: 10, weight: '600' }
+                            }
+                        },
+                        datalabels: {
+                            display: true,
+                            color: '#FFFFFF',
+                            font: {
+                                weight: 'bold',
+                                size: 11
+                            },
+                            formatter: function (value) {
+                                if (totalVolumen === 0) return '';
+                                const pct = ((value / totalVolumen) * 100).toFixed(0);
+                                return pct > 7 ? `${pct}%` : '';
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Gráfico 3: Comparativo de Cortes vs Cuello de Botella
+        function renderCortesChart(data, selected, cerdosMap) {
+            const ctx = document.getElementById("chartCortes").getContext("2d");
+
+            const aggregated = {};
+            data.forEach(d => {
+                const shortName = d.nombre
+                    .replace(" ENTERO FRESCO", "")
+                    .replace(" ENTERO FRES", "")
+                    .replace(" P.CORTE", "")
+                    .replace(" P. CORTE", "");
+
+                if (!aggregated[shortName]) {
+                    aggregated[shortName] = { cerdosEq: 0, count: 0 };
+                }
+                aggregated[shortName].cerdosEq += d.nCerdos;
+                aggregated[shortName].count += 1;
+            });
+
+            const labels = Object.keys(aggregated);
+            const cerdosEqValues = labels.map(l => {
+                return Math.round(selected === "ALL" ? (aggregated[l].cerdosEq / aggregated[l].count) : aggregated[l].cerdosEq);
+            });
+
+            // El corte determinante se resalta en amarillo acento, los demás en teal
+            const barColors = labels.map(l => l.includes("COSTILLAR") ? "#F5B921" : "#008299");
+
+            if (chartCortesInstance) chartCortesInstance.destroy();
+
+            chartCortesInstance = new Chart(ctx, {
+                type: "bar",
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: selected === "ALL" ? "Cerdos Eq. Promedio por Semana" : "Cerdos Requeridos por Corte",
+                        data: cerdosEqValues,
+                        backgroundColor: barColors,
+                        borderRadius: 4,
+                        datalabels: {
+                            display: true,
+                            anchor: 'end',
+                            align: 'right',
+                            color: '#071F36',
+                            font: {
+                                weight: 'bold',
+                                size: 11
+                            },
+                            formatter: function (val) {
+                                return `${formatNumber(val)} cerdos`;
+                            }
+                        }
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            right: 90
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: "#1E293B",
+                                font: { weight: '600', size: 11 }
+                            }
+                        },
+                        tooltip: { enabled: true }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: "#64748B" },
+                            grid: { color: "#BAC8D3", drawBorder: false },
+                            grace: '10%'
+                        },
+                        y: {
+                            ticks: { color: "#1E293B", font: { weight: '600' } },
+                            grid: { color: "#BAC8D3", drawBorder: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Tabla Detalle Operativo
+        function renderTable(data, cerdosMap) {
+            const tbody = document.getElementById("tableBody");
+            tbody.innerHTML = "";
+
+            data.forEach(d => {
+                const cuelloBotellaSemana = cerdosMap[d.semana] || 0;
+                const isCritical = Math.abs(d.nCerdos - cuelloBotellaSemana) < 1;
+                const tr = document.createElement("tr");
+
+                tr.innerHTML = `
+          <td><strong>${d.semana}</strong></td>
+          <td style="font-weight: 500;">${d.nombre}</td>
+          <td class="num-align">${formatNumber(d.kilos)}</td>
+          <td class="num-align">${d.wprom.toFixed(2)}</td>
+          <td class="num-align">${formatNumber(d.piezas)}</td>
+          <td class="num-align">${d.factor}</td>
+          <td class="num-align"><strong style="color: ${isCritical ? '#0E4F63' : 'inherit'};">${formatNumber(d.nCerdos)}</strong></td>
+          <td class="num-align">
+            <span class="badge ${isCritical ? 'badge-critical' : 'badge-secondary'}">
+              ${isCritical ? 'Cuello de Botella' : 'Excedente'}
+            </span>
+          </td>
+        `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Inicializar al cargar la página
+        window.addEventListener("DOMContentLoaded", () => {
+            cargarDatosDesdeApi(false);
+        });
+    </script>
+</body>
+
+</html>
