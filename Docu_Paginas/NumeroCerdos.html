@@ -377,6 +377,54 @@
             font-variant-numeric: tabular-nums;
         }
 
+        /* Checkbox de Selección y Fila Seleccionada */
+        .col-select {
+            width: 48px;
+            text-align: center;
+        }
+
+        .checkbox-custom {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--chart-primary-teal);
+            vertical-align: middle;
+            border-radius: 4px;
+        }
+
+        tr.row-selected {
+            background-color: rgba(0, 130, 153, 0.08) !important;
+        }
+
+        tr.row-selected td {
+            border-bottom-color: rgba(0, 130, 153, 0.22);
+        }
+
+        tr.row-selected:hover td {
+            background-color: rgba(0, 130, 153, 0.15) !important;
+        }
+
+        .btn-reset-selection {
+            background: rgba(14, 79, 99, 0.08);
+            border: 1px solid var(--chart-sage);
+            color: var(--header-teal);
+            padding: 0.35rem 0.75rem;
+            border-radius: 0.35rem;
+            cursor: pointer;
+            font-size: 0.78rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-reset-selection:hover {
+            background: var(--header-teal);
+            color: #FFFFFF;
+            border-color: var(--header-teal);
+        }
+
         /* Toast Notification */
         #toastNotification {
             position: fixed;
@@ -485,9 +533,15 @@
             <div class="chart-card">
                 <h3>
                     <span>Evolución Semanal de Cerdos Requeridos</span>
-                    <span id="badgePromedioCerdos" class="badge"
-                        style="background:#E0F2FE; color:#0369A1; font-size:0.75rem; border:1px solid #BAE6FD; font-weight:600; text-transform:none;">
-                        Promedio: <strong id="lblPromedioCerdos">-</strong> cerdos/sem
+                    <span style="display:inline-flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+                        <span id="badgeModoCalculo" class="badge"
+                            style="background:#E0F2FE; color:#0369A1; font-size:0.73rem; border:1px solid #BAE6FD; font-weight:600; text-transform:none;">
+                            🛡️ Cuellos de Botella (Auto)
+                        </span>
+                        <span id="badgePromedioCerdos" class="badge"
+                            style="background:#E0F2FE; color:#0369A1; font-size:0.75rem; border:1px solid #BAE6FD; font-weight:700; text-transform:none;">
+                            Promedio: <strong id="lblPromedioCerdos">-</strong> cerdos/sem
+                        </span>
                     </span>
                 </h3>
                 <div class="chart-container">
@@ -519,14 +573,28 @@
         <!-- Tabla Detalle Operativo -->
         <section class="table-card">
             <h3 id="tableTitle">
-                <span>Balance Operativo y Detalle de Cortes</span>
-                <span id="recordCount" style="font-size:0.78rem; color:var(--text-muted); font-weight:normal;">0
-                    registros</span>
+                <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                    <span>Balance Operativo y Detalle de Cortes</span>
+                    <span id="badgeSeleccionInfo" class="badge"
+                        style="background:#F1F5F9; color:#475569; font-size:0.73rem; border:1px solid var(--border-card); font-weight:600; text-transform:none;">
+                        Plan Activo
+                    </span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.65rem; flex-wrap: wrap;">
+                    <button class="btn-reset-selection" onclick="restablecerSeleccionCuellosBotella()"
+                        title="Restablecer todas las semanas al corte cuello de botella automático">
+                        <span>↺</span> Restaurar Cuellos de Botella
+                    </button>
+                    <span id="recordCount" style="font-size:0.78rem; color:var(--text-muted); font-weight:normal;">0
+                        registros</span>
+                </div>
             </h3>
             <div class="table-wrapper">
                 <table id="dataTable">
                     <thead>
                         <tr>
+                            <th class="col-select"
+                                title="Seleccionar para el plan de faena y cálculo dinámico del promedio">Sel.</th>
                             <th>Semana</th>
                             <th>Corte</th>
                             <th class="num-align">Demanda (Kg)</th>
@@ -580,6 +648,8 @@
         let apiBaseActiva = null;
         let rawData = [];
         let semanasUnicas = [];
+        let cuellosBotellaPorSemana = {}; // { [semana]: idFilaCuelloBotella }
+        let seleccionCerdosPorSemana = {}; // { [semana]: idFilaSeleccionada }
 
         // Instancias de Chart.js
         Chart.register(ChartDataLabels);
@@ -663,8 +733,9 @@
                     throw new Error("La tabla T_PyCerdos no retornó registros.");
                 }
 
-                // Mapeo seguro y normalización de campos desde NumeroCerdosDto
-                rawData = items.map(d => ({
+                // Mapeo seguro y normalización de campos desde NumeroCerdosDto asignando ID único por fila
+                rawData = items.map((d, index) => ({
+                    id: `row_${index}`,
                     semana: String(d.semana || d.Semana || ""),
                     anio: Number(d.anio || d.Anio || 0),
                     nSemana: Number(d.nSemana || d.NSemana || 0),
@@ -677,7 +748,7 @@
                     nCerdos: Number(d.nCerdos ?? d.NCerdos ?? d["N.Cerdos"] ?? 0)
                 }));
 
-                // Ordenar rawData de menor a mayor por semana (numérico)
+                // Ordenar rawData de menor a mayor por semana (numérico) y luego por cerdos descendente
                 rawData.sort((a, b) => {
                     const diffSem = (Number(a.semana) || 0) - (Number(b.semana) || 0);
                     if (diffSem !== 0) return diffSem;
@@ -687,8 +758,9 @@
                 statusBadge.innerHTML = `<span class="status-dot online"></span><span>En Línea (${urlObj.host})</span>`;
                 mostrarToast(`Datos sincronizados: ${rawData.length} registros cargados`, "✅");
 
-                // Poblar selector de semanas
+                // Poblar selector de semanas e inicializar selecciones a cuello de botella
                 poblarSelectorSemanas();
+                inicializarSeleccionCuellosBotella();
                 actualizarDashboard();
             } catch (err) {
                 console.error("Error al cargar datos desde API:", err);
@@ -699,7 +771,7 @@
                 if (rawData.length === 0) {
                     document.getElementById("tableBody").innerHTML = `
             <tr>
-              <td colspan="8" style="text-align: center; padding: 2rem; color: var(--danger); font-weight: 600;">
+              <td colspan="9" style="text-align: center; padding: 2rem; color: var(--danger); font-weight: 600;">
                 ⚠️ No se pudo conectar a la API .NET (${err.message}).<br>
                 Verifique que la API esté iniciada en los puertos ${APP_CONFIG.puertos.join(' o ')}.
               </td>
@@ -731,7 +803,60 @@
             }
         }
 
-        // Actualizar KPIs, Gráficos y Tabla
+        // Identificar y establecer la selección inicial según el cuello de botella (máximo nCerdos) de cada semana
+        function inicializarSeleccionCuellosBotella() {
+            cuellosBotellaPorSemana = {};
+            seleccionCerdosPorSemana = {};
+
+            semanasUnicas.forEach(sem => {
+                const filasSemana = rawData.filter(d => d.semana === sem);
+                if (filasSemana.length > 0) {
+                    let maxFila = filasSemana[0];
+                    filasSemana.forEach(f => {
+                        if (f.nCerdos > maxFila.nCerdos) {
+                            maxFila = f;
+                        }
+                    });
+                    cuellosBotellaPorSemana[sem] = maxFila.id;
+                    seleccionCerdosPorSemana[sem] = maxFila.id;
+                }
+            });
+        }
+
+        // Restablecer todas las selecciones al corte cuello de botella automático
+        function restablecerSeleccionCuellosBotella() {
+            inicializarSeleccionCuellosBotella();
+            actualizarDashboard();
+            mostrarToast("Selección restablecida a cuellos de botella automáticos", "🔄");
+        }
+
+        // Manejador del cambio de checkbox de selección de corte
+        function toggleSeleccionCorte(id, semana, isChecked) {
+            if (isChecked) {
+                // Al marcar este corte, se define como el corte activo para esa semana
+                seleccionCerdosPorSemana[semana] = id;
+            } else {
+                // Si el usuario desmarca el corte actualmente activo, la semana queda sin selección
+                if (seleccionCerdosPorSemana[semana] === id) {
+                    seleccionCerdosPorSemana[semana] = null;
+                }
+            }
+
+            const scrollY = window.scrollY;
+            actualizarDashboard();
+            window.scrollTo({ top: scrollY, behavior: 'instant' });
+        }
+
+        // Manejador del clic en la celda del checkbox para facilitar interacción
+        function gestionarClickCelda(event, id, semana) {
+            const chk = document.getElementById(`chk_${id}`);
+            if (chk && event.target !== chk) {
+                chk.checked = !chk.checked;
+                toggleSeleccionCorte(id, semana, chk.checked);
+            }
+        }
+
+        // Actualizar KPIs, Gráficos y Tabla de manera dinámica según la selección activa
         function actualizarDashboard() {
             if (!rawData || rawData.length === 0) return;
 
@@ -751,33 +876,71 @@
                 return (b.nCerdos || 0) - (a.nCerdos || 0);
             });
 
-            // Mapear los cerdos cuello de botella por semana (máximo de cerdos requeridos entre cortes)
+            // Mapear los cerdos y nombres de cortes según la selección activa del usuario
             const cerdosPorSemana = {};
             const cortesPorSemana = {};
 
-            rawData.forEach(d => {
-                if (!cerdosPorSemana[d.semana] || d.nCerdos > cerdosPorSemana[d.semana]) {
-                    cerdosPorSemana[d.semana] = d.nCerdos;
-                    cortesPorSemana[d.semana] = d.nombre;
+            semanasUnicas.forEach(sem => {
+                const idSel = seleccionCerdosPorSemana[sem];
+                if (idSel) {
+                    const filaSel = rawData.find(d => d.id === idSel);
+                    if (filaSel) {
+                        cerdosPorSemana[sem] = filaSel.nCerdos;
+                        cortesPorSemana[sem] = filaSel.nombre;
+                    } else {
+                        cerdosPorSemana[sem] = 0;
+                        cortesPorSemana[sem] = "Sin selección";
+                    }
+                } else {
+                    cerdosPorSemana[sem] = 0;
+                    cortesPorSemana[sem] = "Sin selección";
                 }
             });
 
-            const valoresCerdos = Object.values(cerdosPorSemana);
-            const promedioSemanal = valoresCerdos.length > 0
-                ? Math.round(valoresCerdos.reduce((a, b) => a + b, 0) / valoresCerdos.length)
+            // Semanas activas con selección (> 0 cerdos) para el cálculo del promedio dinámico
+            const semanasActivas = semanasUnicas.filter(s => (cerdosPorSemana[s] || 0) > 0);
+            const sumaCerdosActivos = semanasActivas.reduce((acc, s) => acc + cerdosPorSemana[s], 0);
+            const promedioSemanal = semanasActivas.length > 0
+                ? Math.round(sumaCerdosActivos / semanasActivas.length)
                 : 0;
+
+            // Determinar si hay selecciones manuales distintas al cuello de botella original
+            const esPersonalizado = semanasUnicas.some(s => seleccionCerdosPorSemana[s] !== cuellosBotellaPorSemana[s]);
+
+            // Actualizar badge indicador del modo de cálculo en cabecera
+            const badgeModo = document.getElementById("badgeModoCalculo");
+            if (badgeModo) {
+                if (esPersonalizado) {
+                    badgeModo.style.backgroundColor = "#FEF3C7";
+                    badgeModo.style.color = "#92400E";
+                    badgeModo.style.borderColor = "#F5B921";
+                    badgeModo.textContent = "⚡ Cálculo Dinámico (Personalizado)";
+                } else {
+                    badgeModo.style.backgroundColor = "#E0F2FE";
+                    badgeModo.style.color = "#0369A1";
+                    badgeModo.style.borderColor = "#BAE6FD";
+                    badgeModo.textContent = "🛡️ Cuellos de Botella (Auto)";
+                }
+            }
+
+            const badgeInfo = document.getElementById("badgeSeleccionInfo");
+            if (badgeInfo) {
+                badgeInfo.textContent = `${semanasActivas.length} de ${semanasUnicas.length} semanas activas`;
+            }
 
             // -------------------------------------------------------------
             // KPI 1: Cerdos Requeridos (Faena)
             // -------------------------------------------------------------
             let totalCerdos = 0;
             if (selected === "ALL") {
-                totalCerdos = valoresCerdos.reduce((a, b) => a + b, 0);
-                document.getElementById("kpiCerdosSub").textContent = `Total acumulado | Promedio: ${formatNumber(promedioSemanal)} cerdos/sem`;
+                totalCerdos = sumaCerdosActivos;
+                document.getElementById("kpiCerdosSub").textContent =
+                    `Total acumulado | Promedio: ${formatNumber(promedioSemanal)} cerdos/sem (${semanasActivas.length} sem)`;
             } else {
                 totalCerdos = cerdosPorSemana[selected] || 0;
                 const nombreCorte = cortesPorSemana[selected] ? cortesPorSemana[selected].split(' ')[0] : '-';
-                document.getElementById("kpiCerdosSub").textContent = `Corte: ${nombreCorte} | Promedio: ${formatNumber(promedioSemanal)} cerdos/sem`;
+                document.getElementById("kpiCerdosSub").textContent =
+                    `Corte: ${nombreCorte} | Promedio general: ${formatNumber(promedioSemanal)} cerdos/sem`;
             }
             document.getElementById("kpiCerdos").textContent = formatNumber(totalCerdos);
 
@@ -793,10 +956,12 @@
             // KPI 3: Corte Determinante
             // -------------------------------------------------------------
             const conteoCortes = {};
-            Object.keys(cerdosPorSemana).forEach(s => {
+            semanasActivas.forEach(s => {
                 if (selected === "ALL" || selected === s) {
                     const corte = cortesPorSemana[s];
-                    conteoCortes[corte] = (conteoCortes[corte] || 0) + 1;
+                    if (corte && corte !== "Sin selección") {
+                        conteoCortes[corte] = (conteoCortes[corte] || 0) + 1;
+                    }
                 }
             });
 
@@ -808,40 +973,47 @@
                     .replace(" FRES - P.CORTE  3-14 KG", "")
                     .replace(" ENTERO FRESCO P.CORTE (6-18KG)", "")
                     .replace(" P. CORTE (06-16KG)", "")
-                    .replace(" P.CORTE (4-11 KG)", "");
+                    .replace(" P.CORTE (4-11 KG)", "")
+                    .replace(" ENTERO FRESCO", "")
+                    .replace(" ENTERO FRES", "");
             }
             document.getElementById("kpiCorteCritico").textContent = corteLider;
 
             // -------------------------------------------------------------
             // KPI 4: Semana Pico
             // -------------------------------------------------------------
-            let semanaPico = semanasUnicas[0] || "-";
-            let maxCerdosPico = cerdosPorSemana[semanaPico] || 0;
-            semanasUnicas.forEach(s => {
+            let semanaPico = "-";
+            let maxCerdosPico = 0;
+            semanasActivas.forEach(s => {
                 if ((cerdosPorSemana[s] || 0) > maxCerdosPico) {
                     maxCerdosPico = cerdosPorSemana[s];
                     semanaPico = s;
                 }
             });
-            document.getElementById("kpiSemanaPico").textContent = `Sem. ${semanaPico}`;
-            document.getElementById("kpiSemanaPicoSub").textContent = `${formatNumber(maxCerdosPico)} cerdos requeridos`;
+            document.getElementById("kpiSemanaPico").textContent = semanaPico !== "-" ? `Sem. ${semanaPico}` : "-";
+            document.getElementById("kpiSemanaPicoSub").textContent = maxCerdosPico > 0
+                ? `${formatNumber(maxCerdosPico)} cerdos requeridos (${cortesPorSemana[semanaPico] ? cortesPorSemana[semanaPico].split(' ')[0] : ''})`
+                : "Sin selección";
 
             // Contador de registros en tabla
             document.getElementById("recordCount").textContent = `${filteredData.length} registros`;
 
             // Renderizar Componentes Visuales
-            renderTrendChart(semanasUnicas, cerdosPorSemana, selected, promedioSemanal);
+            renderTrendChart(semanasUnicas, cerdosPorSemana, cortesPorSemana, selected, promedioSemanal);
             renderDoughnutChart(filteredData);
             renderCortesChart(filteredData, selected, cerdosPorSemana);
-            renderTable(filteredData, cerdosPorSemana);
+            renderTable(filteredData, cuellosBotellaPorSemana);
         }
 
-        // Gráfico 1: Tendencia Semanal de Cerdos
-        function renderTrendChart(semanas, cerdosMap, selected, promedioSemanal) {
+        // Gráfico 1: Tendencia Semanal de Cerdos con Promedio Dinámico y Detalle en Tooltip
+        function renderTrendChart(semanas, cerdosMap, cortesMap, selected, promedioSemanal) {
             const ctx = document.getElementById("chartTrend").getContext("2d");
             const labels = semanas.map(s => `Sem ${s}`);
             const dataValues = semanas.map(s => Math.round(cerdosMap[s] || 0));
-            const backgroundColors = semanas.map(s => (selected !== "ALL" && selected === s) ? "#0E4F63" : "#008299");
+            const backgroundColors = semanas.map(s => {
+                if (!cerdosMap[s] || cerdosMap[s] <= 0) return "#CBD5E1";
+                return (selected !== "ALL" && selected === s) ? "#0E4F63" : "#008299";
+            });
 
             // Actualizar etiqueta badge en la cabecera del gráfico
             const lblProm = document.getElementById("lblPromedioCerdos");
@@ -872,7 +1044,7 @@
                         },
                         {
                             type: "line",
-                            label: `Promedio (${formatNumber(promedioSemanal)} cerdos)`,
+                            label: `Promedio Dinámico (${formatNumber(promedioSemanal)} cerdos)`,
                             data: Array(labels.length).fill(promedioSemanal),
                             borderColor: "#EF4444",
                             borderWidth: 2,
@@ -887,7 +1059,7 @@
                         },
                         {
                             type: "bar",
-                            label: "Cerdos Programados (Cuello Botella)",
+                            label: "Cerdos Programados (Plan Dinámico)",
                             data: dataValues,
                             backgroundColor: backgroundColors,
                             borderRadius: 4,
@@ -901,7 +1073,7 @@
                                     size: 11
                                 },
                                 formatter: function (val) {
-                                    return formatNumber(val);
+                                    return val > 0 ? formatNumber(val) : '-';
                                 }
                             }
                         }
@@ -922,7 +1094,21 @@
                                 font: { weight: '600', size: 11 }
                             }
                         },
-                        tooltip: { enabled: true }
+                        tooltip: {
+                            enabled: true,
+                            callbacks: {
+                                label: function (context) {
+                                    const index = context.dataIndex;
+                                    const sem = semanas[index];
+                                    const corte = (cortesMap && cortesMap[sem]) ? cortesMap[sem] : "Sin selección";
+                                    const val = context.raw || 0;
+                                    if (context.dataset.type === "bar") {
+                                        return ` Cerdos: ${formatNumber(val)} (${corte})`;
+                                    }
+                                    return ` ${context.dataset.label}: ${formatNumber(val)}`;
+                                }
+                            }
+                        }
                     },
                     scales: {
                         x: {
@@ -1091,30 +1277,58 @@
             });
         }
 
-        // Tabla Detalle Operativo
-        function renderTable(data, cerdosMap) {
+        // Tabla Detalle Operativo con Selección Interactiva y Checkboxes
+        function renderTable(data, cuellosBotellaMap) {
             const tbody = document.getElementById("tableBody");
             tbody.innerHTML = "";
 
             data.forEach(d => {
-                const cuelloBotellaSemana = cerdosMap[d.semana] || 0;
-                const isCritical = Math.abs(d.nCerdos - cuelloBotellaSemana) < 1;
+                const isBottleneck = cuellosBotellaMap[d.semana] === d.id;
+                const isSelected = seleccionCerdosPorSemana[d.semana] === d.id;
                 const tr = document.createElement("tr");
 
+                if (isSelected) {
+                    tr.classList.add("row-selected");
+                }
+
+                // Generar etiqueta de Estado / Rol
+                let badgeHtml = "";
+                if (isSelected && isBottleneck) {
+                    badgeHtml = `<span class="badge badge-critical" title="Cuello de botella seleccionado para el plan">Cuello de Botella ★</span>`;
+                } else if (isSelected) {
+                    badgeHtml = `<span class="badge" style="background:#0E4F63; color:#FFFFFF; border:1px solid #005766;" title="Corte seleccionado manualmente por el usuario">Seleccionado ✓</span>`;
+                } else if (isBottleneck) {
+                    badgeHtml = `<span class="badge" style="background:#FEF3C7; color:#92400E; border:1px dashed #F5B921; opacity:0.75;" title="Cuello de botella no seleccionado actualmente">Cuello de Botella</span>`;
+                } else {
+                    badgeHtml = `<span class="badge badge-secondary">Excedente</span>`;
+                }
+
                 tr.innerHTML = `
-          <td><strong>${d.semana}</strong></td>
-          <td style="font-weight: 500;">${d.nombre}</td>
-          <td class="num-align">${formatNumber(d.kilos)}</td>
-          <td class="num-align">${d.wprom.toFixed(2)}</td>
-          <td class="num-align">${formatNumber(d.piezas)}</td>
-          <td class="num-align">${d.factor}</td>
-          <td class="num-align"><strong style="color: ${isCritical ? '#0E4F63' : 'inherit'};">${formatNumber(d.nCerdos)}</strong></td>
-          <td class="num-align">
-            <span class="badge ${isCritical ? 'badge-critical' : 'badge-secondary'}">
-              ${isCritical ? 'Cuello de Botella' : 'Excedente'}
-            </span>
-          </td>
-        `;
+                    <td class="col-select" style="cursor: pointer;" onclick="gestionarClickCelda(event, '${d.id}', '${d.semana}')">
+                        <input type="checkbox"
+                            class="checkbox-custom"
+                            id="chk_${d.id}"
+                            data-id="${d.id}"
+                            data-semana="${d.semana}"
+                            ${isSelected ? 'checked' : ''}
+                            onchange="toggleSeleccionCorte('${d.id}', '${d.semana}', this.checked)"
+                            title="Seleccionar ${formatNumber(d.nCerdos)} cerdos para la Semana ${d.semana}" />
+                    </td>
+                    <td><strong>${d.semana}</strong></td>
+                    <td style="font-weight: 500;">${d.nombre}</td>
+                    <td class="num-align">${formatNumber(d.kilos)}</td>
+                    <td class="num-align">${d.wprom.toFixed(2)}</td>
+                    <td class="num-align">${formatNumber(d.piezas)}</td>
+                    <td class="num-align">${d.factor}</td>
+                    <td class="num-align">
+                        <strong style="color: ${isSelected ? '#0E4F63' : 'inherit'}; font-weight: ${isSelected ? '800' : '600'}; font-size: ${isSelected ? '0.92rem' : 'inherit'};">
+                            ${formatNumber(d.nCerdos)}
+                        </strong>
+                    </td>
+                    <td class="num-align">
+                        ${badgeHtml}
+                    </td>
+                `;
                 tbody.appendChild(tr);
             });
         }
