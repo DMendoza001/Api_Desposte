@@ -1,0 +1,1856 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard de Índice de Rotación Semanal - Desposte</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- SheetJS para exportar a Excel (.xlsx) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <style>
+    :root {
+      /* Fondos y Estructura */
+      --header-teal: #0E4F63;
+      --bg-dark-navy: #071F36;
+      --sidebar-dark: #041424;
+      --bg-dashboard: #D6DFE6;
+      --bg-card: #FFFFFF;
+
+      /* Series de Datos y Gráficos */
+      --chart-primary-teal: #008299;
+      --chart-dark-teal: #005766;
+      --chart-sage: #6C9E9F;
+      --chart-indigo: #5066A6;
+
+      /* Acento y Contornos */
+      --accent-yellow: #F5B921;
+      --border-card: #BAC8D3;
+      --text-dark: #1E293B;
+
+      /* Derivados de apoyo */
+      --text-muted: #5A6B7C;
+      --success: #10B981;
+      --danger: #DC2626;
+      --shadow-sm: 0 1px 3px rgba(7, 31, 54, 0.08), 0 1px 2px rgba(7, 31, 54, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(7, 31, 54, 0.10), 0 2px 4px -1px rgba(7, 31, 54, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(7, 31, 54, 0.14), 0 4px 6px -2px rgba(7, 31, 54, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dashboard);
+      color: var(--text-dark);
+      padding: 20px 24px 40px;
+      min-height: 100vh;
+    }
+
+    /* ===================== HEADER ===================== */
+    header {
+      background: linear-gradient(135deg, var(--header-teal) 0%, var(--bg-dark-navy) 100%);
+      color: #FFFFFF;
+      padding: 22px 28px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      box-shadow: var(--shadow-lg);
+      border-bottom: 4px solid var(--accent-yellow);
+    }
+
+    .header-info h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-info p {
+      font-size: 0.88rem;
+      color: #A8C4D4;
+      margin-top: 5px;
+      font-weight: 400;
+    }
+
+    .header-status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      backdrop-filter: blur(8px);
+      white-space: nowrap;
+    }
+
+    .status-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background-color: #94A3B8;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+
+    .status-dot.online {
+      background-color: var(--success);
+      box-shadow: 0 0 8px var(--success);
+    }
+
+    .status-dot.loading {
+      background-color: var(--accent-yellow);
+      animation: pulseDot 1s infinite alternate;
+    }
+
+    .status-dot.error {
+      background-color: var(--danger);
+    }
+
+    @keyframes pulseDot {
+      from {
+        transform: scale(0.85);
+        opacity: 0.6;
+      }
+
+      to {
+        transform: scale(1.15);
+        opacity: 1;
+      }
+    }
+
+    /* ===================== PANEL DE FILTROS ===================== */
+    .filter-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      align-items: flex-end;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 170px;
+    }
+
+    .filter-group label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--header-teal);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .filter-group input[type="date"],
+    .filter-group select {
+      padding: 9px 12px;
+      border: 1px solid var(--border-card);
+      border-radius: 8px;
+      font-size: 0.88rem;
+      color: var(--text-dark);
+      background: #FFFFFF;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      font-weight: 500;
+    }
+
+    .filter-group input[type="date"]:focus,
+    .filter-group select:focus {
+      border-color: var(--chart-primary-teal);
+      box-shadow: 0 0 0 3px rgba(0, 130, 153, 0.15);
+    }
+
+    .btn-action-group {
+      display: flex;
+      gap: 10px;
+      margin-left: auto;
+      flex-wrap: wrap;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      transition: transform 0.12s, box-shadow 0.15s, background 0.15s;
+      font-family: inherit;
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--chart-primary-teal) 0%, var(--chart-dark-teal) 100%);
+      color: #FFFFFF;
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn-primary:hover {
+      box-shadow: var(--shadow-lg);
+      filter: brightness(1.07);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      filter: grayscale(0.4);
+    }
+
+    .btn-accent {
+      background: var(--accent-yellow);
+      color: #4A3608;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-accent:hover {
+      filter: brightness(1.05);
+    }
+
+    .btn-reset {
+      background: #EAF0F5;
+      color: var(--header-teal);
+      border: 1px solid var(--border-card);
+    }
+
+    .btn-reset:hover {
+      background: #DFE8EF;
+    }
+
+    /* ===================== KPIs ===================== */
+    .kpi-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(215px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .kpi-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-top: 4px solid var(--chart-primary-teal);
+      border-radius: 11px;
+      padding: 16px 18px;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .kpi-card.destacado {
+      background: linear-gradient(135deg, #FFFFFF 0%, #F2F8FA 100%);
+    }
+
+    .kpi-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+      line-height: 1.35;
+    }
+
+    .kpi-value {
+      font-size: 1.85rem;
+      font-weight: 800;
+      color: var(--header-teal);
+      letter-spacing: -0.025em;
+      line-height: 1.1;
+    }
+
+    .kpi-value.yellow {
+      color: #B07D00;
+    }
+
+    .kpi-sub {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      margin-top: 6px;
+      font-weight: 500;
+      line-height: 1.4;
+    }
+
+    /* ===================== GRÁFICOS ===================== */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1.35fr 1fr;
+      gap: 18px;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 1100px) {
+      .charts-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 12px;
+      padding: 18px 20px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 20px;
+    }
+
+    .card:last-child {
+      margin-bottom: 0;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #E7EEF3;
+    }
+
+    .card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--header-teal);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-subtitle {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-top: 3px;
+    }
+
+    .chart-wrap {
+      position: relative;
+      height: 330px;
+      width: 100%;
+    }
+
+    /* ===================== TABLA ===================== */
+    .table-scroll {
+      overflow-x: auto;
+      border: 1px solid var(--border-card);
+      border-radius: 10px;
+      max-height: 560px;
+      overflow-y: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.845rem;
+      white-space: nowrap;
+    }
+
+    thead th {
+      position: sticky;
+      top: 0;
+      z-index: 3;
+      background: var(--header-teal);
+      color: #FFFFFF;
+      padding: 11px 12px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.045em;
+      border-right: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    thead th.sortable {
+      cursor: pointer;
+      user-select: none;
+    }
+
+    thead th.sortable:hover {
+      background: var(--chart-dark-teal);
+    }
+
+    thead th.num,
+    tbody td.num {
+      text-align: right;
+    }
+
+    thead th .sort-arrow {
+      opacity: 0.4;
+      font-size: 0.7rem;
+      margin-left: 3px;
+    }
+
+    thead th.sorted .sort-arrow {
+      opacity: 1;
+      color: var(--accent-yellow);
+    }
+
+    tbody tr {
+      border-bottom: 1px solid #EBF1F5;
+      transition: background 0.1s;
+    }
+
+    tbody tr:nth-child(even) {
+      background: #F8FBFC;
+    }
+
+    tbody tr:hover {
+      background: #E8F3F7;
+    }
+
+    tbody td {
+      padding: 9px 12px;
+      color: var(--text-dark);
+    }
+
+    tbody td.ceco-cod {
+      font-weight: 700;
+      color: var(--chart-dark-teal);
+      font-variant-numeric: tabular-nums;
+    }
+
+    tbody td.ceco-nombre {
+      white-space: normal;
+      min-width: 230px;
+      max-width: 380px;
+      font-weight: 500;
+    }
+
+    tbody td.num {
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+    }
+
+    tfoot td {
+      background: var(--bg-dark-navy);
+      color: #FFFFFF;
+      padding: 12px;
+      font-weight: 700;
+      position: sticky;
+      bottom: 0;
+      z-index: 2;
+      font-variant-numeric: tabular-nums;
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    tfoot td.num {
+      text-align: right;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 9999px;
+      font-size: 0.71rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .badge-normal {
+      background: rgba(16, 185, 129, 0.14);
+      color: #0B7A55;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .badge-medio {
+      background: rgba(245, 185, 33, 0.18);
+      color: #8A6100;
+      border: 1px solid rgba(245, 185, 33, 0.42);
+    }
+
+    .badge-alto {
+      background: rgba(220, 38, 38, 0.12);
+      color: #B91C1C;
+      border: 1px solid rgba(220, 38, 38, 0.3);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 55px 20px;
+      color: var(--text-muted);
+    }
+
+    .empty-state .icon {
+      font-size: 2.3rem;
+      margin-bottom: 10px;
+    }
+
+    .empty-state .title {
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--header-teal);
+      margin-bottom: 7px;
+    }
+
+    .empty-state .desc {
+      font-size: 0.85rem;
+      max-width: 560px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* ===================== LEYENDA DE SEMANAS ===================== */
+    .leyenda-semanas {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .chip-semana {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 12px;
+      border-radius: 9999px;
+      background: #EAF2F6;
+      border: 1px solid var(--border-card);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--chart-dark-teal);
+    }
+
+    .chip-semana .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--chart-primary-teal);
+    }
+
+    /* ===================== OVERLAY Y TOAST ===================== */
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(4, 20, 36, 0.62);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      backdrop-filter: blur(3px);
+    }
+
+    .loading-overlay.show {
+      display: flex;
+    }
+
+    .loading-box {
+      background: var(--bg-card);
+      padding: 30px 42px;
+      border-radius: 14px;
+      text-align: center;
+      box-shadow: var(--shadow-lg);
+      border-top: 4px solid var(--accent-yellow);
+      max-width: 440px;
+    }
+
+    .loading-box h4 {
+      color: var(--header-teal);
+      font-size: 1.05rem;
+      margin-bottom: 6px;
+    }
+
+    .loading-box p {
+      color: var(--text-muted);
+      font-size: 0.84rem;
+      line-height: 1.5;
+    }
+
+    .spinner {
+      width: 44px;
+      height: 44px;
+      border: 4px solid #E2EBF0;
+      border-top-color: var(--chart-primary-teal);
+      border-radius: 50%;
+      margin: 0 auto 16px;
+      animation: spin 0.85s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .toast-notification {
+      position: fixed;
+      bottom: 26px;
+      right: 26px;
+      background: var(--bg-dark-navy);
+      color: #FFFFFF;
+      padding: 14px 20px;
+      border-radius: 10px;
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      font-size: 0.87rem;
+      font-weight: 500;
+      transform: translateY(120px);
+      opacity: 0;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      z-index: 10000;
+      max-width: 420px;
+      border-left: 4px solid var(--accent-yellow);
+    }
+
+    .toast-notification.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* Barra de resumen metodológico */
+    .metodologia {
+      background: linear-gradient(135deg, var(--sidebar-dark) 0%, var(--bg-dark-navy) 100%);
+      color: #C8DBE6;
+      border-radius: 11px;
+      padding: 15px 22px;
+      font-size: 0.79rem;
+      line-height: 1.65;
+      border-left: 4px solid var(--accent-yellow);
+      margin-bottom: 20px;
+    }
+
+    .metodologia strong {
+      color: #FFFFFF;
+    }
+
+    .metodologia code {
+      background: rgba(255, 255, 255, 0.11);
+      padding: 2px 7px;
+      border-radius: 5px;
+      font-family: 'Consolas', 'Courier New', monospace;
+      color: var(--accent-yellow);
+      font-size: 0.76rem;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Overlay de Carga -->
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-box">
+      <div class="spinner"></div>
+      <h4 id="loadingTitle">Consultando Datos</h4>
+      <p id="loadingMessage">Ejecutando Sp_Indice_Rotacion_Semanal en SQL Server...</p>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header>
+    <div class="header-info">
+      <h1>🔄 Índice de Rotación Semanal de Personal</h1>
+      <p>Análisis general y por centro de costo &middot; Semanas de Lunes a Domingo (ISO-8601)</p>
+    </div>
+    <div class="header-status">
+      <div id="apiStatusBadge" class="status-badge">
+        <span class="status-dot"></span>
+        <span id="apiStatusText">Listo para consultar</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Panel de Filtros -->
+  <section class="filter-panel">
+    <div class="filter-group">
+      <label for="fechaInicio">Fecha Inicial:</label>
+      <input type="date" id="fechaInicio">
+    </div>
+
+    <div class="filter-group">
+      <label for="fechaFin">Fecha Final:</label>
+      <input type="date" id="fechaFin">
+    </div>
+
+    <div class="btn-action-group">
+      <button class="btn-primary" id="btnConsultar" onclick="consultarApi(false)">
+        <span>🚀</span> Generar Reporte
+      </button>
+      <button class="btn-primary" onclick="consultarApi(true)"
+        title="Ignora la caché del servidor y vuelve a ejecutar el SP">
+        <span>♻️</span> Recargar
+      </button>
+      <button class="btn-accent" id="btnExportar" onclick="exportarExcel()" disabled>
+        <span>📥</span> Excel
+      </button>
+      <button class="btn-reset" onclick="resetFiltros()">
+        ↺ Reestablecer
+      </button>
+    </div>
+  </section>
+
+  <!-- Metodología -->
+  <div class="metodologia">
+    <strong>Metodología de cálculo:</strong>
+    <code>Trabajadores Promedio = (TrabajadoresInicio + TrabajadoresFin) / 2</code> &nbsp;·&nbsp;
+    <code>Índice de Rotación = Retirados / Trabajadores Promedio × 100</code>.
+    El índice general del periodo se obtiene sumando retirados y dotaciones de todos los centros de costo y semanas.
+    El cálculo de semanas es ISO-8601 con <strong>inicio en Lunes</strong>.
+    <br>
+    <strong>Nota sobre semanas de borde:</strong> el SP toma <code>TrabajadoresInicio</code> de los presentes el
+    <strong>Lunes</strong> y <code>TrabajadoresFin</code> de los presentes el <strong>Domingo</strong>. Si el rango
+    consultado no cubre esos días, la semana aparece marcada como <strong>⚠ parcial</strong> y su índice queda
+    subestimado. Para medir rotación semanal conviene usar rangos que empiecen en Lunes y terminen en Domingo.
+  </div>
+
+  <!-- Indicadores Clave (KPIs) -->
+  <section class="kpi-container">
+    <div class="kpi-card destacado" style="border-top-color: var(--accent-yellow);">
+      <div class="kpi-title">Índice de Rotación General</div>
+      <div class="kpi-value yellow" id="kpiRotacionGeneral">0.00%</div>
+      <div class="kpi-sub" id="kpiRotacionGeneralSub">Retirados / Promedio de trabajadores</div>
+    </div>
+    <div class="kpi-card" style="border-top-color: var(--chart-primary-teal);">
+      <div class="kpi-title">Trabajadores Promedio</div>
+      <div class="kpi-value" id="kpiPromedio">0.00</div>
+      <div class="kpi-sub" id="kpiPromedioSub">(Inicio + Fin) / 2 del periodo</div>
+    </div>
+    <div class="kpi-card" style="border-top-color: var(--chart-indigo);">
+      <div class="kpi-title">Retiros Totales</div>
+      <div class="kpi-value" id="kpiRetirados">0</div>
+      <div class="kpi-sub" id="kpiRetiradosSub">Personal retirado en el periodo</div>
+    </div>
+    <div class="kpi-card" style="border-top-color: var(--chart-sage);">
+      <div class="kpi-title">Centros de Costo</div>
+      <div class="kpi-value" id="kpiCecos">0</div>
+      <div class="kpi-sub" id="kpiCecosSub">Cecos con actividad en el rango</div>
+    </div>
+    <div class="kpi-card" style="border-top-color: var(--chart-dark-teal);">
+      <div class="kpi-title">Dotación Final</div>
+      <div class="kpi-value" id="kpiDotacionFin">0</div>
+      <div class="kpi-sub" id="kpiDotacionFinSub">Trabajadores al cierre del periodo</div>
+    </div>
+  </section>
+
+  <!-- Semanas incluidas -->
+  <div class="card" id="cardSemanas" style="display: none;">
+    <div class="card-header">
+      <div>
+        <div class="card-title">🗓️ Semanas incluidas en el análisis</div>
+        <div class="card-subtitle" id="semanasResumen">—</div>
+      </div>
+    </div>
+    <div class="leyenda-semanas" id="leyendaSemanas"></div>
+  </div>
+
+  <!-- Gráficos -->
+  <section class="charts-grid">
+    <div class="card" style="margin-bottom: 0;">
+      <div class="card-header">
+        <div>
+          <div class="card-title">🏭 Índice de Rotación por Centro de Costo</div>
+          <div class="card-subtitle">Agregado del periodo por ceco</div>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="chartCecos"></canvas>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom: 0;">
+      <div class="card-header">
+        <div>
+          <div class="card-title">📈 Tendencia Semanal</div>
+          <div class="card-subtitle">Evolución del índice general semana a semana</div>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="chartSemanas"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tabla por Centro de Costo -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">📋 Detalle por Centro de Costo</div>
+        <div class="card-subtitle">Haga clic en un encabezado para ordenar</div>
+      </div>
+      <div id="tablaResumen" style="font-size: 0.78rem; font-weight: 600; color: var(--text-muted);"></div>
+    </div>
+    <div class="table-scroll">
+      <table id="tablaCecos">
+        <thead>
+          <tr>
+            <th class="sortable" data-key="cecosCod">Ceco <span class="sort-arrow">↕</span></th>
+            <th class="sortable" data-key="nCentroCosto">Centro de Costo <span class="sort-arrow">↕</span></th>
+            <th class="sortable num" data-key="semanas">Sem. <span class="sort-arrow">↕</span></th>
+            <th class="sortable num" data-key="trabajadoresInicio">Trab. Inicio <span class="sort-arrow">↕</span></th>
+            <th class="sortable num" data-key="trabajadoresFin">Trab. Fin <span class="sort-arrow">↕</span></th>
+            <th class="sortable num" data-key="trabajadoresPromedio">Trab. Promedio <span class="sort-arrow">↕</span>
+            </th>
+            <th class="sortable num" data-key="retirados">Retirados <span class="sort-arrow">↕</span></th>
+            <th class="sortable num" data-key="indiceRotacion">Índice Rotación <span class="sort-arrow">↕</span></th>
+            <th>Nivel</th>
+          </tr>
+        </thead>
+        <tbody id="tablaCecosBody">
+          <tr>
+            <td colspan="9">
+              <div class="empty-state">
+                <div class="icon">📋</div>
+                <div class="title">Dashboard listo para generar el reporte</div>
+                <div class="desc">
+                  Las fechas ya están configuradas para los últimos 7 días
+                  (Fecha Final: hoy, Fecha Inicial: hoy &minus; 7 días).<br>
+                  Ajuste el rango si lo requiere y haga clic en
+                  <strong style="color: var(--chart-primary-teal);">"🚀 Generar Reporte"</strong>.
+                </div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+        <tfoot id="tablaCecosFoot" style="display: none;"></tfoot>
+      </table>
+    </div>
+  </div>
+
+  <!-- Notificación Toast -->
+  <div id="toastNotification" class="toast-notification">
+    <span id="toastIcon">ℹ️</span>
+    <span id="toastMsg">Mensaje</span>
+  </div>
+
+  <!-- Configuración compartida de conexión a la API -->
+  <script src="config.js"></script>
+
+  <script>
+    // =========================================================================
+    // ⚙️ CONFIGURACIÓN DE CONEXIÓN A LA API (Híbrida: usa config.js si existe)
+    // =========================================================================
+    const APP_CONFIG = {
+      servidor: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.servidor)
+        ? GLOBAL_CONFIG.servidor
+        : "RAEVSALL001",
+      puertos: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.puertos)
+        ? GLOBAL_CONFIG.puertos
+        : [8080, 5000]
+    };
+
+    // Generación de servidores API apuntando al nombre del equipo
+    function generarBasesApi() {
+      if (typeof generarBasesApiGlobal === 'function') {
+        return generarBasesApiGlobal();
+      }
+      const bases = [];
+      for (const puerto of APP_CONFIG.puertos) {
+        bases.push(`http://${APP_CONFIG.servidor}:${puerto}`);
+      }
+      return bases;
+    }
+
+    APP_CONFIG.rutaListar = "/api/IndiceRotacionSemanal";
+    APP_CONFIG.timeoutMs = 60000; // El SP puede tardar; se da margen amplio
+
+    let apiBaseActiva = null;
+
+    // Generación de Endpoints API apuntando al nombre del equipo
+    function generarEndpointsApi(rutaRelativa) {
+      const endpoints = [];
+      if (apiBaseActiva) {
+        endpoints.push(`${apiBaseActiva}${rutaRelativa}`);
+      }
+      generarBasesApi().forEach(base => {
+        const ep = `${base}${rutaRelativa}`;
+        if (!endpoints.includes(ep)) endpoints.push(ep);
+      });
+      return endpoints;
+    }
+
+    // =========================================================================
+    // 📊 ESTADO GLOBAL
+    // =========================================================================
+    let registrosCrudos = [];   // Filas tal cual devuelve la API
+    let filasProcesadas = [];   // Filas normalizadas + campos calculados
+    let datosCeco = [];         // Agregado por centro de costo
+    let datosSemana = [];       // Agregado por semana
+    let rangoConsultado = null; // { inicio: Date, fin: Date }
+    let semanasParciales = new Set(); // Claves de semanas incompletas dentro del rango
+
+    let chartCecosObj = null;
+    let chartSemanasObj = null;
+
+    let ordenActual = { key: 'indiceRotacion', dir: 'desc' };
+
+    // Paleta de gráficos tomada del tema
+    const PALETA = {
+      primaryTeal: '#008299',
+      darkTeal: '#005766',
+      sage: '#6C9E9F',
+      indigo: '#5066A6',
+      yellow: '#F5B921',
+      border: '#BAC8D3',
+      textDark: '#1E293B',
+      grid: 'rgba(186, 200, 211, 0.45)'
+    };
+
+    // =========================================================================
+    // 🗓️ UTILIDADES DE FECHA Y SEMANA (Regla del proyecto: semana inicia LUNES)
+    // =========================================================================
+    function toYMD(d) {
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    /** Convierte 'YYYY-MM-DD' a Date local (evita el desfase de zona horaria de new Date(string)). */
+    function parseYMDLocal(valor) {
+      if (!valor) return null;
+      const soloFecha = String(valor).split('T')[0].split(' ')[0];
+      const partes = soloFecha.split('-');
+      if (partes.length !== 3) return null;
+      const d = new Date(parseInt(partes[0], 10), parseInt(partes[1], 10) - 1, parseInt(partes[2], 10));
+      return isNaN(d.getTime()) ? null : d;
+    }
+
+    /**
+     * Calcula la semana ISO-8601 y el rango de fechas con inicio estricto en LUNES.
+     * Implementación estándar definida en .agents/rules/calculo-semanas.md
+     */
+    function calcularSemanaConInicioLunes(d) {
+      const copia = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+
+      // Con LUNES como día 0 (offset) y DOMINGO como día 6:
+      const diaOffsetLunes = (copia.getDay() + 6) % 7;
+
+      const lunes = new Date(copia);
+      lunes.setDate(copia.getDate() - diaOffsetLunes);
+
+      const domingo = new Date(lunes);
+      domingo.setDate(lunes.getDate() + 6);
+
+      const dateUtc = new Date(Date.UTC(copia.getFullYear(), copia.getMonth(), copia.getDate()));
+      const diaUtc = dateUtc.getUTCDay() === 0 ? 7 : dateUtc.getUTCDay(); // Lunes=1, Domingo=7
+      dateUtc.setUTCDate(dateUtc.getUTCDate() + 4 - diaUtc);             // Ajustar al jueves de la semana
+      const anoSemana = dateUtc.getUTCFullYear();
+      const inicioAno = new Date(Date.UTC(anoSemana, 0, 1));
+      const numSemana = Math.ceil((((dateUtc - inicioAno) / 86400000) + 1) / 7);
+
+      const pad = n => String(n).padStart(2, '0');
+      const lunesStr = `${lunes.getFullYear()}-${pad(lunes.getMonth() + 1)}-${pad(lunes.getDate())}`;
+      const rangoTexto = `${pad(lunes.getDate())}/${pad(lunes.getMonth() + 1)} al ${pad(domingo.getDate())}/${pad(domingo.getMonth() + 1)}`;
+
+      return {
+        semana: numSemana,
+        anoSemana: anoSemana,
+        lunesFecha: lunesStr,
+        rangoTexto: rangoTexto,
+        etiqueta: `Sem. ${pad(numSemana)} (${rangoTexto})`,
+        clave: `${anoSemana}-S${pad(numSemana)}`
+      };
+    }
+
+    // =========================================================================
+    // 🚀 INICIALIZACIÓN
+    // =========================================================================
+    function inicializarFechasPorDefecto() {
+      const hoy = new Date();
+      const hace7Dias = new Date();
+      hace7Dias.setDate(hoy.getDate() - 7);
+
+      const fFin = document.getElementById('fechaFin');
+      const fIni = document.getElementById('fechaInicio');
+      if (fFin) fFin.value = toYMD(hoy);
+      if (fIni) fIni.value = toYMD(hace7Dias);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      inicializarFechasPorDefecto();
+      setupEvents();
+      actualizarEstadoUI('neutral', 'Listo para consultar');
+    });
+
+    function setupEvents() {
+      document.getElementById('fechaInicio').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') consultarApi(false);
+      });
+      document.getElementById('fechaFin').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') consultarApi(false);
+      });
+
+      // Ordenamiento por clic en encabezados
+      document.querySelectorAll('#tablaCecos thead th.sortable').forEach(th => {
+        th.addEventListener('click', () => {
+          const key = th.dataset.key;
+          if (ordenActual.key === key) {
+            ordenActual.dir = ordenActual.dir === 'asc' ? 'desc' : 'asc';
+          } else {
+            ordenActual.key = key;
+            ordenActual.dir = (key === 'cecosCod' || key === 'nCentroCosto') ? 'asc' : 'desc';
+          }
+          renderTabla();
+        });
+      });
+    }
+
+    function resetFiltros() {
+      inicializarFechasPorDefecto();
+      registrosCrudos = [];
+      filasProcesadas = [];
+      datosCeco = [];
+      datosSemana = [];
+      rangoConsultado = null;
+      semanasParciales = new Set();
+      destruirGraficos();
+
+      document.getElementById('tablaCecosBody').innerHTML = `
+        <tr>
+          <td colspan="9">
+            <div class="empty-state">
+              <div class="icon">📋</div>
+              <div class="title">Dashboard listo para generar el reporte</div>
+              <div class="desc">
+                Las fechas ya están configuradas para los últimos 7 días.<br>
+                Haga clic en <strong style="color: var(--chart-primary-teal);">"🚀 Generar Reporte"</strong>.
+              </div>
+            </div>
+          </td>
+        </tr>`;
+      document.getElementById('tablaCecosFoot').style.display = 'none';
+      document.getElementById('cardSemanas').style.display = 'none';
+      document.getElementById('btnExportar').disabled = true;
+      document.getElementById('tablaResumen').textContent = '';
+
+      ['kpiRotacionGeneral', 'kpiPromedio', 'kpiRetirados', 'kpiCecos', 'kpiDotacionFin']
+        .forEach(id => { document.getElementById(id).textContent = '0'; });
+      document.getElementById('kpiRotacionGeneral').textContent = '0.00%';
+
+      actualizarEstadoUI('neutral', 'Listo para consultar');
+      mostrarToast('↺ Filtros y dashboard reestablecidos');
+    }
+
+    // =========================================================================
+    // 🌐 COMUNICACIÓN CON LA API
+    // =========================================================================
+    async function fetchConTimeout(url, timeoutMs = 60000) {
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        const response = await fetch(url, { signal: controller.signal });
+        clearTimeout(id);
+        return response;
+      } catch (err) {
+        clearTimeout(id);
+        throw err;
+      }
+    }
+
+    async function consultarApi(forzarRecarga = false) {
+      const fIni = document.getElementById('fechaInicio').value;
+      const fFin = document.getElementById('fechaFin').value;
+
+      if (!fIni || !fFin) {
+        mostrarToast('⚠️ Ingrese una Fecha Inicial y una Fecha Final válidas', 3500);
+        return;
+      }
+
+      const dIni = parseYMDLocal(fIni);
+      const dFin = parseYMDLocal(fFin);
+      if (dIni && dFin && dIni > dFin) {
+        mostrarToast('⚠️ La Fecha Inicial no puede ser mayor que la Fecha Final', 4000);
+        return;
+      }
+
+      const btn = document.getElementById('btnConsultar');
+      btn.disabled = true;
+
+      mostrarCargando(true, 'Consultando SQL Server',
+        `Ejecutando Sp_Indice_Rotacion_Semanal para el periodo ${fIni} al ${fFin}...`);
+      actualizarEstadoUI('loading', `Conectando con ${APP_CONFIG.servidor}...`);
+
+      const queryParams = `?fechaInicio=${encodeURIComponent(fIni)}&fechaFin=${encodeURIComponent(fFin)}&recargar=${forzarRecarga}`;
+      const endpoints = generarEndpointsApi(`${APP_CONFIG.rutaListar}${queryParams}`);
+      let cargado = false;
+
+      rangoConsultado = { inicio: dIni, fin: dFin };
+
+      for (const url of endpoints) {
+        try {
+          const res = await fetchConTimeout(url, APP_CONFIG.timeoutMs);
+          if (!res.ok) continue;
+
+          const json = await res.json();
+          // Soporta arreglo plano o respuesta envuelta en { exito: true, datos: [...] }
+          const items = Array.isArray(json) ? json : (json.datos || []);
+          const urlObj = new URL(url);
+
+          apiBaseActiva = `${urlObj.protocol}//${urlObj.host}`;
+          registrosCrudos = items;
+          procesarDatos(items);
+
+          actualizarEstadoUI('online', `En Línea (${urlObj.host}) · ${items.length} reg.`);
+          if (items.length === 0) {
+            mostrarToast('ℹ️ Conexión exitosa, pero el SP no arrojó registros para este rango.');
+          } else {
+            mostrarToast(`✅ ${items.length} registros cargados desde IndiceRotacionSemanalController`);
+          }
+          cargado = true;
+          break;
+        } catch (err) {
+          console.warn(`Intento fallido en ${url}:`, err.message);
+        }
+      }
+
+      if (!cargado) {
+        actualizarEstadoUI('error', `Sin conexión con ${APP_CONFIG.servidor}`);
+        mostrarToast(`❌ No se pudo conectar a la API en ${APP_CONFIG.servidor} (Puertos ${APP_CONFIG.puertos.join('/')}).`, 6000);
+      }
+
+      mostrarCargando(false);
+      btn.disabled = false;
+    }
+
+    // =========================================================================
+    // 🛠️ PROCESAMIENTO, CAMPOS CALCULADOS Y AGREGACIONES
+    // =========================================================================
+    function num(v) {
+      const n = Number(v);
+      return isFinite(n) ? n : 0;
+    }
+
+    /** Campo calculado: (TrabajadoresInicio + TrabajadoresFin) / 2 */
+    function calcularTrabajadoresPromedio(inicio, fin) {
+      return (num(inicio) + num(fin)) / 2;
+    }
+
+    /** Campo calculado: Retirados / TrabajadoresPromedio * 100 (expresado en %) */
+    function calcularIndiceRotacion(retirados, promedio) {
+      if (promedio <= 0) return 0;
+      return (num(retirados) / promedio) * 100;
+    }
+
+    function fmtNumero(v, decimales = 0) {
+      return num(v).toLocaleString('es-NI', {
+        minimumFractionDigits: decimales,
+        maximumFractionDigits: decimales
+      });
+    }
+
+    function fmtPct(v) {
+      return `${fmtNumero(v, 2)}%`;
+    }
+
+    function nivelRotacion(indice) {
+      // Escala de referencia operativa sobre el índice porcentual
+      if (indice >= 10) return { texto: 'Alto', clase: 'badge-alto' };
+      if (indice >= 5) return { texto: 'Medio', clase: 'badge-medio' };
+      return { texto: 'Normal', clase: 'badge-normal' };
+    }
+
+    function procesarDatos(items) {
+      // 1. Normalizar cada fila y agregar los campos calculados
+      filasProcesadas = items.map(d => {
+        const anio = num(d.anio ?? d.Anio ?? d['Año'] ?? d.ano);
+        const semana = num(d.semana ?? d.Semana);
+        const inicio = num(d.trabajadoresInicio ?? d.TrabajadoresInicio);
+        const fin = num(d.trabajadoresFin ?? d.TrabajadoresFin);
+        const retirados = num(d.retirados ?? d.Retirados);
+
+        // Semana calculada a partir del Lunes para respetar la regla del proyecto
+        const anioLunes = anio || new Date().getFullYear();
+        const lunes = fechaLunesDeSemanaIso(anioLunes, semana);
+        const infoSemana = calcularSemanaConInicioLunes(lunes);
+
+        const promedio = calcularTrabajadoresPromedio(inicio, fin);
+        const indice = calcularIndiceRotacion(retirados, promedio);
+
+        return {
+          anio: anio,
+          semana: semana,
+          claveSemana: infoSemana.clave,
+          etiquetaSemana: infoSemana.etiqueta,
+          inicioSemana: infoSemana.lunesFecha,
+          finSemana: fechaDomingoDeSemanaIso(anioLunes, semana),
+          cecosCod: String(d.cecosCod ?? d.CecosCod ?? '').trim(),
+          nCentroCosto: String(d.nCentroCosto ?? d.NCentroCosto ?? '').trim(),
+          numeroTrabajadores: num(d.numeroTrabajadores ?? d.NumeroTrabajadores),
+          trabajadoresInicio: inicio,
+          trabajadoresFin: fin,
+          trabajadoresPromedio: promedio,
+          retirados: retirados,
+          indiceRotacion: indice
+        };
+      });
+
+      // 2. Agregación por centro de costo
+      const mapaCeco = new Map();
+      filasProcesadas.forEach(f => {
+        const clave = f.cecosCod || '(SIN CECO)';
+        if (!mapaCeco.has(clave)) {
+          mapaCeco.set(clave, {
+            cecosCod: clave,
+            nCentroCosto: f.nCentroCosto || 'Sin centro de costo',
+            trabajadoresInicio: 0,
+            trabajadoresFin: 0,
+            retirados: 0,
+            clavesSemanas: new Set(),
+            etiquetasSemanas: new Set()
+          });
+        }
+        const acc = mapaCeco.get(clave);
+        acc.trabajadoresInicio += f.trabajadoresInicio;
+        acc.trabajadoresFin += f.trabajadoresFin;
+        acc.retirados += f.retirados;
+        if (f.claveSemana) {
+          acc.clavesSemanas.add(f.claveSemana);
+          acc.etiquetasSemanas.add(f.etiquetaSemana);
+        }
+      });
+
+      datosCeco = Array.from(mapaCeco.values()).map(acc => {
+        const promedio = calcularTrabajadoresPromedio(acc.trabajadoresInicio, acc.trabajadoresFin);
+        return {
+          cecosCod: acc.cecosCod,
+          nCentroCosto: acc.nCentroCosto,
+          semanas: acc.clavesSemanas.size,
+          trabajadoresInicio: acc.trabajadoresInicio,
+          trabajadoresFin: acc.trabajadoresFin,
+          trabajadoresPromedio: promedio,
+          retirados: acc.retirados,
+          indiceRotacion: calcularIndiceRotacion(acc.retirados, promedio)
+        };
+      });
+
+      // 3. Agregación por semana (tendencia del índice general)
+      const mapaSemana = new Map();
+      filasProcesadas.forEach(f => {
+        if (!mapaSemana.has(f.claveSemana)) {
+          mapaSemana.set(f.claveSemana, {
+            clave: f.claveSemana,
+            etiqueta: f.etiquetaSemana,
+            anio: f.anio,
+            semana: f.semana,
+            inicioSemana: f.inicioSemana,
+            finSemana: f.finSemana,
+            trabajadoresInicio: 0,
+            trabajadoresFin: 0,
+            retirados: 0,
+            cecos: new Set()
+          });
+        }
+        const acc = mapaSemana.get(f.claveSemana);
+        acc.trabajadoresInicio += f.trabajadoresInicio;
+        acc.trabajadoresFin += f.trabajadoresFin;
+        acc.retirados += f.retirados;
+        if (f.cecosCod) acc.cecos.add(f.cecosCod);
+      });
+
+      datosSemana = Array.from(mapaSemana.values())
+        .map(acc => {
+          const promedio = calcularTrabajadoresPromedio(acc.trabajadoresInicio, acc.trabajadoresFin);
+          return {
+            clave: acc.clave,
+            etiqueta: acc.etiqueta,
+            anio: acc.anio,
+            semana: acc.semana,
+            inicioSemana: acc.inicioSemana,
+            finSemana: acc.finSemana,
+            trabajadoresInicio: acc.trabajadoresInicio,
+            trabajadoresFin: acc.trabajadoresFin,
+            trabajadoresPromedio: promedio,
+            retirados: acc.retirados,
+            cecos: acc.cecos.size,
+            indiceRotacion: calcularIndiceRotacion(acc.retirados, promedio)
+          };
+        })
+        .sort((a, b) => (a.anio - b.anio) || (a.semana - b.semana));
+
+      // 4. Detectar semanas que el rango deja incompletas (ver calcularSemanasParciales)
+      calcularSemanasParciales();
+
+      renderTodo();
+    }
+
+    /**
+     * Devuelve el Lunes de una semana ISO dentro de un año.
+     * Se usa para reconstruir el rango visual "Sem. XX (DD/MM al DD/MM)".
+     */
+    function fechaLunesDeSemanaIso(anio, semana) {
+      if (!semana) return new Date(anio, 0, 1);
+      // El 4 de enero siempre pertenece a la semana 1 según ISO-8601
+      const cuatroEnero = new Date(anio, 0, 4);
+      const infoCuatro = calcularSemanaConInicioLunes(cuatroEnero);
+      const lunesSemana1 = parseYMDLocal(infoCuatro.lunesFecha);
+      const resultado = new Date(lunesSemana1);
+      resultado.setDate(lunesSemana1.getDate() + (semana - 1) * 7);
+      return resultado;
+    }
+
+    /** Devuelve el Domingo (YYYY-MM-DD) de una semana ISO dentro de un año. */
+    function fechaDomingoDeSemanaIso(anio, semana) {
+      const lunes = fechaLunesDeSemanaIso(anio, semana);
+      const domingo = new Date(lunes);
+      domingo.setDate(lunes.getDate() + 6);
+      return toYMD(domingo);
+    }
+
+    /**
+     * Marca las semanas que caen parcialmente fuera del rango consultado.
+     * El SP cuenta "TrabajadoresInicio" como los presentes el LUNES y "TrabajadoresFin"
+     * como los presentes el DOMINGO; si el rango no cubre esos días, esos valores quedan
+     * en 0 y el índice de esa semana sale distorsionado (normalmente en 0%).
+     */
+    function calcularSemanasParciales() {
+      semanasParciales = new Set();
+      if (!rangoConsultado) return;
+
+      const ini = rangoConsultado.inicio;
+      const fin = rangoConsultado.fin;
+
+      datosSemana.forEach(s => {
+        const lunes = parseYMDLocal(s.inicioSemana);
+        const domingo = parseYMDLocal(s.finSemana);
+        if (!lunes || !domingo) return;
+        if (lunes < ini || domingo > fin) {
+          semanasParciales.add(s.clave);
+        }
+      });
+    }
+
+    // =========================================================================
+    // 🎨 RENDERIZADO
+    // =========================================================================
+    function renderTodo() {
+      const totalInicio = filasProcesadas.reduce((s, f) => s + f.trabajadoresInicio, 0);
+      const totalFin = filasProcesadas.reduce((s, f) => s + f.trabajadoresFin, 0);
+      const totalRetirados = filasProcesadas.reduce((s, f) => s + f.retirados, 0);
+
+      renderKpis(totalInicio, totalFin, totalRetirados);
+      renderSemanas();
+      renderTabla();
+      renderGraficos();
+
+      document.getElementById('btnExportar').disabled = datosCeco.length === 0;
+    }
+
+    function renderKpis(totalInicio, totalFin, totalRetirados) {
+      const promedioGeneral = calcularTrabajadoresPromedio(totalInicio, totalFin);
+      const indiceGeneral = calcularIndiceRotacion(totalRetirados, promedioGeneral);
+
+      document.getElementById('kpiRotacionGeneral').textContent = fmtPct(indiceGeneral);
+      document.getElementById('kpiRotacionGeneralSub').textContent =
+        `${fmtNumero(totalRetirados)} retirados / ${fmtNumero(promedioGeneral, 2)} promedio`;
+
+      document.getElementById('kpiPromedio').textContent = fmtNumero(promedioGeneral, 2);
+      document.getElementById('kpiPromedioSub').textContent =
+        `(${fmtNumero(totalInicio)} inicio + ${fmtNumero(totalFin)} fin) / 2`;
+
+      document.getElementById('kpiRetirados').textContent = fmtNumero(totalRetirados);
+      document.getElementById('kpiRetiradosSub').textContent =
+        `${datosCeco.length} centro(s) de costo analizado(s)`;
+
+      document.getElementById('kpiCecos').textContent = fmtNumero(datosCeco.length);
+      document.getElementById('kpiCecosSub').textContent =
+        `${datosSemana.length} semana(s) en el rango`;
+
+      document.getElementById('kpiDotacionFin').textContent = fmtNumero(totalFin);
+      const variacion = totalFin - totalInicio;
+      const signo = variacion > 0 ? '+' : '';
+      document.getElementById('kpiDotacionFinSub').textContent =
+        `${signo}${fmtNumero(variacion)} vs. inicio del periodo`;
+    }
+
+    function renderSemanas() {
+      const card = document.getElementById('cardSemanas');
+      const cont = document.getElementById('leyendaSemanas');
+      const resumen = document.getElementById('semanasResumen');
+
+      if (datosSemana.length === 0) {
+        card.style.display = 'none';
+        return;
+      }
+
+      card.style.display = 'block';
+      const primera = datosSemana[0];
+      const ultima = datosSemana[datosSemana.length - 1];
+      resumen.textContent = `${datosSemana.length} semana(s): de ${primera.etiqueta} a ${ultima.etiqueta}`;
+
+      const nParciales = semanasParciales.size;
+      if (nParciales > 0) {
+        resumen.textContent += ` · ${nParciales} semana(s) incompleta(s) dentro del rango`;
+        resumen.style.color = '#8A6100';
+      } else {
+        resumen.style.color = '';
+      }
+
+      cont.innerHTML = datosSemana.map(s => {
+        const parcial = semanasParciales.has(s.clave);
+        return `
+        <span class="chip-semana" style="${parcial ? 'background:#FFF6DF;border-color:#F5B921;' : ''}"
+          title="${parcial
+            ? 'Semana incompleta: el rango no cubre el lunes o el domingo de esta semana, por lo que TrabajadoresInicio/TrabajadoresFin quedan parciales en el SP'
+            : 'Índice de rotación general de la semana'}">
+          <span class="dot" style="${parcial ? 'background:#F5B921;' : ''}"></span>
+          ${s.etiqueta} &nbsp;·&nbsp;
+          <strong style="color: var(--chart-primary-teal);">${fmtPct(s.indiceRotacion)}</strong>
+          <span style="color: var(--text-muted); font-weight: 500;">(${fmtNumero(s.retirados)} ret.)</span>
+          ${parcial ? '<span style="color:#8A6100;font-weight:700;">⚠ parcial</span>' : ''}
+        </span>`;
+      }).join('');
+    }
+
+    function renderTabla() {
+      const tbody = document.getElementById('tablaCecosBody');
+      const tfoot = document.getElementById('tablaCecosFoot');
+
+      if (datosCeco.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="9">
+              <div class="empty-state">
+                <div class="icon">🔍</div>
+                <div class="title">Sin datos para el rango seleccionado</div>
+                <div class="desc">El procedimiento almacenado no devolvió centros de costo para estas fechas.</div>
+              </div>
+            </td>
+          </tr>`;
+        tfoot.style.display = 'none';
+        document.getElementById('tablaResumen').textContent = '';
+        return;
+      }
+
+      const ordenados = [...datosCeco].sort((a, b) => {
+        const k = ordenActual.key;
+        const va = a[k];
+        const vb = b[k];
+        let cmp;
+        if (typeof va === 'string' || typeof vb === 'string') {
+          cmp = String(va).localeCompare(String(vb), 'es');
+        } else {
+          cmp = num(va) - num(vb);
+        }
+        return ordenActual.dir === 'asc' ? cmp : -cmp;
+      });
+
+      // Marcar encabezado ordenado
+      document.querySelectorAll('#tablaCecos thead th.sortable').forEach(th => {
+        th.classList.toggle('sorted', th.dataset.key === ordenActual.key);
+        const arrow = th.querySelector('.sort-arrow');
+        if (arrow) {
+          arrow.textContent = th.dataset.key === ordenActual.key
+            ? (ordenActual.dir === 'asc' ? '↑' : '↓')
+            : '↕';
+        }
+      });
+
+      tbody.innerHTML = ordenados.map(d => {
+        const nivel = nivelRotacion(d.indiceRotacion);
+        return `
+          <tr>
+            <td class="ceco-cod">${d.cecosCod}</td>
+            <td class="ceco-nombre">${d.nCentroCosto}</td>
+            <td class="num">${fmtNumero(d.semanas)}</td>
+            <td class="num">${fmtNumero(d.trabajadoresInicio)}</td>
+            <td class="num">${fmtNumero(d.trabajadoresFin)}</td>
+            <td class="num">${fmtNumero(d.trabajadoresPromedio, 2)}</td>
+            <td class="num">${fmtNumero(d.retirados)}</td>
+            <td class="num" style="color:${d.indiceRotacion >= 10 ? 'var(--danger)' : 'var(--chart-dark-teal)'};">${fmtPct(d.indiceRotacion)}</td>
+            <td><span class="badge ${nivel.clase}">${nivel.texto}</span></td>
+          </tr>`;
+      }).join('');
+
+      // Totales generales del periodo (agregado, no promedio de índices)
+      const tIni = datosCeco.reduce((s, d) => s + d.trabajadoresInicio, 0);
+      const tFin = datosCeco.reduce((s, d) => s + d.trabajadoresFin, 0);
+      const tRet = datosCeco.reduce((s, d) => s + d.retirados, 0);
+      const tProm = calcularTrabajadoresPromedio(tIni, tFin);
+      const tInd = calcularIndiceRotacion(tRet, tProm);
+
+      tfoot.style.display = '';
+      tfoot.innerHTML = `
+        <tr>
+          <td colspan="3">TOTAL GENERAL (${datosCeco.length} cecos)</td>
+          <td class="num">${fmtNumero(tIni)}</td>
+          <td class="num">${fmtNumero(tFin)}</td>
+          <td class="num">${fmtNumero(tProm, 2)}</td>
+          <td class="num">${fmtNumero(tRet)}</td>
+          <td class="num" style="color: var(--accent-yellow);">${fmtPct(tInd)}</td>
+          <td></td>
+        </tr>`;
+
+      document.getElementById('tablaResumen').textContent =
+        `${datosCeco.length} centros de costo · Índice general ${fmtPct(tInd)}`;
+    }
+
+    function destruirGraficos() {
+      if (chartCecosObj) { chartCecosObj.destroy(); chartCecosObj = null; }
+      if (chartSemanasObj) { chartSemanasObj.destroy(); chartSemanasObj = null; }
+    }
+
+    function renderGraficos() {
+      destruirGraficos();
+
+      if (typeof Chart === 'undefined') return;
+
+      // ---- Gráfico 1: Índice por centro de costo (barras horizontales) ----
+      const cecosOrdenados = [...datosCeco].sort((a, b) => b.indiceRotacion - a.indiceRotacion);
+      const etiquetasCeco = cecosOrdenados.map(d => `${d.cecosCod} · ${d.nCentroCosto}`);
+
+      chartCecosObj = new Chart(document.getElementById('chartCecos'), {
+        type: 'bar',
+        data: {
+          labels: etiquetasCeco,
+          datasets: [{
+            label: 'Índice de rotación (%)',
+            data: cecosOrdenados.map(d => Number(d.indiceRotacion.toFixed(2))),
+            backgroundColor: cecosOrdenados.map((d, i) =>
+              i === 0 ? PALETA.yellow
+                : (i % 2 === 0 ? PALETA.primaryTeal : PALETA.darkTeal)),
+            borderColor: PALETA.border,
+            borderWidth: 1,
+            borderRadius: 5,
+            barThickness: 'flex',
+            maxBarThickness: 26
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: { duration: 450 },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: PALETA.darkTeal,
+              titleColor: '#FFFFFF',
+              bodyColor: '#DCEDF2',
+              padding: 11,
+              cornerRadius: 7,
+              callbacks: {
+                title: (ctx) => {
+                  const d = cecosOrdenados[ctx[0].dataIndex];
+                  return `${d.cecosCod} · ${d.nCentroCosto}`;
+                },
+                label: (ctx) => {
+                  const d = cecosOrdenados[ctx.dataIndex];
+                  return [
+                    `Índice de rotación: ${fmtPct(d.indiceRotacion)}`,
+                    `Retirados: ${fmtNumero(d.retirados)}`,
+                    `Trab. promedio: ${fmtNumero(d.trabajadoresPromedio, 2)}`,
+                    `Semanas: ${fmtNumero(d.semanas)}`
+                  ];
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              beginAtZero: true,
+              grid: { color: PALETA.grid },
+              ticks: {
+                color: PALETA.textDark,
+                font: { size: 11, weight: '600' },
+                callback: (v) => `${v}%`
+              },
+              title: {
+                display: true,
+                text: 'Índice de rotación (%)',
+                color: PALETA.darkTeal,
+                font: { size: 11, weight: '700' }
+              }
+            },
+            y: {
+              grid: { display: false },
+              ticks: {
+                color: PALETA.textDark,
+                font: { size: 10.5, weight: '600' },
+                autoSkip: false
+              }
+            }
+          }
+        }
+      });
+
+      // ---- Gráfico 2: Tendencia semanal del índice general ----
+      chartSemanasObj = new Chart(document.getElementById('chartSemanas'), {
+        type: 'line',
+        data: {
+          labels: datosSemana.map(s => `Sem. ${String(s.semana).padStart(2, '0')}`),
+          datasets: [
+            {
+              label: 'Índice de rotación general (%)',
+              data: datosSemana.map(s => Number(s.indiceRotacion.toFixed(2))),
+              borderColor: PALETA.primaryTeal,
+              backgroundColor: 'rgba(0, 130, 153, 0.14)',
+              borderWidth: 2.5,
+              fill: true,
+              tension: 0.32,
+              pointRadius: datosSemana.map(s => semanasParciales.has(s.clave) ? 5 : 4.5),
+              pointHoverRadius: 7,
+              pointBackgroundColor: datosSemana.map(s => semanasParciales.has(s.clave) ? '#FFFFFF' : PALETA.primaryTeal),
+              pointBorderColor: datosSemana.map(s => semanasParciales.has(s.clave) ? PALETA.yellow : '#FFFFFF'),
+              pointBorderWidth: 2
+            },
+            {
+              label: 'Retirados',
+              data: datosSemana.map(s => s.retirados),
+              borderColor: PALETA.yellow,
+              backgroundColor: 'transparent',
+              borderWidth: 2,
+              borderDash: [6, 4],
+              tension: 0.32,
+              pointRadius: 3.5,
+              pointHoverRadius: 6,
+              pointBackgroundColor: PALETA.yellow,
+              yAxisID: 'y1'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: { duration: 450 },
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: {
+              labels: {
+                color: PALETA.textDark,
+                font: { size: 11, weight: '600' },
+                usePointStyle: true,
+                boxWidth: 8
+              }
+            },
+            tooltip: {
+              backgroundColor: PALETA.darkTeal,
+              titleColor: '#FFFFFF',
+              bodyColor: '#DCEDF2',
+              padding: 11,
+              cornerRadius: 7,
+              callbacks: {
+                title: (ctx) => datosSemana[ctx[0].dataIndex].etiqueta,
+                afterBody: (ctx) => {
+                  const s = datosSemana[ctx[0].dataIndex];
+                  const extras = [
+                    '',
+                    `Trab. inicio: ${fmtNumero(s.trabajadoresInicio)}`,
+                    `Trab. fin: ${fmtNumero(s.trabajadoresFin)}`,
+                    `Trab. promedio: ${fmtNumero(s.trabajadoresPromedio, 2)}`,
+                    `Centros de costo: ${fmtNumero(s.cecos)}`
+                  ];
+                  if (semanasParciales.has(s.clave)) {
+                    extras.push('', '⚠ Semana incompleta dentro del rango:');
+                    extras.push('el SP no cubre el lunes o el domingo,');
+                    extras.push('por lo que el índice de esta semana');
+                    extras.push('está subestimado.');
+                  }
+                  return extras;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { color: PALETA.textDark, font: { size: 10.5, weight: '600' } }
+            },
+            y: {
+              beginAtZero: true,
+              position: 'left',
+              grid: { color: PALETA.grid },
+              ticks: {
+                color: PALETA.darkTeal,
+                font: { size: 10.5, weight: '600' },
+                callback: (v) => `${v}%`
+              },
+              title: {
+                display: true,
+                text: 'Índice (%)',
+                color: PALETA.darkTeal,
+                font: { size: 10.5, weight: '700' }
+              }
+            },
+            y1: {
+              beginAtZero: true,
+              position: 'right',
+              grid: { drawOnChartArea: false },
+              ticks: {
+                color: '#8A6100',
+                font: { size: 10.5, weight: '600' },
+                precision: 0
+              },
+              title: {
+                display: true,
+                text: 'Retirados',
+                color: '#8A6100',
+                font: { size: 10.5, weight: '700' }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // =========================================================================
+    // 📥 EXPORTACIÓN A EXCEL
+    // =========================================================================
+    function exportarExcel() {
+      if (typeof XLSX === 'undefined') {
+        mostrarToast('⚠️ La librería de Excel no está disponible (sin conexión a CDN).', 4500);
+        return;
+      }
+      if (datosCeco.length === 0) {
+        mostrarToast('ℹ️ No hay datos para exportar. Genere el reporte primero.');
+        return;
+      }
+
+      const fIni = document.getElementById('fechaInicio').value;
+      const fFin = document.getElementById('fechaFin').value;
+
+      // Hoja 1: Detalle por centro de costo
+      const filasCeco = datosCeco.map(d => ({
+        'Ceco': d.cecosCod,
+        'Centro de Costo': d.nCentroCosto,
+        'Semanas': d.semanas,
+        'Trabajadores Inicio': d.trabajadoresInicio,
+        'Trabajadores Fin': d.trabajadoresFin,
+        'Trabajadores Promedio': Number(d.trabajadoresPromedio.toFixed(2)),
+        'Retirados': d.retirados,
+        'Indice Rotacion (%)': Number(d.indiceRotacion.toFixed(2)),
+        'Nivel': nivelRotacion(d.indiceRotacion).texto
+      }));
+
+      const tIni = datosCeco.reduce((s, d) => s + d.trabajadoresInicio, 0);
+      const tFin = datosCeco.reduce((s, d) => s + d.trabajadoresFin, 0);
+      const tRet = datosCeco.reduce((s, d) => s + d.retirados, 0);
+      const tProm = calcularTrabajadoresPromedio(tIni, tFin);
+
+      filasCeco.push({
+        'Ceco': 'TOTAL',
+        'Centro de Costo': `${datosCeco.length} centros de costo`,
+        'Semanas': datosSemana.length,
+        'Trabajadores Inicio': tIni,
+        'Trabajadores Fin': tFin,
+        'Trabajadores Promedio': Number(tProm.toFixed(2)),
+        'Retirados': tRet,
+        'Indice Rotacion (%)': Number(calcularIndiceRotacion(tRet, tProm).toFixed(2)),
+        'Nivel': nivelRotacion(calcularIndiceRotacion(tRet, tProm)).texto
+      });
+
+      const hojaCeco = XLSX.utils.json_to_sheet(filasCeco);
+
+      // Hoja 2: Tendencia semanal
+      const filasSemana = datosSemana.map(s => ({
+        'Año': s.anio,
+        'Semana': s.semana,
+        'Rango': s.etiqueta,
+        'Trabajadores Inicio': s.trabajadoresInicio,
+        'Trabajadores Fin': s.trabajadoresFin,
+        'Trabajadores Promedio': Number(s.trabajadoresPromedio.toFixed(2)),
+        'Retirados': s.retirados,
+        'Indice Rotacion (%)': Number(s.indiceRotacion.toFixed(2)),
+        'Centros de Costo': s.cecos
+      }));
+      const hojaSemana = XLSX.utils.json_to_sheet(filasSemana);
+
+      // Hoja 3: Detalle crudo (tal cual el SP, más campos calculados)
+      const filasDetalle = registrosCrudos.map(d => {
+        const inicio = num(d.trabajadoresInicio ?? d.TrabajadoresInicio);
+        const fin = num(d.trabajadoresFin ?? d.TrabajadoresFin);
+        const retirados = num(d.retirados ?? d.Retirados);
+        const promedio = calcularTrabajadoresPromedio(inicio, fin);
+        return {
+          'Año': num(d.anio ?? d.Anio ?? d['Año']),
+          'Semana': num(d.semana ?? d.Semana),
+          'Ceco': String(d.cecosCod ?? d.CecosCod ?? ''),
+          'Centro de Costo': String(d.nCentroCosto ?? d.NCentroCosto ?? ''),
+          'Numero Trabajadores': num(d.numeroTrabajadores ?? d.NumeroTrabajadores),
+          'Trabajadores Inicio': inicio,
+          'Trabajadores Fin': fin,
+          'Trabajadores Promedio': Number(promedio.toFixed(2)),
+          'Retirados': retirados,
+          'Indice Rotacion (%)': Number(calcularIndiceRotacion(retirados, promedio).toFixed(2))
+        };
+      });
+      const hojaDetalle = XLSX.utils.json_to_sheet(filasDetalle);
+
+      const libro = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(libro, hojaCeco, 'Por Centro de Costo');
+      XLSX.utils.book_append_sheet(libro, hojaSemana, 'Tendencia Semanal');
+      XLSX.utils.book_append_sheet(libro, hojaDetalle, 'Detalle');
+
+      // Anchos de columna legibles
+      hojaCeco['!cols'] = [{ wch: 12 }, { wch: 42 }, { wch: 10 }, { wch: 19 }, { wch: 17 }, { wch: 21 }, { wch: 11 }, { wch: 19 }, { wch: 10 }];
+      hojaSemana['!cols'] = [{ wch: 8 }, { wch: 9 }, { wch: 30 }, { wch: 19 }, { wch: 17 }, { wch: 21 }, { wch: 11 }, { wch: 19 }, { wch: 17 }];
+      hojaDetalle['!cols'] = [{ wch: 8 }, { wch: 9 }, { wch: 12 }, { wch: 42 }, { wch: 19 }, { wch: 19 }, { wch: 17 }, { wch: 21 }, { wch: 11 }, { wch: 19 }];
+
+      XLSX.writeFile(libro, `Indice_Rotacion_Semanal_${fIni}_a_${fFin}.xlsx`);
+      mostrarToast('✅ Archivo Excel generado correctamente');
+    }
+
+    // =========================================================================
+    // 🎛️ UTILIDADES DE INTERFAZ
+    // =========================================================================
+    function mostrarCargando(mostrar, titulo = '', mensaje = '') {
+      const overlay = document.getElementById('loadingOverlay');
+      if (titulo) document.getElementById('loadingTitle').textContent = titulo;
+      if (mensaje) document.getElementById('loadingMessage').textContent = mensaje;
+      overlay.classList.toggle('show', mostrar);
+    }
+
+    function actualizarEstadoUI(estado, texto) {
+      const dot = document.querySelector('#apiStatusBadge .status-dot');
+      const txt = document.getElementById('apiStatusText');
+      dot.className = 'status-dot';
+      if (estado === 'online') dot.classList.add('online');
+      else if (estado === 'loading') dot.classList.add('loading');
+      else if (estado === 'error') dot.classList.add('error');
+      txt.textContent = texto;
+    }
+
+    let toastTimer = null;
+    function mostrarToast(mensaje, duracion = 3200) {
+      const toast = document.getElementById('toastNotification');
+      document.getElementById('toastMsg').textContent = mensaje;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), duracion);
+    }
+  </script>
+</body>
+
+</html>
