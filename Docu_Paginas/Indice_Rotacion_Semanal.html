@@ -19,21 +19,21 @@
 
   <style>
     :root {
-      /* Estructura y Paleta Corporativa */
-      --header-bg: #071F36;
-      --header-teal: #0E4F63;
-      --bg-body: #F0F4F8;
+      /* Estructura y Paleta: CRM Pipeline Blue Theme */
+      --header-bg: #1D4A74;
+      --header-teal: #1D4A74;
+      --bg-body: #E9EFF6;
       --bg-card: #FFFFFF;
       --border-card: #CBD5E1;
       --border-light: #E2E8F0;
 
       /* Series y Colores Temáticos */
-      --color-primary: #008299;
-      --color-primary-dark: #005766;
-      --color-primary-light: #E0F4F7;
+      --color-primary: #1D4A74;
+      --color-primary-dark: #163857;
+      --color-primary-light: #E9EFF6;
       --color-amber: #D97706;
       --color-amber-light: #FEF3C7;
-      --color-indigo: #4F46E5;
+      --color-indigo: #37638B;
       --color-indigo-light: #EEF2FF;
       --color-emerald: #059669;
       --color-emerald-light: #ECFDF5;
@@ -41,7 +41,7 @@
       --color-rose-light: #FEE2E2;
 
       /* Tipografía y Textos */
-      --text-main: #0F172A;
+      --text-main: #1E293B;
       --text-secondary: #475569;
       --text-muted: #64748B;
       --text-light: #94A3B8;
@@ -73,7 +73,7 @@
 
     /* ==================== HEADER ==================== */
     header {
-      background: linear-gradient(135deg, #071F36 0%, #0E4F63 55%, #136780 100%);
+      background: linear-gradient(135deg, #1D4A74 0%, #264F7C 55%, #37638B 100%);
       color: #FFFFFF;
       padding: 22px 30px;
       border-radius: var(--radius-lg);
@@ -84,7 +84,7 @@
       flex-wrap: wrap;
       gap: 16px;
       box-shadow: var(--shadow-lg);
-      border-bottom: 4px solid #F5B921;
+      border-bottom: 4px solid #6E91B3;
       position: relative;
       overflow: hidden;
     }
@@ -112,7 +112,7 @@
 
     .header-info p {
       font-size: 0.88rem;
-      color: #B5D2E0;
+      color: #B9D2E8;
       margin-top: 5px;
       font-weight: 400;
       max-width: 760px;
@@ -516,29 +516,29 @@
       width: 100%;
     }
 
-    /* ==================== SEGMENTADOR Y HEATMAP DE MATRIZ ==================== */
-    .matriz-segmentador-bar {
+    /* ==================== BARRA DE VISTAS EN RESUMEN SEMANAL ==================== */
+    .semanas-view-toolbar {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
-      gap: 14px;
+      gap: 12px;
       background: #F8FAFC;
       border: 1px solid var(--border-card);
       border-radius: var(--radius-md);
-      padding: 12px 16px;
+      padding: 10px 16px;
       margin-bottom: 16px;
     }
 
-    .segmentador-btn-group {
+    .view-toggle-group {
       display: flex;
-      gap: 6px;
       align-items: center;
+      gap: 6px;
       flex-wrap: wrap;
     }
 
-    .segmentador-label {
-      font-size: 0.75rem;
+    .view-toggle-label {
+      font-size: 0.78rem;
       font-weight: 700;
       color: var(--header-teal);
       text-transform: uppercase;
@@ -546,13 +546,13 @@
       margin-right: 4px;
     }
 
-    .btn-segmentador {
+    .btn-toggle-view {
       background: #FFFFFF;
       border: 1px solid var(--border-card);
       color: var(--text-secondary);
       padding: 6px 14px;
       border-radius: 20px;
-      font-size: 0.78rem;
+      font-size: 0.80rem;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.15s ease;
@@ -561,26 +561,33 @@
       gap: 6px;
     }
 
-    .btn-segmentador:hover {
+    .btn-toggle-view:hover {
       background: var(--color-primary-light);
       color: var(--color-primary-dark);
       border-color: var(--color-primary);
     }
 
-    .btn-segmentador.active {
+    .btn-toggle-view.active {
       background: var(--color-primary);
       color: #FFFFFF;
       border-color: var(--color-primary);
       box-shadow: var(--shadow-xs);
     }
 
-    .matriz-ceco-select-wrap {
+    .semana-ceco-select-wrap {
       display: flex;
       align-items: center;
       gap: 8px;
     }
 
-    .matriz-ceco-select-wrap select {
+    .semana-ceco-select-wrap label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--color-primary-dark);
+      white-space: nowrap;
+    }
+
+    .semana-ceco-select-wrap select {
       padding: 6px 12px;
       font-size: 0.82rem;
       font-weight: 600;
@@ -588,59 +595,12 @@
       border-radius: var(--radius-sm);
       color: var(--text-main);
       background: #FFFFFF;
-      min-width: 230px;
+      min-width: 250px;
       outline: none;
     }
 
-    .matriz-ceco-select-wrap select:focus {
+    .semana-ceco-select-wrap select:focus {
       border-color: var(--color-primary);
-    }
-
-    .heatmap-cell {
-      padding: 8px 10px;
-      text-align: center;
-      font-weight: 600;
-      border-right: 1px solid #E2E8F0;
-      border-bottom: 1px solid #E2E8F0;
-      transition: all 0.15s;
-    }
-
-    .heatmap-cell .ir-val {
-      font-size: 0.82rem;
-      display: block;
-    }
-
-    .heatmap-cell .ret-sub {
-      font-size: 0.69rem;
-      color: var(--text-muted);
-      display: block;
-      margin-top: 1px;
-    }
-
-    .heat-zero {
-      background: #FFFFFF;
-      color: #64748B;
-    }
-
-    .heat-low {
-      background: #F0FDF4;
-      color: #15803D;
-    }
-
-    .heat-med {
-      background: #FEF9C3;
-      color: #A16207;
-    }
-
-    .heat-high {
-      background: #FEE2E2;
-      color: #B91C1C;
-    }
-
-    .heat-crit {
-      background: #FECACA;
-      color: #991B1B;
-      font-weight: 800;
     }
 
     /* ==================== TABS DE TABLAS DE DETALLE ==================== */
@@ -1097,140 +1057,51 @@
     </div>
   </section>
 
-  <!-- ==================== SECCIÓN DE LA MATRIZ SEMANAL CON SEGMENTADOR ==================== -->
-  <div class="card">
-    <div class="card-header">
-      <div>
-        <div class="card-title">🗓️ Matriz Semanal de Rotación (Heatmap CECO vs Semana)</div>
-        <div class="card-subtitle">Visualización dinámica de rotación (%) y bajas por centro de costo y semana</div>
-      </div>
-      <div style="display: flex; align-items: center; gap: 8px; font-size: 0.75rem;">
-        <span style="font-weight: 700; color: var(--text-muted);">Semaforización:</span>
-        <span class="badge-status heat-zero" style="border: 1px solid #CBD5E1;">0% (Estable)</span>
-        <span class="badge-status heat-low">0.1 - 2.9%</span>
-        <span class="badge-status heat-med">3.0 - 5.9%</span>
-        <span class="badge-status heat-high">6.0 - 9.9%</span>
-        <span class="badge-status heat-crit">&ge; 10% (Crítico)</span>
-      </div>
-    </div>
-
-    <!-- Barra de Segmentador y Filtro de la Matriz -->
-    <div class="matriz-segmentador-bar">
-      <div class="segmentador-btn-group">
-        <span class="segmentador-label">🎛️ Vista Matriz:</span>
-        <button class="btn-segmentador active" id="btnSegTodo" onclick="setSegmentadorMatriz('TODO')">
-          <span>🌐</span> General y por Cecos
-        </button>
-        <button class="btn-segmentador" id="btnSegCecos" onclick="setSegmentadorMatriz('CECOS')">
-          <span>🏢</span> Solo Centros de Costo
-        </button>
-        <button class="btn-segmentador" id="btnSegGeneral" onclick="setSegmentadorMatriz('GENERAL')">
-          <span>📊</span> Solo Detalle General
-        </button>
-      </div>
-
-      <div class="matriz-ceco-select-wrap">
-        <label for="segmentadorMatrizCeco"
-          style="font-size: 0.78rem; font-weight: 700; color: var(--color-primary-dark);">
-          Foco CECO:
-        </label>
-        <select id="segmentadorMatrizCeco" onchange="cambiarSegmentadorMatrizCeco()">
-          <option value="TODOS">Todos los Centros de Costo</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Tabla Matriz -->
-    <div class="table-responsive">
-      <table id="tablaMatriz">
-        <thead id="tablaMatrizHead">
-          <tr>
-            <th>Centro de Costo</th>
-            <th class="center">Total Periodo</th>
-          </tr>
-        </thead>
-        <tbody id="tablaMatrizBody">
-          <tr>
-            <td colspan="2">
-              <div class="empty-state-box">
-                <div class="icon">🗺️</div>
-                <h4>Matriz de Rotación lista para generar</h4>
-                <p>Haga clic en <strong>"🚀 Generar Reporte"</strong> para construir la vista matricial.</p>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-        <tfoot id="tablaMatrizFoot" style="display: none;"></tfoot>
-      </table>
-    </div>
-  </div>
-
   <!-- ==================== TABLAS DE DETALLE ANALÍTICO ==================== -->
   <div class="card">
     <div class="card-header">
       <div>
         <div class="card-title">📋 Tablas de Detalle y Auditoría</div>
-        <div class="card-subtitle">Explore la información desagregada por Centro de Costo, Semana o Registros SQL</div>
+        <div class="card-subtitle">Explore el Resumen Semanal (General o por Centro de Costo) y el Registro
+          Transaccional SQL</div>
       </div>
     </div>
 
     <!-- Navegación de Tablas -->
     <nav class="tabs-nav">
-      <button class="tab-btn active" onclick="seleccionarTab('tabTablaCecos')">
-        <span>🏢</span> Resumen por Centro de Costo
-      </button>
-      <button class="tab-btn" onclick="seleccionarTab('tabTablaSemanas')">
-        <span>🗓️</span> Resumen Semanal General
+      <button class="tab-btn active" onclick="seleccionarTab('tabTablaSemanas')">
+        <span>🗓️</span> Resumen Semanal
       </button>
       <button class="tab-btn" onclick="seleccionarTab('tabTablaDetalle')">
         <span>🔍</span> Registro Transaccional SQL
       </button>
     </nav>
 
-    <!-- Subtabla 1: Por Centro de Costo -->
-    <div id="tabTablaCecos" class="tab-content active">
-      <div class="table-responsive">
-        <table id="tablaCecos">
-          <thead>
-            <tr>
-              <th class="sortable" data-key="cecosCod">Código <span class="sort-arrow">↕</span></th>
-              <th class="sortable" data-key="nCentroCosto">Centro de Costo <span class="sort-arrow">↕</span></th>
-              <th class="sortable num" data-key="semanasActivas">Semanas <span class="sort-arrow">↕</span></th>
-              <th class="sortable num" data-key="trabajadoresInicio">Dot. Inicio <span class="sort-arrow">↕</span></th>
-              <th class="sortable num" data-key="trabajadoresFin">Dot. Fin <span class="sort-arrow">↕</span></th>
-              <th class="sortable num" data-key="trabajadoresPromedio">Dot. Promedio <span class="sort-arrow">↕</span>
-              </th>
-              <th class="sortable num" data-key="retirados">Retirados <span class="sort-arrow">↕</span></th>
-              <th class="sortable num" data-key="pctDelTotalRetiros">% Bajas Total <span class="sort-arrow">↕</span>
-              </th>
-              <th class="sortable num" data-key="indiceRotacionAcum">Rotación Acum. (%) <span
-                  class="sort-arrow">↕</span></th>
-              <th class="sortable num" data-key="indiceRotacionSemanalProm">Rotación Sem. Prom. (%) <span
-                  class="sort-arrow">↕</span></th>
-              <th class="center">Criticidad</th>
-            </tr>
-          </thead>
-          <tbody id="tablaCecosBody">
-            <tr>
-              <td colspan="11">
-                <div class="empty-state-box">
-                  <div class="icon">🏢</div>
-                  <h4>Sin datos de centros de costo</h4>
-                  <p>Ejecute una consulta para ver la información analítica.</p>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-          <tfoot id="tablaCecosFoot" style="display: none;"></tfoot>
-        </table>
+    <!-- Subtabla 1: Resumen Semanal (General o por Centro de Costo) -->
+    <div id="tabTablaSemanas" class="tab-content active">
+      <!-- Toolbar de Opciones de Visualización Semanal -->
+      <div class="semanas-view-toolbar">
+        <div class="view-toggle-group">
+          <span class="view-toggle-label">Visualización:</span>
+          <button class="btn-toggle-view active" id="btnVistaSemanalGeneral"
+            onclick="cambiarModoVistaSemanal('GENERAL')">
+            <span>🌐</span> General (Consolidado)
+          </button>
+          <button class="btn-toggle-view" id="btnVistaSemanalCeco" onclick="cambiarModoVistaSemanal('CECO')">
+            <span>🏢</span> Por Centro de Costo
+          </button>
+        </div>
+        <div class="semana-ceco-select-wrap" id="wrapFiltroCecoSemanal" style="display: none;">
+          <label for="filtroCecoSemanal">🏢 Filtrar CECO:</label>
+          <select id="filtroCecoSemanal" onchange="cambiarCecoVistaSemanal()">
+            <option value="TODOS">Todos los Centros de Costo</option>
+          </select>
+        </div>
       </div>
-    </div>
 
-    <!-- Subtabla 2: Semanal General -->
-    <div id="tabTablaSemanas" class="tab-content">
       <div class="table-responsive">
         <table id="tablaSemanasGeneral">
-          <thead>
+          <thead id="tablaSemanasHead">
             <tr>
               <th class="sortable" data-key="semanaNum">Semana <span class="sort-arrow">↕</span></th>
               <th class="sortable" data-key="rangoTexto">Rango de Fechas (ISO-8601) <span class="sort-arrow">↕</span>
@@ -1334,7 +1205,7 @@
     }
 
     APP_CONFIG.rutaListar = "/api/IndiceRotacionSemanal";
-    APP_CONFIG.timeoutMs = 60000;
+    APP_CONFIG.timeoutMs = 7000;
 
     let apiBaseActiva = null;
 
@@ -1342,6 +1213,11 @@
       const endpoints = [];
       if (apiBaseActiva) {
         endpoints.push(`${apiBaseActiva}${rutaRelativa}`);
+      }
+      // Si se abre desde http://localhost o similar, intentar primero ese mismo origen
+      if (typeof window !== 'undefined' && window.location && window.location.origin && window.location.origin.startsWith('http')) {
+        const epOrigen = `${window.location.origin}${rutaRelativa}`;
+        if (!endpoints.includes(epOrigen)) endpoints.push(epOrigen);
       }
       generarBasesApi().forEach(base => {
         const ep = `${base}${rutaRelativa}`;
@@ -1353,20 +1229,21 @@
     // =========================================================================
     // 📊 ESTADO GLOBAL DEL DASHBOARD
     // =========================================================================
+    // 📊 ESTADO GLOBAL DEL DASHBOARD
+    // =========================================================================
     let registrosCrudos = [];      // Datos devueltos por el endpoint
     let registrosProcesados = [];  // Datos normalizados con ISO-8601 y calculados
     let datosSemanales = [];       // Agregado por semana general
     let datosCecos = [];           // Agregado por centro de costo
-    let mapaMatriz = new Map();    // Datos para vista matricial (ceco -> semana -> data)
     let listaSemanasUnicas = [];   // Semanas únicas ordenadas
     let rangoConsultado = null;    // { inicio: Date, fin: Date }
 
     let cecoFiltroSeleccionado = 'TODOS';
     let busquedaTextoActual = '';
 
-    // Segmentador específico de la Matriz: 'TODO', 'CECOS', 'GENERAL'
-    let modoSegmentadorMatriz = 'TODO';
-    let cecoSegmentadorMatriz = 'TODOS';
+    // Modo de visualización en el Resumen Semanal: 'GENERAL' (Consolidado) o 'CECO' (Por Centro de Costo)
+    let modoVistaSemanal = 'GENERAL';
+    let cecoVistaSemanal = 'TODOS';
 
     // Instancias de Chart.js (Los 2 gráficos principales)
     let chartGeneralEvolucion = null;
@@ -1375,26 +1252,48 @@
     // Estado de Ordenamiento por tabla
     const estadoOrden = {
       tablaSemanasGeneral: { key: 'semanaNum', dir: 'asc' },
-      tablaCecos: { key: 'indiceRotacionAcum', dir: 'desc' },
       tablaDetalle: { key: 'semana', dir: 'asc' }
     };
 
-    // Paleta de Estilos de Gráficos
+    // =========================================================================
+    // 🎨 PALETA DE ESTILOS: CRM Pipeline Blue Theme
+    // =========================================================================
+    const CRM_THEME = {
+      name: "CRM Pipeline Blue Theme",
+      dataColors: [
+        "#37638B",
+        "#1D4A74",
+        "#6E91B3",
+        "#A2BFDB",
+        "#50789E",
+        "#264F7C",
+        "#87A8C8",
+        "#B9D2E8"
+      ],
+      background: "#E9EFF6",
+      foreground: "#1E293B",
+      tableAccent: "#1D4A74",
+      // Elementos de soporte y armonía
+      grid: "#D8E2EC",
+      textMuted: "#64748B",
+      white: "#FFFFFF"
+    };
+
+    // Alias retrocompatible
     const PALETA_UI = {
-      teal: '#008299',
-      tealDark: '#005766',
-      tealLight: 'rgba(0, 130, 153, 0.15)',
+      teal: CRM_THEME.tableAccent,        // #1D4A74
+      tealDark: CRM_THEME.dataColors[5],  // #264F7C
+      tealDeep: CRM_THEME.dataColors[0],  // #37638B
+      tealLight: 'rgba(29, 74, 116, 0.15)',
       amber: '#D97706',
-      amberLight: 'rgba(217, 119, 6, 0.15)',
-      indigo: '#4F46E5',
-      indigoLight: 'rgba(79, 70, 229, 0.15)',
-      rose: '#DC2626',
-      roseLight: 'rgba(220, 38, 38, 0.15)',
-      emerald: '#059669',
-      emeraldLight: 'rgba(5, 150, 105, 0.15)',
-      navy: '#071F36',
-      grid: '#E2E8F0',
-      text: '#334155'
+      amberDark: '#B45309',
+      crimson: '#C0392B',
+      crimsonDark: '#962D22',
+      navy: CRM_THEME.tableAccent,
+      gold: CRM_THEME.dataColors[7],      // #B9D2E8
+      grid: CRM_THEME.grid,
+      text: CRM_THEME.foreground,
+      textMuted: CRM_THEME.textMuted
     };
 
     // =========================================================================
@@ -1504,26 +1403,25 @@
 
       // Ordenamiento en tablas
       configurarOrdenamientoTabla('tablaSemanasGeneral');
-      configurarOrdenamientoTabla('tablaCecos');
       configurarOrdenamientoTabla('tablaDetalle');
     }
 
     function configurarOrdenamientoTabla(idTabla) {
       const ths = document.querySelectorAll(`#${idTabla} thead th.sortable`);
       ths.forEach(th => {
-        th.addEventListener('click', () => {
+        th.onclick = () => {
           const key = th.dataset.key;
           const conf = estadoOrden[idTabla];
+          if (!conf) return;
           if (conf.key === key) {
             conf.dir = conf.dir === 'asc' ? 'desc' : 'asc';
           } else {
             conf.key = key;
-            conf.dir = (key.includes('Cod') || key.includes('Centro') || key.includes('etiqueta')) ? 'asc' : 'desc';
+            conf.dir = (key.includes('Cod') || key.includes('Centro') || key.includes('etiqueta') || key.includes('rango')) ? 'asc' : 'desc';
           }
           if (idTabla === 'tablaSemanasGeneral') renderTablaSemanas();
-          else if (idTabla === 'tablaCecos') renderTablaCecos();
           else if (idTabla === 'tablaDetalle') renderTablaDetalle();
-        });
+        };
       });
     }
 
@@ -1545,19 +1443,27 @@
       registrosProcesados = [];
       datosSemanales = [];
       datosCecos = [];
-      mapaMatriz.clear();
       listaSemanasUnicas = [];
       cecoFiltroSeleccionado = 'TODOS';
-      modoSegmentadorMatriz = 'TODO';
-      cecoSegmentadorMatriz = 'TODOS';
+      modoVistaSemanal = 'GENERAL';
+      cecoVistaSemanal = 'TODOS';
       busquedaTextoActual = '';
 
-      document.getElementById('filtroCeco').innerHTML = '<option value="TODOS">Todos los Centros de Costo (Visión Global)</option>';
-      document.getElementById('segmentadorMatrizCeco').innerHTML = '<option value="TODOS">Todos los Centros de Costo</option>';
+      const selCeco = document.getElementById('filtroCeco');
+      if (selCeco) selCeco.innerHTML = '<option value="TODOS">Todos los Centros de Costo (Visión Global)</option>';
+
+      const selCecoSem = document.getElementById('filtroCecoSemanal');
+      if (selCecoSem) selCecoSem.innerHTML = '<option value="TODOS">Todos los Centros de Costo</option>';
+
+      const wrapCecoSem = document.getElementById('wrapFiltroCecoSemanal');
+      if (wrapCecoSem) wrapCecoSem.style.display = 'none';
+
+      document.getElementById('btnVistaSemanalGeneral')?.classList.add('active');
+      document.getElementById('btnVistaSemanalCeco')?.classList.remove('active');
+
       document.getElementById('busquedaTabla').value = '';
       document.getElementById('btnExportar').disabled = true;
 
-      setSegmentadorMatriz('TODO', false);
       destruirTodosLosGraficos();
       reiniciarKpis();
 
@@ -1565,14 +1471,6 @@
       document.getElementById('tablaSemanasGeneralBody').innerHTML = `
         <tr><td colspan="9"><div class="empty-state-box"><div class="icon">📋</div><h4>Dashboard listo para consultar</h4><p>Haga clic en <strong>"🚀 Generar Reporte"</strong> para analizar la información.</p></div></td></tr>`;
       document.getElementById('tablaSemanasGeneralFoot').style.display = 'none';
-
-      document.getElementById('tablaCecosBody').innerHTML = `
-        <tr><td colspan="11"><div class="empty-state-box"><div class="icon">🏢</div><h4>Sin datos de centros de costo</h4><p>Ejecute una consulta para ver la información analítica.</p></div></td></tr>`;
-      document.getElementById('tablaCecosFoot').style.display = 'none';
-
-      document.getElementById('tablaMatrizBody').innerHTML = `
-        <tr><td colspan="2"><div class="empty-state-box"><div class="icon">🗺️</div><h4>Matriz no generada</h4></div></td></tr>`;
-      document.getElementById('tablaMatrizFoot').style.display = 'none';
 
       document.getElementById('tablaDetalleBody').innerHTML = `
         <tr><td colspan="12"><div class="empty-state-box"><div class="icon">🔍</div><h4>No hay registros cargados</h4></div></td></tr>`;
@@ -1761,7 +1659,7 @@
       listaSemanasUnicas = Array.from(mapaSemanasUnicas.values())
         .sort((a, b) => (a.anio - b.anio) || (a.semanaNum - b.semanaNum));
 
-      // 3. Poblar dropdown de Centros de Costo (en filtro principal y en segmentador de matriz)
+      // 3. Poblar dropdowns de Centros de Costo (filtro principal y selector en Resumen Semanal)
       poblarSelectoresCecos();
 
       // 4. Calcular agrupaciones
@@ -1773,7 +1671,7 @@
 
     function poblarSelectoresCecos() {
       const selectPrincipal = document.getElementById('filtroCeco');
-      const selectMatriz = document.getElementById('segmentadorMatrizCeco');
+      const selectSemanal = document.getElementById('filtroCecoSemanal');
       const cecosUnicos = new Map();
 
       registrosProcesados.forEach(r => {
@@ -1784,21 +1682,25 @@
       });
 
       const opcionesPrincipal = ['<option value="TODOS">Todos los Centros de Costo (Visión Global)</option>'];
-      const opcionesMatriz = ['<option value="TODOS">Todos los Centros de Costo</option>'];
+      const opcionesSemanal = ['<option value="TODOS">Todos los Centros de Costo</option>'];
 
       Array.from(cecosUnicos.entries())
         .sort((a, b) => a[0].localeCompare(b[0]))
         .forEach(([cod, nombre]) => {
           const item = `<option value="${cod}">${cod} &middot; ${nombre}</option>`;
           opcionesPrincipal.push(item);
-          opcionesMatriz.push(item);
+          opcionesSemanal.push(item);
         });
 
-      selectPrincipal.innerHTML = opcionesPrincipal.join('');
-      selectPrincipal.value = cecoFiltroSeleccionado;
+      if (selectPrincipal) {
+        selectPrincipal.innerHTML = opcionesPrincipal.join('');
+        selectPrincipal.value = cecoFiltroSeleccionado;
+      }
 
-      selectMatriz.innerHTML = opcionesMatriz.join('');
-      selectMatriz.value = cecoSegmentadorMatriz;
+      if (selectSemanal) {
+        selectSemanal.innerHTML = opcionesSemanal.join('');
+        selectSemanal.value = cecoVistaSemanal;
+      }
     }
 
     function cambiarFiltroCeco() {
@@ -1856,7 +1758,7 @@
         };
       }).sort((a, b) => (a.anio - b.anio) || (a.semanaNum - b.semanaNum));
 
-      // B. Agrupación por Centro de Costo
+      // B. Agrupación por Centro de Costo (para KPIs y Gráfico de Cecos)
       const mapaCecosAgregado = new Map();
       const baseParaCecos = (cecoFiltroSeleccionado === 'TODOS') ? registrosProcesados : filasFiltradas;
 
@@ -1909,24 +1811,6 @@
           filas: c.filas
         };
       });
-
-      // C. Construir Matriz Heatmap (ceco -> semana -> data)
-      mapaMatriz.clear();
-      registrosProcesados.forEach(r => {
-        const cod = r.cecosCod || '(Sin Código)';
-        if (!mapaMatriz.has(cod)) {
-          mapaMatriz.set(cod, {
-            cecosCod: cod,
-            nCentroCosto: r.nCentroCosto,
-            porSemana: new Map()
-          });
-        }
-        mapaMatriz.get(cod).porSemana.set(r.claveSemana, {
-          retirados: r.retirados,
-          promedio: r.trabajadoresPromedio,
-          indiceRotacion: r.indiceRotacion
-        });
-      });
     }
 
     // =========================================================================
@@ -1936,8 +1820,6 @@
       renderKPIs();
       renderGraficoGeneral();
       renderGraficoCecos();
-      renderMatrizHeatmap();
-      renderTablaCecos();
       renderTablaSemanas();
       renderTablaDetalle();
 
@@ -1991,7 +1873,7 @@
     }
 
     // =========================================================================
-    // 📈 GRÁFICO 1: ÍNDICE DE ROTACIÓN GENERAL
+    // 📈 GRÁFICO 1: ÍNDICE DE ROTACIÓN GENERAL (CRM Pipeline Blue Theme)
     // =========================================================================
     function renderGraficoGeneral() {
       if (chartGeneralEvolucion) chartGeneralEvolucion.destroy();
@@ -2003,6 +1885,12 @@
       const dataRet = datosSemanales.map(d => d.retirados);
 
       const ctx = document.getElementById('chartGeneralEvolucion').getContext('2d');
+
+      // Área sutil y elegante con degradado del tema CRM Pipeline Blue
+      const gradientBlue = ctx.createLinearGradient(0, 0, 0, 320);
+      gradientBlue.addColorStop(0, 'rgba(29, 74, 116, 0.28)');
+      gradientBlue.addColorStop(1, 'rgba(29, 74, 116, 0.01)');
+
       chartGeneralEvolucion = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -2012,23 +1900,26 @@
               type: 'line',
               label: 'Índice de Rotación (%)',
               data: dataIr,
-              borderColor: PALETA_UI.teal,
-              backgroundColor: PALETA_UI.tealLight,
+              borderColor: CRM_THEME.tableAccent, // #1D4A74
+              backgroundColor: gradientBlue,
               borderWidth: 3,
-              fill: false,
+              fill: true,
               tension: 0.35,
               pointRadius: 5,
               pointHoverRadius: 7,
               pointBackgroundColor: '#FFFFFF',
-              pointBorderColor: PALETA_UI.teal,
-              pointBorderWidth: 2,
+              pointBorderColor: CRM_THEME.tableAccent,
+              pointBorderWidth: 2.5,
+              pointHoverBackgroundColor: CRM_THEME.dataColors[3], // #A2BFDB
+              pointHoverBorderColor: CRM_THEME.tableAccent,
               yAxisID: 'y'
             },
             {
               type: 'bar',
-              label: 'Retirados (Bajas)',
+              label: 'Personal Retirado (Bajas)',
               data: dataRet,
-              backgroundColor: PALETA_UI.amber,
+              backgroundColor: CRM_THEME.dataColors[4], // #50789E
+              hoverBackgroundColor: CRM_THEME.dataColors[5], // #264F7C
               borderRadius: 6,
               barThickness: 24,
               yAxisID: 'y1'
@@ -2042,37 +1933,53 @@
           plugins: {
             legend: {
               position: 'top',
-              labels: { font: { weight: '600', size: 11 }, usePointStyle: true }
+              labels: {
+                font: { family: 'Inter', weight: '600', size: 12 },
+                color: CRM_THEME.foreground,
+                usePointStyle: true,
+                padding: 16
+              }
             },
             tooltip: {
-              backgroundColor: PALETA_UI.navy,
-              padding: 10,
+              backgroundColor: CRM_THEME.tableAccent,
+              titleColor: CRM_THEME.dataColors[7], // #B9D2E8
+              titleFont: { family: 'Inter', weight: '700', size: 13 },
+              bodyFont: { family: 'Inter', size: 12 },
+              bodyColor: '#FFFFFF',
+              borderColor: CRM_THEME.dataColors[2], // #6E91B3
+              borderWidth: 1,
+              padding: 12,
+              boxPadding: 6,
+              usePointStyle: true,
               callbacks: {
                 title: (ctx) => datosSemanales[ctx[0].dataIndex].etiquetaSemana,
                 label: (ctx) => {
-                  if (ctx.datasetIndex === 0) return `Índice de Rotación: ${ctx.parsed.y}%`;
-                  return `Retirados: ${ctx.parsed.y} operarios`;
+                  if (ctx.datasetIndex === 0) return ` Índice de Rotación: ${ctx.parsed.y}%`;
+                  return ` Personal Retirado: ${ctx.parsed.y} operario(s)`;
                 }
               }
             }
           },
           scales: {
-            x: { grid: { display: false }, ticks: { font: { weight: '600' } } },
+            x: {
+              grid: { display: false },
+              ticks: { font: { family: 'Inter', weight: '600', size: 11 }, color: CRM_THEME.textMuted }
+            },
             y: {
               type: 'linear',
               position: 'left',
               beginAtZero: true,
-              grid: { color: PALETA_UI.grid },
-              ticks: { callback: v => `${v}%`, font: { weight: '600' } },
-              title: { display: true, text: 'Índice General (%)', font: { weight: '700' }, color: PALETA_UI.tealDark }
+              grid: { color: CRM_THEME.grid },
+              ticks: { callback: v => `${v}%`, font: { family: 'Inter', weight: '600', size: 11 }, color: CRM_THEME.tableAccent },
+              title: { display: true, text: 'Índice de Rotación General (%)', font: { family: 'Inter', weight: '700', size: 12 }, color: CRM_THEME.tableAccent }
             },
             y1: {
               type: 'linear',
               position: 'right',
               beginAtZero: true,
               grid: { drawOnChartArea: false },
-              ticks: { precision: 0, font: { weight: '600' } },
-              title: { display: true, text: 'Retirados', font: { weight: '700' }, color: PALETA_UI.amber }
+              ticks: { precision: 0, font: { family: 'Inter', weight: '600', size: 11 }, color: CRM_THEME.dataColors[0] }, // #37638B
+              title: { display: true, text: 'Personal Retirado (Bajas)', font: { family: 'Inter', weight: '700', size: 12 }, color: CRM_THEME.dataColors[0] }
             }
           }
         }
@@ -2080,7 +1987,7 @@
     }
 
     // =========================================================================
-    // 🏭 GRÁFICO 2: ÍNDICE DE ROTACIÓN POR CENTRO DE COSTO
+    // 🏭 GRÁFICO 2: ÍNDICE DE ROTACIÓN POR CENTRO DE COSTO (CRM Pipeline Blue Theme)
     // =========================================================================
     function renderGraficoCecos() {
       if (chartCecosRanking) chartCecosRanking.destroy();
@@ -2090,11 +1997,11 @@
       const cecosOrdenados = [...datosCecos].sort((a, b) => b.indiceRotacionAcum - a.indiceRotacionAcum);
       const labelsRanking = cecosOrdenados.map(c => `${c.cecosCod} · ${c.nCentroCosto}`);
       const dataRanking = cecosOrdenados.map(c => Number(c.indiceRotacionAcum.toFixed(2)));
-      const coloresRanking = cecosOrdenados.map(c => {
-        if (c.indiceRotacionAcum >= 6.0) return PALETA_UI.rose;
-        if (c.indiceRotacionAcum >= 3.0) return PALETA_UI.amber;
-        return PALETA_UI.teal;
-      });
+
+      // Aplicar armónicamente la paleta CRM Pipeline Blue Theme a cada barra por CECO
+      const coloresRanking = cecosOrdenados.map((_, i) => CRM_THEME.dataColors[i % CRM_THEME.dataColors.length]);
+      const bordesRanking = cecosOrdenados.map((_, i) => CRM_THEME.dataColors[(i + 1) % CRM_THEME.dataColors.length]);
+      const hoverColoresRanking = cecosOrdenados.map(() => CRM_THEME.tableAccent);
 
       const ctxR = document.getElementById('chartCecosRanking').getContext('2d');
       chartCecosRanking = new Chart(ctxR, {
@@ -2102,11 +2009,14 @@
         data: {
           labels: labelsRanking,
           datasets: [{
-            label: 'Rotación por Ceco (%)',
+            label: 'Rotación Acumulada por Ceco (%)',
             data: dataRanking,
             backgroundColor: coloresRanking,
-            borderRadius: 5,
-            barThickness: 20
+            borderColor: bordesRanking,
+            borderWidth: 1.5,
+            hoverBackgroundColor: hoverColoresRanking,
+            borderRadius: 6,
+            barThickness: 18
           }]
         },
         options: {
@@ -2116,16 +2026,22 @@
           plugins: {
             legend: { display: false },
             tooltip: {
-              backgroundColor: PALETA_UI.navy,
-              padding: 10,
+              backgroundColor: CRM_THEME.tableAccent,
+              titleColor: CRM_THEME.dataColors[7], // #B9D2E8
+              titleFont: { family: 'Inter', weight: '700', size: 13 },
+              bodyFont: { family: 'Inter', size: 12 },
+              bodyColor: '#FFFFFF',
+              borderColor: CRM_THEME.dataColors[2], // #6E91B3
+              borderWidth: 1,
+              padding: 12,
               callbacks: {
                 label: (ctx) => {
                   const item = cecosOrdenados[ctx.dataIndex];
                   return [
-                    `Índice Rotación: ${item.indiceRotacionAcum.toFixed(2)}%`,
-                    `Promedio Semanal: ${item.indiceRotacionSemanalProm.toFixed(2)}%`,
-                    `Retirados: ${item.retirados} personas`,
-                    `Dotación Promedio: ${fmtNum(item.trabajadoresPromedio, 1)}`
+                    ` Índice Rotación Acum.: ${item.indiceRotacionAcum.toFixed(2)}%`,
+                    ` Promedio Semanal: ${item.indiceRotacionSemanalProm.toFixed(2)}%`,
+                    ` Retirados: ${item.retirados} personas`,
+                    ` Dotación Promedio: ${fmtNum(item.trabajadoresPromedio, 1)}`
                   ];
                 }
               }
@@ -2134,295 +2050,225 @@
           scales: {
             x: {
               beginAtZero: true,
-              grid: { color: PALETA_UI.grid },
-              ticks: { callback: v => `${v}%`, font: { weight: '600' } },
-              title: { display: true, text: 'Índice de Rotación (%)', font: { weight: '700' } }
+              grid: { color: CRM_THEME.grid },
+              ticks: { callback: v => `${v}%`, font: { family: 'Inter', weight: '600', size: 11 }, color: CRM_THEME.tableAccent },
+              title: { display: true, text: 'Índice de Rotación Acumulado (%)', font: { family: 'Inter', weight: '700', size: 12 }, color: CRM_THEME.tableAccent }
             },
-            y: { grid: { display: false }, ticks: { font: { weight: '600', size: 11 }, autoSkip: false } }
+            y: {
+              grid: { display: false },
+              ticks: { font: { family: 'Inter', weight: '600', size: 11 }, color: CRM_THEME.foreground, autoSkip: false }
+            }
           }
         }
       });
     }
 
     // =========================================================================
-    // 🗓️ MATRIZ SEMANAL CON SEGMENTADOR (General y Por Ceco)
+    // 🗓️ CONTROLES Y RENDERIZADO DEL RESUMEN SEMANAL (General y Por CECO)
     // =========================================================================
-    function setSegmentadorMatriz(modo, reRender = true) {
-      modoSegmentadorMatriz = modo;
-      document.querySelectorAll('.segmentador-btn-group .btn-segmentador').forEach(b => b.classList.remove('active'));
+    function cambiarModoVistaSemanal(modo) {
+      modoVistaSemanal = modo;
+      document.getElementById('btnVistaSemanalGeneral')?.classList.toggle('active', modo === 'GENERAL');
+      document.getElementById('btnVistaSemanalCeco')?.classList.toggle('active', modo === 'CECO');
 
-      if (modo === 'TODO') document.getElementById('btnSegTodo')?.classList.add('active');
-      else if (modo === 'CECOS') document.getElementById('btnSegCecos')?.classList.add('active');
-      else if (modo === 'GENERAL') document.getElementById('btnSegGeneral')?.classList.add('active');
+      const wrap = document.getElementById('wrapFiltroCecoSemanal');
+      if (wrap) wrap.style.display = (modo === 'CECO') ? 'flex' : 'none';
 
-      if (reRender) {
-        renderMatrizHeatmap();
-        mostrarToast(`🎛️ Vista Matriz: ${modo === 'TODO' ? 'General y por Cecos' : (modo === 'CECOS' ? 'Solo Centros de Costo' : 'Solo Detalle General')}`);
-      }
+      renderTablaSemanas();
+      mostrarToast(`🗓️ Resumen Semanal: ${modo === 'GENERAL' ? 'Vista General Consolidada' : 'Vista Desglosada por Centro de Costo'}`);
     }
 
-    function cambiarSegmentadorMatrizCeco() {
-      cecoSegmentadorMatriz = document.getElementById('segmentadorMatrizCeco').value;
-      renderMatrizHeatmap();
-      mostrarToast(`🏢 Matriz filtrada para: ${cecoSegmentadorMatriz === 'TODOS' ? 'Todos los centros de costo' : cecoSegmentadorMatriz}`);
-    }
-
-    function renderMatrizHeatmap() {
-      const thead = document.getElementById('tablaMatrizHead');
-      const tbody = document.getElementById('tablaMatrizBody');
-      const tfoot = document.getElementById('tablaMatrizFoot');
-
-      if (listaSemanasUnicas.length === 0 || mapaMatriz.size === 0) {
-        tbody.innerHTML = `<tr><td colspan="2"><div class="empty-state-box"><div class="icon">🗺️</div><h4>Matriz no disponible</h4></div></td></tr>`;
-        tfoot.style.display = 'none';
-        return;
+    function cambiarCecoVistaSemanal() {
+      const sel = document.getElementById('filtroCecoSemanal');
+      if (sel) {
+        cecoVistaSemanal = sel.value;
+        renderTablaSemanas();
+        mostrarToast(`🏢 Resumen Semanal filtrado para: ${cecoVistaSemanal === 'TODOS' ? 'Todos los Centros de Costo' : cecoVistaSemanal}`);
       }
-
-      // 1. Cabeceras con cada semana
-      let headHtml = `<tr>
-        <th style="min-width: 220px;">Segmento / Centro de Costo</th>
-        <th class="center" style="min-width: 90px; background: var(--color-primary-dark);">Total Periodo</th>`;
-      listaSemanasUnicas.forEach(s => {
-        headHtml += `<th class="center" style="min-width: 90px;" title="${s.etiqueta}">
-          Sem. ${pad(s.semanaNum)}<br><span style="font-size: 0.65rem; font-weight: 400; opacity: 0.85;">${s.rangoTexto}</span>
-        </th>`;
-      });
-      headHtml += `</tr>`;
-      thead.innerHTML = headHtml;
-
-      // 2. Filas de Cecos según el segmentador
-      let bodyHtml = '';
-
-      // Si el modo es 'GENERAL', sólo mostramos la fila general (sin las filas de CECOs)
-      if (modoSegmentadorMatriz !== 'GENERAL') {
-        let cecosList = Array.from(mapaMatriz.values());
-
-        // Filtrar por CECO específico del segmentador si se seleccionó uno
-        if (cecoSegmentadorMatriz !== 'TODOS') {
-          cecosList = cecosList.filter(c => c.cecosCod === cecoSegmentadorMatriz);
-        }
-
-        cecosList.sort((a, b) => a.cecosCod.localeCompare(b.cecosCod)).forEach(c => {
-          const cecoAgregado = datosCecos.find(dc => dc.cecosCod === c.cecosCod);
-          const irAcum = cecoAgregado?.indiceRotacionAcum || 0;
-          const retTot = cecoAgregado?.retirados || 0;
-
-          bodyHtml += `<tr>
-            <td style="font-weight: 600; color: var(--header-teal);">
-              <strong>${c.cecosCod}</strong> &middot; ${c.nCentroCosto}
-            </td>
-            <td class="heatmap-cell ${obtenerClaseCalor(irAcum, retTot)}" style="border-left: 2px solid var(--border-card); font-weight: 800;">
-              <span class="ir-val">${fmtPct(irAcum)}</span>
-              <span class="ret-sub">(${retTot} ret.)</span>
-            </td>`;
-
-          listaSemanasUnicas.forEach(s => {
-            const celda = c.porSemana.get(s.claveSemana);
-            if (!celda) {
-              bodyHtml += `<td class="heatmap-cell heat-zero"><span class="ir-val">—</span></td>`;
-            } else {
-              const ir = celda.indiceRotacion;
-              const ret = celda.retirados;
-              bodyHtml += `<td class="heatmap-cell ${obtenerClaseCalor(ir, ret)}">
-                <span class="ir-val">${fmtPct(ir)}</span>
-                <span class="ret-sub">${ret > 0 ? `(${ret} ret.)` : ''}</span>
-              </td>`;
-            }
-          });
-          bodyHtml += `</tr>`;
-        });
-      }
-
-      // Si el modo es 'GENERAL', mostramos la fila general directamente en el cuerpo para claridad
-      if (modoSegmentadorMatriz === 'GENERAL') {
-        bodyHtml += `<tr>
-          <td style="font-weight: 800; color: var(--header-teal);">
-            🌐 TOTAL GENERAL DE LA PLANTA (Consolidado)
-          </td>
-          <td class="heatmap-cell" style="background: var(--color-primary-light); color: var(--color-primary-dark); font-weight: 800; border-left: 2px solid var(--border-card);">
-            ${document.getElementById('kpiRotacionAcumulada').textContent}
-          </td>`;
-
-        listaSemanasUnicas.forEach(s => {
-          const dSem = datosSemanales.find(ds => ds.claveSemana === s.claveSemana);
-          const irSem = dSem?.indiceRotacion || 0;
-          const retSem = dSem?.retirados || 0;
-          bodyHtml += `<td class="heatmap-cell ${obtenerClaseCalor(irSem, retSem)}" style="font-weight: 800;">
-            <span class="ir-val">${fmtPct(irSem)}</span>
-            <span class="ret-sub">${retSem > 0 ? `(${retSem} ret.)` : ''}</span>
-          </td>`;
-        });
-        bodyHtml += `</tr>`;
-      }
-
-      tbody.innerHTML = bodyHtml;
-
-      // 3. Fila Footer: Rotación Total General de la Planta
-      // (Se muestra en el footer cuando el modo es 'TODO' o 'GENERAL')
-      if (modoSegmentadorMatriz === 'CECOS') {
-        tfoot.style.display = 'none';
-      } else if (modoSegmentadorMatriz === 'TODO') {
-        let footHtml = `<tr>
-          <td>TOTAL GENERAL PLANTA</td>
-          <td class="heatmap-cell" style="background: var(--header-bg); color: #F5B921; font-weight: 800;">
-            ${document.getElementById('kpiRotacionAcumulada').textContent}
-          </td>`;
-
-        listaSemanasUnicas.forEach(s => {
-          const dSem = datosSemanales.find(ds => ds.claveSemana === s.claveSemana);
-          const irSem = dSem?.indiceRotacion || 0;
-          const retSem = dSem?.retirados || 0;
-          footHtml += `<td class="heatmap-cell" style="background: var(--header-bg); color: #FFFFFF; font-weight: 700;">
-            <span class="ir-val" style="color: ${irSem >= 6 ? '#FCA5A5' : '#FDE68A'};">${fmtPct(irSem)}</span>
-            <span class="ret-sub" style="color: #CBD5E1;">${retSem} ret.</span>
-          </td>`;
-        });
-        footHtml += `</tr>`;
-
-        tfoot.style.display = '';
-        tfoot.innerHTML = footHtml;
-      } else {
-        tfoot.style.display = 'none';
-      }
-    }
-
-    function obtenerClaseCalor(ir, retirados) {
-      if (retirados === 0 || ir === 0) return 'heat-zero';
-      if (ir < 3.0) return 'heat-low';
-      if (ir < 6.0) return 'heat-med';
-      if (ir < 10.0) return 'heat-high';
-      return 'heat-crit';
-    }
-
-    // =========================================================================
-    // 📋 TABLAS DE DETALLE
-    // =========================================================================
-    function renderTablaCecos() {
-      const tbody = document.getElementById('tablaCecosBody');
-      const tfoot = document.getElementById('tablaCecosFoot');
-
-      if (datosCecos.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="11"><div class="empty-state-box"><div class="icon">🏢</div><h4>Sin datos de centros de costo</h4></div></td></tr>`;
-        tfoot.style.display = 'none';
-        return;
-      }
-
-      let lista = [...datosCecos];
-      if (busquedaTextoActual) {
-        const txt = busquedaTextoActual.toLowerCase();
-        lista = lista.filter(c => c.cecosCod.toLowerCase().includes(txt) || c.nCentroCosto.toLowerCase().includes(txt));
-      }
-
-      const conf = estadoOrden.tablaCecos;
-      lista.sort((a, b) => {
-        let va = a[conf.key];
-        let vb = b[conf.key];
-        if (typeof va === 'string') return conf.dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
-        return conf.dir === 'asc' ? va - vb : vb - va;
-      });
-
-      tbody.innerHTML = lista.map(c => {
-        const nivel = nivelRotacion(c.indiceRotacionAcum);
-        return `
-          <tr>
-            <td class="ceco-code">${c.cecosCod}</td>
-            <td class="ceco-name">${c.nCentroCosto}</td>
-            <td class="num">${c.semanasActivas}</td>
-            <td class="num">${fmtNum(c.trabajadoresInicio)}</td>
-            <td class="num">${fmtNum(c.trabajadoresFin)}</td>
-            <td class="num">${fmtNum(c.trabajadoresPromedio, 1)}</td>
-            <td class="num" style="font-weight: 700;">${fmtNum(c.retirados)}</td>
-            <td class="num" style="color: var(--text-muted);">${fmtPct(c.pctDelTotalRetiros)}</td>
-            <td class="num" style="font-weight: 800; color: ${c.indiceRotacionAcum >= 6 ? 'var(--color-rose)' : 'var(--color-primary-dark)'};">
-              ${fmtPct(c.indiceRotacionAcum)}
-            </td>
-            <td class="num">${fmtPct(c.indiceRotacionSemanalProm)}</td>
-            <td class="center"><span class="badge-status ${nivel.clase}">${nivel.texto}</span></td>
-          </tr>`;
-      }).join('');
-
-      const totalRet = datosCecos.reduce((s, c) => s + c.retirados, 0);
-      const totalDotProm = datosCecos.reduce((s, c) => s + c.trabajadoresPromedio, 0);
-      const rotGlobalAcum = totalDotProm > 0 ? (totalRet / totalDotProm) * 100 : 0;
-
-      tfoot.style.display = '';
-      tfoot.innerHTML = `
-        <tr>
-          <td colspan="3">CONSOLIDADO (${datosCecos.length} centros de costo)</td>
-          <td class="num">—</td>
-          <td class="num">—</td>
-          <td class="num">${fmtNum(totalDotProm, 1)}</td>
-          <td class="num">${fmtNum(totalRet)}</td>
-          <td class="num">100.0%</td>
-          <td class="num" style="color: #F5B921;">${fmtPct(rotGlobalAcum)}</td>
-          <td class="num">—</td>
-          <td></td>
-        </tr>`;
     }
 
     function renderTablaSemanas() {
+      const thead = document.getElementById('tablaSemanasHead');
       const tbody = document.getElementById('tablaSemanasGeneralBody');
       const tfoot = document.getElementById('tablaSemanasGeneralFoot');
 
-      if (datosSemanales.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state-box"><div class="icon">📋</div><h4>Sin registros semanales</h4></div></td></tr>`;
-        tfoot.style.display = 'none';
-        return;
-      }
+      if (!thead || !tbody) return;
 
-      let lista = [...datosSemanales];
-      if (busquedaTextoActual) {
-        const txt = busquedaTextoActual.toLowerCase();
-        lista = lista.filter(s => s.etiquetaSemana.toLowerCase().includes(txt) || String(s.semanaNum).includes(txt));
-      }
-
-      const conf = estadoOrden.tablaSemanasGeneral;
-      lista.sort((a, b) => {
-        let va = a[conf.key];
-        let vb = b[conf.key];
-        if (typeof va === 'string') return conf.dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
-        return conf.dir === 'asc' ? va - vb : vb - va;
-      });
-
-      tbody.innerHTML = lista.map(s => {
-        const nivel = nivelRotacion(s.indiceRotacion);
-        return `
+      if (modoVistaSemanal === 'GENERAL') {
+        // ==================== MODO 1: GENERAL CONSOLIDADO ====================
+        thead.innerHTML = `
           <tr>
-            <td style="font-weight: 700; color: var(--color-primary-dark);">Semana ${pad(s.semanaNum)}</td>
-            <td><strong>${s.rangoTexto}</strong></td>
-            <td class="num">${fmtNum(s.trabajadoresInicio)}</td>
-            <td class="num">${fmtNum(s.trabajadoresFin)}</td>
-            <td class="num">${fmtNum(s.trabajadoresPromedio, 1)}</td>
-            <td class="num" style="font-weight: 700;">${fmtNum(s.retirados)}</td>
-            <td class="num" style="color: ${s.variacion >= 0 ? 'var(--color-emerald)' : 'var(--color-rose)'}; font-weight: 600;">
-              ${s.variacion >= 0 ? '+' : ''}${fmtNum(s.variacion)}
-            </td>
-            <td class="num" style="font-weight: 800; color: ${s.indiceRotacion >= 6 ? 'var(--color-rose)' : 'var(--color-primary-dark)'};">
-              ${fmtPct(s.indiceRotacion)}
-            </td>
-            <td class="center"><span class="badge-status ${nivel.clase}">${nivel.texto}</span></td>
+            <th class="sortable" data-key="semanaNum">Semana <span class="sort-arrow">↕</span></th>
+            <th class="sortable" data-key="rangoTexto">Rango de Fechas (ISO-8601) <span class="sort-arrow">↕</span></th>
+            <th class="sortable num" data-key="trabajadoresInicio">Dotación Inicio <span class="sort-arrow">↕</span></th>
+            <th class="sortable num" data-key="trabajadoresFin">Dotación Fin <span class="sort-arrow">↕</span></th>
+            <th class="sortable num" data-key="trabajadoresPromedio">Dotación Promedio <span class="sort-arrow">↕</span></th>
+            <th class="sortable num" data-key="retirados">Retirados <span class="sort-arrow">↕</span></th>
+            <th class="sortable num" data-key="variacion">Variación Neta <span class="sort-arrow">↕</span></th>
+            <th class="sortable num" data-key="indiceRotacion">Índice Rotación (%) <span class="sort-arrow">↕</span></th>
+            <th class="center">Estado</th>
           </tr>`;
-      }).join('');
 
-      const totalRet = datosSemanales.reduce((sum, s) => sum + s.retirados, 0);
-      const iniEmpresa = datosSemanales[0]?.trabajadoresInicio || 0;
-      const finEmpresa = datosSemanales[datosSemanales.length - 1]?.trabajadoresFin || 0;
-      const promEmpresa = datosSemanales.reduce((sum, s) => sum + s.trabajadoresPromedio, 0) / datosSemanales.length;
-      const rotTotalPeriodo = promEmpresa > 0 ? (totalRet / promEmpresa) * 100 : 0;
-      const varTotal = finEmpresa - iniEmpresa;
+        if (datosSemanales.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state-box"><div class="icon">📋</div><h4>Sin registros semanales</h4></div></td></tr>`;
+          if (tfoot) tfoot.style.display = 'none';
+          return;
+        }
 
-      tfoot.style.display = '';
-      tfoot.innerHTML = `
-        <tr>
-          <td colspan="2">TOTAL GENERAL DEL PERIODO (${datosSemanales.length} semanas)</td>
-          <td class="num">${fmtNum(iniEmpresa)}</td>
-          <td class="num">${fmtNum(finEmpresa)}</td>
-          <td class="num">${fmtNum(promEmpresa, 1)}</td>
-          <td class="num">${fmtNum(totalRet)}</td>
-          <td class="num">${varTotal >= 0 ? '+' : ''}${fmtNum(varTotal)}</td>
-          <td class="num" style="color: #F5B921;">${fmtPct(rotTotalPeriodo)} (Acum.)</td>
-          <td></td>
-        </tr>`;
+        let lista = [...datosSemanales];
+        if (busquedaTextoActual) {
+          const txt = busquedaTextoActual.toLowerCase();
+          lista = lista.filter(s => s.etiquetaSemana.toLowerCase().includes(txt) || String(s.semanaNum).includes(txt) || s.rangoTexto.toLowerCase().includes(txt));
+        }
+
+        const conf = estadoOrden.tablaSemanasGeneral;
+        lista.sort((a, b) => {
+          let va = a[conf.key];
+          let vb = b[conf.key];
+          if (typeof va === 'string') return conf.dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
+          return conf.dir === 'asc' ? va - vb : vb - va;
+        });
+
+        tbody.innerHTML = lista.map(s => {
+          const nivel = nivelRotacion(s.indiceRotacion);
+          return `
+            <tr>
+              <td style="font-weight: 700; color: var(--color-primary-dark);">Semana ${pad(s.semanaNum)}</td>
+              <td><strong>${s.rangoTexto}</strong></td>
+              <td class="num">${fmtNum(s.trabajadoresInicio)}</td>
+              <td class="num">${fmtNum(s.trabajadoresFin)}</td>
+              <td class="num">${fmtNum(s.trabajadoresPromedio, 1)}</td>
+              <td class="num" style="font-weight: 700;">${fmtNum(s.retirados)}</td>
+              <td class="num" style="color: ${s.variacion >= 0 ? 'var(--color-emerald)' : 'var(--color-rose)'}; font-weight: 600;">
+                ${s.variacion >= 0 ? '+' : ''}${fmtNum(s.variacion)}
+              </td>
+              <td class="num" style="font-weight: 800; color: ${s.indiceRotacion >= 6 ? 'var(--color-rose)' : 'var(--color-primary-dark)'};">
+                ${fmtPct(s.indiceRotacion)}
+              </td>
+              <td class="center"><span class="badge-status ${nivel.clase}">${nivel.texto}</span></td>
+            </tr>`;
+        }).join('');
+
+        if (tfoot) {
+          const totalRet = datosSemanales.reduce((sum, s) => sum + s.retirados, 0);
+          const iniEmpresa = datosSemanales[0]?.trabajadoresInicio || 0;
+          const finEmpresa = datosSemanales[datosSemanales.length - 1]?.trabajadoresFin || 0;
+          const promEmpresa = datosSemanales.reduce((sum, s) => sum + s.trabajadoresPromedio, 0) / datosSemanales.length;
+          const rotTotalPeriodo = promEmpresa > 0 ? (totalRet / promEmpresa) * 100 : 0;
+          const varTotal = finEmpresa - iniEmpresa;
+
+          tfoot.style.display = '';
+          tfoot.innerHTML = `
+            <tr>
+              <td colspan="2">TOTAL GENERAL DEL PERIODO (${datosSemanales.length} semanas)</td>
+              <td class="num">${fmtNum(iniEmpresa)}</td>
+              <td class="num">${fmtNum(finEmpresa)}</td>
+              <td class="num">${fmtNum(promEmpresa, 1)}</td>
+              <td class="num">${fmtNum(totalRet)}</td>
+              <td class="num">${varTotal >= 0 ? '+' : ''}${fmtNum(varTotal)}</td>
+              <td class="num" style="color: #F5B921;">${fmtPct(rotTotalPeriodo)} (Acum.)</td>
+              <td></td>
+            </tr>`;
+        }
+      } else {
+        // ==================== MODO 2: DESGLOSE POR CENTRO DE COSTO ====================
+        thead.innerHTML = `
+          <tr>
+            <th class="sortable" data-key="semanaNum">Semana <span class="sort-arrow">↕</span></th>
+            <th class="sortable" data-key="rangoTexto">Rango Fechas <span class="sort-arrow">↕</span></th>
+            <th class="sortable" data-key="cecosCod">Código <span class="sort-arrow">↕</span></th>
+            <th class="sortable" data-key="nCentroCosto">Centro de Costo <span class="sort-arrow">↕</span></th>
+            <th class="sortable num" data-key="trabajadoresInicio">Dot. Inicio <span class="sort-arrow">↕</span></th>
+            <th class="sortable num" data-key="trabajadoresFin">Dot. Fin <span class="sort-arrow">↕</span></th>
+            <th class="sortable num" data-key="trabajadoresPromedio">Dot. Promedio <span class="sort-arrow">↕</span></th>
+            <th class="sortable num" data-key="retirados">Retirados <span class="sort-arrow">↕</span></th>
+            <th class="sortable num" data-key="variacion">Variación <span class="sort-arrow">↕</span></th>
+            <th class="sortable num" data-key="indiceRotacion">Rotación (%) <span class="sort-arrow">↕</span></th>
+            <th class="center">Criticidad</th>
+          </tr>`;
+
+        if (registrosProcesados.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="11"><div class="empty-state-box"><div class="icon">🏢</div><h4>Sin registros por centro de costo</h4></div></td></tr>`;
+          if (tfoot) tfoot.style.display = 'none';
+          return;
+        }
+
+        let lista = [...registrosProcesados];
+
+        // Filtro del dropdown superior (si no es TODOS)
+        if (cecoFiltroSeleccionado !== 'TODOS') {
+          lista = lista.filter(r => r.cecosCod === cecoFiltroSeleccionado);
+        }
+
+        // Filtro específico del sub-selector semanal
+        if (cecoVistaSemanal !== 'TODOS') {
+          lista = lista.filter(r => r.cecosCod === cecoVistaSemanal);
+        }
+
+        // Búsqueda en vivo
+        if (busquedaTextoActual) {
+          const txt = busquedaTextoActual.toLowerCase();
+          lista = lista.filter(r =>
+            r.cecosCod.toLowerCase().includes(txt) ||
+            r.nCentroCosto.toLowerCase().includes(txt) ||
+            r.etiquetaSemana.toLowerCase().includes(txt) ||
+            String(r.semanaNum).includes(txt)
+          );
+        }
+
+        const conf = estadoOrden.tablaSemanasGeneral;
+        lista.sort((a, b) => {
+          let va = a[conf.key] ?? a.semanaNum;
+          let vb = b[conf.key] ?? b.semanaNum;
+          if (typeof va === 'string') return conf.dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
+          return conf.dir === 'asc' ? va - vb : vb - va;
+        });
+
+        tbody.innerHTML = lista.map(r => {
+          const nivel = nivelRotacion(r.indiceRotacion);
+          return `
+            <tr>
+              <td style="font-weight: 700; color: var(--color-primary-dark);">Semana ${pad(r.semanaNum)}</td>
+              <td>${r.rangoTexto}</td>
+              <td class="ceco-code">${r.cecosCod}</td>
+              <td class="ceco-name">${r.nCentroCosto}</td>
+              <td class="num">${fmtNum(r.trabajadoresInicio)}</td>
+              <td class="num">${fmtNum(r.trabajadoresFin)}</td>
+              <td class="num">${fmtNum(r.trabajadoresPromedio, 1)}</td>
+              <td class="num" style="font-weight: 700;">${fmtNum(r.retirados)}</td>
+              <td class="num" style="color: ${r.variacion >= 0 ? 'var(--color-emerald)' : 'var(--color-rose)'}; font-weight: 600;">
+                ${r.variacion >= 0 ? '+' : ''}${fmtNum(r.variacion)}
+              </td>
+              <td class="num" style="font-weight: 800; color: ${r.indiceRotacion >= 6 ? 'var(--color-rose)' : 'var(--color-primary-dark)'};">
+                ${fmtPct(r.indiceRotacion)}
+              </td>
+              <td class="center"><span class="badge-status ${nivel.clase}">${nivel.texto}</span></td>
+            </tr>`;
+        }).join('');
+
+        if (tfoot) {
+          const sumRet = lista.reduce((s, r) => s + r.retirados, 0);
+          const sumProm = lista.reduce((s, r) => s + r.trabajadoresPromedio, 0);
+          const rotGrupo = sumProm > 0 ? (sumRet / sumProm) * 100 : 0;
+          const sumVar = lista.reduce((s, r) => s + r.variacion, 0);
+
+          tfoot.style.display = '';
+          tfoot.innerHTML = `
+            <tr>
+              <td colspan="4">SUBTOTAL REGISTROS VISIBLES (${lista.length} filas)</td>
+              <td class="num">—</td>
+              <td class="num">—</td>
+              <td class="num">${fmtNum(sumProm, 1)}</td>
+              <td class="num">${fmtNum(sumRet)}</td>
+              <td class="num">${sumVar >= 0 ? '+' : ''}${fmtNum(sumVar)}</td>
+              <td class="num" style="color: #F5B921;">${fmtPct(rotGrupo)}</td>
+              <td></td>
+            </tr>`;
+        }
+      }
+
+      // Re-vincular los eventos de clic en los encabezados dinámicos
+      configurarOrdenamientoTabla('tablaSemanasGeneral');
     }
 
     function renderTablaDetalle() {
@@ -2478,13 +2324,12 @@
 
     function filtrarTablasEnVivo() {
       busquedaTextoActual = document.getElementById('busquedaTabla').value.trim();
-      renderTablaCecos();
       renderTablaSemanas();
       renderTablaDetalle();
     }
 
     // =========================================================================
-    // 📥 EXPORTACIÓN A EXCEL MULTI-HOJA
+    // 📥 EXPORTACIÓN A EXCEL MULTI-HOJA ACTUALIZADA
     // =========================================================================
     function exportarExcel() {
       if (typeof XLSX === 'undefined') {
@@ -2501,7 +2346,7 @@
 
       const libro = XLSX.utils.book_new();
 
-      // HOJA 1: Resumen General Semanal
+      // HOJA 1: Resumen General Semanal (Consolidado)
       const filasHojaSemanas = datosSemanales.map(s => ({
         'Año': s.anio,
         'Semana': s.semanaNum,
@@ -2516,42 +2361,27 @@
         'Nivel': nivelRotacion(s.indiceRotacion).texto
       }));
       const wsSemanas = XLSX.utils.json_to_sheet(filasHojaSemanas);
-      XLSX.utils.book_append_sheet(libro, wsSemanas, 'Resumen Semanal');
+      XLSX.utils.book_append_sheet(libro, wsSemanas, 'Resumen Semanal General');
 
-      // HOJA 2: Por Centro de Costo
-      const filasHojaCecos = datosCecos.map(c => ({
-        'Código Ceco': c.cecosCod,
-        'Centro de Costo': c.nCentroCosto,
-        'Semanas Evaluadas': c.semanasActivas,
-        'Dotación Inicio (Prom)': c.trabajadoresInicio,
-        'Dotación Fin (Prom)': c.trabajadoresFin,
-        'Dotación Promedio': Number(c.trabajadoresPromedio.toFixed(2)),
-        'Retirados': c.retirados,
-        '% del Total de Bajas': Number(c.pctDelTotalRetiros.toFixed(2)),
-        'Rotación Acumulada (%)': Number(c.indiceRotacionAcum.toFixed(2)),
-        'Rotación Semanal Promedio (%)': Number(c.indiceRotacionSemanalProm.toFixed(2)),
-        'Criticidad': nivelRotacion(c.indiceRotacionAcum).texto
+      // HOJA 2: Resumen Semanal por Centro de Costo
+      const filasHojaSemanasCeco = registrosProcesados.map(r => ({
+        'Año': r.anio,
+        'Semana': r.semana,
+        'Rango Fechas': r.rangoTexto,
+        'Código Ceco': r.cecosCod,
+        'Centro de Costo': r.nCentroCosto,
+        'Dotación Inicio': r.trabajadoresInicio,
+        'Dotación Fin': r.trabajadoresFin,
+        'Dotación Promedio': Number(r.trabajadoresPromedio.toFixed(2)),
+        'Retirados': r.retirados,
+        'Variación': r.variacion,
+        'Índice Rotación (%)': Number(r.indiceRotacion.toFixed(2)),
+        'Nivel': nivelRotacion(r.indiceRotacion).texto
       }));
-      const wsCecos = XLSX.utils.json_to_sheet(filasHojaCecos);
-      XLSX.utils.book_append_sheet(libro, wsCecos, 'Por Centro de Costo');
+      const wsSemanasCeco = XLSX.utils.json_to_sheet(filasHojaSemanasCeco);
+      XLSX.utils.book_append_sheet(libro, wsSemanasCeco, 'Semanal por Ceco');
 
-      // HOJA 3: Matriz Cruzada (CECO x Semana)
-      const filasHojaMatriz = Array.from(mapaMatriz.values()).map(c => {
-        const filaObj = {
-          'Ceco': c.cecosCod,
-          'Centro de Costo': c.nCentroCosto
-        };
-        listaSemanasUnicas.forEach(s => {
-          const item = c.porSemana.get(s.claveSemana);
-          filaObj[`Sem. ${pad(s.semanaNum)} (%)`] = item ? Number(item.indiceRotacion.toFixed(2)) : 0;
-          filaObj[`Sem. ${pad(s.semanaNum)} (Ret.)`] = item ? item.retirados : 0;
-        });
-        return filaObj;
-      });
-      const wsMatriz = XLSX.utils.json_to_sheet(filasHojaMatriz);
-      XLSX.utils.book_append_sheet(libro, wsMatriz, 'Matriz Semanal');
-
-      // HOJA 4: Detalle SQL Crudo
+      // HOJA 3: Detalle Transaccional SQL
       const filasHojaDetalle = registrosProcesados.map(r => ({
         'Año': r.anio,
         'Semana': r.semana,
