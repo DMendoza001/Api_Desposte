@@ -19,38 +19,6 @@
     <!-- Configuración compartida de conexión a la API -->
     <script src="config.js"></script>
 
-    <script>
-        // =========================================================================
-        // ⚙️ CONFIGURACIÓN DE CONEXIÓN A LA API (Híbrida: usa config.js si existe)
-        // =========================================================================
-        const APP_CONFIG = {
-            servidor: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.servidor)
-                ? GLOBAL_CONFIG.servidor
-                : "RAEVSALL001",
-            puertos: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.puertos)
-                ? GLOBAL_CONFIG.puertos
-                : [8080, 5000, 5050, 8085]
-        };
-
-        // Generación de servidores API apuntando al nombre del equipo con fallbacks
-        function generarBasesApi() {
-            if (typeof generarBasesApiGlobal === 'function') {
-                const globalBases = generarBasesApiGlobal();
-                const extras = ["http://localhost:5000", "http://localhost:8080", "http://127.0.0.1:5000", "http://127.0.0.1:8080"];
-                extras.forEach(e => {
-                    if (!globalBases.includes(e)) globalBases.push(e);
-                });
-                return globalBases;
-            }
-            const bases = [];
-            for (const puerto of APP_CONFIG.puertos) {
-                bases.push(`http://${APP_CONFIG.servidor}:${puerto}`);
-            }
-            bases.push("http://localhost:5000", "http://localhost:8080", "http://127.0.0.1:5000");
-            return [...new Set(bases)];
-        }
-    </script>
-
     <style>
         /* =========================================================================
            🎨 PALETA PANTONE INDUSTRIAL
@@ -1555,11 +1523,38 @@
          LÓGICA JAVASCRIPT DEL DASHBOARD
          ========================================================================= -->
     <script>
+        // =========================================================================
+        // ⚙️ CONFIGURACIÓN DE CONEXIÓN HÍBRIDA A LA API .NET
+        // =========================================================================
+        const APP_CONFIG = {
+            servidor: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.servidor)
+                ? GLOBAL_CONFIG.servidor
+                : "RAEVSALL001",
+            puertos: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.puertos)
+                ? GLOBAL_CONFIG.puertos
+                : [8080, 5000]
+        };
+
+        function generarBasesApi() {
+            if (typeof generarBasesApiGlobal === 'function') {
+                return generarBasesApiGlobal();
+            }
+            const bases = [];
+            for (const puerto of APP_CONFIG.puertos) {
+                bases.push(`http://${APP_CONFIG.servidor}:${puerto}`);
+            }
+            return bases;
+        }
+
+        APP_CONFIG.controllerPath = "/api/informe-diario";
+        APP_CONFIG.timeoutMs = 25000;
+
         // Estado global de la aplicación
+        let apiBaseActiva = null;
+        let gServidorActivo = null;
         let gDatosCompletos = null; // { tablas: { personal, sso, horarios, produccion, detalle, paradas } }
         let gFechasDisponibles = [];
         let gFechaSeleccionada = "";
-        let gServidorActivo = null;
         let gChartProduccion = null;
         let gProduccionDiaCache = [];
         let gVistaGraficoProduccion = 'desposte';
@@ -1636,20 +1631,37 @@
             }
         }
 
-        // Detección del Host activo con timeout rápido
+        // Utilidad: Fetch con timeout
+        async function fetchConTimeout(url, timeoutMs = 10000) {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+                const res = await fetch(url, { signal: controller.signal });
+                clearTimeout(id);
+                return res;
+            } catch (err) {
+                clearTimeout(id);
+                throw err;
+            }
+        }
+
+        // Detección automática del host API activo
         async function detectarServidorApi() {
             const bases = generarBasesApi();
             for (const base of bases) {
                 try {
-                    const controller = new AbortController();
-                    const timer = setTimeout(() => controller.abort(), 2000);
-                    const res = await fetch(`${base}/api/informe-diario`, { signal: controller.signal });
-                    clearTimeout(timer);
+                    const res = await fetchConTimeout(`${base}${APP_CONFIG.controllerPath}`, 3500);
                     if (res.ok) {
                         return base;
                     }
                 } catch (e) {
-                    // Siguiente candidato
+                    // Si el controller demora por lectura de Excel, probar ping rápido a raíz de la API
+                    try {
+                        const pingRes = await fetchConTimeout(`${base}/`, 2000);
+                        if (pingRes.ok) return base;
+                    } catch (errPing) {
+                        // Siguiente candidato
+                    }
                 }
             }
             return null;
@@ -1660,18 +1672,19 @@
             mostrarCargando(true, forzarRecarga ? "Leyendo archivo Excel y refrescando caché..." : "Conectando con la API...");
 
             try {
-                if (!gServidorActivo) {
-                    gServidorActivo = await detectarServidorApi();
+                if (!apiBaseActiva) {
+                    apiBaseActiva = await detectarServidorApi();
+                    gServidorActivo = apiBaseActiva;
                 }
 
-                if (!gServidorActivo) {
-                    throw new Error("No se pudo establecer conexión con la API en los puertos 8080 ni 5000.");
+                if (!apiBaseActiva) {
+                    throw new Error(`No se pudo conectar a ${APP_CONFIG.servidor} en puertos ${APP_CONFIG.puertos.join('/')}`);
                 }
 
-                actualizarEstadoApi(true, gServidorActivo);
+                actualizarEstadoApi(true, apiBaseActiva);
 
-                const url = `${gServidorActivo}/api/informe-diario${forzarRecarga ? '?forzarRecarga=true' : ''}`;
-                const resp = await fetch(url);
+                const url = `${apiBaseActiva}${APP_CONFIG.controllerPath}${forzarRecarga ? '?forzarRecarga=true' : ''}`;
+                const resp = await fetchConTimeout(url, APP_CONFIG.timeoutMs);
                 if (!resp.ok) throw new Error(`El servidor respondió con código HTTP ${resp.status}`);
 
                 const data = await resp.json();

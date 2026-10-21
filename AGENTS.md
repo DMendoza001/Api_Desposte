@@ -5,10 +5,11 @@ Este repositorio contiene la API de Desposte en .NET y el conjunto de dashboards
 ## Reglas Generales de Desarrollo
 
 ### 1. Conexión Frontend -> API .NET (Regla Obligatoria)
-Todos los archivos `.html` deben seguir el estándar híbrido de conexión establecido en [.agents/rules/api-connection.md](file:///.agents/rules/api-connection.md):
-- Importar `config.js` opcionalmente: `<script src="config.js"></script>`.
-- Declarar el bloque estándar `APP_CONFIG` con fallback a `RAEVSALL001` y puertos `[8080, 5000]`.
+Todos los archivos `.html` deben seguir el estándar híbrido y resiliente de conexión establecido en [.agents/rules/api-connection.md](file:///.agents/rules/api-connection.md):
+- Importar `config.js` opcionalmente en el `<head>`: `<script src="config.js"></script>` (sin scripts inline en `<head>`).
+- Declarar el bloque estándar `APP_CONFIG` con fallback a `RAEVSALL001`, puertos `[8080, 5000]`, `controllerPath` y `timeoutMs`.
 - Utilizar `generarBasesApi()` para resolver URLs de la API.
+- Implementar `fetchConTimeout(url, timeoutMs)` y `detectarServidorApi()` con timeout adecuado (mínimo 3.5s) y fallback de ping a raíz (`/`).
 - Nunca hardcodear URLs fijas directamente en llamadas `fetch` sin pasar por `generarBasesApi()`.
 
 ### 2. Criterio de Cálculo de Semanas (Regla Obligatoria)
