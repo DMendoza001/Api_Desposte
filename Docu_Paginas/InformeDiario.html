@@ -1,0 +1,2837 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Informe Diario de Operaciones - Planta Trozado de Cerdos</title>
+
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Configuración compartida de conexión a la API -->
+    <script src="config.js"></script>
+
+    <script>
+        // =========================================================================
+        // ⚙️ CONFIGURACIÓN DE CONEXIÓN A LA API (Híbrida: usa config.js si existe)
+        // =========================================================================
+        const APP_CONFIG = {
+            servidor: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.servidor)
+                ? GLOBAL_CONFIG.servidor
+                : "RAEVSALL001",
+            puertos: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.puertos)
+                ? GLOBAL_CONFIG.puertos
+                : [8080, 5000, 5050, 8085]
+        };
+
+        // Generación de servidores API apuntando al nombre del equipo con fallbacks
+        function generarBasesApi() {
+            if (typeof generarBasesApiGlobal === 'function') {
+                const globalBases = generarBasesApiGlobal();
+                const extras = ["http://localhost:5000", "http://localhost:8080", "http://127.0.0.1:5000", "http://127.0.0.1:8080"];
+                extras.forEach(e => {
+                    if (!globalBases.includes(e)) globalBases.push(e);
+                });
+                return globalBases;
+            }
+            const bases = [];
+            for (const puerto of APP_CONFIG.puertos) {
+                bases.push(`http://${APP_CONFIG.servidor}:${puerto}`);
+            }
+            bases.push("http://localhost:5000", "http://localhost:8080", "http://127.0.0.1:5000");
+            return [...new Set(bases)];
+        }
+    </script>
+
+    <style>
+        /* =========================================================================
+           🎨 PALETA PANTONE INDUSTRIAL
+           ========================================================================= */
+        :root {
+            --pantone-yellow: #F4D03F;
+            --pantone-yellow-light: #F8CC5A;
+            --pantone-yellow-soft: rgba(244, 208, 63, 0.15);
+            --pantone-yellow-border: rgba(244, 208, 63, 0.4);
+            --pantone-gold: #BAA063;
+            --pantone-dark: #2E2A2F;
+            --pantone-darker: #252C37;
+            --pantone-gray-dark: #605C5E;
+            --pantone-gray-med: #878994;
+            --pantone-gray-light: #CDCAC0;
+            --pantone-bg: #F2F4F8;
+            --pantone-card: #FFFFFF;
+            --pantone-card-alt: #F8FAFC;
+            --pantone-border: #E2E8F0;
+            --pantone-border-subtle: #EDF2F7;
+
+            --color-success: #10B981;
+            --color-success-soft: rgba(16, 185, 129, 0.12);
+            --color-warning: #F59E0B;
+            --color-warning-soft: rgba(245, 158, 11, 0.12);
+            --color-danger: #EF4444;
+            --color-danger-soft: rgba(239, 68, 68, 0.12);
+            --color-info: #3B82F6;
+            --color-info-soft: rgba(59, 130, 246, 0.12);
+
+            --shadow-sm: 0 1px 3px rgba(46, 42, 47, 0.05), 0 1px 2px rgba(46, 42, 47, 0.03);
+            --shadow-md: 0 4px 6px -1px rgba(46, 42, 47, 0.08), 0 2px 4px -1px rgba(46, 42, 47, 0.04);
+            --shadow-lg: 0 10px 15px -3px rgba(46, 42, 47, 0.1), 0 4px 6px -2px rgba(46, 42, 47, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(46, 42, 47, 0.15), 0 10px 10px -5px rgba(46, 42, 47, 0.04);
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+            --radius-xl: 18px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--pantone-bg);
+            color: var(--pantone-dark);
+            min-height: 100vh;
+            padding: 24px;
+            overflow-x: hidden;
+        }
+
+        /* Contenedor principal fluido */
+        .app-container {
+            max-width: 1720px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+        }
+
+        /* =========================================================================
+           TOPBAR & CONTROLES SUPERIORES
+           ========================================================================= */
+        .header-card {
+            background: linear-gradient(135deg, var(--pantone-dark) 0%, var(--pantone-darker) 100%);
+            color: #FFFFFF;
+            border-radius: var(--radius-lg);
+            padding: 20px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 18px;
+            box-shadow: var(--shadow-lg);
+            border-left: 6px solid var(--pantone-yellow);
+        }
+
+        .header-brand {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .header-tag {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--pantone-yellow);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-title {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-subtitle {
+            font-size: 13px;
+            color: var(--pantone-gray-light);
+            font-weight: 400;
+        }
+
+        /* Barra de fecha y navegación */
+        .controls-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .date-control-group {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: var(--radius-md);
+            padding: 6px 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(8px);
+        }
+
+        .date-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--pantone-yellow);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .date-input {
+            background: #FFFFFF;
+            color: var(--pantone-dark);
+            border: 1px solid transparent;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: var(--radius-sm);
+            outline: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .date-input:focus {
+            border-color: var(--pantone-yellow);
+            box-shadow: 0 0 0 3px rgba(244, 208, 63, 0.4);
+        }
+
+        .btn-nav-date {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #FFFFFF;
+            padding: 7px 12px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-nav-date:hover {
+            background: rgba(255, 255, 255, 0.22);
+            transform: translateY(-1px);
+        }
+
+        .btn-action-primary {
+            background: linear-gradient(135deg, var(--pantone-yellow) 0%, var(--pantone-yellow-light) 100%);
+            color: var(--pantone-darker);
+            border: none;
+            padding: 10px 18px;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(244, 208, 63, 0.35);
+        }
+
+        .btn-action-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(244, 208, 63, 0.45);
+            filter: brightness(1.05);
+        }
+
+        .btn-action-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-action-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #FFFFFF;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 10px 15px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .btn-action-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Banner de Conexión / Estado */
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            background: rgba(16, 185, 129, 0.15);
+            color: #10B981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #10B981;
+            animation: pulseDot 2s infinite;
+        }
+
+        @keyframes pulseDot {
+            0% {
+                transform: scale(0.95);
+                opacity: 0.8;
+            }
+
+            50% {
+                transform: scale(1.3);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(0.95);
+                opacity: 0.8;
+            }
+        }
+
+        /* =========================================================================
+           HERO KPIS (MÉTRICAS CLAVE SUPERIORES)
+           ========================================================================= */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 18px;
+        }
+
+        .kpi-card {
+            background: var(--pantone-card);
+            border-radius: var(--radius-lg);
+            padding: 18px 22px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--pantone-border);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--pantone-gray-med);
+        }
+
+        .kpi-card.accent-yellow::before {
+            background: var(--pantone-yellow);
+        }
+
+        .kpi-card.accent-dark::before {
+            background: var(--pantone-dark);
+        }
+
+        .kpi-card.accent-gold::before {
+            background: var(--pantone-gold);
+        }
+
+        .kpi-card.accent-success::before {
+            background: var(--color-success);
+        }
+
+        .kpi-card.accent-danger::before {
+            background: var(--color-danger);
+        }
+
+        .kpi-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .kpi-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--pantone-gray-dark);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .kpi-icon {
+            font-size: 18px;
+        }
+
+        .kpi-value-row {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+
+        .kpi-value {
+            font-size: 28px;
+            font-weight: 900;
+            color: var(--pantone-dark);
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: -1px;
+        }
+
+        .kpi-subtext {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--pantone-gray-med);
+        }
+
+        .kpi-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            border-radius: var(--radius-sm);
+            font-size: 11px;
+            font-weight: 700;
+            margin-left: auto;
+        }
+
+        .kpi-badge.badge-success {
+            background: var(--color-success-soft);
+            color: var(--color-success);
+        }
+
+        .kpi-badge.badge-warning {
+            background: var(--color-warning-soft);
+            color: var(--color-warning);
+        }
+
+        .kpi-badge.badge-danger {
+            background: var(--color-danger-soft);
+            color: var(--color-danger);
+        }
+
+        .kpi-badge.badge-yellow {
+            background: var(--pantone-yellow-soft);
+            color: #8C6D05;
+        }
+
+        .kpi-progress {
+            width: 100%;
+            height: 6px;
+            background: var(--pantone-bg);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .kpi-progress-bar {
+            height: 100%;
+            background: var(--pantone-yellow);
+            border-radius: 999px;
+            transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .kpi-meta-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--pantone-gray-dark);
+            font-weight: 500;
+        }
+
+        /* =========================================================================
+           TABS DE NAVEGACIÓN Y VISTAS
+           ========================================================================= */
+        .tabs-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #E5E9F0;
+            padding: 6px;
+            border-radius: var(--radius-md);
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            padding: 9px 18px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--pantone-gray-dark);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .tab-btn:hover {
+            color: var(--pantone-dark);
+            background: rgba(255, 255, 255, 0.6);
+        }
+
+        .tab-btn.active {
+            background: var(--pantone-card);
+            color: var(--pantone-dark);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .tab-btn .tab-count {
+            background: var(--pantone-bg);
+            color: var(--pantone-dark);
+            font-size: 11px;
+            padding: 2px 7px;
+            border-radius: 999px;
+            font-weight: 700;
+        }
+
+        .tab-btn.active .tab-count {
+            background: var(--pantone-yellow);
+            color: var(--pantone-dark);
+        }
+
+        /* =========================================================================
+           SECCIONES DE CONTENIDO
+           ========================================================================= */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+            animation: fadeIn 0.25s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(4px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Paneles y Cards principales */
+        .dashboard-section {
+            background: var(--pantone-card);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--pantone-border);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+        }
+
+        .section-header {
+            padding: 16px 22px;
+            background: var(--pantone-card-alt);
+            border-bottom: 1px solid var(--pantone-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--pantone-dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-badge {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 999px;
+            background: var(--pantone-yellow-soft);
+            color: #7D6105;
+            border: 1px solid var(--pantone-yellow-border);
+        }
+
+        /* Selector de vista para gráfico de producción */
+        .chart-toggle-group {
+            display: inline-flex;
+            background: #E5E9F0;
+            padding: 3px;
+            border-radius: var(--radius-sm);
+            gap: 4px;
+            align-items: center;
+            border: 1px solid var(--pantone-border);
+        }
+
+        .chart-toggle-btn {
+            background: transparent;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--pantone-gray-dark);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .chart-toggle-btn:hover {
+            color: var(--pantone-dark);
+            background: rgba(255, 255, 255, 0.7);
+        }
+
+        .chart-toggle-btn.active {
+            background: var(--pantone-card);
+            color: var(--pantone-dark);
+            box-shadow: 0 1px 3px rgba(46, 42, 47, 0.12);
+        }
+
+        .section-body {
+            padding: 22px;
+        }
+
+        /* Grids de cards por área */
+        .cards-grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 18px;
+        }
+
+        .sub-card {
+            background: #FFFFFF;
+            border: 1px solid var(--pantone-border);
+            border-radius: var(--radius-md);
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .sub-card:hover {
+            border-color: var(--pantone-gold);
+            box-shadow: var(--shadow-md);
+        }
+
+        .sub-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--pantone-border-subtle);
+            padding-bottom: 10px;
+        }
+
+        .sub-card-title {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--pantone-dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Filas de métricas en pares clave:valor */
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            padding: 4px 0;
+            border-bottom: 1px dashed var(--pantone-border-subtle);
+        }
+
+        .metric-row:last-child {
+            border-bottom: none;
+        }
+
+        .metric-row .metric-key {
+            color: var(--pantone-gray-dark);
+            font-weight: 500;
+        }
+
+        .metric-row .metric-val {
+            font-weight: 700;
+            color: var(--pantone-dark);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Pills de motivos */
+        .motivo-box {
+            background: var(--pantone-bg);
+            border-radius: var(--radius-sm);
+            padding: 10px 12px;
+            font-size: 12px;
+            color: var(--pantone-dark);
+            border-left: 3px solid var(--pantone-gold);
+            line-height: 1.5;
+        }
+
+        /* =========================================================================
+           TABLAS INDUSTRIALES
+           ========================================================================= */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--pantone-border);
+        }
+
+        .table-industrial {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            text-align: left;
+        }
+
+        .table-industrial th {
+            background: var(--pantone-dark);
+            color: #FFFFFF;
+            padding: 12px 14px;
+            font-weight: 700;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--pantone-yellow);
+            white-space: nowrap;
+        }
+
+        .table-industrial td {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--pantone-border);
+            color: var(--pantone-dark);
+            white-space: nowrap;
+        }
+
+        .table-industrial tbody tr:hover {
+            background-color: var(--pantone-yellow-soft);
+        }
+
+        .table-industrial td.num {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            text-align: right;
+        }
+
+        .table-industrial th.num {
+            text-align: right;
+        }
+
+        /* =========================================================================
+           SECCIÓN DE TEXTO WHATSAPP (GENERADOR & COPIADO)
+           ========================================================================= */
+        .report-preview-container {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 22px;
+            align-items: start;
+        }
+
+        @media (max-width: 1100px) {
+            .report-preview-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .text-terminal {
+            background: #1E2229;
+            color: #E6EDF3;
+            border-radius: var(--radius-lg);
+            border: 1px solid #323842;
+            overflow: hidden;
+            box-shadow: var(--shadow-xl);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .terminal-header {
+            background: #16191F;
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #2B303A;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .terminal-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .terminal-dot.red {
+            background: #FF5F56;
+        }
+
+        .terminal-dot.yellow {
+            background: #FFBD2E;
+        }
+
+        .terminal-dot.green {
+            background: #27C93F;
+        }
+
+        .terminal-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--pantone-yellow);
+            font-weight: 600;
+        }
+
+        .terminal-body {
+            position: relative;
+        }
+
+        .raw-text-area {
+            width: 100%;
+            height: 580px;
+            background: transparent;
+            color: #E2E8F0;
+            border: none;
+            padding: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            resize: vertical;
+            outline: none;
+            white-space: pre-wrap;
+        }
+
+        /* Barra lateral de opciones de copia */
+        .copy-side-panel {
+            background: var(--pantone-card);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--pantone-border);
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .copy-btn-large {
+            background: linear-gradient(135deg, var(--pantone-yellow) 0%, var(--pantone-yellow-light) 100%);
+            color: var(--pantone-darker);
+            border: none;
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 6px 18px rgba(244, 208, 63, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.25s ease;
+        }
+
+        .copy-btn-large:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(244, 208, 63, 0.55);
+            filter: brightness(1.05);
+        }
+
+        .copy-btn-large.copied {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            color: #FFFFFF;
+            box-shadow: 0 6px 18px rgba(16, 185, 129, 0.4);
+        }
+
+        .info-checklist {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            font-size: 12px;
+            color: var(--pantone-gray-dark);
+        }
+
+        .check-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .check-item-icon {
+            color: var(--color-success);
+            font-weight: bold;
+        }
+
+        /* =========================================================================
+           ACORDEONES Y HALLAZGOS DE CALIDAD
+           ========================================================================= */
+        .finding-group {
+            background: var(--pantone-card);
+            border: 1px solid var(--pantone-border);
+            border-radius: var(--radius-md);
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+
+        .finding-group-header {
+            padding: 12px 18px;
+            background: var(--pantone-card-alt);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .finding-group-header:hover {
+            background: var(--pantone-bg);
+        }
+
+        .finding-list {
+            padding: 14px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .finding-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 13px;
+            line-height: 1.4;
+            color: var(--pantone-dark);
+            padding: 6px 10px;
+            background: var(--pantone-card-alt);
+            border-radius: var(--radius-sm);
+        }
+
+        .finding-bullet {
+            color: var(--pantone-gold);
+            font-size: 14px;
+            line-height: 1;
+            margin-top: 2px;
+        }
+
+        /* =========================================================================
+           TOAST NOTIFICATION
+           ========================================================================= */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--pantone-darker);
+            color: #FFFFFF;
+            padding: 14px 22px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-xl);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            z-index: 9999;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            border-left: 5px solid var(--pantone-yellow);
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* =========================================================================
+           SPINNER / LOADING OVERLAY
+           ========================================================================= */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(46, 42, 47, 0.6);
+            backdrop-filter: blur(4px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            z-index: 10000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+
+        .loading-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 5px solid rgba(244, 208, 63, 0.2);
+            border-top-color: var(--pantone-yellow);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-text {
+            color: #FFFFFF;
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay active">
+        <div class="spinner"></div>
+        <div class="loading-text" id="loadingText">Conectando a la API de Desposte...</div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <span id="toastIcon">📋</span>
+        <span id="toastMessage">Texto copiado al portapapeles exitosamente</span>
+    </div>
+
+    <div class="app-container">
+
+        <!-- =========================================================================
+             HEADER / BARRA SUPERIOR
+             ========================================================================= -->
+        <header class="header-card">
+            <div class="header-brand">
+                <div class="header-tag">
+                    <span>🏭 Corporación Rico SAC</span>
+                    <span>•</span>
+                    <span>Planta Trozado de Cerdos</span>
+                </div>
+                <h1 class="header-title">
+                    <span>📋 Informe Diario de Operaciones</span>
+                </h1>
+                <div class="header-subtitle" id="headerSubtitle">
+                    Cargando datos operativos del sistema...
+                </div>
+            </div>
+
+            <div class="controls-wrapper">
+                <!-- Selector y navegación de fecha -->
+                <div class="date-control-group">
+                    <span class="date-label">📅 Fecha:</span>
+                    <button class="btn-nav-date" id="btnPrevDate" title="Día Anterior">◀</button>
+                    <input type="date" id="inputFecha" class="date-input" title="Seleccionar fecha a procesar">
+                    <button class="btn-nav-date" id="btnNextDate" title="Día Siguiente">▶</button>
+                    <select id="selectFechasDisponibles" class="date-input" style="max-width: 140px; display: none;"
+                        title="Fechas con registros"></select>
+                </div>
+
+                <!-- Botón de actualización forzada -->
+                <button class="btn-action-secondary" id="btnRecargar" title="Recargar desde Excel forzando lectura">
+                    <span>🔄 Actualizar</span>
+                </button>
+
+                <!-- Botón primario de Copiar Texto WhatsApp -->
+                <button class="btn-action-primary" id="btnCopiarReporteTop"
+                    title="Copiar reporte diario en formato WhatsApp">
+                    <span>📋 Copiar Reporte WhatsApp</span>
+                </button>
+
+                <!-- Pill de estado API -->
+                <div class="status-pill" id="apiStatusPill">
+                    <span class="status-dot" id="apiStatusDot"></span>
+                    <span id="apiStatusText">Buscando API...</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- =========================================================================
+             HERO KPIS (RESUMEN EJECUTIVO DIARIO)
+             ========================================================================= -->
+        <section class="kpi-grid">
+            <!-- KPI 1: Personal -->
+            <div class="kpi-card accent-yellow">
+                <div class="kpi-header">
+                    <span class="kpi-label">👷 Asistencia Personal</span>
+                    <span class="kpi-badge badge-yellow" id="kpiPctAsistencia">--%</span>
+                </div>
+                <div class="kpi-value-row">
+                    <span class="kpi-value" id="kpiAsistenciaReal">--</span>
+                    <span class="kpi-subtext" id="kpiProgramadoTotal">/ -- Programados</span>
+                </div>
+                <div class="kpi-progress">
+                    <div class="kpi-progress-bar" id="kpiProgressPersonal" style="width: 0%;"></div>
+                </div>
+                <div class="kpi-meta-row">
+                    <span id="kpiAusenciasTotal">Ausencias: --</span>
+                    <span id="kpiPlazasTotal">Plazas: --</span>
+                </div>
+            </div>
+
+            <!-- KPI 2: Desposte -->
+            <div class="kpi-card accent-dark">
+                <div class="kpi-header">
+                    <span class="kpi-label">🐖 Desposte (Un)</span>
+                    <span class="kpi-badge badge-success" id="kpiCumplDesposte">--%</span>
+                </div>
+                <div class="kpi-value-row">
+                    <span class="kpi-value" id="kpiProdDesposte">--</span>
+                    <span class="kpi-subtext" id="kpiProgDesposte">/ -- Meta</span>
+                </div>
+                <div class="kpi-progress">
+                    <div class="kpi-progress-bar" id="kpiProgressDesposte" style="width: 0%;"></div>
+                </div>
+                <div class="kpi-meta-row">
+                    <span>Productividad:</span>
+                    <span id="kpiProdDesposteHH" style="font-weight: 700; color: var(--pantone-dark);">-- Un/HH</span>
+                </div>
+            </div>
+
+            <!-- KPI 3: Chuletas -->
+            <div class="kpi-card accent-gold">
+                <div class="kpi-header">
+                    <span class="kpi-label">🥩 Chuletas (Kg)</span>
+                    <span class="kpi-badge badge-warning" id="kpiCumplChuletas">--%</span>
+                </div>
+                <div class="kpi-value-row">
+                    <span class="kpi-value" id="kpiProdChuletas">--</span>
+                    <span class="kpi-subtext" id="kpiProgChuletas">/ -- Meta</span>
+                </div>
+                <div class="kpi-progress">
+                    <div class="kpi-progress-bar" id="kpiProgressChuletas" style="width: 0%;"></div>
+                </div>
+                <div class="kpi-meta-row">
+                    <span>Productividad:</span>
+                    <span id="kpiProdChuletasHH" style="font-weight: 700; color: var(--pantone-dark);">-- Kg/HH</span>
+                </div>
+            </div>
+
+            <!-- KPI 4: Congelado - Marinado -->
+            <div class="kpi-card accent-success">
+                <div class="kpi-header">
+                    <span class="kpi-label">❄️ Congelado-Marinado (Kg)</span>
+                    <span class="kpi-badge badge-success" id="kpiCumplCongelado">--%</span>
+                </div>
+                <div class="kpi-value-row">
+                    <span class="kpi-value" id="kpiProdCongelado">--</span>
+                    <span class="kpi-subtext" id="kpiProgCongelado">/ -- Meta</span>
+                </div>
+                <div class="kpi-progress">
+                    <div class="kpi-progress-bar" id="kpiProgressCongelado" style="width: 0%;"></div>
+                </div>
+                <div class="kpi-meta-row">
+                    <span>% Inyección: <strong id="kpiInyeccionVal">--%</strong></span>
+                    <span>Productividad: <strong id="kpiProdCongHH">-- Kg/HH</strong></span>
+                </div>
+            </div>
+        </section>
+
+        <!-- =========================================================================
+             TABS BAR
+             ========================================================================= -->
+        <nav class="tabs-bar">
+            <button class="tab-btn active" data-tab="tab-integral">
+                <span>📊 Visión Integral</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-personal">
+                <span>👷 Personal & Horarios</span>
+                <span class="tab-count" id="tabCountPersonal">0</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-produccion">
+                <span>🏭 Producción en Detalle</span>
+                <span class="tab-count" id="tabCountProd">0</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-calidad">
+                <span>✅ Calidad & BPM</span>
+                <span class="tab-count" id="tabCountCalidad">0</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-paradas">
+                <span>🛑 Paradas de Planta & Equipo</span>
+                <span class="tab-count" id="tabCountParadas">0</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-whatsapp"
+                style="margin-left: auto; background: var(--pantone-yellow); color: var(--pantone-dark);">
+                <span>📝 Formato Texto (WhatsApp)</span>
+            </button>
+        </nav>
+
+        <!-- =========================================================================
+             TAB 1: VISIÓN INTEGRAL (DASHBOARD COMPLETO)
+             ========================================================================= -->
+        <div id="tab-integral" class="tab-content active">
+            <!-- Fila doble: Producción vs Programa Gráfico + Calidad Resumen -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <!-- Gráfico Comparativo -->
+                <div class="dashboard-section">
+                    <div class="section-header"
+                        style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                            <div class="section-title">
+                                <span>📊 Comparativa Programa vs Real</span>
+                            </div>
+                            <span class="section-badge" id="badgeGraficoProduccion">Meta vs Real</span>
+                        </div>
+                        <div class="chart-toggle-group">
+                            <button type="button" class="chart-toggle-btn active" id="btnToggleDesposte"
+                                onclick="cambiarVistaGraficoProduccion('desposte')">
+                                🐖 Desposte (Un)
+                            </button>
+                            <button type="button" class="chart-toggle-btn" id="btnToggleKilos"
+                                onclick="cambiarVistaGraficoProduccion('kilos')">
+                                🥩 Chuletas & Congelado (Kg)
+                            </button>
+                        </div>
+                    </div>
+                    <div class="section-body">
+                        <div style="position: relative; height: 280px; width: 100%;">
+                            <canvas id="chartProduccionDia"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resumen de Hallazgos y SSO -->
+                <div class="dashboard-section">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <span>🦺 SSO & Resumen de Calidad</span>
+                        </div>
+                        <span class="section-badge">Inspección Diaria</span>
+                    </div>
+                    <div class="section-body" style="display: flex; flex-direction: column; gap: 16px;">
+                        <!-- SSO Cards -->
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+                            <div
+                                style="background: var(--pantone-bg); padding: 12px; border-radius: var(--radius-sm); border-left: 3px solid var(--color-success);">
+                                <div style="font-size: 11px; font-weight: 700; color: var(--pantone-gray-dark);">
+                                    DESPOSTE SSO</div>
+                                <div style="font-size: 20px; font-weight: 800; font-family: 'JetBrains Mono', monospace;"
+                                    id="ssoDesposteVal">0</div>
+                            </div>
+                            <div
+                                style="background: var(--pantone-bg); padding: 12px; border-radius: var(--radius-sm); border-left: 3px solid var(--color-success);">
+                                <div style="font-size: 11px; font-weight: 700; color: var(--pantone-gray-dark);">
+                                    CHULETAS SSO</div>
+                                <div style="font-size: 20px; font-weight: 800; font-family: 'JetBrains Mono', monospace;"
+                                    id="ssoChuletasVal">0</div>
+                            </div>
+                            <div
+                                style="background: var(--pantone-bg); padding: 12px; border-radius: var(--radius-sm); border-left: 3px solid var(--color-success);">
+                                <div style="font-size: 11px; font-weight: 700; color: var(--pantone-gray-dark);">
+                                    CONGELADO SSO</div>
+                                <div style="font-size: 20px; font-weight: 800; font-family: 'JetBrains Mono', monospace;"
+                                    id="ssoCongeladoVal">0</div>
+                            </div>
+                        </div>
+
+                        <!-- Resumen Chips Calidad -->
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                            <div class="metric-row"><span class="metric-key">Reclamos Externos:</span><span
+                                    class="metric-val" id="resumenReclamosExt">0</span></div>
+                            <div class="metric-row"><span class="metric-key">Reclamos Internos:</span><span
+                                    class="metric-val" id="resumenReclamosInt">0</span></div>
+                            <div class="metric-row"><span class="metric-key">No Conformidades:</span><span
+                                    class="metric-val" id="resumenNoConf">0</span></div>
+                            <div class="metric-row"><span class="metric-key">Cadena de Frío:</span><span
+                                    class="metric-val" id="resumenCadenaFrio">0</span></div>
+                            <div class="metric-row"><span class="metric-key">Incumplimiento BPM:</span><span
+                                    class="metric-val" id="resumenBpm">0</span></div>
+                            <div class="metric-row"><span class="metric-key">Limpieza Industrial:</span><span
+                                    class="metric-val" id="resumenLimpieza">0</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla Resumen Producción -->
+            <div class="dashboard-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <span>🏭 Tabla de Producción por Área y Concepto</span>
+                    </div>
+                </div>
+                <div class="section-body" style="padding: 0;">
+                    <div class="table-responsive">
+                        <table class="table-industrial">
+                            <thead>
+                                <tr>
+                                    <th>Área</th>
+                                    <th>Concepto</th>
+                                    <th class="num">Programa</th>
+                                    <th class="num">Producción</th>
+                                    <th class="num">% Cumplimiento</th>
+                                    <th class="num">Productividad</th>
+                                    <th class="num">% Extra / Inyección</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyProduccionResumen">
+                                <tr>
+                                    <td colspan="7" style="text-align: center; padding: 20px;">Cargando datos...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- =========================================================================
+             TAB 2: PERSONAL & HORARIOS
+             ========================================================================= -->
+        <div id="tab-personal" class="tab-content">
+            <div class="cards-grid-3" id="cardsPersonalContainer">
+                <!-- Se puebla dinámicamente -->
+            </div>
+
+            <div class="dashboard-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <span>⏰ Horarios y Horas Hombre (HH) por Turno</span>
+                    </div>
+                </div>
+                <div class="section-body" style="padding: 0;">
+                    <div class="table-responsive">
+                        <table class="table-industrial">
+                            <thead>
+                                <tr>
+                                    <th>Área</th>
+                                    <th>Turno</th>
+                                    <th>Hora Ingreso</th>
+                                    <th>Hora Salida</th>
+                                    <th class="num">N° Personas</th>
+                                    <th class="num">Horas</th>
+                                    <th class="num">Horas Hombre (HH)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyHorarios">
+                                <tr>
+                                    <td colspan="7" style="text-align: center; padding: 20px;">Cargando horarios...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- =========================================================================
+             TAB 3: PRODUCCIÓN EN DETALLE
+             ========================================================================= -->
+        <div id="tab-produccion" class="tab-content">
+            <div class="cards-grid-3">
+                <!-- Tarjeta Desposte -->
+                <div class="sub-card">
+                    <div class="sub-card-header">
+                        <span class="sub-card-title">🐖 Desposte (Unidades)</span>
+                        <span class="kpi-badge badge-yellow" id="badgeDetalleDesposte">--%</span>
+                    </div>
+                    <div class="metric-row"><span class="metric-key">Programa Total:</span><span class="metric-val"
+                            id="detProgDesposte">--</span></div>
+                    <div class="metric-row"><span class="metric-key">Producción Total:</span><span class="metric-val"
+                            id="detProdDesposte">--</span></div>
+                    <div class="metric-row"><span class="metric-key">Cumplimiento:</span><span class="metric-val"
+                            id="detCumplDesposte">--%</span></div>
+                    <div class="metric-row"><span class="metric-key">Productividad:</span><span class="metric-val"
+                            id="detProductivDesposte">-- Un/HH</span></div>
+                    <div class="metric-row"><span class="metric-key">Horas Hombre (HH):</span><span class="metric-val"
+                            id="detHhDesposte">-- HH</span></div>
+                </div>
+
+                <!-- Tarjeta Chuletas -->
+                <div class="sub-card">
+                    <div class="sub-card-header">
+                        <span class="sub-card-title">🥩 Chuletas (Kilogramos)</span>
+                        <span class="kpi-badge badge-warning" id="badgeDetalleChuletas">--%</span>
+                    </div>
+                    <div class="metric-row"><span class="metric-key">Programa Total:</span><span class="metric-val"
+                            id="detProgChuletas">--</span></div>
+                    <div class="metric-row"><span class="metric-key">Producción Total:</span><span class="metric-val"
+                            id="detProdChuletas">--</span></div>
+                    <div class="metric-row"><span class="metric-key">Cumplimiento:</span><span class="metric-val"
+                            id="detCumplChuletas">--%</span></div>
+                    <div class="metric-row"><span class="metric-key">Productividad:</span><span class="metric-val"
+                            id="detProductivChuletas">-- Kg/HH</span></div>
+                    <div class="metric-row"><span class="metric-key">Horas Hombre (HH):</span><span class="metric-val"
+                            id="detHhChuletas">-- HH</span></div>
+                </div>
+
+                <!-- Tarjeta Congelado / Marinado -->
+                <div class="sub-card">
+                    <div class="sub-card-header">
+                        <span class="sub-card-title">❄️ Congelado - Marinado (Kg)</span>
+                        <span class="kpi-badge badge-success" id="badgeDetalleCongelado">--%</span>
+                    </div>
+                    <div class="metric-row"><span class="metric-key">Programa Total:</span><span class="metric-val"
+                            id="detProgCongelado">--</span></div>
+                    <div class="metric-row"><span class="metric-key">Producción Total:</span><span class="metric-val"
+                            id="detProdCongelado">--</span></div>
+                    <div class="metric-row"><span class="metric-key">Cumplimiento:</span><span class="metric-val"
+                            id="detCumplCongelado">--%</span></div>
+                    <div class="metric-row"><span class="metric-key">Productividad:</span><span class="metric-val"
+                            id="detProductivCongelado">-- Kg/HH</span></div>
+                    <div class="metric-row"><span class="metric-key">% Inyección Marinado:</span><span
+                            class="metric-val" id="detInyeccionCongelado">--%</span></div>
+                    <div class="metric-row"><span class="metric-key">Ensacado (Kg):</span><span class="metric-val"
+                            id="detEnsacadoCongelado">--</span></div>
+                    <div class="metric-row"><span class="metric-key">Dif. Ensacado-Marinado:</span><span
+                            class="metric-val" id="detDifEnsacadoMarinado">--</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- =========================================================================
+             TAB 4: CALIDAD & BPM
+             ========================================================================= -->
+        <div id="tab-calidad" class="tab-content">
+            <div class="dashboard-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <span>✅ Detalle de Hallazgos de Calidad, Inocuidad y BPM</span>
+                    </div>
+                    <input type="text" id="filtroHallazgos" placeholder="🔍 Filtrar hallazgos..."
+                        style="padding: 6px 12px; border-radius: var(--radius-sm); border: 1px solid var(--pantone-border); font-size: 13px; outline: none; width: 240px;">
+                </div>
+                <div class="section-body" id="containerHallazgosCalidad">
+                    <!-- Se puebla dinámicamente por secciones -->
+                </div>
+            </div>
+        </div>
+
+        <!-- =========================================================================
+             TAB 5: PARADAS
+             ========================================================================= -->
+        <div id="tab-paradas" class="tab-content">
+            <div class="dashboard-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <span>🛑 Paradas de Planta y Equipos</span>
+                    </div>
+                </div>
+                <div class="section-body" style="padding: 0;">
+                    <div class="table-responsive">
+                        <table class="table-industrial">
+                            <thead>
+                                <tr>
+                                    <th>Tipo</th>
+                                    <th>Área Afectada</th>
+                                    <th>Equipo</th>
+                                    <th>Causa</th>
+                                    <th>Inicio</th>
+                                    <th>Fin</th>
+                                    <th class="num">Duración (min)</th>
+                                    <th>Medida Correctiva</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyParadas">
+                                <tr>
+                                    <td colspan="8" style="text-align: center; padding: 20px;">Sin registros de paradas.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- =========================================================================
+             TAB 6: FORMATO TEXTO (WHATSAPP)
+             ========================================================================= -->
+        <div id="tab-whatsapp" class="tab-content">
+            <div class="report-preview-container">
+                <!-- Visor Terminal de Texto Listo para Copiar -->
+                <div class="text-terminal">
+                    <div class="terminal-header">
+                        <div class="terminal-dots">
+                            <span class="terminal-dot red"></span>
+                            <span class="terminal-dot yellow"></span>
+                            <span class="terminal-dot green"></span>
+                        </div>
+                        <div class="terminal-title">informe_diario_whatsapp.txt</div>
+                        <div style="font-size: 11px; color: var(--pantone-gray-med);" id="terminalStats">0 caracteres •
+                            0 líneas</div>
+                    </div>
+                    <div class="terminal-body">
+                        <textarea id="textoReporteWhatsapp" class="raw-text-area" spellcheck="false"></textarea>
+                    </div>
+                </div>
+
+                <!-- Panel Lateral de Acción -->
+                <div class="copy-side-panel">
+                    <button class="copy-btn-large" id="btnCopiarReporteBig">
+                        <span id="btnCopiarIcon">📋</span>
+                        <span id="btnCopiarText">Copiar al Portapapeles</span>
+                    </button>
+
+                    <div
+                        style="font-size: 13px; font-weight: 700; color: var(--pantone-dark); border-bottom: 1px solid var(--pantone-border); padding-bottom: 8px;">
+                        📌 Instrucciones de Uso
+                    </div>
+
+                    <div class="info-checklist">
+                        <div class="check-item">
+                            <span class="check-item-icon">✔</span>
+                            <span>Formato exacto con viñetas y emojis estándar para WhatsApp.</span>
+                        </div>
+                        <div class="check-item">
+                            <span class="check-item-icon">✔</span>
+                            <span>Calcula ausencias agrupadas por área y motivo.</span>
+                        </div>
+                        <div class="check-item">
+                            <span class="check-item-icon">✔</span>
+                            <span>Productividad automática Un/HH y Kg/HH.</span>
+                        </div>
+                        <div class="check-item">
+                            <span class="check-item-icon">✔</span>
+                            <span>Desglose de Calidad y Paradas de equipo.</span>
+                        </div>
+                        <div class="check-item">
+                            <span class="check-item-icon">✔</span>
+                            <span>Puedes editar manualmente en el cuadro antes de copiar si lo deseas.</span>
+                        </div>
+                    </div>
+
+                    <button class="btn-action-secondary" id="btnRegenerarTexto"
+                        style="color: var(--pantone-dark); border-color: var(--pantone-border); margin-top: 10px;">
+                        <span>🔄 Regenerar Texto Automático</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- =========================================================================
+         LÓGICA JAVASCRIPT DEL DASHBOARD
+         ========================================================================= -->
+    <script>
+        // Estado global de la aplicación
+        let gDatosCompletos = null; // { tablas: { personal, sso, horarios, produccion, detalle, paradas } }
+        let gFechasDisponibles = [];
+        let gFechaSeleccionada = "";
+        let gServidorActivo = null;
+        let gChartProduccion = null;
+        let gProduccionDiaCache = [];
+        let gVistaGraficoProduccion = 'desposte';
+
+        // Inicialización al cargar el DOM
+        window.addEventListener('DOMContentLoaded', async () => {
+            configurarTabs();
+            configurarEventos();
+            await cargarDatosDesdeApi(false);
+        });
+
+        // Configuración de Tabs
+        function configurarTabs() {
+            const tabs = document.querySelectorAll('.tab-btn');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+                    tab.classList.add('active');
+                    const targetId = tab.getAttribute('data-tab');
+                    const targetContent = document.getElementById(targetId);
+                    if (targetContent) targetContent.classList.add('active');
+
+                    // Redibujar gráfico si se abre la pestaña integral
+                    if (targetId === 'tab-integral' && gChartProduccion) {
+                        gChartProduccion.resize();
+                    }
+                });
+            });
+        }
+
+        // Configuración de Eventos de Botones y Fechas
+        function configurarEventos() {
+            const inputFecha = document.getElementById('inputFecha');
+            inputFecha.addEventListener('change', (e) => {
+                cambiarFecha(e.target.value);
+            });
+
+            document.getElementById('btnPrevDate').addEventListener('click', () => {
+                navegarFecha(-1);
+            });
+
+            document.getElementById('btnNextDate').addEventListener('click', () => {
+                navegarFecha(1);
+            });
+
+            document.getElementById('selectFechasDisponibles').addEventListener('change', (e) => {
+                if (e.target.value) cambiarFecha(e.target.value);
+            });
+
+            document.getElementById('btnRecargar').addEventListener('click', async () => {
+                await cargarDatosDesdeApi(true);
+            });
+
+            document.getElementById('btnCopiarReporteTop').addEventListener('click', () => {
+                copiarTextoReporte();
+            });
+
+            document.getElementById('btnCopiarReporteBig').addEventListener('click', () => {
+                copiarTextoReporte();
+            });
+
+            document.getElementById('btnRegenerarTexto').addEventListener('click', () => {
+                generarTextoWhatsapp();
+                mostrarToast("Texto regenerado desde los datos del día");
+            });
+
+            const filtroHallazgos = document.getElementById('filtroHallazgos');
+            if (filtroHallazgos) {
+                filtroHallazgos.addEventListener('input', (e) => {
+                    filtrarHallazgosEnVista(e.target.value);
+                });
+            }
+        }
+
+        // Detección del Host activo con timeout rápido
+        async function detectarServidorApi() {
+            const bases = generarBasesApi();
+            for (const base of bases) {
+                try {
+                    const controller = new AbortController();
+                    const timer = setTimeout(() => controller.abort(), 2000);
+                    const res = await fetch(`${base}/api/informe-diario`, { signal: controller.signal });
+                    clearTimeout(timer);
+                    if (res.ok) {
+                        return base;
+                    }
+                } catch (e) {
+                    // Siguiente candidato
+                }
+            }
+            return null;
+        }
+
+        // Carga Principal desde la API
+        async function cargarDatosDesdeApi(forzarRecarga = false) {
+            mostrarCargando(true, forzarRecarga ? "Leyendo archivo Excel y refrescando caché..." : "Conectando con la API...");
+
+            try {
+                if (!gServidorActivo) {
+                    gServidorActivo = await detectarServidorApi();
+                }
+
+                if (!gServidorActivo) {
+                    throw new Error("No se pudo establecer conexión con la API en los puertos 8080 ni 5000.");
+                }
+
+                actualizarEstadoApi(true, gServidorActivo);
+
+                const url = `${gServidorActivo}/api/informe-diario${forzarRecarga ? '?forzarRecarga=true' : ''}`;
+                const resp = await fetch(url);
+                if (!resp.ok) throw new Error(`El servidor respondió con código HTTP ${resp.status}`);
+
+                const data = await resp.json();
+                if (!data.exito || !data.tablas) {
+                    throw new Error("La API no retornó la estructura de tablas esperada.");
+                }
+
+                gDatosCompletos = data.tablas;
+                procesarFechasDisponibles();
+
+                mostrarToast(forzarRecarga ? "✅ Datos actualizados exitosamente desde Excel" : "✅ Conectado a la API");
+
+            } catch (err) {
+                console.error("Error al cargar datos:", err);
+                actualizarEstadoApi(false, err.message);
+                mostrarToast(`⚠️ Error: ${err.message}`);
+            } finally {
+                mostrarCargando(false);
+            }
+        }
+
+        // Actualizar indicador visual de API
+        function actualizarEstadoApi(online, servidorOError) {
+            const dot = document.getElementById('apiStatusDot');
+            const txt = document.getElementById('apiStatusText');
+            const pill = document.getElementById('apiStatusPill');
+
+            if (online) {
+                dot.style.backgroundColor = '#10B981';
+                dot.style.animation = 'pulseDot 2s infinite';
+                const nombreHost = servidorOError.replace('http://', '');
+                txt.innerText = `Online: ${nombreHost}`;
+                pill.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+                pill.style.background = 'rgba(16, 185, 129, 0.15)';
+                pill.style.color = '#10B981';
+            } else {
+                dot.style.backgroundColor = '#EF4444';
+                dot.style.animation = 'none';
+                txt.innerText = `Desconectado`;
+                pill.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+                pill.style.background = 'rgba(239, 68, 68, 0.15)';
+                pill.style.color = '#EF4444';
+            }
+        }
+
+        // Extracción de Fechas Únicas disponibles en los datos
+        function procesarFechasDisponibles() {
+            if (!gDatosCompletos) return;
+
+            const setFechas = new Set();
+            const tablasRelevantes = ['personal', 'produccion', 'horarios', 'detalle', 'paradas'];
+
+            tablasRelevantes.forEach(nom => {
+                const filas = gDatosCompletos[nom] || [];
+                filas.forEach(f => {
+                    const rawF = normalizarFecha(f.FECHA);
+                    if (rawF) setFechas.add(rawF);
+                });
+            });
+
+            gFechasDisponibles = Array.from(setFechas).sort();
+
+            // Llenar combo select
+            const select = document.getElementById('selectFechasDisponibles');
+            select.innerHTML = '';
+            gFechasDisponibles.forEach(f => {
+                const opt = document.createElement('option');
+                opt.value = f;
+                opt.innerText = formatearFechaDDMMYYYY(f);
+                select.appendChild(opt);
+            });
+            if (gFechasDisponibles.length > 0) {
+                select.style.display = 'inline-block';
+            }
+
+            // Seleccionar fecha por defecto: la última fecha disponible con datos de producción o personal
+            let fechaDefault = "";
+            for (let i = gFechasDisponibles.length - 1; i >= 0; i--) {
+                const f = gFechasDisponibles[i];
+                // Preferir fechas que tengan producción o personal con asistencia
+                const prod = (gDatosCompletos.produccion || []).filter(r => normalizarFecha(r.FECHA) === f);
+                const pers = (gDatosCompletos.personal || []).filter(r => normalizarFecha(r.FECHA) === f && (r['ASISTENCIA REAL'] || 0) > 0);
+                if (prod.length > 0 || pers.length > 0) {
+                    fechaDefault = f;
+                    break;
+                }
+            }
+
+            if (!fechaDefault && gFechasDisponibles.length > 0) {
+                fechaDefault = gFechasDisponibles[gFechasDisponibles.length - 1];
+            }
+
+            if (fechaDefault) {
+                cambiarFecha(fechaDefault);
+            }
+        }
+
+        // Normalizar formato de fecha a YYYY-MM-DD
+        function normalizarFecha(val) {
+            if (!val) return "";
+            const s = String(val).trim();
+            // Si viene como YYYY-MM-DD o YYYY-MM-DD HH:mm:ss
+            if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
+                return s.substring(0, 10);
+            }
+            // Si viene como DD/MM/YYYY
+            if (/^\d{2}\/\d{2}\/\d{4}/.test(s)) {
+                const parts = s.split('/');
+                return `${parts[2]}-${parts[1]}-${parts[0]}`;
+            }
+            return s;
+        }
+
+        // Formato para presentación: DD/MM/YYYY
+        function formatearFechaDDMMYYYY(valYYYYMMDD) {
+            if (!valYYYYMMDD) return "";
+            const parts = valYYYYMMDD.split('-');
+            if (parts.length === 3) {
+                return `${parts[2]}/${parts[1]}/${parts[0]}`;
+            }
+            return valYYYYMMDD;
+        }
+
+        // Navegación rápida de fechas (+1 día, -1 día)
+        function navegarFecha(delta) {
+            if (!gFechasDisponibles.length) return;
+            const idxActual = gFechasDisponibles.indexOf(gFechaSeleccionada);
+            let nuevoIdx = idxActual + delta;
+            if (nuevoIdx < 0) nuevoIdx = 0;
+            if (nuevoIdx >= gFechasDisponibles.length) nuevoIdx = gFechasDisponibles.length - 1;
+            cambiarFecha(gFechasDisponibles[nuevoIdx]);
+        }
+
+        // Cambiar fecha activa y renderizar todas las secciones
+        function cambiarFecha(nuevaFecha) {
+            const fechaNormalizada = normalizarFecha(nuevaFecha);
+            gFechaSeleccionada = fechaNormalizada;
+
+            document.getElementById('inputFecha').value = fechaNormalizada;
+            document.getElementById('selectFechasDisponibles').value = fechaNormalizada;
+
+            const fechaFormat = formatearFechaDDMMYYYY(fechaNormalizada);
+            document.getElementById('headerSubtitle').innerText = `Operaciones del día ${fechaFormat} • Planta Trozado de Cerdos`;
+
+            renderizarDashboard();
+        }
+
+        // =========================================================================
+        // RENDERIZADO COMPLETO DEL DASHBOARD
+        // =========================================================================
+        function renderizarDashboard() {
+            if (!gDatosCompletos || !gFechaSeleccionada) return;
+
+            // Filtrar datos del día
+            const fSel = gFechaSeleccionada;
+            const personalDia = (gDatosCompletos.personal || []).filter(r => normalizarFecha(r.FECHA) === fSel);
+            const ssoDia = (gDatosCompletos.sso || []).filter(r => normalizarFecha(r.FECHA) === fSel);
+            const horariosDia = (gDatosCompletos.horarios || []).filter(r => normalizarFecha(r.FECHA) === fSel);
+            const produccionDia = (gDatosCompletos.produccion || []).filter(r => normalizarFecha(r.FECHA) === fSel);
+            const detalleDia = (gDatosCompletos.detalle || []).filter(r => normalizarFecha(r.FECHA) === fSel);
+            const paradasDia = (gDatosCompletos.paradas || []).filter(r => normalizarFecha(r.FECHA) === fSel);
+
+            // Actualizar contadores de tabs
+            document.getElementById('tabCountPersonal').innerText = personalDia.length;
+            document.getElementById('tabCountProd').innerText = produccionDia.length;
+            document.getElementById('tabCountCalidad').innerText = detalleDia.length;
+            document.getElementById('tabCountParadas').innerText = paradasDia.length;
+
+            renderizarKpisPrincipales(personalDia, produccionDia, horariosDia);
+            renderizarGraficoProduccion(produccionDia);
+            renderizarTablaProduccionResumen(produccionDia, horariosDia);
+            renderizarSsoYCalidadResumen(ssoDia, detalleDia);
+            renderizarSeccionPersonal(personalDia);
+            renderizarSeccionHorarios(horariosDia);
+            renderizarSeccionProduccionDetalle(produccionDia, horariosDia);
+            renderizarSeccionCalidad(detalleDia);
+            renderizarSeccionParadas(paradasDia);
+
+            // Generar automáticamente el texto para WhatsApp
+            generarTextoWhatsapp();
+        }
+
+        // 1. KPIs Principales del Top Bar
+        function renderizarKpisPrincipales(personal, produccion, horarios) {
+            // Personal
+            const progTotal = personal.reduce((acc, r) => acc + (Number(r.PROGRAMADO) || 0), 0);
+            const asistTotal = personal.reduce((acc, r) => acc + (Number(r['ASISTENCIA REAL']) || 0), 0);
+            const ausTotal = personal.reduce((acc, r) => acc + (Number(r.AUSENCIAS) || 0), 0);
+            const plazasTotal = personal.reduce((acc, r) => acc + (Number(r['PLAZAS ASIGNADAS']) || 0), 0);
+            const pctAsist = progTotal > 0 ? Math.round((asistTotal / progTotal) * 100) : 0;
+
+            document.getElementById('kpiAsistenciaReal').innerText = asistTotal;
+            document.getElementById('kpiProgramadoTotal').innerText = `/ ${progTotal} Programados`;
+            document.getElementById('kpiPctAsistencia').innerText = `${pctAsist}%`;
+            document.getElementById('kpiProgressPersonal').style.width = `${Math.min(pctAsist, 100)}%`;
+            document.getElementById('kpiAusenciasTotal').innerText = `Ausencias: ${ausTotal}`;
+            document.getElementById('kpiPlazasTotal').innerText = `Plazas: ${plazasTotal}`;
+
+            // Horas Hombre por área
+            const hhDesposte = horarios.filter(r => normalizarTexto(r.AREA).includes('DESPOSTE'))
+                .reduce((acc, r) => acc + (Number(r['HORAS HOMBRE (HH)']) || 0), 0);
+            const hhChuletas = horarios.filter(r => normalizarTexto(r.AREA).includes('CHULETAS'))
+                .reduce((acc, r) => acc + (Number(r['HORAS HOMBRE (HH)']) || 0), 0);
+            const hhCongelado = horarios.filter(r => normalizarTexto(r.AREA).includes('CONGELADO'))
+                .reduce((acc, r) => acc + (Number(r['HORAS HOMBRE (HH)']) || 0), 0);
+
+            // Producción Desposte
+            const rowsDesposte = produccion.filter(r => normalizarTexto(r.AREA).includes('DESPOSTE'));
+            const progDesposte = rowsDesposte.reduce((acc, r) => acc + (Number(r.PROGRAMA) || 0), 0);
+            const prodDesposte = rowsDesposte.reduce((acc, r) => acc + (Number(r.PRODUCCIÓN) || 0), 0);
+            const cumplDesposte = progDesposte > 0 ? Math.round((prodDesposte / progDesposte) * 100) : 0;
+            const prodDesposteHH = hhDesposte > 0 ? (prodDesposte / hhDesposte).toFixed(2) : "0.00";
+
+            document.getElementById('kpiProdDesposte').innerText = formatearNumero(prodDesposte);
+            document.getElementById('kpiProgDesposte').innerText = `/ ${formatearNumero(progDesposte)} Meta`;
+            document.getElementById('kpiCumplDesposte').innerText = `${cumplDesposte}%`;
+            document.getElementById('kpiProgressDesposte').style.width = `${Math.min(cumplDesposte, 100)}%`;
+            document.getElementById('kpiProdDesposteHH').innerText = `${prodDesposteHH} Un/HH`;
+
+            // Producción Chuletas
+            const rowsChuletas = produccion.filter(r => normalizarTexto(r.AREA).includes('CHULETAS'));
+            const progChuletas = rowsChuletas.reduce((acc, r) => acc + (Number(r.PROGRAMA) || 0), 0);
+            const prodChuletas = rowsChuletas.reduce((acc, r) => acc + (Number(r.PRODUCCIÓN) || 0), 0);
+            const cumplChuletas = progChuletas > 0 ? Math.round((prodChuletas / progChuletas) * 100) : 0;
+            const prodChuletasHH = hhChuletas > 0 ? (prodChuletas / hhChuletas).toFixed(2) : "0.00";
+
+            document.getElementById('kpiProdChuletas').innerText = formatearNumero(prodChuletas);
+            document.getElementById('kpiProgChuletas').innerText = `/ ${formatearNumero(progChuletas)} Meta`;
+            document.getElementById('kpiCumplChuletas').innerText = `${cumplChuletas}%`;
+            document.getElementById('kpiProgressChuletas').style.width = `${Math.min(cumplChuletas, 100)}%`;
+            document.getElementById('kpiProdChuletasHH').innerText = `${prodChuletasHH} Kg/HH`;
+
+            // Producción Congelado
+            const rowsCongelado = produccion.filter(r => normalizarTexto(r.AREA).includes('CONGELADO'));
+            const progCongelado = rowsCongelado.reduce((acc, r) => acc + (Number(r.PROGRAMA) || 0), 0);
+            const prodCongelado = rowsCongelado.reduce((acc, r) => acc + (Number(r.PRODUCCIÓN) || 0), 0);
+            const cumplCongelado = progCongelado > 0 ? Math.round((prodCongelado / progCongelado) * 100) : 0;
+            const prodCongHH = hhCongelado > 0 ? (prodCongelado / hhCongelado).toFixed(2) : "0.00";
+
+            // Inyección row
+            const rowMarinado = rowsCongelado.find(r => normalizarTexto(r.CONCEPTO).includes('MARINADO'));
+            const inyeccionVal = rowMarinado && rowMarinado['% EXTRA / INYECCIÓN']
+                ? (Number(rowMarinado['% EXTRA / INYECCIÓN']) * 100).toFixed(2) + "%"
+                : "--";
+
+            document.getElementById('kpiProdCongelado').innerText = formatearNumero(prodCongelado);
+            document.getElementById('kpiProgCongelado').innerText = `/ ${formatearNumero(progCongelado)} Meta`;
+            document.getElementById('kpiCumplCongelado').innerText = `${cumplCongelado}%`;
+            document.getElementById('kpiProgressCongelado').style.width = `${Math.min(cumplCongelado, 100)}%`;
+            document.getElementById('kpiInyeccionVal').innerText = inyeccionVal;
+            document.getElementById('kpiProdCongHH').innerText = `${prodCongHH} Kg/HH`;
+        }
+
+        // Alternar vista del gráfico entre Desposte (Unidades) y Chuletas & Congelado (Kg)
+        function cambiarVistaGraficoProduccion(vista) {
+            gVistaGraficoProduccion = vista;
+            const btnDesposte = document.getElementById('btnToggleDesposte');
+            const btnKilos = document.getElementById('btnToggleKilos');
+            if (btnDesposte) btnDesposte.classList.toggle('active', vista === 'desposte');
+            if (btnKilos) btnKilos.classList.toggle('active', vista === 'kilos');
+
+            renderizarGraficoProduccion(gProduccionDiaCache);
+        }
+
+        // 2. Gráfico Comparativo Chart.js
+        function renderizarGraficoProduccion(produccion) {
+            gProduccionDiaCache = produccion || [];
+            const canvas = document.getElementById('chartProduccionDia');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            let labels = [];
+            let dataProg = [];
+            let dataProd = [];
+            let unidadTexto = '';
+            let unidadCorta = '';
+            let badgeTexto = '';
+
+            if (gVistaGraficoProduccion === 'desposte') {
+                unidadTexto = 'Unidades';
+                unidadCorta = 'Un';
+
+                const rowsDesposte = (produccion || []).filter(r => normalizarTexto(r.AREA).includes('DESPOSTE'));
+                const progTotal = rowsDesposte.reduce((acc, r) => acc + (Number(r.PROGRAMA) || 0), 0);
+                const prodTotal = rowsDesposte.reduce((acc, r) => acc + (Number(r.PRODUCCIÓN) || 0), 0);
+                const cumpl = progTotal > 0 ? ((prodTotal / progTotal) * 100).toFixed(1) + '%' : '--%';
+
+                badgeTexto = `Desposte: ${formatearNumero(prodTotal)} / ${formatearNumero(progTotal)} Un (${cumpl})`;
+
+                if (rowsDesposte.length > 1) {
+                    labels = rowsDesposte.map(r => r.CONCEPTO || 'Desposte');
+                    dataProg = rowsDesposte.map(r => Number(r.PROGRAMA) || 0);
+                    dataProd = rowsDesposte.map(r => Number(r.PRODUCCIÓN) || 0);
+                } else {
+                    labels = ['Desposte (Canales / Cerdos)'];
+                    dataProg = [progTotal];
+                    dataProd = [prodTotal];
+                }
+            } else {
+                unidadTexto = 'Kilogramos';
+                unidadCorta = 'Kg';
+
+                const rowsChuletas = (produccion || []).filter(r => normalizarTexto(r.AREA).includes('CHULETAS'));
+                const rowsCongelado = (produccion || []).filter(r => normalizarTexto(r.AREA).includes('CONGELADO'));
+
+                const progChuletas = rowsChuletas.reduce((acc, r) => acc + (Number(r.PROGRAMA) || 0), 0);
+                const prodChuletas = rowsChuletas.reduce((acc, r) => acc + (Number(r.PRODUCCIÓN) || 0), 0);
+
+                const progCongelado = rowsCongelado.reduce((acc, r) => acc + (Number(r.PROGRAMA) || 0), 0);
+                const prodCongelado = rowsCongelado.reduce((acc, r) => acc + (Number(r.PRODUCCIÓN) || 0), 0);
+
+                const progTotalKg = progChuletas + progCongelado;
+                const prodTotalKg = prodChuletas + prodCongelado;
+                const cumplTotal = progTotalKg > 0 ? ((prodTotalKg / progTotalKg) * 100).toFixed(1) + '%' : '--%';
+
+                badgeTexto = `Total Kilos: ${formatearNumero(prodTotalKg)} / ${formatearNumero(progTotalKg)} Kg (${cumplTotal})`;
+
+                labels = ['Chuletas (Kg)', 'Congelado - Marinado (Kg)'];
+                dataProg = [progChuletas, progCongelado];
+                dataProd = [prodChuletas, prodCongelado];
+            }
+
+            const badgeElem = document.getElementById('badgeGraficoProduccion');
+            if (badgeElem) {
+                badgeElem.innerText = badgeTexto;
+            }
+
+            if (gChartProduccion) {
+                gChartProduccion.destroy();
+            }
+
+            const esUnicaColumna = labels.length === 1;
+
+            gChartProduccion = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: `Programa (${unidadCorta})`,
+                            data: dataProg,
+                            backgroundColor: '#2E2A2F',
+                            borderRadius: 6,
+                            barPercentage: esUnicaColumna ? 0.35 : 0.6,
+                            categoryPercentage: esUnicaColumna ? 0.45 : 0.7
+                        },
+                        {
+                            label: `Producción Real (${unidadCorta})`,
+                            data: dataProd,
+                            backgroundColor: '#F4D03F',
+                            borderRadius: 6,
+                            barPercentage: esUnicaColumna ? 0.35 : 0.6,
+                            categoryPercentage: esUnicaColumna ? 0.45 : 0.7
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: { family: 'Inter', size: 12, weight: '600' },
+                                color: '#2E2A2F'
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    return `${context.dataset.label}: ${formatearNumero(context.parsed.y)} ${unidadCorta}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#E2E8F0' },
+                            ticks: {
+                                font: { family: 'JetBrains Mono', size: 11 },
+                                callback: val => `${formatearNumero(val)} ${unidadCorta}`
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                font: { family: 'Inter', size: 12, weight: '600' },
+                                color: '#2E2A2F'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 3. Tabla Resumen de Producción
+        function renderizarTablaProduccionResumen(produccion, horarios) {
+            const tbody = document.getElementById('tbodyProduccionResumen');
+            tbody.innerHTML = '';
+
+            if (!produccion || produccion.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 20px; color: var(--pantone-gray-med);">Sin registros de producción para esta fecha.</td></tr>`;
+                return;
+            }
+
+            produccion.forEach(r => {
+                const tr = document.createElement('tr');
+                const prog = Number(r.PROGRAMA) || 0;
+                const prod = Number(r.PRODUCCIÓN) || 0;
+                const cumpl = r['% CUMPLIMIENTO'] !== null && r['% CUMPLIMIENTO'] !== undefined
+                    ? (Number(r['% CUMPLIMIENTO']) * 100).toFixed(1) + "%"
+                    : (prog > 0 ? ((prod / prog) * 100).toFixed(1) + "%" : "--");
+
+                const rend = r.RENDIMIENTO !== null && r.RENDIMIENTO !== undefined ? r.RENDIMIENTO : "--";
+                const extra = r['% EXTRA / INYECCIÓN'] !== null && r['% EXTRA / INYECCIÓN'] !== undefined
+                    ? (Number(r['% EXTRA / INYECCIÓN']) * 100).toFixed(2) + "%"
+                    : "--";
+
+                tr.innerHTML = `
+                    <td><strong>${r.AREA || '--'}</strong></td>
+                    <td>${r.CONCEPTO || '--'}</td>
+                    <td class="num">${formatearNumero(prog)}</td>
+                    <td class="num"><strong>${formatearNumero(prod)}</strong></td>
+                    <td class="num">${cumpl}</td>
+                    <td class="num">${rend}</td>
+                    <td class="num">${extra}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // 4. SSO y Resumen de Calidad
+        function renderizarSsoYCalidadResumen(sso, detalle) {
+            const getSsoVal = (area) => {
+                const row = sso.find(r => normalizarTexto(r.AREA).includes(area));
+                if (!row) return 0;
+                const mortal = Number(row['ACC. MORTAL']) || 0;
+                const incap = Number(row['ACC. INCAPACITANTE']) || 0;
+                const aux = Number(row['PRIMER AUXILIO']) || 0;
+                const inc = Number(row['INCIDENTE DE SEGURIDAD']) || 0;
+                return mortal + incap + aux + inc;
+            };
+
+            document.getElementById('ssoDesposteVal').innerText = getSsoVal('DESPOSTE');
+            document.getElementById('ssoChuletasVal').innerText = getSsoVal('CHULETAS');
+            document.getElementById('ssoCongeladoVal').innerText = getSsoVal('CONGELADO');
+
+            // Conteo por secciones en detalle
+            const getCountSeccion = (patron) => {
+                return detalle.filter(r => normalizarTexto(r.SECCION).includes(patron)).length;
+            };
+
+            document.getElementById('resumenReclamosExt').innerText = getCountSeccion('RECLAMOS EXTERNOS');
+            document.getElementById('resumenReclamosInt').innerText = getCountSeccion('RECLAMOS INTERNOS');
+            document.getElementById('resumenNoConf').innerText = getCountSeccion('NO CONFORMIDADES');
+            document.getElementById('resumenCadenaFrio').innerText = getCountSeccion('CADENA DE FRIO');
+            document.getElementById('resumenBpm').innerText = getCountSeccion('BPM');
+            document.getElementById('resumenLimpieza').innerText = getCountSeccion('LIMPIEZA INDUSTRIAL');
+        }
+
+        // 5. Sección de Personal (Cards por Área)
+        function renderizarSeccionPersonal(personal) {
+            const container = document.getElementById('cardsPersonalContainer');
+            container.innerHTML = '';
+
+            if (!personal || personal.length === 0) {
+                container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 30px; color: var(--pantone-gray-med);">No hay registros de personal para esta fecha.</div>`;
+                return;
+            }
+
+            personal.forEach(p => {
+                const area = p.AREA || 'ÁREA';
+                const prog = Number(p.PROGRAMADO) || 0;
+                const asist = Number(p['ASISTENCIA REAL']) || 0;
+                const aus = Number(p.AUSENCIAS) || 0;
+                const plazas = Number(p['PLAZAS ASIGNADAS']) || 0;
+                const vac = Number(p.VACACIONES) || 0;
+                const pct = prog > 0 ? Math.round((asist / prog) * 100) : 0;
+                const motivo = p['MOTIVO (para el reporte)'] || p['OBSERVACIÓN'] || 'Sin novedades registradas.';
+
+                const card = document.createElement('div');
+                card.className = 'sub-card';
+                card.innerHTML = `
+                    <div class="sub-card-header">
+                        <span class="sub-card-title">👷 ${area}</span>
+                        <span class="kpi-badge ${pct >= 90 ? 'badge-success' : 'badge-warning'}">${pct}% Asistencia</span>
+                    </div>
+                    <div class="metric-row"><span class="metric-key">Plazas Asignadas:</span><span class="metric-val">${plazas}</span></div>
+                    <div class="metric-row"><span class="metric-key">Vacaciones:</span><span class="metric-val">${vac}</span></div>
+                    <div class="metric-row"><span class="metric-key">Programado:</span><span class="metric-val">${prog}</span></div>
+                    <div class="metric-row"><span class="metric-key">Asistencia Real:</span><span class="metric-val" style="color: var(--color-success);">${asist}</span></div>
+                    <div class="metric-row"><span class="metric-key">Ausencias:</span><span class="metric-val" style="color: var(--color-danger);">${aus}</span></div>
+                    <div style="margin-top: 6px;">
+                        <span style="font-size: 11px; font-weight: 700; color: var(--pantone-gray-dark); text-transform: uppercase;">Motivo de Ausencias:</span>
+                        <div class="motivo-box" style="margin-top: 4px;">${motivo}</div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // 6. Sección de Horarios
+        function renderizarSeccionHorarios(horarios) {
+            const tbody = document.getElementById('tbodyHorarios');
+            tbody.innerHTML = '';
+
+            if (!horarios || horarios.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 20px; color: var(--pantone-gray-med);">Sin registros de horarios para esta fecha.</td></tr>`;
+                return;
+            }
+
+            horarios.forEach(h => {
+                const tr = document.createElement('tr');
+                const ingreso = formatearHora(h['HR. INGRESO']);
+                const salida = formatearHora(h['HR. SALIDA']);
+                const personas = h['N° PERSONAS'] || '--';
+                const horas = h.HORAS !== null && h.HORAS !== undefined ? Number(h.HORAS).toFixed(2) : '--';
+                const hh = h['HORAS HOMBRE (HH)'] !== null && h['HORAS HOMBRE (HH)'] !== undefined ? Number(h['HORAS HOMBRE (HH)']).toFixed(1) : '--';
+
+                tr.innerHTML = `
+                    <td><strong>${h.AREA || '--'}</strong></td>
+                    <td><span class="kpi-badge badge-yellow">${h.TURNO || '--'}</span></td>
+                    <td>${ingreso}</td>
+                    <td>${salida}</td>
+                    <td class="num">${personas}</td>
+                    <td class="num">${horas}</td>
+                    <td class="num"><strong>${hh}</strong></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // 7. Sección de Producción Detalle
+        function renderizarSeccionProduccionDetalle(produccion, horarios) {
+            // Desposte
+            const rowsDesposte = produccion.filter(r => normalizarTexto(r.AREA).includes('DESPOSTE'));
+            const progDesposte = rowsDesposte.reduce((acc, r) => acc + (Number(r.PROGRAMA) || 0), 0);
+            const prodDesposte = rowsDesposte.reduce((acc, r) => acc + (Number(r.PRODUCCIÓN) || 0), 0);
+            const hhDesposte = horarios.filter(r => normalizarTexto(r.AREA).includes('DESPOSTE'))
+                .reduce((acc, r) => acc + (Number(r['HORAS HOMBRE (HH)']) || 0), 0);
+            const cumplDesposte = progDesposte > 0 ? Math.round((prodDesposte / progDesposte) * 100) : 0;
+            const prodDesposteHH = hhDesposte > 0 ? (prodDesposte / hhDesposte).toFixed(2) : "0.00";
+
+            document.getElementById('detProgDesposte').innerText = formatearNumero(progDesposte);
+            document.getElementById('detProdDesposte').innerText = formatearNumero(prodDesposte);
+            document.getElementById('detCumplDesposte').innerText = `${cumplDesposte}%`;
+            document.getElementById('badgeDetalleDesposte').innerText = `${cumplDesposte}%`;
+            document.getElementById('detProductivDesposte').innerText = `${prodDesposteHH} Un/HH`;
+            document.getElementById('detHhDesposte').innerText = `${hhDesposte.toFixed(1)} HH`;
+
+            // Chuletas
+            const rowsChuletas = produccion.filter(r => normalizarTexto(r.AREA).includes('CHULETAS'));
+            const progChuletas = rowsChuletas.reduce((acc, r) => acc + (Number(r.PROGRAMA) || 0), 0);
+            const prodChuletas = rowsChuletas.reduce((acc, r) => acc + (Number(r.PRODUCCIÓN) || 0), 0);
+            const hhChuletas = horarios.filter(r => normalizarTexto(r.AREA).includes('CHULETAS'))
+                .reduce((acc, r) => acc + (Number(r['HORAS HOMBRE (HH)']) || 0), 0);
+            const cumplChuletas = progChuletas > 0 ? Math.round((prodChuletas / progChuletas) * 100) : 0;
+            const prodChuletasHH = hhChuletas > 0 ? (prodChuletas / hhChuletas).toFixed(2) : "0.00";
+
+            document.getElementById('detProgChuletas').innerText = formatearNumero(progChuletas);
+            document.getElementById('detProdChuletas').innerText = formatearNumero(prodChuletas);
+            document.getElementById('detCumplChuletas').innerText = `${cumplChuletas}%`;
+            document.getElementById('badgeDetalleChuletas').innerText = `${cumplChuletas}%`;
+            document.getElementById('detProductivChuletas').innerText = `${prodChuletasHH} Kg/HH`;
+            document.getElementById('detHhChuletas').innerText = `${hhChuletas.toFixed(1)} HH`;
+
+            // Congelado
+            const rowsCongelado = produccion.filter(r => normalizarTexto(r.AREA).includes('CONGELADO'));
+            const progCongelado = rowsCongelado.reduce((acc, r) => acc + (Number(r.PROGRAMA) || 0), 0);
+            const prodCongelado = rowsCongelado.reduce((acc, r) => acc + (Number(r.PRODUCCIÓN) || 0), 0);
+            const hhCongelado = horarios.filter(r => normalizarTexto(r.AREA).includes('CONGELADO'))
+                .reduce((acc, r) => acc + (Number(r['HORAS HOMBRE (HH)']) || 0), 0);
+            const cumplCongelado = progCongelado > 0 ? Math.round((prodCongelado / progCongelado) * 100) : 0;
+            const prodCongHH = hhCongelado > 0 ? (prodCongelado / hhCongelado).toFixed(2) : "0.00";
+
+            const rowMarinado = rowsCongelado.find(r => normalizarTexto(r.CONCEPTO).includes('MARINADO'));
+            const inyVal = rowMarinado && rowMarinado['% EXTRA / INYECCIÓN']
+                ? (Number(rowMarinado['% EXTRA / INYECCIÓN']) * 100).toFixed(2) + "%"
+                : "--";
+
+            const rowEnsacado = rowsCongelado.find(r => normalizarTexto(r.CONCEPTO).includes('ENSACADO'));
+            const ensacadoVal = rowEnsacado ? (Number(rowEnsacado.PRODUCCIÓN) || 0) : 0;
+
+            const marinadoVal = rowMarinado ? (Number(rowMarinado.PRODUCCIÓN) || 0) : 0;
+            const congPuroVal = rowsCongelado.find(r => normalizarTexto(r.CONCEPTO) === 'CONGELADO')
+                ? (Number(rowsCongelado.find(r => normalizarTexto(r.CONCEPTO) === 'CONGELADO').PRODUCCIÓN) || 0)
+                : 0;
+            const difEnsacadoMarinado = ensacadoVal - (marinadoVal + congPuroVal);
+
+            document.getElementById('detProgCongelado').innerText = formatearNumero(progCongelado);
+            document.getElementById('detProdCongelado').innerText = formatearNumero(prodCongelado);
+            document.getElementById('detCumplCongelado').innerText = `${cumplCongelado}%`;
+            document.getElementById('badgeDetalleCongelado').innerText = `${cumplCongelado}%`;
+            document.getElementById('detProductivCongelado').innerText = `${prodCongHH} Kg/HH`;
+            document.getElementById('detInyeccionCongelado').innerText = inyVal;
+            document.getElementById('detEnsacadoCongelado').innerText = formatearNumero(ensacadoVal);
+            document.getElementById('detDifEnsacadoMarinado').innerText = formatearNumero(Math.abs(difEnsacadoMarinado));
+        }
+
+        // 8. Sección de Calidad (Hallazgos agrupados)
+        function renderizarSeccionCalidad(detalle) {
+            const container = document.getElementById('containerHallazgosCalidad');
+            container.innerHTML = '';
+
+            if (!detalle || detalle.length === 0) {
+                container.innerHTML = `<div style="text-align: center; padding: 30px; color: var(--pantone-gray-med);">Sin hallazgos registrados para esta fecha.</div>`;
+                return;
+            }
+
+            // Agrupar por SECCION
+            const grupos = {};
+            detalle.forEach(d => {
+                const sec = d.SECCION || 'OTROS';
+                if (!grupos[sec]) grupos[sec] = [];
+                grupos[sec].push(d);
+            });
+
+            for (const [sec, items] of Object.entries(grupos)) {
+                const groupDiv = document.createElement('div');
+                groupDiv.className = 'finding-group';
+
+                // Agrupar por CATEGORIA dentro de la seccion
+                const catGrupos = {};
+                items.forEach(it => {
+                    const cat = it.CATEGORIA || 'GENERAL';
+                    if (!catGrupos[cat]) catGrupos[cat] = [];
+                    catGrupos[cat].push(it);
+                });
+
+                let catHtml = '';
+                for (const [cat, catItems] of Object.entries(catGrupos)) {
+                    catHtml += `
+                        <div style="margin-bottom: 8px;">
+                            <div style="font-size: 12px; font-weight: 700; color: var(--pantone-gold); text-transform: uppercase; margin-bottom: 4px;">• ${cat} (${catItems.length})</div>
+                            <div style="display: flex; flex-direction: column; gap: 4px; padding-left: 14px;">
+                                ${catItems.map(ci => `
+                                    <div class="finding-item">
+                                        <span class="finding-bullet">•</span>
+                                        <span>${ci['DETALLE DEL HALLAZGO'] || '--'}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                groupDiv.innerHTML = `
+                    <div class="finding-group-header">
+                        <span>📋 ${sec}</span>
+                        <span class="kpi-badge badge-yellow">${items.length} Hallazgos</span>
+                    </div>
+                    <div class="finding-list">
+                        ${catHtml}
+                    </div>
+                `;
+                container.appendChild(groupDiv);
+            }
+        }
+
+        // 9. Sección de Paradas
+        function renderizarSeccionParadas(paradas) {
+            const tbody = document.getElementById('tbodyParadas');
+            tbody.innerHTML = '';
+
+            if (!paradas || paradas.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 20px; color: var(--pantone-gray-med);">Sin registros de paradas en esta fecha.</td></tr>`;
+                return;
+            }
+
+            paradas.forEach(p => {
+                const tr = document.createElement('tr');
+                const inicio = formatearHora(p.INICIO);
+                const fin = formatearHora(p.FIN);
+                const duracion = p['DURACIÓN (MIN)'] || '--';
+
+                tr.innerHTML = `
+                    <td><span class="kpi-badge badge-warning">${p.TIPO || 'EQUIPO'}</span></td>
+                    <td><strong>${p['ÁREA AFECTADA'] || '--'}</strong></td>
+                    <td>${p.EQUIPO || '--'}</td>
+                    <td>${p.CAUSA || '--'}</td>
+                    <td>${inicio}</td>
+                    <td>${fin}</td>
+                    <td class="num">${duracion} min</td>
+                    <td>${p['MEDIDA CORRECTIVA'] || '--'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Filtrar hallazgos en la vista
+        function filtrarHallazgosEnVista(texto) {
+            const q = normalizarTexto(texto);
+            const items = document.querySelectorAll('.finding-item');
+            items.forEach(it => {
+                const t = normalizarTexto(it.innerText);
+                it.style.display = t.includes(q) ? 'flex' : 'none';
+            });
+        }
+
+        // =========================================================================
+        // GENERADOR DE TEXTO PARA WHATSAPP (FORMATO EXACTO REQUERIDO)
+        // =========================================================================
+        function generarTextoWhatsapp() {
+            if (!gDatosCompletos || !gFechaSeleccionada) return;
+
+            const fSel = gFechaSeleccionada;
+            const personal = (gDatosCompletos.personal || []).filter(r => normalizarFecha(r.FECHA) === fSel);
+            const sso = (gDatosCompletos.sso || []).filter(r => normalizarFecha(r.FECHA) === fSel);
+            const horarios = (gDatosCompletos.horarios || []).filter(r => normalizarFecha(r.FECHA) === fSel);
+            const produccion = (gDatosCompletos.produccion || []).filter(r => normalizarFecha(r.FECHA) === fSel);
+            const detalle = (gDatosCompletos.detalle || []).filter(r => normalizarFecha(r.FECHA) === fSel);
+            const paradas = (gDatosCompletos.paradas || []).filter(r => normalizarFecha(r.FECHA) === fSel);
+
+            const fechaFormat = formatearFechaDDMMYYYY(fSel);
+
+            let txt = `*PLANTA TROZADO DE CERDOS*\n`;
+            txt += `Fecha: ${fechaFormat}\n\n`;
+
+            // *👷 PERSONAL*
+            const progTotal = personal.reduce((acc, r) => acc + (Number(r.PROGRAMADO) || 0), 0);
+            const asistTotal = personal.reduce((acc, r) => acc + (Number(r['ASISTENCIA REAL']) || 0), 0);
+            const ausTotal = personal.reduce((acc, r) => acc + (Number(r.AUSENCIAS) || 0), 0);
+            const pctAsist = progTotal > 0 ? Math.round((asistTotal / progTotal) * 100) : 0;
+
+            txt += `*👷 PERSONAL*\n`;
+            txt += `- Programado: ${progTotal}\n`;
+            txt += `- Asistencia Real: ${asistTotal}\n`;
+            txt += `- % Asistencia: ${pctAsist}%\n`;
+            txt += `- Ausencias: ${ausTotal}\n`;
+            txt += `- Motivos:\n`;
+
+            // Areas estándar en orden
+            const ordenAreas = ['DESPOSTE', 'CHULETAS', 'CONGELADO'];
+            ordenAreas.forEach(areaKey => {
+                const row = personal.find(r => normalizarTexto(r.AREA).includes(areaKey));
+                const nombreArea = capitalizarTexto(areaKey);
+                let motivo = "";
+                if (row) {
+                    motivo = row['MOTIVO (para el reporte)'] || row['OBSERVACIÓN'] || "";
+                    if (!motivo) {
+                        const falta = Number(row.FALTA) || 0;
+                        const dm = Number(row.DM) || 0;
+                        const sub = Number(row.SUBSIDIO) || 0;
+                        const otros = Number(row.OTROS) || 0;
+                        const partes = [];
+                        if (falta > 0) partes.push(`${padZero(falta)} ${falta === 1 ? 'falta injustificada' : 'faltas injustificadas'}`);
+                        if (sub > 0) partes.push(`${padZero(sub)} ${sub === 1 ? 'subsidio' : 'subsidios'}`);
+                        if (dm > 0) partes.push(`${padZero(dm)} DM`);
+                        if (otros > 0) partes.push(`${padZero(otros)} otros`);
+                        motivo = partes.length > 0 ? partes.join(' + ') : 'Sin ausencias';
+                    }
+                } else {
+                    motivo = "Sin ausencias";
+                }
+                txt += `  • ${nombreArea}: ${motivo}\n`;
+            });
+            txt += `\n`;
+
+            // *🦺 SSO*
+            txt += `*🦺 SSO*\n`;
+            ordenAreas.forEach(areaKey => {
+                const row = sso.find(r => normalizarTexto(r.AREA).includes(areaKey));
+                const nombreArea = capitalizarTexto(areaKey);
+                let ssoVal = "0";
+                if (row) {
+                    const totalInc = (Number(row['ACC. MORTAL']) || 0) +
+                        (Number(row['ACC. INCAPACITANTE']) || 0) +
+                        (Number(row['PRIMER AUXILIO']) || 0) +
+                        (Number(row['INCIDENTE DE SEGURIDAD']) || 0);
+                    if (totalInc > 0) {
+                        ssoVal = `${totalInc} (${row.OBSERVACION || 'Incidente registrado'})`;
+                    } else if (row.OBSERVACION) {
+                        ssoVal = row.OBSERVACION;
+                    }
+                }
+                txt += `- ${nombreArea}: ${ssoVal}\n`;
+            });
+            txt += `\n`;
+
+            // *⏰ HORARIOS*
+            txt += `*⏰ HORARIOS*\n`;
+            const turnos = [
+                { key: 'MAÑANA', titulo: '_Turno Mañana:_' },
+                { key: 'TARDE', titulo: '_Turno Tarde:_' }
+            ];
+
+            turnos.forEach(t => {
+                txt += `${t.titulo}\n`;
+                ordenAreas.forEach(areaKey => {
+                    const row = horarios.find(r => normalizarTexto(r.TURNO).includes(t.key) && normalizarTexto(r.AREA).includes(areaKey));
+                    const nombreArea = capitalizarTexto(areaKey);
+                    if (row && row['HR. INGRESO'] && row['HR. SALIDA']) {
+                        const hIni = formatearHora(row['HR. INGRESO']);
+                        const hFin = formatearHora(row['HR. SALIDA']);
+                        txt += `- ${nombreArea}: ${hIni} - ${hFin}\n`;
+                    } else {
+                        txt += `- ${nombreArea}: -\n`;
+                    }
+                });
+                txt += `\n`;
+            });
+
+            // *🏭 PRODUCCIÓN*
+            txt += `*🏭 PRODUCCIÓN*\n\n`;
+
+            // Horas Hombre para productividad
+            const hhDesposte = horarios.filter(r => normalizarTexto(r.AREA).includes('DESPOSTE'))
+                .reduce((acc, r) => acc + (Number(r['HORAS HOMBRE (HH)']) || 0), 0);
+            const hhChuletas = horarios.filter(r => normalizarTexto(r.AREA).includes('CHULETAS'))
+                .reduce((acc, r) => acc + (Number(r['HORAS HOMBRE (HH)']) || 0), 0);
+            const hhCongelado = horarios.filter(r => normalizarTexto(r.AREA).includes('CONGELADO'))
+                .reduce((acc, r) => acc + (Number(r['HORAS HOMBRE (HH)']) || 0), 0);
+
+            // Desposte (Un)
+            const rowsDesposte = produccion.filter(r => normalizarTexto(r.AREA).includes('DESPOSTE'));
+            const progDesposte = rowsDesposte.reduce((acc, r) => acc + (Number(r.PROGRAMA) || 0), 0);
+            const prodDesposte = rowsDesposte.reduce((acc, r) => acc + (Number(r.PRODUCCIÓN) || 0), 0);
+            const cumplDesposte = progDesposte > 0 ? Math.round((prodDesposte / progDesposte) * 100) : 0;
+            const prodDesposteHH = hhDesposte > 0 ? (prodDesposte / hhDesposte).toFixed(2) : "0.00";
+
+            txt += `🐖 _Desposte (Un):_\n`;
+            txt += `- Programa: ${formatearNumero(progDesposte)}\n`;
+            txt += `- Producción: ${formatearNumero(prodDesposte)}\n`;
+            txt += `- Cumplimiento: ${cumplDesposte}%\n`;
+            txt += `- Productividad: ${prodDesposteHH} Un/HH\n\n`;
+
+            // Chuletas (Kg)
+            const rowsChuletas = produccion.filter(r => normalizarTexto(r.AREA).includes('CHULETAS'));
+            const progChuletas = rowsChuletas.reduce((acc, r) => acc + (Number(r.PROGRAMA) || 0), 0);
+            const prodChuletas = rowsChuletas.reduce((acc, r) => acc + (Number(r.PRODUCCIÓN) || 0), 0);
+            const cumplChuletas = progChuletas > 0 ? Math.round((prodChuletas / progChuletas) * 100) : 0;
+            const prodChuletasHH = hhChuletas > 0 ? (prodChuletas / hhChuletas).toFixed(2) : "0.00";
+
+            txt += `🥩 _Chuletas (Kg):_\n`;
+            txt += `- Programa: ${formatearNumero(progChuletas)}\n`;
+            txt += `- Producción: ${formatearNumero(prodChuletas)}\n`;
+            txt += `- Cumplimiento: ${cumplChuletas}%\n`;
+            txt += `- Productividad: ${prodChuletasHH} Kg/HH\n\n`;
+
+            // Congelado-Marinado (Kg)
+            const rowsCongelado = produccion.filter(r => normalizarTexto(r.AREA).includes('CONGELADO'));
+            const progCongelado = rowsCongelado.reduce((acc, r) => acc + (Number(r.PROGRAMA) || 0), 0);
+            const prodCongelado = rowsCongelado.reduce((acc, r) => acc + (Number(r.PRODUCCIÓN) || 0), 0);
+            const cumplCongelado = progCongelado > 0 ? Math.round((prodCongelado / progCongelado) * 100) : 0;
+            const prodCongHH = hhCongelado > 0 ? (prodCongelado / hhCongelado).toFixed(2) : "0.00";
+
+            const rowMarinado = rowsCongelado.find(r => normalizarTexto(r.CONCEPTO).includes('MARINADO'));
+            const inyVal = rowMarinado && rowMarinado['% EXTRA / INYECCIÓN']
+                ? (Number(rowMarinado['% EXTRA / INYECCIÓN']) * 100).toFixed(2) + "%"
+                : "0.00%";
+
+            const rowEnsacado = rowsCongelado.find(r => normalizarTexto(r.CONCEPTO).includes('ENSACADO'));
+            const ensacadoVal = rowEnsacado ? (Number(rowEnsacado.PRODUCCIÓN) || 0) : 0;
+            const marinadoVal = rowMarinado ? (Number(rowMarinado.PRODUCCIÓN) || 0) : 0;
+            const congPuroVal = rowsCongelado.find(r => normalizarTexto(r.CONCEPTO) === 'CONGELADO')
+                ? (Number(rowsCongelado.find(r => normalizarTexto(r.CONCEPTO) === 'CONGELADO').PRODUCCIÓN) || 0)
+                : 0;
+            const difEnsacadoMarinado = ensacadoVal - (marinadoVal + congPuroVal);
+
+            txt += `❄️ _Congelado-Marinado (Kg):_\n`;
+            txt += `- Programa: ${formatearNumero(progCongelado)}\n`;
+            txt += `- Producción: ${formatearNumero(prodCongelado)}\n`;
+            txt += `- Cumplimiento: ${cumplCongelado}%\n`;
+            txt += `- Productividad: ${prodCongHH} Kg/HH\n`;
+            txt += `- % Inyección: ${inyVal}\n`;
+            txt += `- Ensacado: ${formatearNumero(ensacadoVal)}\n`;
+            txt += `- Dif. Ensacado-Marinado: ${formatearNumero(Math.abs(difEnsacadoMarinado))}\n\n`;
+
+            // *✅ CALIDAD*
+            txt += `*✅ CALIDAD*\n`;
+
+            // Reclamos Externos & Internos
+            const recExt = detalle.filter(r => normalizarTexto(r.SECCION).includes('RECLAMOS EXTERNOS'));
+            txt += `- Reclamos Externos: ${recExt.length === 0 ? '0' : recExt.length}\n`;
+            recExt.forEach(r => { txt += `  • ${r['DETALLE DEL HALLAZGO']}\n`; });
+
+            const recInt = detalle.filter(r => normalizarTexto(r.SECCION).includes('RECLAMOS INTERNOS'));
+            txt += `- Reclamos Internos: ${recInt.length === 0 ? '0' : recInt.length}\n\n`;
+            recInt.forEach(r => { txt += `  • ${r['DETALLE DEL HALLAZGO']}\n`; });
+
+            // No Conformidades
+            const noConf = detalle.filter(r => normalizarTexto(r.SECCION).includes('NO CONFORMIDADES'));
+            if (noConf.length === 0) {
+                txt += `- No Conformidades: 0\n\n`;
+            } else {
+                txt += `- No Conformidades:\n`;
+                const cats = agruparPorCategoria(noConf);
+                for (const [catName, items] of Object.entries(cats)) {
+                    if (items.length === 1 && items[0]['DETALLE DEL HALLAZGO'].length < 75 && !items[0]['DETALLE DEL HALLAZGO'].includes('\n')) {
+                        txt += `  • ${catName}: ${items[0]['DETALLE DEL HALLAZGO']}\n`;
+                    } else {
+                        txt += `  • ${catName}:\n`;
+                        items.forEach(it => {
+                            txt += `    - ${it['DETALLE DEL HALLAZGO']}\n`;
+                        });
+                    }
+                }
+                txt += `\n`;
+            }
+
+            // Cadena de Frío
+            const cadFrio = detalle.filter(r => normalizarTexto(r.SECCION).includes('CADENA DE FRIO'));
+            txt += `- Cadena de frío: ${cadFrio.length === 0 ? '0' : cadFrio.length}\n\n`;
+            cadFrio.forEach(r => { txt += `  • ${r['DETALLE DEL HALLAZGO']}\n`; });
+
+            // Contaminación Cruzada
+            const contamCruz = detalle.filter(r => normalizarTexto(r.SECCION).includes('CONTAMINACION CRUZADA'));
+            if (contamCruz.length === 0) {
+                txt += `- Contaminación cruzada: 0\n\n`;
+            } else {
+                txt += `- Contaminación cruzada:\n`;
+                const cats = agruparPorCategoria(contamCruz);
+                for (const [catName, items] of Object.entries(cats)) {
+                    txt += `  • ${catName}:\n`;
+                    items.forEach(it => {
+                        txt += `    - ${it['DETALLE DEL HALLAZGO']}\n`;
+                    });
+                }
+                txt += `\n`;
+            }
+
+            // Calidad
+            const calItems = detalle.filter(r => normalizarTexto(r.SECCION) === 'CALIDAD');
+            if (calItems.length === 0) {
+                txt += `- Calidad: 0\n\n`;
+            } else {
+                txt += `- Calidad:\n`;
+                const cats = agruparPorCategoria(calItems);
+                for (const [catName, items] of Object.entries(cats)) {
+                    txt += `  • ${catName}:\n`;
+                    items.forEach(it => {
+                        txt += `    - ${it['DETALLE DEL HALLAZGO']}\n`;
+                    });
+                }
+                txt += `\n`;
+            }
+
+            // Incumplimiento BPM
+            const bpmItems = detalle.filter(r => normalizarTexto(r.SECCION).includes('BPM'));
+            txt += `- Incumplimiento BPM: ${bpmItems.length}\n`;
+            bpmItems.forEach(b => {
+                txt += `  • ${b['DETALLE DEL HALLAZGO']}\n`;
+            });
+            txt += `\n`;
+
+            // Reclamos a Proveedores/Servicios
+            const provItems = detalle.filter(r => normalizarTexto(r.SECCION).includes('PROVEEDOR') || normalizarTexto(r.SECCION).includes('SERVICIOS'));
+            if (provItems.length === 0) {
+                txt += `- Reclamos a Proveedores/Servicios: 0\n\n`;
+            } else {
+                txt += `- Reclamos a Proveedores/Servicios:\n`;
+                const cats = agruparPorCategoria(provItems);
+                for (const [catName, items] of Object.entries(cats)) {
+                    txt += `  • ${catName}:\n`;
+                    items.forEach(it => {
+                        txt += `    - ${it['DETALLE DEL HALLAZGO']}\n`;
+                    });
+                }
+                txt += `\n`;
+            }
+
+            // Limpieza Industrial
+            const limpItems = detalle.filter(r => normalizarTexto(r.SECCION).includes('LIMPIEZA INDUSTRIAL'));
+            txt += `- Limpieza Industrial: ${limpItems.length}\n`;
+            limpItems.forEach(l => {
+                txt += `  • ${l['DETALLE DEL HALLAZGO']}\n`;
+            });
+            txt += `\n`;
+
+            // *🛑 PARADAS DE PLANTA*
+            txt += `*🛑 PARADAS DE PLANTA*\n`;
+            const paradasPlanta = paradas.filter(p => normalizarTexto(p.TIPO).includes('PLANTA'));
+            if (paradasPlanta.length === 0) {
+                txt += `- Sin novedad\n\n`;
+            } else {
+                paradasPlanta.forEach(p => {
+                    const ini = formatearHora(p.INICIO);
+                    const fin = formatearHora(p.FIN);
+                    const dur = p['DURACIÓN (MIN)'] || '0';
+                    txt += `- Área: ${p['ÁREA AFECTADA'] || '--'}\n`;
+                    txt += `- Causa: ${p.CAUSA || '--'}\n`;
+                    txt += `- Duración: ${ini} a ${fin} (${dur} min)\n`;
+                    txt += `- Medida correctiva: ${p['MEDIDA CORRECTIVA'] || '--'}\n\n`;
+                });
+            }
+
+            // *🔧 PARADAS DE EQUIPO*
+            txt += `*🔧 PARADAS DE EQUIPO*\n`;
+            const paradasEquipo = paradas.filter(p => !normalizarTexto(p.TIPO).includes('PLANTA'));
+            if (paradasEquipo.length === 0) {
+                txt += `- Sin novedad\n`;
+            } else {
+                paradasEquipo.forEach(p => {
+                    const ini = formatearHora(p.INICIO);
+                    const fin = formatearHora(p.FIN);
+                    const dur = p['DURACIÓN (MIN)'] || '0';
+                    txt += `- Área: ${p['ÁREA AFECTADA'] || '--'}\n`;
+                    txt += `- Equipo: ${p.EQUIPO || '--'}\n`;
+                    txt += `- Causa: ${p.CAUSA || '--'}\n`;
+                    txt += `- Duración: ${ini} a ${fin} (${dur} min)\n`;
+                    txt += `- Medida correctiva: ${p['MEDIDA CORRECTIVA'] || '--'}\n\n`;
+                });
+            }
+
+            // Colocar texto en el textarea
+            const textarea = document.getElementById('textoReporteWhatsapp');
+            textarea.value = txt.trimEnd();
+
+            // Estadísticas
+            const numLineas = textarea.value.split('\n').length;
+            const numChars = textarea.value.length;
+            document.getElementById('terminalStats').innerText = `${numChars} caracteres • ${numLineas} líneas`;
+        }
+
+        // =========================================================================
+        // ACCIÓN DE COPIADO AL PORTAPAPELES CON FEEDBACK VISUAL
+        // =========================================================================
+        function copiarTextoReporte() {
+            const textarea = document.getElementById('textoReporteWhatsapp');
+            if (!textarea || !textarea.value) {
+                mostrarToast("No hay texto generado para copiar");
+                return;
+            }
+
+            const textoACopiar = textarea.value;
+
+            // Intentar API moderna de Clipboard
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(textoACopiar).then(() => {
+                    marcarBotonCopiado();
+                    mostrarToast("✅ ¡Reporte copiado al portapapeles exitosamente!");
+                }).catch(err => {
+                    fallbackCopiar(textoACopiar);
+                });
+            } else {
+                fallbackCopiar(textoACopiar);
+            }
+        }
+
+        function fallbackCopiar(texto) {
+            const temp = document.createElement('textarea');
+            temp.value = texto;
+            temp.style.position = 'fixed';
+            temp.style.left = '-9999px';
+            document.body.appendChild(temp);
+            temp.select();
+            try {
+                document.execCommand('copy');
+                marcarBotonCopiado();
+                mostrarToast("✅ ¡Reporte copiado al portapapeles!");
+            } catch (err) {
+                console.error("Error al copiar:", err);
+                mostrarToast("⚠️ No se pudo copiar automáticamente, copia el texto del visor");
+            }
+            document.body.removeChild(temp);
+        }
+
+        function marcarBotonCopiado() {
+            const btnBig = document.getElementById('btnCopiarReportBig');
+            const btnTop = document.getElementById('btnCopiarReporteTop');
+
+            if (btnBig) {
+                btnBig.classList.add('copied');
+                document.getElementById('btnCopiarText').innerText = "¡Copiado con Éxito!";
+                document.getElementById('btnCopiarIcon').innerText = "✔";
+
+                setTimeout(() => {
+                    btnBig.classList.remove('copied');
+                    document.getElementById('btnCopiarText').innerText = "Copiar al Portapapeles";
+                    document.getElementById('btnCopiarIcon').innerText = "📋";
+                }, 2500);
+            }
+
+            if (btnTop) {
+                const originalHtml = btnTop.innerHTML;
+                btnTop.innerHTML = `<span>✔ ¡Copiado!</span>`;
+                btnTop.style.background = 'linear-gradient(135deg, #10B981 0%, #059669 100%)';
+                btnTop.style.color = '#FFFFFF';
+
+                setTimeout(() => {
+                    btnTop.innerHTML = originalHtml;
+                    btnTop.style.background = '';
+                    btnTop.style.color = '';
+                }, 2500);
+            }
+        }
+
+        // =========================================================================
+        // UTILIDADES Y HELPERS DE FORMATO
+        // =========================================================================
+        function normalizarTexto(txt) {
+            if (!txt) return "";
+            return String(txt)
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .toUpperCase()
+                .trim();
+        }
+
+        function capitalizarTexto(txt) {
+            if (!txt) return "";
+            const s = String(txt).toLowerCase();
+            return s.charAt(0).toUpperCase() + s.slice(1);
+        }
+
+        function formatearNumero(num) {
+            if (num === null || num === undefined || isNaN(num)) return "0";
+            return Math.round(Number(num)).toLocaleString('en-US');
+        }
+
+        function formatearHora(val) {
+            if (!val) return "--";
+            const s = String(val).trim();
+            // Si viene como YYYY-MM-DD HH:mm:ss o HH:mm:ss
+            if (s.includes(' ')) {
+                const timePart = s.split(' ')[1];
+                return timePart.substring(0, 5);
+            }
+            if (s.includes(':')) {
+                return s.substring(0, 5);
+            }
+            return s;
+        }
+
+        function padZero(n) {
+            return Number(n) < 10 ? `0${n}` : `${n}`;
+        }
+
+        function agruparPorCategoria(items) {
+            const grupos = {};
+            items.forEach(it => {
+                let cat = it.CATEGORIA || 'General';
+                // Formateo de nombre de categoría
+                cat = capitalizarTexto(cat);
+                if (normalizarTexto(cat) === 'PBC') cat = 'PBC';
+                if (normalizarTexto(cat) === 'MANTENIMIENTO HACCP') cat = 'Mantenimiento HACCP';
+                if (!grupos[cat]) grupos[cat] = [];
+                grupos[cat].push(it);
+            });
+            return grupos;
+        }
+
+        function mostrarToast(mensaje) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').innerText = mensaje;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function mostrarCargando(activo, mensaje = "Cargando...") {
+            const overlay = document.getElementById('loadingOverlay');
+            const txt = document.getElementById('loadingText');
+            if (txt) txt.innerText = mensaje;
+            if (activo) overlay.classList.add('active');
+            else overlay.classList.remove('active');
+        }
+    </script>
+</body>
+
+</html>
