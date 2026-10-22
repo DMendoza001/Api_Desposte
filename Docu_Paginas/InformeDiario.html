@@ -2310,7 +2310,7 @@
                 // Agrupar por CATEGORIA dentro de la seccion
                 const catGrupos = {};
                 items.forEach(it => {
-                    const cat = it.CATEGORIA || 'GENERAL';
+                    const cat = formatearNombreCategoria(it.CATEGORIA);
                     if (!catGrupos[cat]) catGrupos[cat] = [];
                     catGrupos[cat].push(it);
                 });
@@ -2468,14 +2468,34 @@
             // *⏰ HORARIOS*
             txt += `*⏰ HORARIOS*\n`;
             const turnos = [
-                { key: 'MAÑANA', titulo: '_Turno Mañana:_' },
-                { key: 'TARDE', titulo: '_Turno Tarde:_' }
+                {
+                    titulo: '_Turno Mañana:_',
+                    match: (turnoRaw) => {
+                        const norm = normalizarTexto(turnoRaw);
+                        return norm.includes('MAN') || norm.includes('DIA');
+                    }
+                },
+                {
+                    titulo: '_Turno Tarde:_',
+                    match: (turnoRaw) => {
+                        const norm = normalizarTexto(turnoRaw);
+                        return norm.includes('TARD');
+                    }
+                }
             ];
+
+            const tieneNoche = horarios.some(r => normalizarTexto(r.TURNO).includes('NOCH'));
+            if (tieneNoche) {
+                turnos.push({
+                    titulo: '_Turno Noche:_',
+                    match: (turnoRaw) => normalizarTexto(turnoRaw).includes('NOCH')
+                });
+            }
 
             turnos.forEach(t => {
                 txt += `${t.titulo}\n`;
                 ordenAreas.forEach(areaKey => {
-                    const row = horarios.find(r => normalizarTexto(r.TURNO).includes(t.key) && normalizarTexto(r.AREA).includes(areaKey));
+                    const row = horarios.find(r => t.match(r.TURNO) && normalizarTexto(r.AREA).includes(areaKey));
                     const nombreArea = capitalizarTexto(areaKey);
                     if (row && row['HR. INGRESO'] && row['HR. SALIDA']) {
                         const hIni = formatearHora(row['HR. INGRESO']);
@@ -2557,103 +2577,91 @@
             // *✅ CALIDAD*
             txt += `*✅ CALIDAD*\n`;
 
-            // Reclamos Externos & Internos
-            const recExt = detalle.filter(r => normalizarTexto(r.SECCION).includes('RECLAMOS EXTERNOS'));
-            txt += `- Reclamos Externos: ${recExt.length === 0 ? '0' : recExt.length}\n`;
-            recExt.forEach(r => { txt += `  • ${r['DETALLE DEL HALLAZGO']}\n`; });
-
-            const recInt = detalle.filter(r => normalizarTexto(r.SECCION).includes('RECLAMOS INTERNOS'));
-            txt += `- Reclamos Internos: ${recInt.length === 0 ? '0' : recInt.length}\n\n`;
-            recInt.forEach(r => { txt += `  • ${r['DETALLE DEL HALLAZGO']}\n`; });
-
-            // No Conformidades
-            const noConf = detalle.filter(r => normalizarTexto(r.SECCION).includes('NO CONFORMIDADES'));
-            if (noConf.length === 0) {
-                txt += `- No Conformidades: 0\n\n`;
-            } else {
-                txt += `- No Conformidades:\n`;
-                const cats = agruparPorCategoria(noConf);
-                for (const [catName, items] of Object.entries(cats)) {
-                    if (items.length === 1 && items[0]['DETALLE DEL HALLAZGO'].length < 75 && !items[0]['DETALLE DEL HALLAZGO'].includes('\n')) {
-                        txt += `  • ${catName}: ${items[0]['DETALLE DEL HALLAZGO']}\n`;
-                    } else {
-                        txt += `  • ${catName}:\n`;
-                        items.forEach(it => {
-                            txt += `    - ${it['DETALLE DEL HALLAZGO']}\n`;
-                        });
-                    }
+            // Helper para renderizar cada sección respetando estrictamente la jerarquía:
+            // Sección -> Categoría -> Detalle (incluso si solo tiene 1 detalle)
+            function formatearBloqueSeccionCalidad(titulo, items, saltoDoble = true) {
+                if (!items || items.length === 0) {
+                    return `- ${titulo}: 0${saltoDoble ? '\n\n' : '\n'}`;
                 }
-                txt += `\n`;
-            }
-
-            // Cadena de Frío
-            const cadFrio = detalle.filter(r => normalizarTexto(r.SECCION).includes('CADENA DE FRIO'));
-            txt += `- Cadena de frío: ${cadFrio.length === 0 ? '0' : cadFrio.length}\n\n`;
-            cadFrio.forEach(r => { txt += `  • ${r['DETALLE DEL HALLAZGO']}\n`; });
-
-            // Contaminación Cruzada
-            const contamCruz = detalle.filter(r => normalizarTexto(r.SECCION).includes('CONTAMINACION CRUZADA'));
-            if (contamCruz.length === 0) {
-                txt += `- Contaminación cruzada: 0\n\n`;
-            } else {
-                txt += `- Contaminación cruzada:\n`;
-                const cats = agruparPorCategoria(contamCruz);
-                for (const [catName, items] of Object.entries(cats)) {
-                    txt += `  • ${catName}:\n`;
-                    items.forEach(it => {
-                        txt += `    - ${it['DETALLE DEL HALLAZGO']}\n`;
+                let res = `- ${titulo}:\n`;
+                const cats = agruparPorCategoria(items);
+                for (const [catName, catItems] of Object.entries(cats)) {
+                    res += `  • ${catName}:\n`;
+                    catItems.forEach(it => {
+                        const d = it['DETALLE DEL HALLAZGO'] ? String(it['DETALLE DEL HALLAZGO']).trim() : '--';
+                        res += `    - ${d}\n`;
                     });
                 }
-                txt += `\n`;
+                res += `\n`;
+                return res;
             }
 
-            // Calidad
-            const calItems = detalle.filter(r => normalizarTexto(r.SECCION) === 'CALIDAD');
-            if (calItems.length === 0) {
-                txt += `- Calidad: 0\n\n`;
-            } else {
-                txt += `- Calidad:\n`;
-                const cats = agruparPorCategoria(calItems);
-                for (const [catName, items] of Object.entries(cats)) {
-                    txt += `  • ${catName}:\n`;
-                    items.forEach(it => {
-                        txt += `    - ${it['DETALLE DEL HALLAZGO']}\n`;
-                    });
+            const seccionesCalidadConfig = [
+                {
+                    titulo: 'Reclamos Externos',
+                    match: r => normalizarTexto(r.SECCION).includes('RECLAMOS EXTERNOS'),
+                    saltoDoble: false
+                },
+                {
+                    titulo: 'Reclamos Internos',
+                    match: r => normalizarTexto(r.SECCION).includes('RECLAMOS INTERNOS'),
+                    saltoDoble: true
+                },
+                {
+                    titulo: 'No Conformidades',
+                    match: r => normalizarTexto(r.SECCION).includes('NO CONFORMIDADES'),
+                    saltoDoble: true
+                },
+                {
+                    titulo: 'Cadena de frío',
+                    match: r => normalizarTexto(r.SECCION).includes('CADENA DE FRIO'),
+                    saltoDoble: true
+                },
+                {
+                    titulo: 'Contaminación cruzada',
+                    match: r => normalizarTexto(r.SECCION).includes('CONTAMINACION CRUZADA'),
+                    saltoDoble: true
+                },
+                {
+                    titulo: 'Calidad',
+                    match: r => normalizarTexto(r.SECCION) === 'CALIDAD',
+                    saltoDoble: true
+                },
+                {
+                    titulo: 'Incumplimiento BPM',
+                    match: r => normalizarTexto(r.SECCION).includes('BPM'),
+                    saltoDoble: true
+                },
+                {
+                    titulo: 'Reclamos a Proveedores/Servicios',
+                    match: r => normalizarTexto(r.SECCION).includes('PROVEEDOR') || normalizarTexto(r.SECCION).includes('SERVICIOS'),
+                    saltoDoble: true
+                },
+                {
+                    titulo: 'Limpieza Industrial',
+                    match: r => normalizarTexto(r.SECCION).includes('LIMPIEZA INDUSTRIAL'),
+                    saltoDoble: true
                 }
-                txt += `\n`;
-            }
+            ];
 
-            // Incumplimiento BPM
-            const bpmItems = detalle.filter(r => normalizarTexto(r.SECCION).includes('BPM'));
-            txt += `- Incumplimiento BPM: ${bpmItems.length}\n`;
-            bpmItems.forEach(b => {
-                txt += `  • ${b['DETALLE DEL HALLAZGO']}\n`;
+            seccionesCalidadConfig.forEach(sec => {
+                const items = detalle.filter(sec.match);
+                txt += formatearBloqueSeccionCalidad(sec.titulo, items, sec.saltoDoble);
             });
-            txt += `\n`;
 
-            // Reclamos a Proveedores/Servicios
-            const provItems = detalle.filter(r => normalizarTexto(r.SECCION).includes('PROVEEDOR') || normalizarTexto(r.SECCION).includes('SERVICIOS'));
-            if (provItems.length === 0) {
-                txt += `- Reclamos a Proveedores/Servicios: 0\n\n`;
-            } else {
-                txt += `- Reclamos a Proveedores/Servicios:\n`;
-                const cats = agruparPorCategoria(provItems);
-                for (const [catName, items] of Object.entries(cats)) {
-                    txt += `  • ${catName}:\n`;
-                    items.forEach(it => {
-                        txt += `    - ${it['DETALLE DEL HALLAZGO']}\n`;
-                    });
+            // Respaldo por si existe alguna sección no contemplada en BD_DETALLE
+            const itemsRestantes = detalle.filter(r => !seccionesCalidadConfig.some(s => s.match(r)));
+            if (itemsRestantes.length > 0) {
+                const secGrupos = {};
+                itemsRestantes.forEach(r => {
+                    const s = capitalizarTexto(r.SECCION || 'Otros');
+                    if (!secGrupos[s]) secGrupos[s] = [];
+                    secGrupos[s].push(r);
+                });
+                for (const [secName, items] of Object.entries(secGrupos)) {
+                    txt += formatearBloqueSeccionCalidad(secName, items, true);
                 }
-                txt += `\n`;
             }
-
-            // Limpieza Industrial
-            const limpItems = detalle.filter(r => normalizarTexto(r.SECCION).includes('LIMPIEZA INDUSTRIAL'));
-            txt += `- Limpieza Industrial: ${limpItems.length}\n`;
-            limpItems.forEach(l => {
-                txt += `  • ${l['DETALLE DEL HALLAZGO']}\n`;
-            });
-            txt += `\n`;
 
             // *🛑 PARADAS DE PLANTA*
             txt += `*🛑 PARADAS DE PLANTA*\n`;
@@ -2814,14 +2822,23 @@
             return Number(n) < 10 ? `0${n}` : `${n}`;
         }
 
+        function formatearNombreCategoria(cat) {
+            if (!cat) return "General";
+            const norm = normalizarTexto(cat);
+            if (norm === 'PBC') return 'PBC';
+            if (norm === 'BPM') return 'BPM';
+            if (norm === 'SSO') return 'SSO';
+            if (norm === 'MANTENIMIENTO HACCP') return 'Mantenimiento HACCP';
+            if (norm === 'MEDIO AMBIENTE') return 'Medio Ambiente';
+            if (norm === 'SERVICIOS GENERALES') return 'Servicios Generales';
+            if (norm === 'LIMPIEZA INDUSTRIAL') return 'Limpieza Industrial';
+            return capitalizarTexto(cat);
+        }
+
         function agruparPorCategoria(items) {
             const grupos = {};
             items.forEach(it => {
-                let cat = it.CATEGORIA || 'General';
-                // Formateo de nombre de categoría
-                cat = capitalizarTexto(cat);
-                if (normalizarTexto(cat) === 'PBC') cat = 'PBC';
-                if (normalizarTexto(cat) === 'MANTENIMIENTO HACCP') cat = 'Mantenimiento HACCP';
+                const cat = formatearNombreCategoria(it.CATEGORIA);
                 if (!grupos[cat]) grupos[cat] = [];
                 grupos[cat].push(it);
             });
