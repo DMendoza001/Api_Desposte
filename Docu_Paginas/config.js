@@ -8,7 +8,8 @@ var GLOBAL_CONFIG = {
     // Nombre del equipo o IP donde corre tu API .NET
     // 🏢 Oficina: "RAEVSALL001"
     // 🏠 Casa / Local: "localhost" o el nombre de tu máquina
-    servidor: "localhost",
+    //RAEVFINL016
+    servidor: "RAEVFINL016",
 
     // Puertos a los que intentará conectarse en orden de prioridad
     puertos: [8080, 5000]

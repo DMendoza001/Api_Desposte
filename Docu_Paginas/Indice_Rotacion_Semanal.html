@@ -18,39 +18,55 @@
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <style>
+    /* =========================================================================
+       🎨 PALETA PANTONE INDUSTRIAL
+       ========================================================================= */
     :root {
-      /* Estructura y Paleta: CRM Pipeline Blue Theme */
-      --header-bg: #1D4A74;
-      --header-teal: #1D4A74;
-      --bg-body: #E9EFF6;
+      --pantone-yellow: #F4D03F;
+      --pantone-yellow-light: #F8CC5A;
+      --pantone-gold: #BAA063;
+      --pantone-dark: #2E2A2F;
+      --pantone-darker: #252C37;
+      --pantone-gray-dark: #605C5E;
+      --pantone-gray-med: #878994;
+      --pantone-gray-light: #CDCAC0;
+      --pantone-bg: #F2F4F8;
+      --pantone-card: #FFFFFF;
+      --pantone-border: #E2E8F0;
+      --table-accent: #F4D03F;
+
+      /* Estructura y Paleta */
+      --header-bg: #2E2A2F;
+      --header-teal: #2E2A2F;
+      --bg-body: #F2F4F8;
       --bg-card: #FFFFFF;
-      --border-card: #CBD5E1;
-      --border-light: #E2E8F0;
+      --border-card: #E2E8F0;
+      --border-light: #EDF2F7;
 
       /* Series y Colores Temáticos */
-      --color-primary: #1D4A74;
-      --color-primary-dark: #163857;
-      --color-primary-light: #E9EFF6;
-      --color-amber: #D97706;
-      --color-amber-light: #FEF3C7;
-      --color-indigo: #37638B;
-      --color-indigo-light: #EEF2FF;
-      --color-emerald: #059669;
-      --color-emerald-light: #ECFDF5;
-      --color-rose: #DC2626;
-      --color-rose-light: #FEE2E2;
+      --color-primary: #2E2A2F;
+      --color-primary-dark: #252C37;
+      --color-primary-light: rgba(244, 208, 63, 0.16);
+      --color-amber: #F4D03F;
+      --color-amber-light: rgba(244, 208, 63, 0.2);
+      --color-indigo: #BAA063;
+      --color-indigo-light: rgba(186, 160, 99, 0.2);
+      --color-emerald: #10B981;
+      --color-emerald-light: rgba(16, 185, 129, 0.15);
+      --color-rose: #EF4444;
+      --color-rose-light: rgba(239, 68, 68, 0.15);
 
       /* Tipografía y Textos */
-      --text-main: #1E293B;
-      --text-secondary: #475569;
-      --text-muted: #64748B;
-      --text-light: #94A3B8;
+      --text-main: #2E2A2F;
+      --text-secondary: #605C5E;
+      --text-muted: #878994;
+      --text-light: #CDCAC0;
 
       /* Sombras Suaves */
-      --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
-      --shadow-sm: 0 2px 4px 0 rgba(15, 23, 42, 0.06);
-      --shadow-md: 0 4px 12px -2px rgba(15, 23, 42, 0.08), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
-      --shadow-lg: 0 12px 24px -4px rgba(15, 23, 42, 0.12), 0 4px 8px -2px rgba(15, 23, 42, 0.04);
+      --shadow-xs: 0 1px 2px 0 rgba(46, 42, 47, 0.04);
+      --shadow-sm: 0 2px 4px 0 rgba(46, 42, 47, 0.06);
+      --shadow-md: 0 4px 12px -2px rgba(46, 42, 47, 0.08), 0 2px 6px -1px rgba(46, 42, 47, 0.04);
+      --shadow-lg: 0 12px 24px -4px rgba(46, 42, 47, 0.12), 0 4px 8px -2px rgba(46, 42, 47, 0.04);
       --radius-sm: 6px;
       --radius-md: 10px;
       --radius-lg: 14px;

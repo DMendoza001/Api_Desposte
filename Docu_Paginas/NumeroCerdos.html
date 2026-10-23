@@ -20,25 +20,41 @@
     <script src="config.js"></script>
 
     <style>
+        /* =========================================================================
+           🎨 PALETA PANTONE INDUSTRIAL
+           ========================================================================= */
         :root {
+            --pantone-yellow: #F4D03F;
+            --pantone-yellow-light: #F8CC5A;
+            --pantone-gold: #BAA063;
+            --pantone-dark: #2E2A2F;
+            --pantone-darker: #252C37;
+            --pantone-gray-dark: #605C5E;
+            --pantone-gray-med: #878994;
+            --pantone-gray-light: #CDCAC0;
+            --pantone-bg: #F2F4F8;
+            --pantone-card: #FFFFFF;
+            --pantone-border: #E2E8F0;
+            --table-accent: #F4D03F;
+
             /* Fondos y Estructura */
-            --header-teal: #0E4F63;
-            --bg-dark-navy: #071F36;
-            --sidebar-dark: #041424;
-            --bg-dashboard: #D6DFE6;
+            --header-teal: #252C37;
+            --bg-dark-navy: #2E2A2F;
+            --sidebar-dark: #252C37;
+            --bg-dashboard: #F2F4F8;
             --bg-card: #FFFFFF;
 
             /* Series de Datos y Gráficos */
-            --chart-primary-teal: #008299;
-            --chart-dark-teal: #005766;
-            --chart-sage: #6C9E9F;
-            --chart-indigo: #5066A6;
+            --chart-primary-teal: #F4D03F;
+            --chart-dark-teal: #BAA063;
+            --chart-sage: #CDCAC0;
+            --chart-indigo: #252C37;
 
             /* Acento y Contornos */
-            --accent-yellow: #F5B921;
-            --border-card: #BAC8D3;
-            --text-dark: #1E293B;
-            --text-muted: #64748B;
+            --accent-yellow: #F4D03F;
+            --border-card: #E2E8F0;
+            --text-dark: #2E2A2F;
+            --text-muted: #605C5E;
             --success: #10B981;
             --danger: #EF4444;
         }
@@ -60,7 +76,7 @@
 
         /* Encabezado Principal */
         .header {
-            background: linear-gradient(135deg, var(--bg-dark-navy) 0%, var(--header-teal) 100%);
+            background: linear-gradient(135deg, var(--pantone-dark) 0%, var(--pantone-darker) 100%);
             color: #FFFFFF;
             padding: 1.15rem 2rem;
             display: flex;
@@ -68,8 +84,8 @@
             justify-content: space-between;
             align-items: center;
             gap: 1rem;
-            box-shadow: 0 4px 10px rgba(7, 31, 54, 0.15);
-            border-bottom: 3px solid var(--accent-yellow);
+            box-shadow: 0 4px 10px rgba(46, 42, 47, 0.12);
+            border-bottom: 3px solid var(--pantone-yellow);
         }
 
         .header-title h1 {

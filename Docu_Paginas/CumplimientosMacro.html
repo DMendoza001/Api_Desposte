@@ -20,42 +20,64 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
     <style>
+        /* =========================================================================
+           🎨 PALETA PANTONE INDUSTRIAL
+           ========================================================================= */
         :root {
-            --bg-main: #0D1424;
-            --bg-card: #162238;
-            --bg-card-hover: #1C2B47;
-            --border-card: #223554;
-            --border-subtle: rgba(255, 255, 255, 0.08);
+            --pantone-yellow: #F4D03F;
+            --pantone-yellow-light: #F8CC5A;
+            --pantone-yellow-soft: rgba(244, 208, 63, 0.16);
+            --pantone-yellow-border: rgba(244, 208, 63, 0.45);
+            --pantone-gold: #BAA063;
+            --pantone-gold-soft: rgba(186, 160, 99, 0.16);
+            --pantone-gold-border: rgba(186, 160, 99, 0.4);
+            --pantone-dark: #2E2A2F;
+            --pantone-darker: #252C37;
+            --pantone-gray-dark: #605C5E;
+            --pantone-gray-med: #878994;
+            --pantone-gray-light: #CDCAC0;
+            --pantone-bg: #F2F4F8;
+            --pantone-card: #FFFFFF;
+            --pantone-card-alt: #F8FAFC;
+            --pantone-border: #E2E8F0;
+            --pantone-border-subtle: #EDF2F7;
+            --table-accent: #F4D03F;
+
+            --bg-main: #F2F4F8;
+            --bg-card: #FFFFFF;
+            --bg-card-hover: #F8FAFC;
+            --border-card: #E2E8F0;
+            --border-subtle: #EDF2F7;
 
             /* Series y acciones requeridas */
-            --color-pedido: #5C7CFA;
-            --color-despacho: #10B981;
+            --color-pedido: #BAA063;
+            --color-despacho: #F4D03F;
 
             /* Semáforo / Alertas */
-            --status-success: #00D084;
+            --status-success: #10B981;
             --status-warning: #F59E0B;
             --status-danger: #EF4444;
 
-            /* Paleta complementaria de categorías */
-            --color-prod-cerdo: #0E7490;
-            --color-prod-marrana: #0891B2;
-            --color-prod-menudo: #06B6D4;
-            --color-prod-inyeccion: #38BDF8;
+            /* Paleta complementaria de categorías en Pantone Industrial */
+            --color-prod-cerdo: #2E2A2F;
+            --color-prod-marrana: #252C37;
+            --color-prod-menudo: #605C5E;
+            --color-prod-inyeccion: #878994;
 
-            --color-ped-comercial: #3B82F6;
-            --color-ped-embutidos: #6366F1;
-            --color-ped-westphalia: #8B5CF6;
+            --color-ped-comercial: #BAA063;
+            --color-ped-embutidos: #F4D03F;
+            --color-ped-westphalia: #F8CC5A;
 
             /* Tipografía */
-            --text-primary: #FFFFFF;
-            --text-muted: #94A3B8;
-            --text-dim: #64748B;
+            --text-primary: #2E2A2F;
+            --text-muted: #605C5E;
+            --text-dim: #878994;
 
             /* Sombras y bordes */
             --radius-sm: 8px;
             --radius-md: 12px;
             --radius-lg: 16px;
-            --shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.45);
+            --shadow-card: 0 4px 15px -2px rgba(46, 42, 47, 0.08);
         }
 
         * {
@@ -67,11 +89,6 @@
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background-color: var(--bg-main);
-            background-image:
-                radial-gradient(circle at 20% 15%, rgba(92, 124, 250, 0.07) 0%, transparent 45%),
-                radial-gradient(circle at 80% 20%, rgba(16, 185, 129, 0.07) 0%, transparent 45%),
-                radial-gradient(circle at 50% 90%, rgba(34, 53, 84, 0.35) 0%, transparent 60%);
-            background-attachment: fixed;
             color: var(--text-primary);
             padding: 24px;
             min-height: 100vh;
@@ -106,10 +123,11 @@
 
         /* HEADER */
         .dashboard-header {
-            background: linear-gradient(135deg, var(--bg-card) 0%, #111A2C 100%);
-            border: 1px solid var(--border-card);
+            background: linear-gradient(135deg, var(--pantone-dark) 0%, var(--pantone-darker) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: var(--radius-lg);
             padding: 20px 24px;
+            color: #FFFFFF;
             display: flex;
             flex-wrap: wrap;
             justify-content: space-between;
@@ -127,7 +145,7 @@
             left: 0;
             right: 0;
             height: 3px;
-            background: linear-gradient(90deg, var(--color-despacho), var(--color-pedido), var(--status-success));
+            background: linear-gradient(90deg, var(--pantone-yellow), var(--pantone-gold));
         }
 
         .header-title-group {
@@ -140,12 +158,12 @@
             width: 48px;
             height: 48px;
             border-radius: var(--radius-md);
-            background: linear-gradient(135deg, rgba(92, 124, 250, 0.2), rgba(16, 185, 129, 0.2));
-            border: 1px solid rgba(92, 124, 250, 0.3);
+            background: rgba(244, 208, 63, 0.15);
+            border: 1px solid var(--pantone-yellow-border);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #7995FA;
+            color: var(--pantone-yellow);
             flex-shrink: 0;
         }
 
@@ -153,7 +171,7 @@
             font-size: 1.5rem;
             font-weight: 800;
             letter-spacing: -0.02em;
-            color: var(--text-primary);
+            color: #FFFFFF;
             display: flex;
             align-items: center;
             gap: 12px;

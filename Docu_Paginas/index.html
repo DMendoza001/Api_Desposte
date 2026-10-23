@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Central de Dashboards | Planta Desposte</title>
+
+    <!-- Fuentes e Iconos Google Fonts: Inter y JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Configuración compartida de conexión a la API -->
+    <script src="config.js"></script>
+
+    <style>
+        /* =========================================================================
+           🎨 PALETA PANTONE INDUSTRIAL
+           ========================================================================= */
+        :root {
+            --pantone-yellow: #F4D03F;
+            --pantone-yellow-light: #F8CC5A;
+            --pantone-yellow-soft: rgba(244, 208, 63, 0.16);
+            --pantone-yellow-border: rgba(244, 208, 63, 0.45);
+            --pantone-gold: #BAA063;
+            --pantone-gold-soft: rgba(186, 160, 99, 0.16);
+            --pantone-gold-border: rgba(186, 160, 99, 0.4);
+            --pantone-dark: #2E2A2F;
+            --pantone-darker: #252C37;
+            --pantone-gray-dark: #605C5E;
+            --pantone-gray-med: #878994;
+            --pantone-gray-light: #CDCAC0;
+            --pantone-bg: #F2F4F8;
+            --pantone-card: #FFFFFF;
+            --pantone-card-alt: #F8FAFC;
+            --pantone-border: #E2E8F0;
+            --pantone-border-subtle: #EDF2F7;
+            --table-accent: #F4D03F;
+
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --info: #3B82F6;
+
+            --shadow-sm: 0 1px 3px rgba(46, 42, 47, 0.06), 0 1px 2px rgba(46, 42, 47, 0.04);
+            --shadow-md: 0 4px 6px -1px rgba(46, 42, 47, 0.08), 0 2px 4px -1px rgba(46, 42, 47, 0.04);
+            --shadow-lg: 0 10px 15px -3px rgba(46, 42, 47, 0.1), 0 4px 6px -2px rgba(46, 42, 47, 0.05);
+
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--pantone-bg);
+            color: var(--pantone-dark);
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        .portal-container {
+            max-width: 1540px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* =========================================================================
+           HEADER PRINCIPAL
+           ========================================================================= */
+        .portal-header {
+            background: linear-gradient(135deg, var(--pantone-dark) 0%, var(--pantone-darker) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--radius-lg);
+            padding: 28px 32px;
+            color: #FFFFFF;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .portal-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--pantone-yellow) 0%, var(--pantone-gold) 50%, var(--pantone-yellow-light) 100%);
+        }
+
+        .header-title-box {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .header-badge-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .portal-badge {
+            background: rgba(244, 208, 63, 0.18);
+            color: var(--pantone-yellow);
+            border: 1px solid var(--pantone-yellow-border);
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            padding: 3px 10px;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .portal-title {
+            font-size: 1.75rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: #FFFFFF;
+        }
+
+        .portal-subtitle {
+            font-size: 0.88rem;
+            color: var(--pantone-gray-light);
+            max-width: 650px;
+            line-height: 1.45;
+        }
+
+        .header-status-box {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 10px;
+        }
+
+        .api-status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 8px 14px;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+            backdrop-filter: blur(8px);
+        }
+
+        .status-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background-color: var(--warning);
+            box-shadow: 0 0 8px var(--warning);
+            animation: pulseDot 2s infinite ease-in-out;
+        }
+
+        .status-dot.online {
+            background-color: var(--success);
+            box-shadow: 0 0 10px var(--success);
+        }
+
+        .status-dot.offline {
+            background-color: var(--danger);
+            box-shadow: 0 0 10px var(--danger);
+            animation: none;
+        }
+
+        @keyframes pulseDot {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.25);
+                opacity: 0.75;
+            }
+        }
+
+        .btn-refresh-status {
+            background: rgba(244, 208, 63, 0.12);
+            color: var(--pantone-yellow);
+            border: 1px solid var(--pantone-yellow-border);
+            padding: 6px 12px;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-refresh-status:hover {
+            background: var(--pantone-yellow);
+            color: var(--pantone-dark);
+        }
+
+        /* =========================================================================
+           BANNER INFORMATIVO DE RED
+           ========================================================================= */
+        .info-banner {
+            background: #FFFFFF;
+            border: 1px solid var(--pantone-border);
+            border-left: 5px solid var(--pantone-yellow);
+            border-radius: var(--radius-md);
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            box-shadow: var(--shadow-sm);
+            flex-wrap: wrap;
+        }
+
+        .info-banner-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.85rem;
+            color: var(--pantone-gray-dark);
+        }
+
+        .info-banner-icon {
+            font-size: 1.3rem;
+            line-height: 1;
+        }
+
+        .info-banner-content strong {
+            color: var(--pantone-dark);
+        }
+
+        .quick-metrics {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .quick-metric-item {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .quick-metric-val {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--pantone-dark);
+        }
+
+        .quick-metric-lbl {
+            font-size: 0.68rem;
+            color: var(--pantone-gray-med);
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        /* =========================================================================
+           BARRA DE FILTROS Y BÚSQUEDA
+           ========================================================================= */
+        .controls-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .category-tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background: #FFFFFF;
+            border: 1px solid var(--pantone-border);
+            color: var(--pantone-gray-dark);
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab-btn:hover {
+            border-color: var(--pantone-yellow);
+            color: var(--pantone-dark);
+            background: var(--pantone-card-alt);
+        }
+
+        .tab-btn.active {
+            background: var(--pantone-dark);
+            color: #FFFFFF;
+            border-color: var(--pantone-dark);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .tab-btn.active .tab-count {
+            background: var(--pantone-yellow);
+            color: var(--pantone-dark);
+        }
+
+        .tab-count {
+            background: var(--pantone-bg);
+            color: var(--pantone-gray-dark);
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 999px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .search-box {
+            position: relative;
+            min-width: 280px;
+            flex-grow: 1;
+            max-width: 420px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 9px 14px 9px 38px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--pantone-border);
+            background: #FFFFFF;
+            font-size: 0.85rem;
+            color: var(--pantone-dark);
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .search-input:focus {
+            border-color: var(--pantone-gold);
+            box-shadow: 0 0 0 3px rgba(186, 160, 99, 0.15);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.95rem;
+            color: var(--pantone-gray-med);
+            pointer-events: none;
+        }
+
+        /* =========================================================================
+           GRID DE DASHBOARDS (CARDS)
+           ========================================================================= */
+        .dashboards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .dash-card {
+            background: var(--pantone-card);
+            border: 1px solid var(--pantone-border);
+            border-radius: var(--radius-md);
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 16px;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dash-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--pantone-yellow-border);
+        }
+
+        .dash-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: transparent;
+            transition: background 0.2s ease;
+        }
+
+        .dash-card:hover::before {
+            background: linear-gradient(90deg, var(--pantone-yellow) 0%, var(--pantone-gold) 100%);
+        }
+
+        .card-top {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .card-meta-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-category-tag {
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 3px 8px;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .cat-operaciones {
+            background: rgba(244, 208, 63, 0.2);
+            color: #8D7400;
+            border: 1px solid rgba(244, 208, 63, 0.5);
+        }
+
+        .cat-cumplimientos {
+            background: rgba(37, 44, 55, 0.08);
+            color: var(--pantone-darker);
+            border: 1px solid rgba(37, 44, 55, 0.2);
+        }
+
+        .cat-costos {
+            background: rgba(186, 160, 99, 0.15);
+            color: #7B6227;
+            border: 1px solid var(--pantone-gold-border);
+        }
+
+        .cat-personal {
+            background: rgba(96, 92, 94, 0.12);
+            color: var(--pantone-gray-dark);
+            border: 1px solid rgba(96, 92, 94, 0.25);
+        }
+
+        .card-endpoint {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.68rem;
+            color: var(--pantone-gray-med);
+            background: var(--pantone-bg);
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid var(--pantone-border-subtle);
+        }
+
+        .card-title-box {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-sm);
+            background: var(--pantone-bg);
+            border: 1px solid var(--pantone-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .card-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--pantone-dark);
+            line-height: 1.35;
+        }
+
+        .card-desc {
+            font-size: 0.82rem;
+            color: var(--pantone-gray-dark);
+            line-height: 1.5;
+        }
+
+        .card-footer {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-top: 14px;
+            border-top: 1px solid var(--pantone-border-subtle);
+        }
+
+        .btn-card-open {
+            flex-grow: 1;
+            background: var(--pantone-dark);
+            color: #FFFFFF;
+            border: 1px solid var(--pantone-dark);
+            padding: 9px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-card-open:hover {
+            background: var(--pantone-darker);
+            border-color: var(--pantone-darker);
+            color: var(--pantone-yellow);
+        }
+
+        .btn-card-copy {
+            background: var(--pantone-bg);
+            color: var(--pantone-gray-dark);
+            border: 1px solid var(--pantone-border);
+            padding: 9px 12px;
+            border-radius: var(--radius-sm);
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-card-copy:hover {
+            background: #FFFFFF;
+            color: var(--pantone-dark);
+            border-color: var(--pantone-gold);
+        }
+
+        /* =========================================================================
+           MENSAJE CUANDO NO HAY RESULTADOS
+           ========================================================================= */
+        .no-results {
+            grid-column: 1 / -1;
+            background: #FFFFFF;
+            border: 1px dashed var(--pantone-border);
+            border-radius: var(--radius-md);
+            padding: 40px;
+            text-align: center;
+            display: none;
+        }
+
+        .no-results-icon {
+            font-size: 2.2rem;
+            margin-bottom: 8px;
+            color: var(--pantone-gray-med);
+        }
+
+        .no-results-text {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--pantone-dark);
+        }
+
+        /* =========================================================================
+           TOAST NOTIFICACIÓN
+           ========================================================================= */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--pantone-dark);
+            color: #FFFFFF;
+            border-left: 4px solid var(--pantone-yellow);
+            padding: 12px 18px;
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-lg);
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 9999;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 14px;
+            }
+
+            .portal-header {
+                padding: 20px;
+            }
+
+            .portal-title {
+                font-size: 1.35rem;
+            }
+
+            .header-status-box {
+                align-items: flex-start;
+            }
+
+            .dashboards-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="portal-container">
+
+        <!-- HEADER PRINCIPAL -->
+        <header class="portal-header">
+            <div class="header-title-box">
+                <div class="header-badge-row">
+                    <span class="portal-badge">⚡ Servidor Web Activo</span>
+                    <span class="portal-badge"
+                        style="background: rgba(255,255,255,0.1); color: #fff; border-color: rgba(255,255,255,0.2);">Planta
+                        Desposte</span>
+                </div>
+                <h1 class="portal-title">Portal de Dashboards Operativos</h1>
+
+            </div>
+
+            <div class="header-status-box">
+                <div class="api-status-pill">
+                    <span id="statusDot" class="status-dot"></span>
+                    <span id="statusText">Detectando API...</span>
+                </div>
+                <button class="btn-refresh-status" onclick="verificarEstadoApi(true)">
+                    🔄 Reintentar Conexión
+                </button>
+            </div>
+        </header>
+
+        <!-- BANNER INFORMATIVO -->
+        <section class="info-banner">
+            <div class="info-banner-content">
+
+
+            </div>
+
+            <div class="quick-metrics">
+                <div class="quick-metric-item">
+                    <span class="quick-metric-val" id="metricTotalDashboards">12</span>
+                    <span class="quick-metric-lbl">Dashboards</span>
+                </div>
+                <div class="quick-metric-item"
+                    style="border-left: 1px solid var(--pantone-border); padding-left: 16px;">
+                    <span class="quick-metric-val" id="metricHostPort">--</span>
+                    <span class="quick-metric-lbl">Host Activo</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- CONTROLES: FILTROS Y BÚSQUEDA -->
+        <section class="controls-bar">
+            <div class="category-tabs">
+                <button class="tab-btn active" onclick="filtrarCategoria('OPERACIONES', this)">
+                    🥩 Operaciones <span class="tab-count" id="countOperaciones">4</span>
+                </button>
+                <button class="tab-btn" onclick="filtrarCategoria('CUMPLIMIENTOS', this)">
+                    🎯 Cumplimientos PTC <span class="tab-count" id="countCumplimientos">4</span>
+                </button>
+                <button class="tab-btn" onclick="filtrarCategoria('COSTOS', this)">
+                    💰 Costos & Presupuesto <span class="tab-count" id="countCostos">3</span>
+                </button>
+                <button class="tab-btn" onclick="filtrarCategoria('PERSONAL', this)">
+                    👥 Personal <span class="tab-count" id="countPersonal">1</span>
+                </button>
+            </div>
+
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="inputBuscar" class="search-input"
+                    placeholder="Buscar dashboard por nombre, área o endpoint..." oninput="ejecutarBusqueda()">
+            </div>
+        </section>
+
+        <!-- GRID DE TARJETAS DE DASHBOARDS -->
+        <main class="dashboards-grid" id="gridDashboards">
+            <!-- Renderizado dinámico vía JavaScript -->
+        </main>
+
+        <!-- MENSAJE SIN RESULTADOS -->
+        <div id="noResults" class="no-results">
+            <div class="no-results-icon">🔎</div>
+            <div class="no-results-text">No se encontraron dashboards que coincidan con la búsqueda.</div>
+        </div>
+
+    </div>
+
+    <!-- TOAST NOTIFICACIÓN -->
+    <div id="toastMessage" class="toast">
+        <span>📋</span>
+        <span id="toastText">¡Enlace copiado al portapapeles!</span>
+    </div>
+
+    <!-- =========================================================================
+       LÓGICA JAVASCRIPT DEL PORTAL
+       ========================================================================= -->
+    <script>
+        // =========================================================================
+        // ⚙️ CONFIGURACIÓN DE CONEXIÓN HÍBRIDA A LA API .NET
+        // =========================================================================
+        const APP_CONFIG = {
+            servidor: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.servidor)
+                ? GLOBAL_CONFIG.servidor
+                : "RAEVFINL016",
+            puertos: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.puertos)
+                ? GLOBAL_CONFIG.puertos
+                : [8080, 5000]
+        };
+
+        function generarBasesApi() {
+            if (typeof generarBasesApiGlobal === 'function') {
+                return generarBasesApiGlobal();
+            }
+            const bases = [];
+            for (const puerto of APP_CONFIG.puertos) {
+                bases.push(`http://${APP_CONFIG.servidor}:${puerto}`);
+            }
+            return bases;
+        }
+
+        APP_CONFIG.controllerPath = "/api/health";
+        APP_CONFIG.timeoutMs = 15000;
+
+        let apiBaseActiva = null;
+
+        // Fetch con AbortController
+        async function fetchConTimeout(url, timeoutMs = 8000) {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+                const res = await fetch(url, { signal: controller.signal });
+                clearTimeout(id);
+                return res;
+            } catch (err) {
+                clearTimeout(id);
+                throw err;
+            }
+        }
+
+        // Detección automática del servidor API activo
+        async function detectarServidorApi() {
+            // Si estamos navegando por HTTP/HTTPS (servido por la API), nuestro propio origen es la base principal
+            const candidatos = [];
+            if (window.location.protocol.startsWith('http')) {
+                candidatos.push(window.location.origin);
+            }
+            generarBasesApi().forEach(b => {
+                if (!candidatos.includes(b)) candidatos.push(b);
+            });
+
+            for (const base of candidatos) {
+                try {
+                    // Intento 1: Ping a /api/health
+                    const resHealth = await fetchConTimeout(`${base}/api/health`, 2500);
+                    if (resHealth.ok) return base;
+                } catch (e1) {
+                    try {
+                        // Intento 2: Ping a la raíz /
+                        const resRoot = await fetchConTimeout(`${base}/`, 2000);
+                        if (resRoot.ok) return base;
+                    } catch (e3) {
+                        // siguiente
+                    }
+                }
+            }
+            return null;
+        }
+
+        // =========================================================================
+        // LISTADO OFICIAL DE DASHBOARDS ACTIVOS (12 DASHBOARDS)
+        // (Se excluyeron los eliminados y Planilla_ConCarga_Archivo.html)
+        // =========================================================================
+        const LISTA_DASHBOARDS = [
+            // OPERACIONES (4)
+            {
+                id: 'informe-diario',
+                titulo: 'Informe Diario de Operaciones',
+                archivo: 'InformeDiario.html',
+                categoria: 'OPERACIONES',
+                categoriaNombre: 'Operaciones',
+                categoriaClase: 'cat-operaciones',
+                icono: '📋',
+                endpoint: 'GET /api/InformeDiario',
+                descripcion: 'Control diario de Planta Trozado de Cerdos: Horarios por turno, Asistencia, Producción por área, Calidad y Paradas de línea.'
+            },
+            {
+                id: 'numero-cerdos',
+                titulo: 'Planificación de Demanda y Cerdos',
+                archivo: 'NumeroCerdos.html',
+                categoria: 'OPERACIONES',
+                categoriaNombre: 'Operaciones',
+                categoriaClase: 'cat-operaciones',
+                icono: '🐷',
+                endpoint: 'GET /api/NumeroCerdos',
+                descripcion: 'Estimación de cerdos requeridos, proyección de demanda diaria y cálculo analítico de capacidades de turno.'
+            },
+            {
+                id: 'indice-rotacion',
+                titulo: 'Índice de Rotación Semanal',
+                archivo: 'Indice_Rotacion_Semanal.html',
+                categoria: 'OPERACIONES',
+                categoriaNombre: 'Operaciones',
+                categoriaClase: 'cat-operaciones',
+                icono: '🔄',
+                endpoint: 'GET /api/IndiceRotacionSemanal',
+                descripcion: 'Métrica semanal de rotación de personal, ingresos, ceses y variación porcentual en la planta de desposte.'
+            },
+            {
+                id: 'rendimiento-chuletas-2',
+                titulo: 'Rendimiento Operativo de Chuletas',
+                archivo: 'RendimientosChuletas002.html',
+                categoria: 'OPERACIONES',
+                categoriaNombre: 'Operaciones',
+                categoriaClase: 'cat-operaciones',
+                icono: '🥩',
+                endpoint: 'GET /api/ProdChuletas',
+                descripcion: 'Control y rendimiento de línea de chuletas: volumen procesado vs desposte, eficiencia por lote y dispersión de peso.'
+            },
+
+            // CUMPLIMIENTOS PTC (4)
+            {
+                id: 'cumplimiento-macro',
+                titulo: 'Dashboard Macro PTC',
+                archivo: 'CumplimientosMacro.html',
+                categoria: 'CUMPLIMIENTOS',
+                categoriaNombre: 'Cumplimientos PTC',
+                categoriaClase: 'cat-cumplimientos',
+                icono: '🎯',
+                endpoint: 'GET /api/Cumplimientos',
+                descripcion: 'Visión general de alto nivel: Producción consolidada frente a pedidos proyectados en Trozado de Cerdos.'
+            },
+            {
+                id: 'cumplimiento-ptc',
+                titulo: 'Cumplimiento PTC: Real vs Proyección',
+                archivo: 'CumplimientosPTC.html',
+                categoria: 'CUMPLIMIENTOS',
+                categoriaNombre: 'Cumplimientos PTC',
+                categoriaClase: 'cat-cumplimientos',
+                icono: '📈',
+                endpoint: 'GET /api/CumplimientosDetalle',
+                descripcion: 'Detalle analítico por línea y corte comparando la producción ejecutada real contra la proyección comercial.'
+            },
+            {
+                id: 'cumplimiento-ptc-py',
+                titulo: 'Cumplimiento PTC: Programa vs Proyección',
+                archivo: 'CumplimientosPTC_Py.html',
+                categoria: 'CUMPLIMIENTOS',
+                categoriaNombre: 'Cumplimientos PTC',
+                categoriaClase: 'cat-cumplimientos',
+                icono: '📅',
+                endpoint: 'GET /api/CumplimientosDetallePy',
+                descripcion: 'Evaluación del programa de producción planificado frente a las proyecciones comerciales estimadas.'
+            },
+            {
+                id: 'resumen-pl-ptc',
+                titulo: 'Resumen Planilla PTC: Real vs Planificado',
+                archivo: 'ResumenPl_PTC.html',
+                categoria: 'CUMPLIMIENTOS',
+                categoriaNombre: 'Cumplimientos PTC',
+                categoriaClase: 'cat-cumplimientos',
+                icono: '⏱️',
+                endpoint: 'GET /api/ResumenPl',
+                descripcion: 'Comparativa de horas hombre (HH), planilla real asignada y cumplimiento versus presupuesto planificado.'
+            },
+
+            // COSTOS & PRESUPUESTO (3)
+            {
+                id: 'presupuesto-forecast-dark',
+                titulo: 'Presupuesto vs ForeCast 2027',
+                archivo: 'Presupuesto_Vs_ForeCast_Dark.html',
+                categoria: 'COSTOS',
+                categoriaNombre: 'Costos & Presupuesto',
+                categoriaClase: 'cat-costos',
+                icono: '💵',
+                endpoint: 'GET /api/ComparativoPresupuesto',
+                descripcion: 'Comparativa integral de presupuesto operativo frente a forecast proyectado en formato oscuro ejecutivo.'
+            },
+            {
+                id: 'presupuestos-final',
+                titulo: 'Dashboard Analítico Presupuesto 2027',
+                archivo: 'Presupuestos_Final.html',
+                categoria: 'COSTOS',
+                categoriaNombre: 'Costos & Presupuesto',
+                categoriaClase: 'cat-costos',
+                icono: '📑',
+                endpoint: 'GET /api/Presupuesto',
+                descripcion: 'Desglose detallado por centros de costo, partidas presupuestarias y estacionalidad proyectada anual.'
+            },
+            {
+                id: 'informe-costo-produccion',
+                titulo: 'Informe de Costo de Producción',
+                archivo: 'Informe_Costo_Produccion.html',
+                categoria: 'COSTOS',
+                categoriaNombre: 'Costos & Presupuesto',
+                categoriaClase: 'cat-costos',
+                icono: '🏭',
+                endpoint: 'GET /api/CostosProduccion',
+                descripcion: 'Evolución de costos directos e indirectos de producción, costo unitario por kilogramo procesado y tendencias.'
+            },
+
+            // PERSONAL & RRHH (1)
+            {
+                id: 'personal-prueba',
+                titulo: 'Gestión y Consulta de Personal',
+                archivo: 'Personal_Prueba.html',
+                categoria: 'PERSONAL',
+                categoriaNombre: 'Personal & RRHH',
+                categoriaClase: 'cat-personal',
+                icono: '👷',
+                endpoint: 'GET /api/PersonalExcel',
+                descripcion: 'Padrón de colaboradores, cargos, áreas de asignación y verificación de sincronización con SharePoint.'
+            }
+        ];
+
+
+        let categoriaActiva = 'OPERACIONES';
+        let textoBusqueda = '';
+
+        // =========================================================================
+        // INICIALIZACIÓN
+        // =========================================================================
+        document.addEventListener('DOMContentLoaded', async () => {
+            renderizarCards();
+            actualizarContadores();
+            await verificarEstadoApi();
+        });
+
+        // =========================================================================
+        // VERIFICACIÓN DE ESTADO DE LA API
+        // =========================================================================
+        async function verificarEstadoApi(manual = false) {
+            const dot = document.getElementById('statusDot');
+            const txt = document.getElementById('statusText');
+            const metricHost = document.getElementById('metricHostPort');
+
+            dot.className = 'status-dot';
+            txt.innerText = manual ? 'Reverificando...' : 'Detectando API...';
+
+            const start = performance.now();
+            const hostEncontrado = await detectarServidorApi();
+            const latency = Math.round(performance.now() - start);
+
+            if (hostEncontrado) {
+                apiBaseActiva = hostEncontrado;
+                dot.className = 'status-dot online';
+                try {
+                    const urlObj = new URL(hostEncontrado);
+                    txt.innerText = `En Línea: ${urlObj.hostname}:${urlObj.port || '80'} (${latency}ms)`;
+                    metricHost.innerText = `${urlObj.hostname}:${urlObj.port || '80'}`;
+                } catch {
+                    txt.innerText = `En Línea: ${hostEncontrado} (${latency}ms)`;
+                    metricHost.innerText = hostEncontrado;
+                }
+            } else {
+                apiBaseActiva = null;
+                dot.className = 'status-dot offline';
+                txt.innerText = `Sin conexión (${APP_CONFIG.servidor}:${APP_CONFIG.puertos.join('/')})`;
+                metricHost.innerText = 'Desconectado';
+            }
+        }
+
+        // =========================================================================
+        // RENDERIZADO DE CARDS
+        // =========================================================================
+        function obtenerUrlDashboard(archivo) {
+            // Si el portal se abre por HTTP (servido por la API), la URL relativa es directa
+            if (window.location.protocol.startsWith('http')) {
+                return `${window.location.origin}/${archivo}`;
+            }
+            // Si se abre localmente por file:///, construir la URL hacia el servidor activo
+            const base = apiBaseActiva || `http://${APP_CONFIG.servidor}:8080`;
+            return `${base}/${archivo}`;
+        }
+
+        function renderizarCards() {
+            const grid = document.getElementById('gridDashboards');
+            const noResults = document.getElementById('noResults');
+            grid.innerHTML = '';
+
+            const query = textoBusqueda.toLowerCase().trim();
+
+            const filtrados = LISTA_DASHBOARDS.filter(d => {
+                const matchCat = query ? true : (d.categoria === categoriaActiva);
+                const matchQuery = !query ||
+                    d.titulo.toLowerCase().includes(query) ||
+                    d.descripcion.toLowerCase().includes(query) ||
+                    d.categoriaNombre.toLowerCase().includes(query) ||
+                    d.endpoint.toLowerCase().includes(query) ||
+                    d.archivo.toLowerCase().includes(query);
+
+                return matchCat && matchQuery;
+            });
+
+            if (filtrados.length === 0) {
+                noResults.style.display = 'block';
+                return;
+            } else {
+                noResults.style.display = 'none';
+            }
+
+            filtrados.forEach(item => {
+                const urlCompleta = obtenerUrlDashboard(item.archivo);
+
+                const card = document.createElement('article');
+                card.className = 'dash-card';
+                card.id = `card-${item.id}`;
+
+                card.innerHTML = `
+                    <div class="card-top">
+                        <div class="card-meta-row">
+                            <span class="card-category-tag ${item.categoriaClase}">${item.categoriaNombre}</span>
+                            <span class="card-endpoint">${item.endpoint}</span>
+                        </div>
+
+                        <div class="card-title-box">
+                            <div class="card-icon">${item.icono}</div>
+                            <div>
+                                <h2 class="card-title">${item.titulo}</h2>
+                            </div>
+                        </div>
+
+                        <p class="card-desc">${item.descripcion}</p>
+                    </div>
+
+                    <div class="card-footer">
+                        <a href="${item.archivo}" target="_blank" class="btn-card-open" title="Abrir reporte en pestaña nueva">
+                            Abrir Dashboard ↗
+                        </a>
+                        <button class="btn-card-copy" onclick="copiarEnlace('${urlCompleta}')" title="Copiar enlace para compartir">
+                            📋 Copiar Link
+                        </button>
+                    </div>
+                `;
+
+                grid.appendChild(card);
+            });
+        }
+
+        // =========================================================================
+        // FILTROS Y BÚSQUEDA
+        // =========================================================================
+        function filtrarCategoria(cat, btn) {
+            categoriaActiva = cat;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+
+            const inputBuscar = document.getElementById('inputBuscar');
+            if (inputBuscar && inputBuscar.value) {
+                inputBuscar.value = '';
+                textoBusqueda = '';
+            }
+            renderizarCards();
+        }
+
+        function ejecutarBusqueda() {
+            textoBusqueda = document.getElementById('inputBuscar').value;
+            renderizarCards();
+        }
+
+        function actualizarContadores() {
+            const countOperaciones = document.getElementById('countOperaciones');
+            const countCumplimientos = document.getElementById('countCumplimientos');
+            const countCostos = document.getElementById('countCostos');
+            const countPersonal = document.getElementById('countPersonal');
+            const metricTotal = document.getElementById('metricTotalDashboards');
+
+            if (countOperaciones) countOperaciones.innerText = LISTA_DASHBOARDS.filter(d => d.categoria === 'OPERACIONES').length;
+            if (countCumplimientos) countCumplimientos.innerText = LISTA_DASHBOARDS.filter(d => d.categoria === 'CUMPLIMIENTOS').length;
+            if (countCostos) countCostos.innerText = LISTA_DASHBOARDS.filter(d => d.categoria === 'COSTOS').length;
+            if (countPersonal) countPersonal.innerText = LISTA_DASHBOARDS.filter(d => d.categoria === 'PERSONAL').length;
+            if (metricTotal) metricTotal.innerText = LISTA_DASHBOARDS.length;
+        }
+
+        // =========================================================================
+        // UTILIDAD: COPIAR ENLACE AL PORTAPAPELES
+        // =========================================================================
+        async function copiarEnlace(url) {
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(url);
+                } else {
+                    // Fallback para contextos no seguros en red local HTTP
+                    const textArea = document.createElement("textarea");
+                    textArea.value = url;
+                    textArea.style.position = "fixed";
+                    textArea.style.left = "-999999px";
+                    textArea.style.top = "-999999px";
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+                    document.execCommand('copy');
+                    textArea.remove();
+                }
+                mostrarToast(`¡Enlace copiado! Listo para compartir: ${url}`);
+            } catch (err) {
+                mostrarToast(`Enlace: ${url}`);
+            }
+        }
+
+        function mostrarToast(mensaje) {
+            const toast = document.getElementById('toastMessage');
+            const toastText = document.getElementById('toastText');
+            toastText.innerText = mensaje;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3800);
+        }
+    </script>
+</body>
+
+</html>

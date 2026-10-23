@@ -19,28 +19,51 @@
     <!-- SheetJS para exportar a Excel (.xlsx) -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
+        /* =========================================================================
+           🎨 PALETA PANTONE INDUSTRIAL
+           ========================================================================= */
         :root {
-            --navy-peony: #223A5E;
-            --cyan-blue: #1295C1;
-            --cool-blue: #9DBED5;
-            --blue-sapphire: #10587F;
-            --foggy-dew: #CBCFCB;
-            --lagoon: #43928E;
-            --teal-blue: #007D7E;
-            --aegean-blue: #4E6E81;
-            --semana-custom: #3B6680;
+            --pantone-yellow: #F4D03F;
+            --pantone-yellow-light: #F8CC5A;
+            --pantone-yellow-soft: rgba(244, 208, 63, 0.16);
+            --pantone-yellow-border: rgba(244, 208, 63, 0.45);
+            --pantone-gold: #BAA063;
+            --pantone-gold-soft: rgba(186, 160, 99, 0.16);
+            --pantone-gold-border: rgba(186, 160, 99, 0.4);
+            --pantone-dark: #2E2A2F;
+            --pantone-darker: #252C37;
+            --pantone-gray-dark: #605C5E;
+            --pantone-gray-med: #878994;
+            --pantone-gray-light: #CDCAC0;
+            --pantone-bg: #F2F4F8;
+            --pantone-card: #FFFFFF;
+            --pantone-card-alt: #F8FAFC;
+            --pantone-border: #E2E8F0;
+            --pantone-border-subtle: #EDF2F7;
+            --table-accent: #F4D03F;
 
-            --bg-canvas: #F1F5F9;
+            /* Mapeo de compatibilidad con variables */
+            --navy-peony: #2E2A2F;
+            --cyan-blue: #F4D03F;
+            --cool-blue: #CDCAC0;
+            --blue-sapphire: #252C37;
+            --foggy-dew: #CDCAC0;
+            --lagoon: #BAA063;
+            --teal-blue: #605C5E;
+            --aegean-blue: #878994;
+            --semana-custom: #2E2A2F;
+
+            --bg-canvas: #F2F4F8;
             --bg-card: #FFFFFF;
             --border-ui: #E2E8F0;
-            --text-dark: #0F172A;
-            --text-muted: #64748B;
+            --text-dark: #2E2A2F;
+            --text-muted: #605C5E;
             --success: #10B981;
             --warning: #F59E0B;
             --danger: #EF4444;
-            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+            --shadow-sm: 0 1px 3px rgba(46, 42, 47, 0.06), 0 1px 2px rgba(46, 42, 47, 0.04);
+            --shadow-md: 0 4px 6px -1px rgba(46, 42, 47, 0.08), 0 2px 4px -1px rgba(46, 42, 47, 0.04);
+            --shadow-lg: 0 10px 15px -3px rgba(46, 42, 47, 0.1), 0 4px 6px -2px rgba(46, 42, 47, 0.05);
 
             /* Compatibility aliases */
             --bg-main: var(--bg-canvas);
@@ -49,29 +72,29 @@
             --border-card: var(--border-ui);
             --border-subtle: var(--border-ui);
 
-            /* Series de datos adaptadas a la paleta de RendimientosChuletas */
-            --color-prod: #007D7E;
-            --color-prod-light: rgba(0, 125, 126, 0.12);
-            --color-demanda: #1295C1;
-            --color-demanda-light: rgba(18, 149, 193, 0.12);
+            /* Series de datos adaptadas a la paleta Pantone Industrial */
+            --color-prod: #BAA063;
+            --color-prod-light: rgba(186, 160, 99, 0.16);
+            --color-demanda: #F4D03F;
+            --color-demanda-light: rgba(244, 208, 63, 0.16);
 
             /* SubPlanta badges */
-            --color-subplanta: #10587F;
-            --color-subplanta-light: rgba(16, 88, 127, 0.12);
-            --color-desposte: #10B981;
-            --color-chuletas: #1295C1;
-            --color-menudo: #43928E;
+            --color-subplanta: #252C37;
+            --color-subplanta-light: rgba(37, 44, 55, 0.12);
+            --color-desposte: #F4D03F;
+            --color-chuletas: #BAA063;
+            --color-menudo: #605C5E;
 
-            /* SemÃ¡foro y Alertas */
+            /* Semáforo y Alertas */
             --status-success: #10B981;
             --status-warning: #F59E0B;
             --status-danger: #EF4444;
-            --status-info: #1295C1;
+            --status-info: #BAA063;
 
-            /* TipografÃ­a */
-            --text-primary: #0F172A;
-            --text-secondary: #334155;
-            --text-dim: #64748B;
+            /* Tipografía */
+            --text-primary: #2E2A2F;
+            --text-secondary: #605C5E;
+            --text-dim: #878994;
 
             /* Sombras y bordes */
             --radius-sm: 8px;

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,20 +10,46 @@
     <!-- SheetJS para lectura y exportacion de Excel en el navegador -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
+        /* =========================================================================
+           🎨 PALETA PANTONE INDUSTRIAL
+           ========================================================================= */
         :root {
-            --bg-main: #0D1424;
-            --bg-card: #162238;
-            --border-card: #223554;
-            --color-he: #5C7CFA;
-            --color-bono: #10B981;
-            --color-fer: #F59E0B;
+            --pantone-yellow: #F4D03F;
+            --pantone-yellow-light: #F8CC5A;
+            --pantone-gold: #BAA063;
+            --pantone-dark: #2E2A2F;
+            --pantone-darker: #252C37;
+            --pantone-gray-dark: #605C5E;
+            --pantone-gray-med: #878994;
+            --pantone-gray-light: #CDCAC0;
+            --pantone-bg: #F2F4F8;
+            --pantone-card: #FFFFFF;
+            --pantone-border: #E2E8F0;
+            --table-accent: #F4D03F;
+
+            --bg-main: #F2F4F8;
+            --bg-card: #FFFFFF;
+            --border-card: #E2E8F0;
+            --color-he: #BAA063;
+            --color-bono: #F4D03F;
+            --color-fer: #878994;
             --color-alert: #EF4444;
-            --text-primary: #FFFFFF;
-            --text-muted: #94A3B8;
+            --text-primary: #2E2A2F;
+            --text-muted: #605C5E;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: var(--bg-main); color: var(--text-primary); padding: 20px; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            padding: 20px;
+        }
 
         header {
             background-color: var(--bg-card);
@@ -36,8 +63,16 @@
             flex-wrap: wrap;
             gap: 15px;
         }
-        header h1 { font-size: 1.5rem; font-weight: 600; }
-        header p { font-size: 0.85rem; color: var(--text-muted); }
+
+        header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        header p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
 
         .actions-header {
             display: flex;
@@ -58,9 +93,18 @@
             transition: opacity 0.2s;
             color: #ffffff;
         }
-        .btn-action:hover { opacity: 0.9; }
-        .btn-upload { background-color: var(--color-bono); }
-        .btn-export { background-color: var(--color-he); }
+
+        .btn-action:hover {
+            opacity: 0.9;
+        }
+
+        .btn-upload {
+            background-color: var(--color-bono);
+        }
+
+        .btn-export {
+            background-color: var(--color-he);
+        }
 
         /* Filtros */
         .filter-panel {
@@ -74,8 +118,19 @@
             gap: 20px;
             align-items: flex-end;
         }
-        .filter-group { display: flex; flex-direction: column; gap: 6px; }
-        .filter-group label { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .filter-group label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
         .filter-group select {
             background-color: var(--bg-main);
             color: var(--text-primary);
@@ -85,6 +140,7 @@
             outline: none;
             min-width: 200px;
         }
+
         .btn-reset {
             background-color: var(--border-card);
             color: var(--text-primary);
@@ -95,7 +151,10 @@
             font-size: 0.85rem;
             transition: 0.2s;
         }
-        .btn-reset:hover { background-color: var(--color-he); }
+
+        .btn-reset:hover {
+            background-color: var(--color-he);
+        }
 
         /* KPIs */
         .kpi-container {
@@ -104,6 +163,7 @@
             gap: 15px;
             margin-bottom: 20px;
         }
+
         .kpi-card {
             background-color: var(--bg-card);
             border: 1px solid var(--border-card);
@@ -111,8 +171,19 @@
             padding: 18px;
             border-radius: 8px;
         }
-        .kpi-title { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 5px; }
-        .kpi-value { font-size: 1.5rem; font-weight: bold; }
+
+        .kpi-title {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .kpi-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
 
         /* Gráficos */
         .charts-grid {
@@ -121,15 +192,31 @@
             gap: 20px;
             margin-bottom: 20px;
         }
-        @media (max-width: 550px) { .charts-grid { grid-template-columns: 1fr; } }
+
+        @media (max-width: 550px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
         .chart-card {
             background-color: var(--bg-card);
             border: 1px solid var(--border-card);
             padding: 20px;
             border-radius: 8px;
         }
-        .chart-card h3 { font-size: 1rem; margin-bottom: 15px; color: var(--text-primary); }
-        .chart-container { position: relative; height: 280px; width: 100%; }
+
+        .chart-card h3 {
+            font-size: 1rem;
+            margin-bottom: 15px;
+            color: var(--text-primary);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 280px;
+            width: 100%;
+        }
 
         /* Tabla */
         .table-card {
@@ -138,6 +225,7 @@
             padding: 20px;
             border-radius: 8px;
         }
+
         .table-header {
             display: flex;
             justify-content: space-between;
@@ -146,6 +234,7 @@
             flex-wrap: wrap;
             gap: 10px;
         }
+
         .search-input {
             background-color: var(--bg-main);
             color: var(--text-primary);
@@ -155,21 +244,39 @@
             outline: none;
             width: 250px;
         }
-        .table-wrapper { overflow-x: auto; max-height: 420px; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+
+        .table-wrapper {
+            overflow-x: auto;
+            max-height: 420px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+        }
+
         th {
-            background-color: #1a2942;
-            color: var(--text-muted);
+            background-color: var(--pantone-dark);
+            color: #FFFFFF;
             padding: 10px;
             text-align: left;
             position: sticky;
             top: 0;
             z-index: 5;
         }
-        td { padding: 9px 10px; border-bottom: 1px solid var(--border-card); }
-        tr:hover { background-color: rgba(92, 124, 250, 0.08); }
+
+        td {
+            padding: 9px 10px;
+            border-bottom: 1px solid var(--border-card);
+        }
+
+        tr:hover {
+            background-color: rgba(244, 208, 63, 0.12);
+        }
     </style>
 </head>
+
 <body>
 
     <header>
@@ -179,7 +286,8 @@
         </div>
         <div class="actions-header">
             <!-- Selector oculto para Excel -->
-            <input type="file" id="excelInput" accept=".xlsx, .xls" style="display: none;" onchange="handleExcelUpload(event)">
+            <input type="file" id="excelInput" accept=".xlsx, .xls" style="display: none;"
+                onchange="handleExcelUpload(event)">
             <button class="btn-action btn-upload" onclick="document.getElementById('excelInput').click()">
                 📂 Cargar Excel
             </button>
@@ -254,7 +362,8 @@
     <section class="table-card">
         <div class="table-header">
             <h3>Detalle por Colaborador</h3>
-            <input type="text" id="searchInput" class="search-input" placeholder="Buscar por nombre o puesto..." onkeyup="filterTable()">
+            <input type="text" id="searchInput" class="search-input" placeholder="Buscar por nombre o puesto..."
+                onkeyup="filterTable()">
         </div>
         <div class="table-wrapper">
             <table>
@@ -293,7 +402,7 @@
             if (!file) return;
 
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = function (e) {
                 try {
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, { type: 'array' });
@@ -368,7 +477,7 @@
             semSelect.innerHTML = '<option value="ALL">-- Todas las Semanas --</option>';
             cecoSelect.innerHTML = '<option value="ALL">-- Todos los Centros --</option>';
 
-            const semanas = [...new Set(rawData.map(d => d.Semana))].filter(Boolean).sort((a,b)=>a-b);
+            const semanas = [...new Set(rawData.map(d => d.Semana))].filter(Boolean).sort((a, b) => a - b);
             semanas.forEach(s => {
                 const opt = document.createElement('option');
                 opt.value = s;
@@ -446,7 +555,7 @@
             // Chart 2: Ceco
             const cecoGroup = filtered.reduce((acc, d) => {
                 const name = (d.detCCostos || 'Otros').trim();
-                const totalHE = (d.impHE25||0) + (d.impHE35||0) + (d.impHE100||0) + (d.impHEFer||0);
+                const totalHE = (d.impHE25 || 0) + (d.impHE35 || 0) + (d.impHE100 || 0) + (d.impHEFer || 0);
                 acc[name] = (acc[name] || 0) + totalHE;
                 return acc;
             }, {});
@@ -476,7 +585,7 @@
             // Chart 3: Evolución Semanal
             const semGroup = filtered.reduce((acc, d) => {
                 const s = 'Sem ' + d.Semana;
-                const totalHE = (d.impHE25||0) + (d.impHE35||0) + (d.impHE100||0) + (d.impHEFer||0);
+                const totalHE = (d.impHE25 || 0) + (d.impHE35 || 0) + (d.impHE100 || 0) + (d.impHEFer || 0);
                 acc[s] = (acc[s] || 0) + totalHE;
                 return acc;
             }, {});
@@ -509,12 +618,12 @@
             // Chart 4: Top 10 Personal
             const personGroup = filtered.reduce((acc, d) => {
                 const nom = d['Apellidos y Nombres'] || 'N/A';
-                const horas = (d.CantHE25||0) + (d.CantHE35||0) + (d.CantHEdob||0) + (d.CantHEFer||0);
+                const horas = (d.CantHE25 || 0) + (d.CantHE35 || 0) + (d.CantHEdob || 0) + (d.CantHEFer || 0);
                 acc[nom] = (acc[nom] || 0) + horas;
                 return acc;
             }, {});
 
-            const sortedTop = Object.entries(personGroup).sort((a,b)=>b[1]-a[1]).slice(0, 10);
+            const sortedTop = Object.entries(personGroup).sort((a, b) => b[1] - a[1]).slice(0, 10);
 
             if (chTop) chTop.destroy();
             chTop = new Chart(document.getElementById('chartTopPersonal'), {
@@ -543,15 +652,15 @@
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
             filtered.forEach(d => {
-                const totalH = ((d.CantHE25||0)+(d.CantHE35||0)+(d.CantHEdob||0)+(d.CantHEFer||0)).toFixed(2);
-                const impTotalHE = ((d.impHE25||0)+(d.impHE35||0)+(d.impHE100||0)+(d.impHEFer||0)).toFixed(2);
+                const totalH = ((d.CantHE25 || 0) + (d.CantHE35 || 0) + (d.CantHEdob || 0) + (d.CantHEFer || 0)).toFixed(2);
+                const impTotalHE = ((d.impHE25 || 0) + (d.impHE35 || 0) + (d.impHE100 || 0) + (d.impHEFer || 0)).toFixed(2);
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${d.Semana || ''}</td>
                     <td>${d.Codigo || ''}</td>
                     <td>${d['Apellidos y Nombres'] || ''}</td>
-                    <td>${(d.detCCostos||'').trim()}</td>
+                    <td>${(d.detCCostos || '').trim()}</td>
                     <td>${d.detPuesto || ''}</td>
                     <td>${d.cantHNor || 0}</td>
                     <td><b>${totalH}</b></td>
@@ -571,4 +680,5 @@
         }
     </script>
 </body>
+
 </html>

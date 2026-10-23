@@ -10,32 +10,45 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        /* =========================================================================
+           🎨 PALETA PANTONE INDUSTRIAL (Dark Edition)
+           ========================================================================= */
         :root {
-            --bg-main: #081326;
-            --bg-card: #0D1E3A;
-            --border-card: #1A3358;
-            --accent-cyan: #48B2CF;
-            --accent-blue: #206788;
-            --accent-gold: #F3BE4D;
-            --accent-orange: #E55A36;
+            --pantone-yellow: #F4D03F;
+            --pantone-yellow-light: #F8CC5A;
+            --pantone-gold: #BAA063;
+            --pantone-dark: #2E2A2F;
+            --pantone-darker: #252C37;
+            --pantone-gray-dark: #605C5E;
+            --pantone-gray-med: #878994;
+            --pantone-gray-light: #CDCAC0;
+            --table-accent: #F4D03F;
+
+            --bg-main: #252C37;
+            --bg-card: #2E2A2F;
+            --border-card: #3D393E;
+            --accent-cyan: #F4D03F;
+            --accent-blue: #BAA063;
+            --accent-gold: #F8CC5A;
+            --accent-orange: #CDCAC0;
             --text-primary: #FFFFFF;
-            --text-secondary: #8AA2BE;
+            --text-secondary: #CDCAC0;
 
             /* Variables Semánticas y Compatibilidad */
             --border-color: var(--border-card);
             --primary-cyan: var(--accent-cyan);
             --secondary-teal: var(--accent-blue);
-            --dark-teal: #142E52;
+            --dark-teal: #1F252E;
             --text-light: var(--text-primary);
             --text-muted: var(--text-secondary);
 
             --budget-color: var(--accent-blue);
             --forecast-color: var(--accent-cyan);
-            --positive: var(--accent-cyan);
-            --negative: var(--accent-orange);
+            --positive: #10B981;
+            --negative: #EF4444;
             --orange: var(--accent-gold);
             --neutral: var(--text-secondary);
-            --glow: rgba(72, 178, 207, 0.2);
+            --glow: rgba(244, 208, 63, 0.25);
         }
 
         * {
@@ -47,7 +60,7 @@
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background-color: var(--bg-main);
-            background-image: radial-gradient(circle at 50% 0%, #102548 0%, #081326 75%);
+            background-image: radial-gradient(circle at 50% 0%, #2E2A2F 0%, #252C37 75%);
             color: var(--text-primary);
             padding: 24px;
             min-height: 100vh;

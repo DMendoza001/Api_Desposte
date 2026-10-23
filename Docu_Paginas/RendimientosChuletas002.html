@@ -15,27 +15,44 @@
   <!-- SheetJS para exportar a Excel (.xlsx) -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
+    /* =========================================================================
+       🎨 PALETA PANTONE INDUSTRIAL
+       ========================================================================= */
     :root {
-      --navy-peony: #223A5E;
-      --cyan-blue: #1295C1;
-      --cool-blue: #9DBED5;
-      --blue-sapphire: #10587F;
-      --foggy-dew: #CBCFCB;
-      --lagoon: #43928E;
-      --teal-blue: #007D7E;
-      --aegean-blue: #4E6E81;
+      --pantone-yellow: #F4D03F;
+      --pantone-yellow-light: #F8CC5A;
+      --pantone-gold: #BAA063;
+      --pantone-dark: #2E2A2F;
+      --pantone-darker: #252C37;
+      --pantone-gray-dark: #605C5E;
+      --pantone-gray-med: #878994;
+      --pantone-gray-light: #CDCAC0;
+      --pantone-bg: #F2F4F8;
+      --pantone-card: #FFFFFF;
+      --pantone-border: #E2E8F0;
+      --table-accent: #F4D03F;
 
-      --bg-canvas: #F1F5F9;
+      /* Mapeo de compatibilidad con variables */
+      --navy-peony: #2E2A2F;
+      --cyan-blue: #F4D03F;
+      --cool-blue: #CDCAC0;
+      --blue-sapphire: #252C37;
+      --foggy-dew: #CDCAC0;
+      --lagoon: #BAA063;
+      --teal-blue: #605C5E;
+      --aegean-blue: #878994;
+
+      --bg-canvas: #F2F4F8;
       --bg-card: #FFFFFF;
       --border-ui: #E2E8F0;
-      --text-dark: #0F172A;
-      --text-muted: #64748B;
+      --text-dark: #2E2A2F;
+      --text-muted: #605C5E;
       --success: #10B981;
       --warning: #F59E0B;
       --danger: #EF4444;
-      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
-      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+      --shadow-sm: 0 1px 3px rgba(46, 42, 47, 0.06), 0 1px 2px rgba(46, 42, 47, 0.04);
+      --shadow-md: 0 4px 6px -1px rgba(46, 42, 47, 0.08), 0 2px 4px -1px rgba(46, 42, 47, 0.04);
+      --shadow-lg: 0 10px 15px -3px rgba(46, 42, 47, 0.1), 0 4px 6px -2px rgba(46, 42, 47, 0.05);
     }
 
     * {
@@ -54,7 +71,7 @@
 
     /* Header */
     header {
-      background: linear-gradient(135deg, var(--navy-peony) 0%, var(--blue-sapphire) 100%);
+      background: linear-gradient(135deg, var(--pantone-dark) 0%, var(--pantone-darker) 100%);
       color: #FFFFFF;
       padding: 22px 28px;
       border-radius: 12px;
