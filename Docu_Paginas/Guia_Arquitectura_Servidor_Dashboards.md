@@ -202,8 +202,6 @@ Para evitar sobrecargar la vista con más de 10 tarjetas simultáneas, los dashb
 - **Dashboard Analítico Presupuesto 2027 (`Presupuestos_Final.html`):** Desglose por centros de costo y partidas presupuestarias.
 - **Informe de Costo de Producción (`Informe_Costo_Produccion.html`):** Costo unitario por kilogramo procesado y análisis de costos directos/indirectos.
 
-### 👥 4. Personal (1 Dashboard)
-- **Gestión de Personal (`Personal_Prueba.html`):** Consulta del padrón de colaboradores conectado al controlador de sincronización Excel.
 
 ---
 

@@ -704,9 +704,6 @@
                 <button class="tab-btn" onclick="filtrarCategoria('COSTOS', this)">
                     💰 Costos & Presupuesto <span class="tab-count" id="countCostos">3</span>
                 </button>
-                <button class="tab-btn" onclick="filtrarCategoria('PERSONAL', this)">
-                    👥 Personal <span class="tab-count" id="countPersonal">1</span>
-                </button>
             </div>
 
             <div class="search-box">
@@ -811,8 +808,8 @@
         }
 
         // =========================================================================
-        // LISTADO OFICIAL DE DASHBOARDS ACTIVOS (12 DASHBOARDS)
-        // (Se excluyeron los eliminados y Planilla_ConCarga_Archivo.html)
+        // LISTADO OFICIAL DE DASHBOARDS ACTIVOS (11 DASHBOARDS)
+        // (Se excluyeron los de prueba y temporales)
         // =========================================================================
         const LISTA_DASHBOARDS = [
             // OPERACIONES (4)
@@ -940,19 +937,6 @@
                 icono: '🏭',
                 endpoint: 'GET /api/CostosProduccion',
                 descripcion: 'Evolución de costos directos e indirectos de producción, costo unitario por kilogramo procesado y tendencias.'
-            },
-
-            // PERSONAL & RRHH (1)
-            {
-                id: 'personal-prueba',
-                titulo: 'Gestión y Consulta de Personal',
-                archivo: 'Personal_Prueba.html',
-                categoria: 'PERSONAL',
-                categoriaNombre: 'Personal & RRHH',
-                categoriaClase: 'cat-personal',
-                icono: '👷',
-                endpoint: 'GET /api/PersonalExcel',
-                descripcion: 'Padrón de colaboradores, cargos, áreas de asignación y verificación de sincronización con SharePoint.'
             }
         ];
 
@@ -1105,13 +1089,11 @@
             const countOperaciones = document.getElementById('countOperaciones');
             const countCumplimientos = document.getElementById('countCumplimientos');
             const countCostos = document.getElementById('countCostos');
-            const countPersonal = document.getElementById('countPersonal');
             const metricTotal = document.getElementById('metricTotalDashboards');
 
             if (countOperaciones) countOperaciones.innerText = LISTA_DASHBOARDS.filter(d => d.categoria === 'OPERACIONES').length;
             if (countCumplimientos) countCumplimientos.innerText = LISTA_DASHBOARDS.filter(d => d.categoria === 'CUMPLIMIENTOS').length;
             if (countCostos) countCostos.innerText = LISTA_DASHBOARDS.filter(d => d.categoria === 'COSTOS').length;
-            if (countPersonal) countPersonal.innerText = LISTA_DASHBOARDS.filter(d => d.categoria === 'PERSONAL').length;
             if (metricTotal) metricTotal.innerText = LISTA_DASHBOARDS.length;
         }
 

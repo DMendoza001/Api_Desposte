@@ -14,6 +14,8 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <!-- SheetJS para exportar a Excel (.xlsx) -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- Configuración compartida de conexión a la API -->
+  <script src="config.js"></script>
   <style>
     /* =========================================================================
        🎨 PALETA PANTONE INDUSTRIAL
@@ -1108,12 +1110,9 @@
     <span id="toastMsg">Mensaje</span>
   </div>
 
-  <!-- Configuración compartida de conexión a la API -->
-  <script src="config.js"></script>
-
   <script>
     // =========================================================================
-    // ⚙️ CONFIGURACIÓN DE CONEXIÓN A LA API (Híbrida: usa config.js si existe)
+    // ⚙️ CONFIGURACIÓN DE CONEXIÓN HÍBRIDA A LA API .NET
     // =========================================================================
     const APP_CONFIG = {
       servidor: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.servidor)
@@ -1121,34 +1120,23 @@
         : "RAEVSALL001",
       puertos: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.puertos)
         ? GLOBAL_CONFIG.puertos
-        : [8080, 5000]
+        : [8080, 5000],
+      controllerPath: "/api/ProdChuletas",
+      timeoutMs: 120000 // 120 segundos para el Procedimiento Almacenado Sp_Informe_Prod_Chuletas
     };
 
-    // Generación de servidores API apuntando al nombre del equipo
     function generarBasesApi() {
       if (typeof generarBasesApiGlobal === 'function') {
         return generarBasesApiGlobal();
       }
       const bases = [];
+      if (typeof window !== 'undefined' && window.location && window.location.origin && window.location.protocol.startsWith('http')) {
+        bases.push(window.location.origin);
+      }
       for (const puerto of APP_CONFIG.puertos) {
         bases.push(`http://${APP_CONFIG.servidor}:${puerto}`);
       }
       return bases;
-    }
-
-    APP_CONFIG.rutaListar = "/api/ProdChuletas";
-    APP_CONFIG.timeoutMs = 20000;
-
-    function generarEndpointsApi(rutaRelativa) {
-      const endpoints = [];
-      if (apiBaseActiva) {
-        endpoints.push(`${apiBaseActiva}${rutaRelativa}`);
-      }
-      generarBasesApi().forEach(base => {
-        const ep = `${base}${rutaRelativa}`;
-        if (!endpoints.includes(ep)) endpoints.push(ep);
-      });
-      return endpoints;
     }
 
     let apiBaseActiva = null;
@@ -1163,6 +1151,50 @@
     const collapsedPeriodos = new Set();
     const collapsedTipos = new Set();
     const collapsedChuletas = new Set();
+
+    // =========================================================================
+    // 🌐 UTILIDADES DE RED Y DETECCIÓN RESILIENTE
+    // =========================================================================
+    async function fetchConTimeout(url, timeoutMs = 120000) {
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        const response = await fetch(url, { signal: controller.signal });
+        clearTimeout(id);
+        return response;
+      } catch (err) {
+        clearTimeout(id);
+        throw err;
+      }
+    }
+
+    async function detectarServidorApi() {
+      const bases = generarBasesApi();
+      for (const base of bases) {
+        try {
+          const pingRes = await fetchConTimeout(`${base}/api/health`, 3500);
+          if (pingRes.ok) return base;
+        } catch (e1) {
+          try {
+            const resRoot = await fetchConTimeout(`${base}/`, 2500);
+            if (resRoot.ok) return base;
+          } catch (e2) { }
+        }
+      }
+      return null;
+    }
+
+    function generarEndpointsApi(rutaRelativa) {
+      const endpoints = [];
+      if (apiBaseActiva) {
+        endpoints.push(`${apiBaseActiva}${rutaRelativa}`);
+      }
+      generarBasesApi().forEach(base => {
+        const ep = `${base}${rutaRelativa}`;
+        if (!endpoints.includes(ep)) endpoints.push(ep);
+      });
+      return endpoints;
+    }
 
     // =========================================================================
     // 🚀 INICIALIZACIÓN
@@ -1214,11 +1246,10 @@
             <td colspan="7" style="text-align: center; padding: 55px 20px; color: var(--text-muted);">
               <div style="font-size: 2.2rem; margin-bottom: 10px;">📋</div>
               <div style="font-weight: 700; font-size: 1.05rem; color: var(--navy-peony); margin-bottom: 6px;">
-                Dashboard listo para generar reporte
+                Cargando datos del reporte...
               </div>
               <div style="font-size: 0.85rem; max-width: 520px; margin: 0 auto; line-height: 1.5;">
-                Las fechas están configuradas para los últimos 7 días.<br>
-                Ajuste el rango si lo requiere y haga clic en <strong style="color: var(--blue-sapphire);">"🚀 Generar Reporte"</strong> para cargar los datos.
+                Conectando con la API y ejecutando Sp_Informe_Prod_Chuletas...
               </div>
             </td>
           </tr>
@@ -1226,7 +1257,6 @@
       }
       if (tfoot) tfoot.innerHTML = '';
 
-      // Resetear contadores de pestañas
       const bDia = document.getElementById('badgeDiario');
       const bSem = document.getElementById('badgeSemanal');
       const bMes = document.getElementById('badgeMensual');
@@ -1235,10 +1265,27 @@
       if (bMes) bMes.textContent = '0';
     }
 
-    window.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('DOMContentLoaded', async () => {
       inicializarFechasPorDefecto();
       setupEvents();
       inicializarDashboardVacio();
+
+      // Detección proactiva de la API y carga automática inmediata
+      actualizarEstadoUI('loading', `Detectando API...`);
+      apiBaseActiva = await detectarServidorApi();
+
+      if (apiBaseActiva) {
+        try {
+          const urlObj = new URL(apiBaseActiva);
+          actualizarEstadoUI('loading', `En Línea (${urlObj.host}) - Consultando...`);
+        } catch (e) {
+          actualizarEstadoUI('loading', `En Línea - Consultando...`);
+        }
+        await consultarApi(false);
+      } else {
+        actualizarEstadoUI('error', `Sin conexión con ${APP_CONFIG.servidor}`);
+        mostrarToast(`⚠️ No se detectó la API en ${APP_CONFIG.servidor}:${APP_CONFIG.puertos.join('/')}. Asegúrese de ejecutar dotnet run.`);
+      }
     });
 
     function setupEvents() {
@@ -1266,19 +1313,6 @@
     // =========================================================================
     // 🌐 COMUNICACIÓN CON LA API
     // =========================================================================
-    async function fetchConTimeout(url, timeoutMs = 20000) {
-      const controller = new AbortController();
-      const id = setTimeout(() => controller.abort(), timeoutMs);
-      try {
-        const response = await fetch(url, { signal: controller.signal });
-        clearTimeout(id);
-        return response;
-      } catch (err) {
-        clearTimeout(id);
-        throw err;
-      }
-    }
-
     async function consultarApi(forzarRecarga = false) {
       const fIni = document.getElementById('fechaInicio').value;
       const fFin = document.getElementById('fechaFin').value;
@@ -1291,22 +1325,22 @@
       mostrarCargando(
         true,
         'Consultando SQL Server',
-        `Ejecutando Sp_Informe_Prod_Chuletas para el periodo ${fIni} al ${fFin}...`
+        `Ejecutando Sp_Informe_Prod_Chuletas para el periodo ${fIni} al ${fFin}... (puede tardar entre 30 y 60s la primera vez)`
       );
-      actualizarEstadoUI('loading', `Conectando con ${APP_CONFIG.servidor}...`);
+      actualizarEstadoUI('loading', `Ejecutando consulta en SQL Server...`);
 
-      const queryParams = `?fechaInicio=${encodeURIComponent(fIni)}&fechaFin=${encodeURIComponent(fFin)}&recargar=${forzarRecarga}`;
-      let ruta = APP_CONFIG.rutaListar || "/api/ProdChuletas";
-      if (ruta.includes("costosproduccion")) {
-        ruta = "/api/ProdChuletas";
+      if (!apiBaseActiva) {
+        apiBaseActiva = await detectarServidorApi();
       }
 
+      const queryParams = `?fechaInicio=${encodeURIComponent(fIni)}&fechaFin=${encodeURIComponent(fFin)}&recargar=${forzarRecarga}`;
+      const ruta = APP_CONFIG.controllerPath || "/api/ProdChuletas";
       const endpoints = generarEndpointsApi(`${ruta}${queryParams}`);
       let dataCargada = false;
 
       for (const url of endpoints) {
         try {
-          const res = await fetchConTimeout(url, APP_CONFIG.timeoutMs || 20000);
+          const res = await fetchConTimeout(url, APP_CONFIG.timeoutMs || 120000);
 
           if (res.ok) {
             const json = await res.json();
@@ -1319,9 +1353,9 @@
 
             actualizarEstadoUI('online', `En Línea (${urlObj.host}) - ${items.length} reg.`);
             if (items.length === 0) {
-              mostrarToast('ℹ️ Conexión exitosa, pero no arrojó registros para este rango.');
+              mostrarToast('ℹ️ Conexión exitosa, pero no se encontraron registros para este rango de fechas.', 4000);
             } else {
-              mostrarToast(`✅ ${items.length} registros cargados desde ProdChuletasController`);
+              mostrarToast(`✅ ${items.length} registros cargados exitosamente`, 3500);
             }
             dataCargada = true;
             break;
@@ -1333,7 +1367,7 @@
 
       if (!dataCargada) {
         actualizarEstadoUI('error', `Sin conexión con ${APP_CONFIG.servidor}`);
-        mostrarToast(`❌ No se pudo conectar a la API en ${APP_CONFIG.servidor} (Puertos ${APP_CONFIG.puertos.join('/')}).`);
+        mostrarToast(`❌ No se pudo conectar a la API o el procedimiento excedió el tiempo límite (${(APP_CONFIG.timeoutMs || 120000) / 1000}s).`);
       }
 
       mostrarCargando(false);
@@ -1368,14 +1402,30 @@
       return `${yyyy}-${mm}-${dd}`;
     }
 
-    function getISOWeek(d) {
-      const target = new Date(d.valueOf());
-      const dayNr = (d.getDay() + 6) % 7;
-      target.setDate(target.getDate() - dayNr + 3);
-      const firstThursday = target.valueOf();
-      target.setMonth(0, 1);
-      if (target.getDay() !== 4) target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
-      return 1 + Math.ceil((firstThursday - target) / 604800000);
+    function calcularSemanaConInicioLunes(d) {
+      const copia = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      const diaOffsetLunes = (copia.getDay() + 6) % 7;
+      const lunes = new Date(copia);
+      lunes.setDate(copia.getDate() - diaOffsetLunes);
+      const domingo = new Date(lunes);
+      domingo.setDate(lunes.getDate() + 6);
+
+      const dateUtc = new Date(Date.UTC(copia.getFullYear(), copia.getMonth(), copia.getDate()));
+      const diaUtc = dateUtc.getUTCDay() === 0 ? 7 : dateUtc.getUTCDay();
+      dateUtc.setUTCDate(dateUtc.getUTCDate() + 4 - diaUtc);
+      const anoSemana = dateUtc.getUTCFullYear();
+      const inicioAno = new Date(Date.UTC(anoSemana, 0, 1));
+      const numSemana = Math.ceil((((dateUtc - inicioAno) / 86400000) + 1) / 7);
+
+      const pad = n => String(n).padStart(2, '0');
+      const rangoTexto = `${pad(lunes.getDate())}/${pad(lunes.getMonth() + 1)} al ${pad(domingo.getDate())}/${pad(domingo.getMonth() + 1)}`;
+
+      return {
+        semana: numSemana,
+        anoSemana: anoSemana,
+        semanaClave: `${anoSemana}-S${pad(numSemana)}`,
+        semanaEtiqueta: `Sem. ${pad(numSemana)} (${rangoTexto})`
+      };
     }
 
     function procesarDatos(items) {
@@ -1384,7 +1434,7 @@
         const dObj = parseDate(fechaRaw);
         const yyyy = dObj.getFullYear();
         const mm = String(dObj.getMonth() + 1).padStart(2, '0');
-        const week = getISOWeek(dObj);
+        const semInfo = calcularSemanaConInicioLunes(dObj);
 
         return {
           ...d,
@@ -1406,7 +1456,8 @@
           _dateObj: dObj,
           _ymd: formatYMD(dObj),
           _dia: formatYMD(dObj),
-          _semana: `${yyyy}-S${String(week).padStart(2, '0')}`,
+          _semana: semInfo.semanaClave,
+          _semanaEtiqueta: semInfo.semanaEtiqueta,
           _mes: `${yyyy}-${mm}`,
           _anual: `${yyyy}`
         };
@@ -1765,6 +1816,10 @@
         }
         return key;
       } else if (modo === 'semanal') {
+        const filaEj = (filteredData || []).find(d => d._semana === key);
+        if (filaEj && filaEj._semanaEtiqueta) {
+          return filaEj._semanaEtiqueta;
+        }
         const parts = key.split('-S');
         if (parts.length === 2) {
           return `Semana ${parts[1]} (${parts[0]})`;

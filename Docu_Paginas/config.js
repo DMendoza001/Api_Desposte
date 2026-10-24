@@ -15,14 +15,19 @@ var GLOBAL_CONFIG = {
     puertos: [8080, 5000]
 };
 
-// Función auxiliar global para generar las bases URL de la API
 function generarBasesApiGlobal() {
     var s = (GLOBAL_CONFIG && GLOBAL_CONFIG.servidor) ? GLOBAL_CONFIG.servidor : "RAEVSALL001";
     var puertos = (GLOBAL_CONFIG && GLOBAL_CONFIG.puertos) ? GLOBAL_CONFIG.puertos : [8080, 5000];
     var bases = [];
 
+    // Si la página se sirve por HTTP/HTTPS (ej. http://localhost:8080 o http://RAEVFINL016:8080), ese origen tiene máxima prioridad
+    if (typeof window !== 'undefined' && window.location && window.location.origin && window.location.protocol.startsWith('http')) {
+        bases.push(window.location.origin);
+    }
+
     for (var i = 0; i < puertos.length; i++) {
-        bases.push("http://" + s + ":" + puertos[i]);
+        var baseServidor = "http://" + s + ":" + puertos[i];
+        if (bases.indexOf(baseServidor) === -1) bases.push(baseServidor);
     }
 
     // Fallbacks si el servidor principal no es localhost
