@@ -16,6 +16,8 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <!-- SheetJS para exportar a Excel (.xlsx) -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- Configuración compartida de conexión a la API -->
+  <script src="config.js"></script>
 
   <style>
     /* =========================================================================
@@ -89,7 +91,7 @@
 
     /* ==================== HEADER ==================== */
     header {
-      background: linear-gradient(135deg, #1D4A74 0%, #264F7C 55%, #37638B 100%);
+      background: linear-gradient(135deg, var(--pantone-dark) 0%, var(--pantone-darker) 100%);
       color: #FFFFFF;
       padding: 22px 30px;
       border-radius: var(--radius-lg);
@@ -100,9 +102,19 @@
       flex-wrap: wrap;
       gap: 16px;
       box-shadow: var(--shadow-lg);
-      border-bottom: 4px solid #6E91B3;
+      border-bottom: 4px solid var(--pantone-yellow);
       position: relative;
       overflow: hidden;
+    }
+
+    header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, var(--pantone-yellow) 0%, var(--pantone-gold) 50%, var(--pantone-yellow-light) 100%);
     }
 
     header::after {
@@ -112,7 +124,7 @@
       right: -40px;
       width: 180px;
       height: 180px;
-      background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(244, 208, 63, 0.08) 0%, transparent 70%);
       border-radius: 50%;
       pointer-events: none;
     }
@@ -128,7 +140,7 @@
 
     .header-info p {
       font-size: 0.88rem;
-      color: #B9D2E8;
+      color: var(--pantone-gray-light);
       margin-top: 5px;
       font-weight: 400;
       max-width: 760px;
@@ -170,7 +182,7 @@
     }
 
     .status-dot.loading {
-      background-color: #F5B921;
+      background-color: var(--pantone-yellow);
       animation: pulseDot 1s infinite alternate;
     }
 
@@ -239,8 +251,8 @@
     .filter-group input[type="date"]:focus,
     .filter-group select:focus,
     .filter-group input[type="text"]:focus {
-      border-color: var(--color-primary);
-      box-shadow: 0 0 0 3px rgba(0, 130, 153, 0.18);
+      border-color: var(--pantone-yellow);
+      box-shadow: 0 0 0 3px rgba(244, 208, 63, 0.25);
     }
 
     .btn-actions {
@@ -269,35 +281,47 @@
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+      background: linear-gradient(135deg, var(--pantone-dark) 0%, var(--pantone-darker) 100%);
       color: #FFFFFF;
+      border: 1px solid rgba(255, 255, 255, 0.12);
       box-shadow: var(--shadow-sm);
     }
 
     .btn-primary:hover {
       box-shadow: var(--shadow-md);
-      filter: brightness(1.08);
+      border-color: var(--pantone-yellow);
+      filter: brightness(1.15);
     }
 
     .btn-secondary {
-      background: #EAF2F5;
-      color: var(--color-primary-dark);
-      border: 1px solid #BACED8;
+      background: #FFFFFF;
+      color: var(--pantone-dark);
+      border: 1px solid var(--border-card);
     }
 
     .btn-secondary:hover {
-      background: #DCEAF0;
+      background: #F1F5F9;
+      border-color: var(--pantone-gray-med);
     }
 
     .btn-accent {
-      background: #F5B921;
-      color: #4B3802;
+      background: var(--pantone-yellow);
+      color: var(--pantone-dark);
       font-weight: 700;
+      border: 1px solid rgba(46, 42, 47, 0.15);
       box-shadow: var(--shadow-xs);
     }
 
-    .btn-accent:hover {
-      filter: brightness(1.06);
+    .btn-accent:hover:not(:disabled) {
+      background: var(--pantone-yellow-light);
+      filter: brightness(1.05);
+    }
+
+    .btn-accent:disabled {
+      background: #E2E8F0;
+      color: #94A3B8;
+      border-color: #CBD5E1;
+      cursor: not-allowed;
     }
 
     .btn-reset {
@@ -366,6 +390,11 @@
       outline: none;
     }
 
+    .search-input-wrap input:focus {
+      border-color: var(--pantone-yellow);
+      box-shadow: 0 0 0 3px rgba(244, 208, 63, 0.2);
+    }
+
     .search-icon {
       position: absolute;
       left: 10px;
@@ -392,7 +421,7 @@
       position: relative;
       overflow: hidden;
       transition: transform 0.15s, box-shadow 0.15s;
-      border-top: 4px solid var(--color-primary);
+      border-top: 4px solid var(--pantone-dark);
     }
 
     .kpi-card:hover {
@@ -401,12 +430,12 @@
     }
 
     .kpi-card.destacado {
-      border-top-color: var(--color-amber);
-      background: linear-gradient(180deg, #FFFFFF 0%, #FFFDF7 100%);
+      border-top-color: var(--pantone-yellow);
+      background: linear-gradient(180deg, #FFFFFF 0%, rgba(244, 208, 63, 0.05) 100%);
     }
 
     .kpi-card.indigo {
-      border-top-color: var(--color-indigo);
+      border-top-color: var(--pantone-gold);
     }
 
     .kpi-card.emerald {
@@ -414,11 +443,11 @@
     }
 
     .kpi-card.teal {
-      border-top-color: var(--color-primary);
+      border-top-color: var(--pantone-darker);
     }
 
     .kpi-card.dark {
-      border-top-color: var(--header-bg);
+      border-top-color: var(--pantone-dark);
     }
 
     .kpi-header {
@@ -451,11 +480,11 @@
     }
 
     .kpi-value.amber {
-      color: var(--color-amber);
+      color: #B45309;
     }
 
     .kpi-value.teal {
-      color: var(--color-primary-dark);
+      color: var(--pantone-dark);
     }
 
     .kpi-value.emerald {
@@ -513,7 +542,7 @@
     .card-title {
       font-size: 1.02rem;
       font-weight: 700;
-      color: var(--header-teal);
+      color: var(--pantone-dark);
       display: flex;
       align-items: center;
       gap: 8px;
@@ -556,7 +585,7 @@
     .view-toggle-label {
       font-size: 0.78rem;
       font-weight: 700;
-      color: var(--header-teal);
+      color: var(--pantone-dark);
       text-transform: uppercase;
       letter-spacing: 0.04em;
       margin-right: 4px;
@@ -578,15 +607,15 @@
     }
 
     .btn-toggle-view:hover {
-      background: var(--color-primary-light);
-      color: var(--color-primary-dark);
-      border-color: var(--color-primary);
+      background: rgba(244, 208, 63, 0.15);
+      color: var(--pantone-dark);
+      border-color: var(--pantone-yellow);
     }
 
     .btn-toggle-view.active {
-      background: var(--color-primary);
-      color: #FFFFFF;
-      border-color: var(--color-primary);
+      background: var(--pantone-dark);
+      color: var(--pantone-yellow);
+      border-color: var(--pantone-dark);
       box-shadow: var(--shadow-xs);
     }
 
@@ -616,7 +645,8 @@
     }
 
     .semana-ceco-select-wrap select:focus {
-      border-color: var(--color-primary);
+      border-color: var(--pantone-yellow);
+      box-shadow: 0 0 0 3px rgba(244, 208, 63, 0.2);
     }
 
     /* ==================== TABS DE TABLAS DE DETALLE ==================== */
@@ -647,14 +677,14 @@
     }
 
     .tab-btn:hover {
-      color: var(--color-primary);
-      background: rgba(0, 130, 153, 0.05);
+      color: var(--pantone-dark);
+      background: rgba(244, 208, 63, 0.08);
     }
 
     .tab-btn.active {
-      color: var(--color-primary-dark);
+      color: var(--pantone-dark);
       background: #FFFFFF;
-      border-bottom: 3px solid var(--color-primary);
+      border-bottom: 3px solid var(--pantone-yellow);
       font-weight: 700;
     }
 
@@ -700,7 +730,7 @@
       position: sticky;
       top: 0;
       z-index: 3;
-      background: var(--header-teal);
+      background: var(--pantone-dark);
       color: #FFFFFF;
       padding: 11px 12px;
       text-align: left;
@@ -709,6 +739,7 @@
       text-transform: uppercase;
       letter-spacing: 0.04em;
       border-right: 1px solid rgba(255, 255, 255, 0.12);
+      border-bottom: 2px solid var(--pantone-yellow);
       user-select: none;
     }
 
@@ -717,7 +748,8 @@
     }
 
     thead th.sortable:hover {
-      background: var(--color-primary-dark);
+      background: var(--pantone-darker);
+      color: var(--pantone-yellow);
     }
 
     thead th.num,
@@ -740,11 +772,11 @@
 
     thead th.sorted .sort-arrow {
       opacity: 1;
-      color: #F5B921;
+      color: var(--pantone-yellow);
     }
 
     tbody tr {
-      border-bottom: 1px solid #EBF1F5;
+      border-bottom: 1px solid #EDF2F7;
       transition: background 0.1s;
     }
 
@@ -753,7 +785,7 @@
     }
 
     tbody tr:hover {
-      background: #EAF4F7;
+      background: rgba(244, 208, 63, 0.08);
     }
 
     tbody td {
@@ -764,7 +796,7 @@
 
     tbody td.ceco-code {
       font-weight: 700;
-      color: var(--color-primary-dark);
+      color: var(--pantone-dark);
     }
 
     tbody td.ceco-name {
@@ -778,12 +810,13 @@
       position: sticky;
       bottom: 0;
       z-index: 2;
-      background: var(--header-bg);
+      background: var(--pantone-dark);
       color: #FFFFFF;
       padding: 12px;
       font-weight: 700;
       font-variant-numeric: tabular-nums;
       border-right: 1px solid rgba(255, 255, 255, 0.1);
+      border-top: 2px solid var(--pantone-yellow);
     }
 
     /* Badges de semaforización */
@@ -805,9 +838,9 @@
     }
 
     .badge-alerta {
-      background: #FEF3C7;
-      color: #B45309;
-      border: 1px solid #FDE68A;
+      background: rgba(244, 208, 63, 0.18);
+      color: #8C6B00;
+      border: 1px solid rgba(244, 208, 63, 0.6);
     }
 
     .badge-critico {
@@ -820,7 +853,7 @@
     .loading-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(7, 31, 54, 0.65);
+      background: rgba(37, 44, 55, 0.7);
       display: none;
       align-items: center;
       justify-content: center;
@@ -839,14 +872,14 @@
       text-align: center;
       box-shadow: var(--shadow-lg);
       max-width: 440px;
-      border-top: 5px solid #F5B921;
+      border-top: 5px solid var(--pantone-yellow);
     }
 
     .spinner {
       width: 46px;
       height: 46px;
-      border: 4px solid #E2EBF0;
-      border-top-color: var(--color-primary);
+      border: 4px solid var(--pantone-border);
+      border-top-color: var(--pantone-yellow);
       border-radius: 50%;
       margin: 0 auto 16px;
       animation: spin 0.85s linear infinite;
@@ -862,7 +895,7 @@
       position: fixed;
       bottom: 26px;
       right: 26px;
-      background: #071F36;
+      background: var(--pantone-dark);
       color: #FFFFFF;
       padding: 13px 20px;
       border-radius: var(--radius-md);
@@ -876,7 +909,7 @@
       opacity: 0;
       transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       z-index: 10000;
-      border-left: 4px solid #F5B921;
+      border-left: 4px solid var(--pantone-yellow);
       max-width: 420px;
     }
 
@@ -901,7 +934,7 @@
     .empty-state-box h4 {
       font-size: 1.1rem;
       font-weight: 700;
-      color: var(--header-teal);
+      color: var(--pantone-dark);
       margin-bottom: 6px;
     }
 
@@ -920,7 +953,7 @@
   <div id="loadingOverlay" class="loading-overlay">
     <div class="loading-modal">
       <div class="spinner"></div>
-      <h4 id="loadingTitle" style="color: var(--header-teal); margin-bottom: 6px;">Procesando Datos</h4>
+      <h4 id="loadingTitle" style="color: var(--pantone-dark); margin-bottom: 6px;">Procesando Datos</h4>
       <p id="loadingMessage" style="color: var(--text-muted); font-size: 0.84rem;">Ejecutando procedimiento en SQL
         Server...</p>
     </div>
@@ -1193,12 +1226,9 @@
     <span id="toastText">Mensaje del sistema</span>
   </div>
 
-  <!-- Configuración compartida de conexión a la API -->
-  <script src="config.js"></script>
-
   <script>
     // =========================================================================
-    // ⚙️ CONFIGURACIÓN DE CONEXIÓN A LA API (Híbrida: usa config.js si existe)
+    // ⚙️ CONFIGURACIÓN DE CONEXIÓN HÍBRIDA A LA API .NET
     // =========================================================================
     const APP_CONFIG = {
       servidor: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.servidor)
@@ -1220,17 +1250,46 @@
       return bases;
     }
 
-    APP_CONFIG.rutaListar = "/api/IndiceRotacionSemanal";
-    APP_CONFIG.timeoutMs = 7000;
+    APP_CONFIG.controllerPath = "/api/IndiceRotacionSemanal";
+    APP_CONFIG.rutaListar = APP_CONFIG.controllerPath;
+    APP_CONFIG.timeoutMs = 25000;
 
     let apiBaseActiva = null;
+
+    async function fetchConTimeout(url, timeoutMs = 25000) {
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        const response = await fetch(url, { signal: controller.signal });
+        clearTimeout(id);
+        return response;
+      } catch (err) {
+        clearTimeout(id);
+        throw err;
+      }
+    }
+
+    async function detectarServidorApi() {
+      const bases = generarBasesApi();
+      for (const base of bases) {
+        try {
+          const res = await fetchConTimeout(`${base}${APP_CONFIG.controllerPath}`, 3500);
+          if (res.ok) return base;
+        } catch (e) {
+          try {
+            const pingRes = await fetchConTimeout(`${base}/`, 2000);
+            if (pingRes.ok) return base;
+          } catch (errPing) {}
+        }
+      }
+      return null;
+    }
 
     function generarEndpointsApi(rutaRelativa) {
       const endpoints = [];
       if (apiBaseActiva) {
         endpoints.push(`${apiBaseActiva}${rutaRelativa}`);
       }
-      // Si se abre desde http://localhost o similar, intentar primero ese mismo origen
       if (typeof window !== 'undefined' && window.location && window.location.origin && window.location.origin.startsWith('http')) {
         const epOrigen = `${window.location.origin}${rutaRelativa}`;
         if (!endpoints.includes(epOrigen)) endpoints.push(epOrigen);
@@ -1242,8 +1301,6 @@
       return endpoints;
     }
 
-    // =========================================================================
-    // 📊 ESTADO GLOBAL DEL DASHBOARD
     // =========================================================================
     // 📊 ESTADO GLOBAL DEL DASHBOARD
     // =========================================================================
@@ -1272,44 +1329,44 @@
     };
 
     // =========================================================================
-    // 🎨 PALETA DE ESTILOS: CRM Pipeline Blue Theme
+    // 🎨 PALETA DE ESTILOS: Pantone Industrial Palette
     // =========================================================================
-    const CRM_THEME = {
-      name: "CRM Pipeline Blue Theme",
+    const PANTONE_THEME = {
+      name: "Pantone Industrial Palette",
       dataColors: [
-        "#37638B",
-        "#1D4A74",
-        "#6E91B3",
-        "#A2BFDB",
-        "#50789E",
-        "#264F7C",
-        "#87A8C8",
-        "#B9D2E8"
+        "#F4D03F",
+        "#2E2A2F",
+        "#CDCAC0",
+        "#605C5E",
+        "#BAA063",
+        "#252C37",
+        "#878994",
+        "#F8CC5A"
       ],
-      background: "#E9EFF6",
-      foreground: "#1E293B",
-      tableAccent: "#1D4A74",
+      background: "#F2F4F8",
+      foreground: "#2E2A2F",
+      tableAccent: "#F4D03F",
       // Elementos de soporte y armonía
-      grid: "#D8E2EC",
-      textMuted: "#64748B",
+      card: "#FFFFFF",
+      grid: "#E2E8F0",
+      textMuted: "#605C5E",
       white: "#FFFFFF"
     };
 
     // Alias retrocompatible
     const PALETA_UI = {
-      teal: CRM_THEME.tableAccent,        // #1D4A74
-      tealDark: CRM_THEME.dataColors[5],  // #264F7C
-      tealDeep: CRM_THEME.dataColors[0],  // #37638B
-      tealLight: 'rgba(29, 74, 116, 0.15)',
-      amber: '#D97706',
-      amberDark: '#B45309',
-      crimson: '#C0392B',
-      crimsonDark: '#962D22',
-      navy: CRM_THEME.tableAccent,
-      gold: CRM_THEME.dataColors[7],      // #B9D2E8
-      grid: CRM_THEME.grid,
-      text: CRM_THEME.foreground,
-      textMuted: CRM_THEME.textMuted
+      yellow: PANTONE_THEME.dataColors[0],
+      dark: PANTONE_THEME.dataColors[1],
+      grayLight: PANTONE_THEME.dataColors[2],
+      grayDark: PANTONE_THEME.dataColors[3],
+      gold: PANTONE_THEME.dataColors[4],
+      darker: PANTONE_THEME.dataColors[5],
+      grayMed: PANTONE_THEME.dataColors[6],
+      yellowLight: PANTONE_THEME.dataColors[7],
+      tableAccent: PANTONE_THEME.tableAccent,
+      grid: PANTONE_THEME.grid,
+      text: PANTONE_THEME.foreground,
+      textMuted: PANTONE_THEME.textMuted
     };
 
     // =========================================================================
@@ -1889,7 +1946,7 @@
     }
 
     // =========================================================================
-    // 📈 GRÁFICO 1: ÍNDICE DE ROTACIÓN GENERAL (CRM Pipeline Blue Theme)
+    // 📈 GRÁFICO 1: ÍNDICE DE ROTACIÓN GENERAL (Pantone Industrial Palette)
     // =========================================================================
     function renderGraficoGeneral() {
       if (chartGeneralEvolucion) chartGeneralEvolucion.destroy();
@@ -1902,10 +1959,10 @@
 
       const ctx = document.getElementById('chartGeneralEvolucion').getContext('2d');
 
-      // Área sutil y elegante con degradado del tema CRM Pipeline Blue
-      const gradientBlue = ctx.createLinearGradient(0, 0, 0, 320);
-      gradientBlue.addColorStop(0, 'rgba(29, 74, 116, 0.28)');
-      gradientBlue.addColorStop(1, 'rgba(29, 74, 116, 0.01)');
+      // Área sutil y elegante con degradado del tema Pantone Industrial
+      const gradientYellow = ctx.createLinearGradient(0, 0, 0, 320);
+      gradientYellow.addColorStop(0, 'rgba(244, 208, 63, 0.35)');
+      gradientYellow.addColorStop(1, 'rgba(244, 208, 63, 0.02)');
 
       chartGeneralEvolucion = new Chart(ctx, {
         type: 'bar',
@@ -1916,26 +1973,26 @@
               type: 'line',
               label: 'Índice de Rotación (%)',
               data: dataIr,
-              borderColor: CRM_THEME.tableAccent, // #1D4A74
-              backgroundColor: gradientBlue,
+              borderColor: PANTONE_THEME.tableAccent, // #F4D03F
+              backgroundColor: gradientYellow,
               borderWidth: 3,
               fill: true,
               tension: 0.35,
               pointRadius: 5,
               pointHoverRadius: 7,
               pointBackgroundColor: '#FFFFFF',
-              pointBorderColor: CRM_THEME.tableAccent,
+              pointBorderColor: PANTONE_THEME.foreground, // #2E2A2F
               pointBorderWidth: 2.5,
-              pointHoverBackgroundColor: CRM_THEME.dataColors[3], // #A2BFDB
-              pointHoverBorderColor: CRM_THEME.tableAccent,
+              pointHoverBackgroundColor: PANTONE_THEME.dataColors[7], // #F8CC5A
+              pointHoverBorderColor: PANTONE_THEME.foreground,
               yAxisID: 'y'
             },
             {
               type: 'bar',
               label: 'Personal Retirado (Bajas)',
               data: dataRet,
-              backgroundColor: CRM_THEME.dataColors[4], // #50789E
-              hoverBackgroundColor: CRM_THEME.dataColors[5], // #264F7C
+              backgroundColor: PANTONE_THEME.dataColors[1], // #2E2A2F
+              hoverBackgroundColor: PANTONE_THEME.dataColors[3], // #605C5E
               borderRadius: 6,
               barThickness: 24,
               yAxisID: 'y1'
@@ -1951,18 +2008,18 @@
               position: 'top',
               labels: {
                 font: { family: 'Inter', weight: '600', size: 12 },
-                color: CRM_THEME.foreground,
+                color: PANTONE_THEME.foreground,
                 usePointStyle: true,
                 padding: 16
               }
             },
             tooltip: {
-              backgroundColor: CRM_THEME.tableAccent,
-              titleColor: CRM_THEME.dataColors[7], // #B9D2E8
+              backgroundColor: PANTONE_THEME.foreground,
+              titleColor: PANTONE_THEME.tableAccent,
               titleFont: { family: 'Inter', weight: '700', size: 13 },
               bodyFont: { family: 'Inter', size: 12 },
               bodyColor: '#FFFFFF',
-              borderColor: CRM_THEME.dataColors[2], // #6E91B3
+              borderColor: PANTONE_THEME.dataColors[4], // #BAA063
               borderWidth: 1,
               padding: 12,
               boxPadding: 6,
@@ -1979,23 +2036,23 @@
           scales: {
             x: {
               grid: { display: false },
-              ticks: { font: { family: 'Inter', weight: '600', size: 11 }, color: CRM_THEME.textMuted }
+              ticks: { font: { family: 'Inter', weight: '600', size: 11 }, color: PANTONE_THEME.textMuted }
             },
             y: {
               type: 'linear',
               position: 'left',
               beginAtZero: true,
-              grid: { color: CRM_THEME.grid },
-              ticks: { callback: v => `${v}%`, font: { family: 'Inter', weight: '600', size: 11 }, color: CRM_THEME.tableAccent },
-              title: { display: true, text: 'Índice de Rotación General (%)', font: { family: 'Inter', weight: '700', size: 12 }, color: CRM_THEME.tableAccent }
+              grid: { color: PANTONE_THEME.grid },
+              ticks: { callback: v => `${v}%`, font: { family: 'Inter', weight: '600', size: 11 }, color: PANTONE_THEME.dataColors[4] },
+              title: { display: true, text: 'Índice de Rotación General (%)', font: { family: 'Inter', weight: '700', size: 12 }, color: PANTONE_THEME.dataColors[4] }
             },
             y1: {
               type: 'linear',
               position: 'right',
               beginAtZero: true,
               grid: { drawOnChartArea: false },
-              ticks: { precision: 0, font: { family: 'Inter', weight: '600', size: 11 }, color: CRM_THEME.dataColors[0] }, // #37638B
-              title: { display: true, text: 'Personal Retirado (Bajas)', font: { family: 'Inter', weight: '700', size: 12 }, color: CRM_THEME.dataColors[0] }
+              ticks: { precision: 0, font: { family: 'Inter', weight: '600', size: 11 }, color: PANTONE_THEME.foreground },
+              title: { display: true, text: 'Personal Retirado (Bajas)', font: { family: 'Inter', weight: '700', size: 12 }, color: PANTONE_THEME.foreground }
             }
           }
         }
@@ -2003,7 +2060,7 @@
     }
 
     // =========================================================================
-    // 🏭 GRÁFICO 2: ÍNDICE DE ROTACIÓN POR CENTRO DE COSTO (CRM Pipeline Blue Theme)
+    // 🏭 GRÁFICO 2: ÍNDICE DE ROTACIÓN POR CENTRO DE COSTO (Pantone Industrial Palette)
     // =========================================================================
     function renderGraficoCecos() {
       if (chartCecosRanking) chartCecosRanking.destroy();
@@ -2014,10 +2071,10 @@
       const labelsRanking = cecosOrdenados.map(c => `${c.cecosCod} · ${c.nCentroCosto}`);
       const dataRanking = cecosOrdenados.map(c => Number(c.indiceRotacionAcum.toFixed(2)));
 
-      // Aplicar armónicamente la paleta CRM Pipeline Blue Theme a cada barra por CECO
-      const coloresRanking = cecosOrdenados.map((_, i) => CRM_THEME.dataColors[i % CRM_THEME.dataColors.length]);
-      const bordesRanking = cecosOrdenados.map((_, i) => CRM_THEME.dataColors[(i + 1) % CRM_THEME.dataColors.length]);
-      const hoverColoresRanking = cecosOrdenados.map(() => CRM_THEME.tableAccent);
+      // Aplicar armónicamente la paleta Pantone Industrial a cada barra por CECO
+      const coloresRanking = cecosOrdenados.map((_, i) => PANTONE_THEME.dataColors[i % PANTONE_THEME.dataColors.length]);
+      const bordesRanking = cecosOrdenados.map((_, i) => PANTONE_THEME.dataColors[(i + 1) % PANTONE_THEME.dataColors.length]);
+      const hoverColoresRanking = cecosOrdenados.map(() => PANTONE_THEME.tableAccent);
 
       const ctxR = document.getElementById('chartCecosRanking').getContext('2d');
       chartCecosRanking = new Chart(ctxR, {
@@ -2042,12 +2099,12 @@
           plugins: {
             legend: { display: false },
             tooltip: {
-              backgroundColor: CRM_THEME.tableAccent,
-              titleColor: CRM_THEME.dataColors[7], // #B9D2E8
+              backgroundColor: PANTONE_THEME.foreground,
+              titleColor: PANTONE_THEME.tableAccent,
               titleFont: { family: 'Inter', weight: '700', size: 13 },
               bodyFont: { family: 'Inter', size: 12 },
               bodyColor: '#FFFFFF',
-              borderColor: CRM_THEME.dataColors[2], // #6E91B3
+              borderColor: PANTONE_THEME.dataColors[4],
               borderWidth: 1,
               padding: 12,
               callbacks: {
@@ -2066,13 +2123,13 @@
           scales: {
             x: {
               beginAtZero: true,
-              grid: { color: CRM_THEME.grid },
-              ticks: { callback: v => `${v}%`, font: { family: 'Inter', weight: '600', size: 11 }, color: CRM_THEME.tableAccent },
-              title: { display: true, text: 'Índice de Rotación Acumulado (%)', font: { family: 'Inter', weight: '700', size: 12 }, color: CRM_THEME.tableAccent }
+              grid: { color: PANTONE_THEME.grid },
+              ticks: { callback: v => `${v}%`, font: { family: 'Inter', weight: '600', size: 11 }, color: PANTONE_THEME.foreground },
+              title: { display: true, text: 'Índice de Rotación Acumulado (%)', font: { family: 'Inter', weight: '700', size: 12 }, color: PANTONE_THEME.foreground }
             },
             y: {
               grid: { display: false },
-              ticks: { font: { family: 'Inter', weight: '600', size: 11 }, color: CRM_THEME.foreground, autoSkip: false }
+              ticks: { font: { family: 'Inter', weight: '600', size: 11 }, color: PANTONE_THEME.foreground, autoSkip: false }
             }
           }
         }
@@ -2182,7 +2239,7 @@
               <td class="num">${fmtNum(promEmpresa, 1)}</td>
               <td class="num">${fmtNum(totalRet)}</td>
               <td class="num">${varTotal >= 0 ? '+' : ''}${fmtNum(varTotal)}</td>
-              <td class="num" style="color: #F5B921;">${fmtPct(rotTotalPeriodo)} (Acum.)</td>
+              <td class="num" style="color: var(--pantone-yellow); font-weight: 800;">${fmtPct(rotTotalPeriodo)} (Acum.)</td>
               <td></td>
             </tr>`;
         }
@@ -2277,7 +2334,7 @@
               <td class="num">${fmtNum(sumProm, 1)}</td>
               <td class="num">${fmtNum(sumRet)}</td>
               <td class="num">${sumVar >= 0 ? '+' : ''}${fmtNum(sumVar)}</td>
-              <td class="num" style="color: #F5B921;">${fmtPct(rotGrupo)}</td>
+              <td class="num" style="color: var(--pantone-yellow); font-weight: 800;">${fmtPct(rotGrupo)}</td>
               <td></td>
             </tr>`;
         }
