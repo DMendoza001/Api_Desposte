@@ -4,57 +4,96 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard de Rendimiento Operativo de Chuletas - Desposte</title>
+  <title>Dashboard de Rendimiento - Chuletas</title>
+
   <!-- Google Fonts: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
     rel="stylesheet">
+
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <!-- SheetJS para exportar a Excel (.xlsx) -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
   <!-- Configuración compartida de conexión a la API -->
   <script src="config.js"></script>
+
   <style>
     /* =========================================================================
-       🎨 PALETA PANTONE INDUSTRIAL
+       🎨 PALETA: INDUSTRIAL SLATE & GOLD
        ========================================================================= */
     :root {
-      --pantone-yellow: #F4D03F;
-      --pantone-yellow-light: #F8CC5A;
-      --pantone-gold: #BAA063;
-      --pantone-dark: #2E2A2F;
-      --pantone-darker: #252C37;
-      --pantone-gray-dark: #605C5E;
-      --pantone-gray-med: #878994;
-      --pantone-gray-light: #CDCAC0;
-      --pantone-bg: #F2F4F8;
-      --pantone-card: #FFFFFF;
-      --pantone-border: #E2E8F0;
+      /* Tokens Oficiales: Industrial Slate & Gold */
+      --isg-gold-bright: #F4D03F;
+      /* 01. Vivid Gold / Yellow */
+      --isg-slate-dark: #34495E;
+      /* 02. Dark Slate Plomo */
+      --isg-slate-med: #5D6D7E;
+      /* 03. Medium Slate Plomo */
+      --isg-slate-cool: #85929E;
+      /* 04. Cool Slate Plomo */
+      --isg-slate-deep: #2C3E50;
+      /* 05. Midnight Slate Plomo */
+      --isg-gold-rich: #D4AC0D;
+      /* 06. Rich Industrial Gold */
+      --isg-slate-charcoal: #1C2833;
+      /* 07. Charcoal Slate Antracita */
+      --isg-slate-silver: #AEB6BF;
+      /* 08. Silver Slate Plomo */
+      --isg-slate-stone: #7F8C8D;
+      /* 09. Stone Gray Plomo */
+      --isg-gold-bronze: #B7950B;
+      /* 10. Dark Bronze Gold */
+
+      /* Roles Estructurales */
+      --bg-canvas: #F2F4F8;
+      --text-dark: #2E2A2F;
       --table-accent: #F4D03F;
 
-      /* Mapeo de compatibilidad con variables */
-      --navy-peony: #2E2A2F;
-      --cyan-blue: #F4D03F;
-      --cool-blue: #CDCAC0;
-      --blue-sapphire: #252C37;
-      --foggy-dew: #CDCAC0;
-      --lagoon: #BAA063;
-      --teal-blue: #605C5E;
-      --aegean-blue: #878994;
+      /* Mapeos funcionales */
+      --pantone-yellow: #F4D03F;
+      --pantone-yellow-light: #F8CC5A;
+      --pantone-yellow-soft: rgba(244, 208, 63, 0.16);
+      --pantone-yellow-border: rgba(244, 208, 63, 0.45);
+      --pantone-gold: #D4AC0D;
+      --pantone-gold-soft: rgba(212, 172, 13, 0.16);
+      --pantone-gold-border: rgba(212, 172, 13, 0.4);
+      --pantone-dark: #2C3E50;
+      --pantone-darker: #1C2833;
+      --pantone-gray-dark: #34495E;
+      --pantone-gray-med: #5D6D7E;
+      --pantone-gray-light: #AEB6BF;
+      --pantone-bg: #F2F4F8;
+      --pantone-card: #FFFFFF;
+      --pantone-card-alt: #F8FAFC;
+      --pantone-border: #E2E8F0;
+      --pantone-border-subtle: #EDF2F7;
 
-      --bg-canvas: #F2F4F8;
+      /* Mapeo de compatibilidad */
+      --navy-peony: #2C3E50;
+      --cyan-blue: #F4D03F;
+      --cool-blue: #AEB6BF;
+      --blue-sapphire: #1C2833;
+      --foggy-dew: #AEB6BF;
+      --lagoon: #D4AC0D;
+      --teal-blue: #5D6D7E;
+      --aegean-blue: #34495E;
+
       --bg-card: #FFFFFF;
       --border-ui: #E2E8F0;
-      --text-dark: #2E2A2F;
-      --text-muted: #605C5E;
+      --text-muted: #5D6D7E;
       --success: #10B981;
       --warning: #F59E0B;
       --danger: #EF4444;
-      --shadow-sm: 0 1px 3px rgba(46, 42, 47, 0.06), 0 1px 2px rgba(46, 42, 47, 0.04);
-      --shadow-md: 0 4px 6px -1px rgba(46, 42, 47, 0.08), 0 2px 4px -1px rgba(46, 42, 47, 0.04);
-      --shadow-lg: 0 10px 15px -3px rgba(46, 42, 47, 0.1), 0 4px 6px -2px rgba(46, 42, 47, 0.05);
+      --shadow-sm: 0 1px 3px rgba(28, 40, 51, 0.06), 0 1px 2px rgba(28, 40, 51, 0.04);
+      --shadow-md: 0 4px 6px -1px rgba(28, 40, 51, 0.08), 0 2px 4px -1px rgba(28, 40, 51, 0.04);
+      --shadow-lg: 0 10px 15px -3px rgba(28, 40, 51, 0.12), 0 4px 6px -2px rgba(28, 40, 51, 0.06);
     }
 
     * {
@@ -67,13 +106,20 @@
     body {
       background-color: var(--bg-canvas);
       color: var(--text-dark);
-      padding: 20px 24px;
+      padding: 10px 15px 40px;
       min-height: 100vh;
     }
 
+    .dashboard-chuletas-wrapper {
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+
     /* Header */
-    header {
+    .header-banner {
       background: linear-gradient(135deg, var(--pantone-dark) 0%, var(--pantone-darker) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-left: 6px solid var(--pantone-yellow);
       color: #FFFFFF;
       padding: 22px 28px;
       border-radius: 12px;
@@ -84,21 +130,36 @@
       flex-wrap: wrap;
       gap: 16px;
       box-shadow: var(--shadow-lg);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header-banner::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--pantone-yellow), var(--pantone-gold), var(--pantone-yellow-light));
     }
 
     .header-info h1 {
       font-size: 1.5rem;
       font-weight: 700;
       letter-spacing: -0.02em;
+      margin-bottom: 0;
       display: flex;
       align-items: center;
       gap: 10px;
+      color: #FFFFFF;
     }
 
     .header-info p {
       font-size: 0.88rem;
-      color: var(--cool-blue);
+      color: var(--pantone-gray-light);
       margin-top: 4px;
+      margin-bottom: 0;
       font-weight: 400;
     }
 
@@ -116,8 +177,9 @@
       border-radius: 9999px;
       font-size: 0.8rem;
       font-weight: 600;
-      background: rgba(255, 255, 255, 0.12);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: var(--pantone-yellow-soft);
+      border: 1px solid var(--pantone-yellow-border);
+      color: var(--pantone-yellow);
       backdrop-filter: blur(8px);
     }
 
@@ -125,7 +187,7 @@
       width: 9px;
       height: 9px;
       border-radius: 50%;
-      background-color: #94A3B8;
+      background-color: var(--pantone-gray-med);
       display: inline-block;
     }
 
@@ -135,7 +197,8 @@
     }
 
     .status-dot.loading {
-      background-color: #F59E0B;
+      background-color: var(--pantone-yellow);
+      box-shadow: 0 0 8px var(--pantone-yellow);
       animation: pulseDot 1s infinite alternate;
     }
 
@@ -153,6 +216,33 @@
         transform: scale(1.2);
         opacity: 1;
       }
+    }
+
+    /* Alerta de Error */
+    .alert-error-box {
+      background: #FEE2E2;
+      border: 1px solid #FCA5A5;
+      color: #991B1B;
+      padding: 14px 18px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 0.88rem;
+    }
+
+    .alert-error-box.show {
+      display: flex;
+    }
+
+    .btn-close-alert {
+      background: transparent;
+      border: none;
+      font-size: 1.1rem;
+      color: #991B1B;
+      cursor: pointer;
     }
 
     /* Panel de Filtros */
@@ -180,7 +270,7 @@
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.03em;
-      color: var(--navy-peony);
+      color: var(--pantone-dark);
     }
 
     .filter-group input,
@@ -199,8 +289,8 @@
 
     .filter-group input:focus,
     .filter-group select:focus {
-      border-color: var(--cyan-blue);
-      box-shadow: 0 0 0 3px rgba(18, 149, 193, 0.15);
+      border-color: var(--pantone-gold);
+      box-shadow: 0 0 0 3px var(--pantone-yellow-soft);
     }
 
     /* Botones de acción */
@@ -211,26 +301,33 @@
       align-items: center;
     }
 
-    .btn-primary {
-      background: linear-gradient(135deg, var(--cyan-blue) 0%, var(--blue-sapphire) 100%);
-      color: #FFFFFF;
-      border: none;
+    .btn-primary-action {
+      background: linear-gradient(135deg, var(--pantone-yellow) 0%, var(--pantone-yellow-light) 100%);
+      border: 1px solid rgba(244, 208, 63, 0.6);
+      color: var(--pantone-dark);
       padding: 9px 18px;
       border-radius: 8px;
       cursor: pointer;
       font-size: 0.85rem;
-      font-weight: 600;
+      font-weight: 700;
       display: inline-flex;
       align-items: center;
       gap: 7px;
-      box-shadow: var(--shadow-sm);
+      box-shadow: 0 2px 6px rgba(244, 208, 63, 0.35);
       transition: all 0.2s ease;
     }
 
-    .btn-primary:hover {
-      background: linear-gradient(135deg, var(--blue-sapphire) 0%, var(--navy-peony) 100%);
+    .btn-primary-action:hover:not(:disabled) {
+      background: linear-gradient(135deg, var(--pantone-yellow-light) 0%, var(--pantone-gold) 100%);
+      color: var(--pantone-dark);
+      border-color: var(--pantone-gold);
       transform: translateY(-1px);
-      box-shadow: var(--shadow-md);
+      box-shadow: 0 4px 10px rgba(186, 160, 99, 0.4);
+    }
+
+    .btn-primary-action:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
     }
 
     .btn-reset {
@@ -245,9 +342,10 @@
       transition: all 0.2s;
     }
 
-    .btn-reset:hover {
+    .btn-reset:hover:not(:disabled) {
       background-color: #EEF2F6;
-      color: var(--text-dark);
+      border-color: var(--pantone-gold);
+      color: var(--pantone-dark);
     }
 
     /* Indicadores Clave (KPIs) */
@@ -261,17 +359,18 @@
     .kpi-card {
       background-color: var(--bg-card);
       border: 1px solid var(--border-ui);
-      border-top: 4px solid var(--cyan-blue);
+      border-top: 4px solid var(--pantone-yellow);
       padding: 18px 22px;
       border-radius: 10px;
       box-shadow: var(--shadow-sm);
       position: relative;
       overflow: hidden;
-      transition: transform 0.2s, box-shadow 0.2s;
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
     }
 
     .kpi-card:hover {
       transform: translateY(-2px);
+      border-color: var(--pantone-gold);
       box-shadow: var(--shadow-md);
     }
 
@@ -287,13 +386,13 @@
     .kpi-value {
       font-size: 1.7rem;
       font-weight: 800;
-      color: var(--navy-peony);
+      color: var(--pantone-dark);
       letter-spacing: -0.02em;
     }
 
     .kpi-sub {
       font-size: 0.78rem;
-      color: var(--aegean-blue);
+      color: var(--pantone-gray-dark);
       margin-top: 5px;
       font-weight: 500;
       display: flex;
@@ -335,14 +434,16 @@
     .chart-header h3 {
       font-size: 1rem;
       font-weight: 700;
-      color: var(--navy-peony);
+      color: var(--pantone-dark);
+      margin-bottom: 0;
     }
 
     .chart-header .badge-info {
       font-size: 0.75rem;
-      font-weight: 600;
-      color: var(--cyan-blue);
-      background: rgba(18, 149, 193, 0.1);
+      font-weight: 700;
+      color: var(--pantone-dark);
+      background: var(--pantone-yellow-soft);
+      border: 1px solid var(--pantone-yellow-border);
       padding: 4px 10px;
       border-radius: 9999px;
     }
@@ -353,9 +454,7 @@
       width: 100%;
     }
 
-    /* =========================================================================
-       🗂️ ESTILOS DE MATRIZ JERÁRQUICA: Tipo ➔ TipoChuleta ➔ Plantilla-NPlantilla
-       ========================================================================= */
+    /* Matriz Jerárquica */
     .matrix-card {
       background-color: var(--bg-card);
       border: 1px solid var(--border-ui);
@@ -385,13 +484,14 @@
     .matrix-header-top h3 {
       font-size: 1.12rem;
       font-weight: 700;
-      color: var(--navy-peony);
+      color: var(--pantone-dark);
       display: flex;
       align-items: center;
       gap: 8px;
+      margin-bottom: 0;
     }
 
-    /* Pestañas de Vista Temporal */
+    /* Pestañas de Segmentación Temporal (Diario, Semanal, Mensual) */
     .matrix-tabs-nav {
       display: inline-flex;
       background: #E2E8F0;
@@ -405,7 +505,7 @@
       align-items: center;
       gap: 8px;
       padding: 8px 16px;
-      border: none;
+      border: 1px solid transparent;
       background: transparent;
       color: var(--text-muted);
       font-weight: 600;
@@ -416,14 +516,15 @@
     }
 
     .matrix-tab-btn:hover {
-      color: var(--navy-peony);
-      background: rgba(255, 255, 255, 0.55);
+      color: var(--pantone-dark);
+      background: rgba(255, 255, 255, 0.65);
     }
 
     .matrix-tab-btn.active {
-      background: var(--navy-peony);
-      color: #FFFFFF;
-      box-shadow: 0 2px 6px rgba(34, 58, 94, 0.25);
+      background: var(--pantone-dark);
+      color: var(--pantone-yellow);
+      border-color: var(--pantone-yellow);
+      box-shadow: 0 2px 6px rgba(44, 62, 80, 0.35);
     }
 
     .tab-badge {
@@ -437,11 +538,10 @@
     }
 
     .matrix-tab-btn.active .tab-badge {
-      background: rgba(255, 255, 255, 0.25);
-      color: #FFFFFF;
+      background: rgba(244, 208, 63, 0.25);
+      color: var(--pantone-yellow);
     }
 
-    /* Barra de herramientas / Búsqueda y Acciones */
     .matrix-toolbar {
       display: flex;
       justify-content: space-between;
@@ -468,8 +568,8 @@
     }
 
     .table-search input:focus {
-      border-color: var(--cyan-blue);
-      box-shadow: 0 0 0 3px rgba(18, 149, 193, 0.15);
+      border-color: var(--pantone-gold);
+      box-shadow: 0 0 0 3px var(--pantone-yellow-soft);
     }
 
     .table-search-icon {
@@ -496,17 +596,17 @@
       border-radius: 7px;
       border: 1px solid var(--border-ui);
       background: #FFFFFF;
-      color: var(--navy-peony);
+      color: var(--pantone-dark);
       font-size: 0.8rem;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.15s ease;
     }
 
-    .btn-tool:hover {
-      background: var(--bg-canvas);
-      border-color: var(--cyan-blue);
-      color: var(--blue-sapphire);
+    .btn-tool:hover:not(:disabled) {
+      background: #F8FAFC;
+      border-color: var(--pantone-gold);
+      color: var(--pantone-dark);
       transform: translateY(-1px);
     }
 
@@ -517,7 +617,7 @@
       font-weight: 700;
     }
 
-    .btn-excel:hover {
+    .btn-excel:hover:not(:disabled) {
       background: #166534;
       border-color: #166534;
       color: #FFFFFF;
@@ -526,21 +626,21 @@
     }
 
     .btn-excel-flat {
-      background: #EFF6FF;
-      border-color: #93C5FD;
-      color: #1E40AF;
+      background: var(--pantone-yellow-soft);
+      border-color: var(--pantone-yellow-border);
+      color: var(--pantone-dark);
       font-weight: 700;
     }
 
-    .btn-excel-flat:hover {
-      background: #1E40AF;
-      border-color: #1E40AF;
-      color: #FFFFFF;
+    .btn-excel-flat:hover:not(:disabled) {
+      background: var(--pantone-yellow);
+      border-color: var(--pantone-yellow);
+      color: var(--pantone-dark);
       transform: translateY(-1px);
-      box-shadow: 0 2px 6px rgba(30, 64, 175, 0.25);
+      box-shadow: 0 2px 6px rgba(244, 208, 63, 0.35);
     }
 
-    /* Contenedor y Tabla */
+    /* Tabla */
     .table-wrapper {
       overflow-x: auto;
       max-height: 580px;
@@ -554,22 +654,22 @@
     }
 
     .matrix-table th {
-      background-color: var(--navy-peony);
+      background-color: var(--pantone-dark);
       color: #FFFFFF;
       padding: 12px 14px;
       position: sticky;
       top: 0;
       z-index: 10;
       text-align: left;
-      font-weight: 600;
+      font-weight: 700;
       font-size: 0.8rem;
       letter-spacing: 0.02em;
-      border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+      border-bottom: 3px solid var(--pantone-yellow);
     }
 
     /* Fila Nivel 1: PERIODO */
     .row-periodo {
-      background: linear-gradient(90deg, #1E293B 0%, #29384D 100%) !important;
+      background: linear-gradient(90deg, #1C2833 0%, #2C3E50 100%) !important;
       color: #FFFFFF !important;
       font-weight: 700;
       cursor: pointer;
@@ -578,33 +678,32 @@
     }
 
     .row-periodo:hover {
-      background: linear-gradient(90deg, #0F172A 0%, #1E293B 100%) !important;
+      background: linear-gradient(90deg, #151E27 0%, #1C2833 100%) !important;
     }
 
     .row-periodo td {
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+      border-bottom: 1px solid #34495E;
       padding: 11px 14px;
     }
 
     .periodo-title {
-      font-weight: 700;
-      font-size: 0.95rem;
-      color: #F8FAFC;
+      font-size: 0.92rem;
       letter-spacing: -0.01em;
+      color: var(--pantone-yellow);
+      font-weight: 700;
     }
 
     .periodo-count {
       font-size: 0.74rem;
-      opacity: 0.75;
-      font-weight: 400;
+      font-weight: 500;
+      color: var(--pantone-gray-light);
       margin-left: 8px;
     }
 
-    /* Fila Nivel 2: TIPO */
+    /* Fila Nivel 2: TIPO PROCESO */
     .row-tipo {
-      background-color: #EBF3FA !important;
-      color: #0F172A !important;
+      background-color: #F8F9FA !important;
+      color: var(--pantone-dark) !important;
       font-weight: 600;
       cursor: pointer;
       user-select: none;
@@ -612,7 +711,7 @@
     }
 
     .row-tipo:hover {
-      background-color: #DEEBF5 !important;
+      background-color: rgba(244, 208, 63, 0.12) !important;
     }
 
     .row-tipo td {
@@ -628,15 +727,22 @@
       border-radius: 6px;
       font-size: 0.78rem;
       font-weight: 700;
-      background: #D0E4F3;
-      color: var(--blue-sapphire);
-      border: 1px solid #B8D6ED;
+      background: var(--pantone-gold-soft);
+      color: var(--pantone-dark);
+      border: 1px solid var(--pantone-gold-border);
+    }
+
+    .tipo-count {
+      font-size: 0.74rem;
+      font-weight: 500;
+      color: var(--pantone-gray-dark);
+      margin-left: 8px;
     }
 
     /* Fila Nivel 3: TIPO CHULETA */
     .row-chuleta {
-      background-color: #F8FAFC !important;
-      color: #1E293B !important;
+      background-color: #FFFFFF !important;
+      color: var(--pantone-dark) !important;
       font-weight: 600;
       cursor: pointer;
       user-select: none;
@@ -644,7 +750,7 @@
     }
 
     .row-chuleta:hover {
-      background-color: #F1F5F9 !important;
+      background-color: rgba(244, 208, 63, 0.08) !important;
     }
 
     .row-chuleta td {
@@ -656,19 +762,19 @@
       display: inline-flex;
       align-items: center;
       gap: 5px;
-      padding: 2px 9px;
+      padding: 3px 10px;
       border-radius: 6px;
-      font-size: 0.76rem;
+      font-size: 0.78rem;
       font-weight: 700;
-      background: rgba(18, 149, 193, 0.12);
-      color: var(--blue-sapphire);
-      border: 1px solid rgba(18, 149, 193, 0.25);
+      background: var(--pantone-yellow-soft);
+      color: var(--pantone-dark);
+      border: 1px solid var(--pantone-yellow-border);
     }
 
-    /* Fila Nivel 4: PLANTILLA-NPLANTILLA */
+    /* Fila Nivel 4: PLANTILLA - NPLANTILLA */
     .row-plantilla {
       background-color: #FFFFFF !important;
-      color: #1E293B;
+      color: var(--pantone-dark);
       transition: background 0.12s;
     }
 
@@ -677,7 +783,7 @@
     }
 
     .row-plantilla:hover {
-      background-color: #F1F5F9 !important;
+      background-color: rgba(244, 208, 63, 0.06) !important;
     }
 
     .row-plantilla td {
@@ -693,8 +799,9 @@
 
     .plantilla-code {
       display: inline-block;
-      background: #E2E8F0;
-      color: #334155;
+      background: #EBEDEF;
+      color: var(--pantone-dark);
+      border: 1px solid #D5D8DC;
       font-size: 0.75rem;
       font-weight: 700;
       padding: 2px 6px;
@@ -704,7 +811,7 @@
 
     .plantilla-name {
       font-weight: 500;
-      color: var(--text-dark);
+      color: var(--pantone-dark);
     }
 
     /* Icono de árbol */
@@ -722,30 +829,38 @@
       transition: transform 0.15s ease;
     }
 
+    .row-periodo .tree-toggle-icon {
+      background: var(--pantone-yellow-soft);
+      color: var(--pantone-yellow);
+      border: 1px solid var(--pantone-yellow-border);
+    }
+
     .row-tipo .tree-toggle-icon {
-      background: rgba(16, 88, 127, 0.12);
-      color: var(--blue-sapphire);
+      background: var(--pantone-gold-soft);
+      color: var(--pantone-dark);
+      border: 1px solid var(--pantone-gold-border);
     }
 
     .row-chuleta .tree-toggle-icon {
-      background: rgba(18, 149, 193, 0.15);
-      color: var(--cyan-blue);
+      background: var(--pantone-yellow-soft);
+      color: var(--pantone-dark);
+      border: 1px solid var(--pantone-yellow-border);
     }
 
-    /* Total General en Footer */
+    /* Total General Footer */
     .row-grand-total {
-      background: #0F172A !important;
+      background: var(--pantone-darker) !important;
       color: #FFFFFF !important;
       font-weight: 700;
       position: sticky;
       bottom: 0;
       z-index: 8;
-      box-shadow: 0 -3px 10px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 -3px 10px rgba(0, 0, 0, 0.2);
     }
 
     .row-grand-total td {
       padding: 12px 14px;
-      border-top: 2px solid var(--cyan-blue);
+      border-top: 3px solid var(--pantone-yellow);
       border-bottom: none;
     }
 
@@ -763,7 +878,7 @@
     }
 
     .text-teal {
-      color: var(--teal-blue);
+      color: var(--pantone-gold);
     }
 
     .text-muted {
@@ -785,36 +900,29 @@
     .badge-good {
       background-color: #DCFCE7;
       color: #166534;
+      border: 1px solid #86EFAC;
     }
 
     .badge-mid {
-      background-color: #FEF3C7;
-      color: #92400E;
+      background-color: var(--pantone-yellow-soft);
+      color: #854D0E;
+      border: 1px solid var(--pantone-yellow-border);
     }
 
     .badge-low {
       background-color: #FEE2E2;
       color: #991B1B;
+      border: 1px solid #FCA5A5;
     }
 
-    .badge-tag {
-      padding: 3px 8px;
-      border-radius: 4px;
-      font-size: 0.72rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      background: #E2E8F0;
-      color: #334155;
-    }
-
-    /* Modal / Overlay de Carga */
+    /* Spinner y Overlay */
     .loading-overlay {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(15, 23, 42, 0.45);
+      background: rgba(37, 44, 55, 0.6);
       backdrop-filter: blur(4px);
       display: flex;
       flex-direction: column;
@@ -835,7 +943,8 @@
       background: #FFFFFF;
       padding: 30px 40px;
       border-radius: 14px;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--pantone-border);
       text-align: center;
       max-width: 420px;
       width: 90%;
@@ -845,7 +954,7 @@
       width: 48px;
       height: 48px;
       border: 4px solid #E2E8F0;
-      border-top-color: var(--cyan-blue);
+      border-top-color: var(--pantone-yellow);
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
       margin: 0 auto 16px;
@@ -859,7 +968,7 @@
 
     .loading-box h4 {
       font-size: 1.1rem;
-      color: var(--navy-peony);
+      color: var(--pantone-dark);
       margin-bottom: 6px;
       font-weight: 700;
     }
@@ -875,7 +984,8 @@
       position: fixed;
       bottom: 24px;
       right: 24px;
-      background: #0F172A;
+      background: var(--pantone-darker);
+      border: 1px solid var(--pantone-yellow-border);
       color: #FFFFFF;
       padding: 12px 20px;
       border-radius: 8px;
@@ -909,200 +1019,218 @@
     </div>
   </div>
 
-  <!-- Header -->
-  <header>
-    <div class="header-info">
-      <h1>📊 Control de Rendimiento - Chuletas</h1>
-      <p>Kilos Origen (TTra 13) vs. Kilos Resultado (TTra 4 excl. Harinas y Merma)</p>
-    </div>
-    <div class="header-status">
-      <div id="apiStatusBadge" class="status-badge">
-        <span class="status-dot"></span>
-        <span id="apiStatusText">Listo para consultar</span>
+  <div class="dashboard-chuletas-wrapper">
+    <!-- Header -->
+    <header class="header-banner">
+      <div class="header-info">
+        <h1><i class="fa-solid fa-chart-column me-2"></i>Control de Rendimiento - Chuletas</h1>
+        <p>Kilos Origen (TTra 13) vs. Kilos Resultado (TTra 4 excl. Harinas y Merma)</p>
       </div>
-    </div>
-  </header>
-
-  <!-- Panel de Filtros -->
-  <section class="filter-panel">
-    <div class="filter-group">
-      <label for="fechaInicio">Fecha Inicial:</label>
-      <input type="date" id="fechaInicio">
-    </div>
-
-    <div class="filter-group">
-      <label for="fechaFin">Fecha Final:</label>
-      <input type="date" id="fechaFin">
-    </div>
-
-    <div class="filter-group">
-      <label for="tipoFilter">Tipo de Proceso (Tipo):</label>
-      <select id="tipoFilter">
-        <option value="ALL">-- Todos los Tipos --</option>
-      </select>
-    </div>
-
-    <div class="filter-group">
-      <label for="tipoChuletaFilter">Tipo Chuleta:</label>
-      <select id="tipoChuletaFilter">
-        <option value="ALL">-- Todos (Fresco/Congelado) --</option>
-      </select>
-    </div>
-
-    <div class="filter-group">
-      <label for="plantillaFilter">Plantilla (NPlantilla):</label>
-      <select id="plantillaFilter">
-        <option value="ALL">-- Todas las Plantillas --</option>
-      </select>
-    </div>
-
-    <div class="filter-group">
-      <label for="temporalFilter">Serie Temporal:</label>
-      <select id="temporalFilter">
-        <option value="diario">Diario</option>
-        <option value="semanal" selected>Semanal</option>
-        <option value="mensual">Mensual</option>
-        <option value="anual">Año</option>
-      </select>
-    </div>
-
-    <div class="btn-action-group">
-      <button class="btn-primary" id="btnConsultar" onclick="consultarApi(false)">
-        <span>🚀</span> Generar Reporte
-      </button>
-      <button class="btn-reset" onclick="resetFilters()">
-        ↺ Reestablecer
-      </button>
-    </div>
-  </section>
-
-  <!-- Indicadores Clave (KPIs) -->
-  <section class="kpi-container">
-    <div class="kpi-card" style="border-top-color: var(--navy-peony);">
-      <div class="kpi-title">Kilos Origen (TTra 13)</div>
-      <div class="kpi-value" id="kpiOrigen">0.00 kg</div>
-      <div class="kpi-sub">Total Materia Prima Entrada</div>
-    </div>
-    <div class="kpi-card" style="border-top-color: var(--cyan-blue);">
-      <div class="kpi-title">Kilos Resultado (TTra 4 Útiles)</div>
-      <div class="kpi-value" id="kpiResultado">0.00 kg</div>
-      <div class="kpi-sub">Chuletas y Cortes Comerciales</div>
-    </div>
-    <div class="kpi-card" style="border-top-color: var(--teal-blue);">
-      <div class="kpi-title">Rendimiento Ponderado</div>
-      <div class="kpi-value" id="kpiRendimiento">0.00%</div>
-      <div class="kpi-sub" id="kpiRendimientoSub">Resultado / Origen</div>
-    </div>
-    <div class="kpi-card" style="border-top-color: var(--aegean-blue);">
-      <div class="kpi-title">Mermas y Harinas</div>
-      <div class="kpi-value" id="kpiPerdida">0.00 kg</div>
-      <div class="kpi-sub" id="kpiPerdidaPct">0.00% de la MP</div>
-    </div>
-    <div class="kpi-card" style="border-top-color: #8B5CF6;">
-      <div class="kpi-title">Volumen Total Procesado</div>
-      <div class="kpi-value" id="kpiVolumenTotal">0.00 kg</div>
-      <div class="kpi-sub" id="kpiRegistros">0 registros analizados</div>
-    </div>
-  </section>
-
-  <!-- Gráficos -->
-  <section class="charts-grid">
-    <div class="chart-card">
-      <div class="chart-header">
-        <h3 id="chartTimeSeriesTitle">Evolución Temporal del Rendimiento (Semanal)</h3>
-        <span class="badge-info" id="chartTimeSeriesBadge">Rendimiento vs. Origen</span>
+      <div class="header-status">
+        <div class="status-badge">
+          <span class="status-dot" id="statusDot"></span>
+          <span id="statusText">Listo para consultar</span>
+        </div>
       </div>
-      <div class="chart-container">
-        <canvas id="chartTemporal"></canvas>
+    </header>
+
+    <!-- Alerta de Error -->
+    <div id="alertError" class="alert-error-box">
+      <div>
+        <i class="fa-solid fa-triangle-exclamation me-2"></i><strong>Atención:</strong> <span id="errorText"></span>
       </div>
+      <button type="button" class="btn-close-alert" onclick="cerrarError()">✕</button>
     </div>
 
-    <div class="chart-card">
-      <div class="chart-header">
-        <h3>Rendimiento por Plantilla</h3>
-        <span class="badge-info">Ordenado por % Rendimiento</span>
+    <!-- Panel de Filtros -->
+    <section class="filter-panel">
+      <div class="filter-group">
+        <label for="fechaInicio">Fecha Inicial:</label>
+        <input type="date" id="fechaInicio">
       </div>
-      <div class="chart-container">
-        <canvas id="chartPlantillas"></canvas>
+
+      <div class="filter-group">
+        <label for="fechaFin">Fecha Final:</label>
+        <input type="date" id="fechaFin">
       </div>
-    </div>
-  </section>
 
-  <!-- Matriz Jerárquica: Periodo ➔ Tipo ➔ Tipo Chuleta ➔ Plantilla - NPlantilla -->
-  <section class="matrix-card">
-    <div class="matrix-header-bar">
-      <div class="matrix-header-top">
-        <h3 id="matrixTitle">📆 Matriz Jerárquica Semanal (Semana ➔ Tipo ➔ Tipo Chuleta ➔ Plantilla)</h3>
+      <div class="filter-group">
+        <label for="tipoFilter">Tipo de Proceso (Tipo):</label>
+        <select id="tipoFilter">
+          <option value="ALL">-- Todos los Tipos --</option>
+        </select>
+      </div>
 
-        <!-- Pestañas de Frecuencia: Diaria, Semanal, Mensual -->
-        <div class="matrix-tabs-nav">
-          <button class="matrix-tab-btn" id="tabMatrizDiario" onclick="cambiarPestanaMatriz('diario')">
-            <span>📅</span>
-            <span>Diario</span>
-            <span class="tab-badge" id="badgeDiario">0</span>
-          </button>
-          <button class="matrix-tab-btn active" id="tabMatrizSemanal" onclick="cambiarPestanaMatriz('semanal')">
-            <span>📆</span>
-            <span>Semanal</span>
-            <span class="tab-badge" id="badgeSemanal">0</span>
-          </button>
-          <button class="matrix-tab-btn" id="tabMatrizMensual" onclick="cambiarPestanaMatriz('mensual')">
-            <span>📊</span>
-            <span>Mensual</span>
-            <span class="tab-badge" id="badgeMensual">0</span>
-          </button>
+      <div class="filter-group">
+        <label for="tipoChuletaFilter">Tipo Chuleta:</label>
+        <select id="tipoChuletaFilter">
+          <option value="ALL">-- Todos (Fresco/Congelado) --</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="plantillaFilter">Plantilla (NPlantilla):</label>
+        <select id="plantillaFilter">
+          <option value="ALL">-- Todas las Plantillas --</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="temporalFilter">Serie Temporal Gráfica:</label>
+        <select id="temporalFilter">
+          <option value="diario">Diario</option>
+          <option value="semanal" selected>Semanal</option>
+          <option value="mensual">Mensual</option>
+          <option value="anual">Año</option>
+        </select>
+      </div>
+
+      <div class="btn-action-group">
+        <button class="btn-primary-action" id="btnConsultar" onclick="consultarReporte()">
+          <span>🚀 Generar Reporte</span>
+        </button>
+        <button class="btn-reset" id="btnReset" onclick="resetFiltros()">
+          ↺ Reestablecer
+        </button>
+      </div>
+    </section>
+
+    <!-- Indicadores Clave (KPIs) -->
+    <section class="kpi-container">
+      <div class="kpi-card" style="border-top-color: var(--pantone-dark);">
+        <div class="kpi-title">Kilos Origen (TTra 13)</div>
+        <div class="kpi-value" id="kpiOrigen">0.00 kg</div>
+        <div class="kpi-sub">Total Materia Prima Entrada</div>
+      </div>
+      <div class="kpi-card" style="border-top-color: var(--pantone-yellow);">
+        <div class="kpi-title">Kilos Resultado (TTra 4 Útiles)</div>
+        <div class="kpi-value" id="kpiResultado">0.00 kg</div>
+        <div class="kpi-sub">Chuletas y Cortes Comerciales</div>
+      </div>
+      <div class="kpi-card" style="border-top-color: var(--pantone-gold);">
+        <div class="kpi-title">Rendimiento Ponderado</div>
+        <div class="kpi-value" id="kpiRendimiento">0.00%</div>
+        <div class="kpi-sub">Resultado / Origen</div>
+      </div>
+      <div class="kpi-card" style="border-top-color: var(--pantone-gray-dark);">
+        <div class="kpi-title">Mermas y Harinas</div>
+        <div class="kpi-value" id="kpiPerdida">0.00 kg</div>
+        <div class="kpi-sub" id="kpiPerdidaSub">0.00% de la MP</div>
+      </div>
+      <div class="kpi-card" style="border-top-color: var(--pantone-darker);">
+        <div class="kpi-title">Volumen Total Procesado</div>
+        <div class="kpi-value" id="kpiVolumenTotal">0.00 kg</div>
+        <div class="kpi-sub" id="kpiRegistrosSub">0 registros analizados</div>
+      </div>
+    </section>
+
+    <!-- Gráficos -->
+    <section class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3 id="chartTemporalTitle">Evolución Temporal del Rendimiento (Semanal)</h3>
+          <span class="badge-info">Rendimiento vs. Origen</span>
+        </div>
+        <div class="chart-container">
+          <canvas id="chartTemporal"></canvas>
         </div>
       </div>
 
-      <div class="matrix-toolbar">
-        <div class="table-search">
-          <span class="table-search-icon">🔍</span>
-          <input type="text" id="tableSearchInput" placeholder="Buscar periodo, tipo, chuleta o plantilla..."
-            oninput="filtrarMatrizTexto()">
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3>Rendimiento por Plantilla</h3>
+          <span class="badge-info">Top 15 ordenado por % Rendimiento</span>
         </div>
-        <div class="matrix-actions">
-          <button class="btn-tool" onclick="toggleExpandirTodo(true)" title="Expandir todos los periodos y procesos">
-            <span>📂</span> Expandir Todo
-          </button>
-          <button class="btn-tool" onclick="toggleExpandirTodo(false)" title="Colapsar a nivel de Periodo">
-            <span>📁</span> Colapsar Todo
-          </button>
-          <button class="btn-tool btn-excel-flat" onclick="exportarDataPlanaExcel()"
-            title="Descargar data plana del procedimiento almacenado Sp_Informe_Prod_Chuletas en Excel (.xlsx) sin totales">
-            <span>📄</span> Exportar Data Plana SP
-          </button>
-          <button class="btn-tool btn-excel" onclick="exportarMatrizExcel()"
-            title="Descargar datos de la matriz jerárquica con subtotales en Excel (.xlsx)">
-            <span>📊</span> Exportar Matriz
-          </button>
+        <div class="chart-container">
+          <canvas id="chartPlantillas"></canvas>
         </div>
       </div>
-    </div>
+    </section>
 
-    <div class="table-wrapper">
-      <table class="matrix-table" id="matrixTable">
-        <thead>
-          <tr>
-            <th style="min-width: 360px;">Jerarquía: Periodo / Tipo / Tipo Chuleta / Plantilla - NPlantilla</th>
-            <th style="text-align: right; width: 140px;">Kilos Origen (kg)</th>
-            <th style="text-align: right; width: 140px;">Kilos Resultado (kg)</th>
-            <th style="text-align: right; width: 120px;">Harinas (kg)</th>
-            <th style="text-align: right; width: 120px;">Merma (kg)</th>
-            <th style="text-align: right; width: 130px;">Total Pérdida (kg)</th>
-            <th style="text-align: right; width: 130px;">Rendimiento (%)</th>
-          </tr>
-        </thead>
-        <tbody id="tablePlantillasBody">
-          <tr>
-            <td colspan="7" style="text-align:center; padding: 28px; color: var(--text-muted);">
-              Cargando información de la matriz...
-            </td>
-          </tr>
-        </tbody>
-        <tfoot id="tablePlantillasFoot"></tfoot>
-      </table>
-    </div>
-  </section>
+    <!-- Matriz Jerárquica: Periodo ➔ Tipo ➔ Tipo Chuleta ➔ Plantilla - NPlantilla -->
+    <section class="matrix-card">
+      <div class="matrix-header-bar">
+        <div class="matrix-header-top">
+          <h3 id="matrixTitle">📆 Matriz Jerárquica Semanal (Semana ➔ Tipo Proceso ➔ Tipo Chuleta ➔ Plantilla)</h3>
+
+          <!-- Segmentadores Diaria, Semanal y Mensual con contadores dinámicos -->
+          <div class="matrix-tabs-nav">
+            <button class="matrix-tab-btn" id="tabMatrizDiario" onclick="cambiarModoMatriz('diario')">
+              <span>📅</span>
+              <span>Diario</span>
+              <span class="tab-badge" id="badgeDiario">0</span>
+            </button>
+            <button class="matrix-tab-btn active" id="tabMatrizSemanal" onclick="cambiarModoMatriz('semanal')">
+              <span>📆</span>
+              <span>Semanal</span>
+              <span class="tab-badge" id="badgeSemanal">0</span>
+            </button>
+            <button class="matrix-tab-btn" id="tabMatrizMensual" onclick="cambiarModoMatriz('mensual')">
+              <span>📊</span>
+              <span>Mensual</span>
+              <span class="tab-badge" id="badgeMensual">0</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="matrix-toolbar">
+          <div class="table-search">
+            <span class="table-search-icon">🔍</span>
+            <input type="text" id="tableSearchInput" placeholder="Buscar periodo, tipo, tipo chuleta o plantilla..."
+              oninput="filtrarMatrizTexto()">
+          </div>
+          <div class="matrix-actions">
+            <button class="btn-tool" onclick="expandirTodo(true)" title="Expandir todos los periodos y subniveles">
+              <span>📂</span> Expandir Todo
+            </button>
+            <button class="btn-tool" onclick="expandirTodo(false)" title="Colapsar a nivel de Periodo">
+              <span>📁</span> Colapsar Todo
+            </button>
+            <button class="btn-tool btn-excel-flat" id="btnExportarPlana" onclick="exportarDataPlanaExcel()"
+              title="Descargar data plana del procedimiento almacenado Sp_Informe_Prod_Chuletas en Excel (.xlsx) sin totales">
+              <span>📄</span> Exportar Data Plana SP
+            </button>
+            <button class="btn-tool btn-excel" id="btnExportarMatriz" onclick="exportarMatrizExcel()"
+              title="Descargar datos de la matriz jerárquica con subtotales en Excel (.xlsx)">
+              <span>📊</span> Exportar Matriz
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="matrix-table" id="matrixTable">
+          <thead>
+            <tr>
+              <th style="min-width: 360px;">Jerarquía: Periodo / Tipo / Tipo Chuleta / Plantilla - NPlantilla</th>
+              <th style="text-align: right; width: 140px;">Kilos Origen (kg)</th>
+              <th style="text-align: right; width: 140px;">Kilos Resultado (kg)</th>
+              <th style="text-align: right; width: 120px;">Harinas (kg)</th>
+              <th style="text-align: right; width: 120px;">Merma (kg)</th>
+              <th style="text-align: right; width: 130px;">Total Pérdida (kg)</th>
+              <th style="text-align: right; width: 130px;">Rendimiento (%)</th>
+            </tr>
+          </thead>
+          <tbody id="tableMatrixBody">
+            <tr>
+              <td colspan="7" style="text-align: center; padding: 55px 20px; color: var(--text-muted);">
+                <div style="font-size: 2.2rem; margin-bottom: 10px;">📋</div>
+                <div style="font-weight: 700; font-size: 1.05rem; color: var(--pantone-dark); margin-bottom: 6px;">
+                  Dashboard listo para generar reporte
+                </div>
+                <div style="font-size: 0.85rem; max-width: 520px; margin: 0 auto; line-height: 1.5;">
+                  Las fechas están configuradas para los últimos 7 días.<br />
+                  Ajuste el rango si lo requiere y haga clic en <strong style="color: var(--pantone-dark);">"🚀 Generar
+                    Reporte"</strong> para cargar los datos.
+                </div>
+              </td>
+            </tr>
+          </tbody>
+          <tfoot id="tableMatrixFoot"></tfoot>
+        </table>
+      </div>
+    </section>
+  </div>
 
   <!-- Notificación Toast -->
   <div id="toastNotification" class="toast-notification">
@@ -1110,7 +1238,60 @@
     <span id="toastMsg">Mensaje</span>
   </div>
 
+  <!-- =========================================================================
+       LÓGICA JAVASCRIPT DEL DASHBOARD (EQUIVALENTE AL CÓDIGO BLAZOR)
+       ========================================================================= -->
   <script>
+    // =========================================================================
+    // 🎨 PALETA DE ESTILOS: Industrial Slate & Gold
+    // =========================================================================
+    const INDUSTRIAL_SLATE_GOLD = {
+      name: "Industrial Slate & Gold",
+      dataColors: [
+        "#F4D03F",
+        "#34495E",
+        "#5D6D7E",
+        "#85929E",
+        "#2C3E50",
+        "#D4AC0D",
+        "#1C2833",
+        "#AEB6BF",
+        "#7F8C8D",
+        "#B7950B"
+      ],
+      background: "#F2F4F8",
+      foreground: "#2E2A2F",
+      tableAccent: "#F4D03F",
+      card: "#FFFFFF",
+      grid: "#E2E8F0",
+      textMuted: "#5D6D7E",
+      white: "#FFFFFF"
+    };
+
+    // Alias para retrocompatibilidad
+    const PANTONE_THEME = INDUSTRIAL_SLATE_GOLD;
+
+    // =========================================================================
+    // 📊 PALETA GRÁFICA: INDUSTRIAL SLATE & GOLD
+    // Paleta calibrada con los 10 tonos exactos oficiales
+    // =========================================================================
+    const GRAFICOS_PALETA = {
+      // 10 tonos exactos de la paleta "Industrial Slate & Gold"
+      rankingPlantillas: INDUSTRIAL_SLATE_GOLD.dataColors,
+      // Gráfico de Evolución Temporal (Línea Gold + Barras dobles en tonos Slate)
+      temporal: {
+        rendimientoLine: "#F4D03F",                    // 01. Vivid Gold
+        rendimientoFill: "rgba(244, 208, 63, 0.16)",
+        rendimientoPoint: "#2C3E50",                   // 05. Midnight Slate
+        rendimientoPointBorder: "#F4D03F",
+        rendimientoHoverPoint: "#D4AC0D",              // 06. Rich Gold
+        kilosOrigenBar: "rgba(52, 73, 94, 0.88)",      // 02. Slate Dark (#34495E)
+        kilosOrigenHover: "#1C2833",                   // 07. Charcoal Slate (#1C2833)
+        kilosResultadoBar: "rgba(93, 109, 126, 0.88)", // 03. Slate Med (#5D6D7E)
+        kilosResultadoHover: "#2C3E50"                 // 05. Midnight Slate (#2C3E50)
+      }
+    };
+
     // =========================================================================
     // ⚙️ CONFIGURACIÓN DE CONEXIÓN HÍBRIDA A LA API .NET
     // =========================================================================
@@ -1122,7 +1303,7 @@
         ? GLOBAL_CONFIG.puertos
         : [8080, 5000],
       controllerPath: "/api/ProdChuletas",
-      timeoutMs: 120000 // 120 segundos para el Procedimiento Almacenado Sp_Informe_Prod_Chuletas
+      timeoutMs: 120000 // 120s para Sp_Informe_Prod_Chuletas
     };
 
     function generarBasesApi() {
@@ -1139,18 +1320,29 @@
       return bases;
     }
 
+    // Estados
     let apiBaseActiva = null;
+    let cargando = false;
+    let reporteGenerado = false;
     let rawData = [];
-    let enrichedData = [];
-    let filteredData = [];
-    let chartTemporalObj = null;
-    let chartPlantillasObj = null;
+    let datosFiltrados = [];
 
-    // Estado de la Matriz Jerárquica
-    let modoMatrizActivo = 'semanal'; // 'diario', 'semanal', 'mensual'
+    // Filtros
+    let tipoFiltro = "ALL";
+    let tipoChuletaFiltro = "ALL";
+    let plantillaFiltro = "ALL";
+    let serieTemporalFiltro = "semanal";
+    let modoMatrizActivo = "semanal"; // "diario", "semanal", "mensual"
+    let textoBusqueda = "";
+
+    // Sets de Colapso Jerárquico
     const collapsedPeriodos = new Set();
     const collapsedTipos = new Set();
     const collapsedChuletas = new Set();
+
+    // Instancias de Gráficos
+    let chartTemporalObj = null;
+    let chartPlantillasObj = null;
 
     // =========================================================================
     // 🌐 UTILIDADES DE RED Y DETECCIÓN RESILIENTE
@@ -1199,7 +1391,7 @@
     // =========================================================================
     // 🚀 INICIALIZACIÓN
     // =========================================================================
-    function inicializarFechasPorDefecto() {
+    function inicializarFechas() {
       const hoy = new Date();
       const hace7Dias = new Date();
       hace7Dias.setDate(hoy.getDate() - 7);
@@ -1211,67 +1403,16 @@
         return `${yyyy}-${mm}-${dd}`;
       };
 
-      const fFinInput = document.getElementById('fechaFin');
-      const fIniInput = document.getElementById('fechaInicio');
-
-      if (fFinInput) fFinInput.value = toYMD(hoy);
-      if (fIniInput) fIniInput.value = toYMD(hace7Dias);
-    }
-
-    function inicializarDashboardVacio() {
-      actualizarEstadoUI('neutral', 'Listo para consultar');
-
-      document.getElementById('kpiOrigen').textContent = '0.00 kg';
-      document.getElementById('kpiResultado').textContent = '0.00 kg';
-      document.getElementById('kpiRendimiento').textContent = '0.00%';
-      document.getElementById('kpiPerdida').textContent = '0.00 kg';
-      document.getElementById('kpiPerdidaPct').textContent = '0.00% de la MP';
-      document.getElementById('kpiVolumenTotal').textContent = '0.00 kg';
-      document.getElementById('kpiRegistros').textContent = '0 registros analizados';
-
-      if (chartTemporalObj) {
-        chartTemporalObj.destroy();
-        chartTemporalObj = null;
-      }
-      if (chartPlantillasObj) {
-        chartPlantillasObj.destroy();
-        chartPlantillasObj = null;
-      }
-
-      const tbody = document.getElementById('tablePlantillasBody');
-      const tfoot = document.getElementById('tablePlantillasFoot');
-      if (tbody) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="7" style="text-align: center; padding: 55px 20px; color: var(--text-muted);">
-              <div style="font-size: 2.2rem; margin-bottom: 10px;">📋</div>
-              <div style="font-weight: 700; font-size: 1.05rem; color: var(--navy-peony); margin-bottom: 6px;">
-                Cargando datos del reporte...
-              </div>
-              <div style="font-size: 0.85rem; max-width: 520px; margin: 0 auto; line-height: 1.5;">
-                Conectando con la API y ejecutando Sp_Informe_Prod_Chuletas...
-              </div>
-            </td>
-          </tr>
-        `;
-      }
-      if (tfoot) tfoot.innerHTML = '';
-
-      const bDia = document.getElementById('badgeDiario');
-      const bSem = document.getElementById('badgeSemanal');
-      const bMes = document.getElementById('badgeMensual');
-      if (bDia) bDia.textContent = '0';
-      if (bSem) bSem.textContent = '0';
-      if (bMes) bMes.textContent = '0';
+      document.getElementById('fechaFin').value = toYMD(hoy);
+      document.getElementById('fechaInicio').value = toYMD(hace7Dias);
     }
 
     window.addEventListener('DOMContentLoaded', async () => {
-      inicializarFechasPorDefecto();
+      inicializarFechas();
       setupEvents();
-      inicializarDashboardVacio();
 
-      // Detección proactiva de la API y carga automática inmediata
-      actualizarEstadoUI('loading', `Detectando API...`);
+      // Detección proactiva y consulta inicial
+      actualizarEstadoUI('loading', 'Detectando API...');
       apiBaseActiva = await detectarServidorApi();
 
       if (apiBaseActiva) {
@@ -1281,83 +1422,97 @@
         } catch (e) {
           actualizarEstadoUI('loading', `En Línea - Consultando...`);
         }
-        await consultarApi(false);
+        await consultarReporte();
       } else {
         actualizarEstadoUI('error', `Sin conexión con ${APP_CONFIG.servidor}`);
-        mostrarToast(`⚠️ No se detectó la API en ${APP_CONFIG.servidor}:${APP_CONFIG.puertos.join('/')}. Asegúrese de ejecutar dotnet run.`);
       }
     });
 
     function setupEvents() {
-      document.getElementById('tipoFilter').addEventListener('change', applyFilters);
-      document.getElementById('tipoChuletaFilter').addEventListener('change', applyFilters);
-      document.getElementById('plantillaFilter').addEventListener('change', applyFilters);
+      document.getElementById('tipoFilter').addEventListener('change', (e) => {
+        tipoFiltro = e.target.value;
+        aplicarFiltrosLocales();
+      });
 
-      // Sincronizar temporalFilter del panel con la pestaña activa de la matriz
+      document.getElementById('tipoChuletaFilter').addEventListener('change', (e) => {
+        tipoChuletaFiltro = e.target.value;
+        aplicarFiltrosLocales();
+      });
+
+      document.getElementById('plantillaFilter').addEventListener('change', (e) => {
+        plantillaFiltro = e.target.value;
+        aplicarFiltrosLocales();
+      });
+
       document.getElementById('temporalFilter').addEventListener('change', (e) => {
-        const v = e.target.value;
-        if (['diario', 'semanal', 'mensual'].includes(v)) {
-          cambiarPestanaMatriz(v, false);
-        }
-        renderTemporalChart();
+        serieTemporalFiltro = e.target.value;
+        actualizarGraficoTemporal();
       });
 
       document.getElementById('fechaInicio').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') consultarApi(false);
+        if (e.key === 'Enter') consultarReporte();
       });
       document.getElementById('fechaFin').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') consultarApi(false);
+        if (e.key === 'Enter') consultarReporte();
       });
     }
 
     // =========================================================================
-    // 🌐 COMUNICACIÓN CON LA API
+    // 🌐 CONSULTAR REPORTE (API .NET / SQL Server)
     // =========================================================================
-    async function consultarApi(forzarRecarga = false) {
+    async function consultarReporte() {
       const fIni = document.getElementById('fechaInicio').value;
       const fFin = document.getElementById('fechaFin').value;
 
       if (!fIni || !fFin) {
-        mostrarToast("⚠️ Ingrese una Fecha Inicial y una Fecha Final válidas", 3500);
+        mostrarError("La fecha inicial y final son requeridas.");
         return;
       }
 
-      mostrarCargando(
-        true,
-        'Consultando SQL Server',
-        `Ejecutando Sp_Informe_Prod_Chuletas para el periodo ${fIni} al ${fFin}... (puede tardar entre 30 y 60s la primera vez)`
-      );
-      actualizarEstadoUI('loading', `Ejecutando consulta en SQL Server...`);
+      if (fIni > fFin) {
+        mostrarError("La fecha inicial no puede ser mayor que la fecha final.");
+        return;
+      }
+
+      cargando = true;
+      cerrarError();
+      actualizarEstadoUI('loading', 'Consultando base de datos...');
+      mostrarCargando(true, 'Consultando base de datos...', `Ejecutando Sp_Informe_Prod_Chuletas para el periodo ${fIni} al ${fFin}...`);
+
+      const btnConsultar = document.getElementById('btnConsultar');
+      if (btnConsultar) {
+        btnConsultar.disabled = true;
+        btnConsultar.innerHTML = `<span class="spinner" style="width:16px;height:16px;border-width:2px;display:inline-block;margin:0 6px 0 0;vertical-align:middle;"></span> Consultando...`;
+      }
 
       if (!apiBaseActiva) {
         apiBaseActiva = await detectarServidorApi();
       }
 
-      const queryParams = `?fechaInicio=${encodeURIComponent(fIni)}&fechaFin=${encodeURIComponent(fFin)}&recargar=${forzarRecarga}`;
+      const queryParams = `?fechaInicio=${encodeURIComponent(fIni)}&fechaFin=${encodeURIComponent(fFin)}`;
       const ruta = APP_CONFIG.controllerPath || "/api/ProdChuletas";
       const endpoints = generarEndpointsApi(`${ruta}${queryParams}`);
-      let dataCargada = false;
+      let exito = false;
 
       for (const url of endpoints) {
         try {
           const res = await fetchConTimeout(url, APP_CONFIG.timeoutMs || 120000);
-
           if (res.ok) {
             const json = await res.json();
             const items = Array.isArray(json) ? json : (json.datos || []);
+
+            rawData = items.map(mapearDiccionarioAItem);
+            reporteGenerado = true;
+
             const urlObj = new URL(url);
-
             apiBaseActiva = `${urlObj.protocol}//${urlObj.host}`;
-            rawData = items;
-            procesarDatos(items);
+            actualizarEstadoUI('online', `En Línea - ${rawData.length.toLocaleString('es-PE')} registros`);
 
-            actualizarEstadoUI('online', `En Línea (${urlObj.host}) - ${items.length} reg.`);
-            if (items.length === 0) {
-              mostrarToast('ℹ️ Conexión exitosa, pero no se encontraron registros para este rango de fechas.', 4000);
-            } else {
-              mostrarToast(`✅ ${items.length} registros cargados exitosamente`, 3500);
-            }
-            dataCargada = true;
+            poblarListasFiltros();
+            aplicarFiltrosLocales();
+
+            mostrarToast(`✅ ${rawData.length.toLocaleString('es-PE')} registros cargados exitosamente`, 3000);
+            exito = true;
             break;
           }
         } catch (err) {
@@ -1365,278 +1520,371 @@
         }
       }
 
-      if (!dataCargada) {
-        actualizarEstadoUI('error', `Sin conexión con ${APP_CONFIG.servidor}`);
-        mostrarToast(`❌ No se pudo conectar a la API o el procedimiento excedió el tiempo límite (${(APP_CONFIG.timeoutMs || 120000) / 1000}s).`);
+      if (!exito) {
+        mostrarError(`No se pudo conectar a la base de datos o el procedimiento excedió el tiempo límite.`);
+        actualizarEstadoUI('error', 'Error en consulta');
       }
 
+      cargando = false;
       mostrarCargando(false);
+      if (btnConsultar) {
+        btnConsultar.disabled = false;
+        btnConsultar.innerHTML = `<span>🚀 Generar Reporte</span>`;
+      }
     }
 
-    // =========================================================================
-    // 🛠️ PROCESAMIENTO Y ENRIQUECIMIENTO DE DATOS
-    // =========================================================================
-    function parseDate(val) {
-      if (!val) return new Date();
-      if (typeof val === 'number') {
-        const utc_days = Math.floor(val - 25569);
-        const utc_value = utc_days * 86400;
-        const d = new Date(utc_value * 1000);
-        return new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
-      }
-      if (typeof val === 'string') {
-        const clean = val.split('T')[0];
-        const parts = clean.split('-');
-        if (parts.length === 3) {
-          return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+    // Mapeo normalizado idéntico al método C# MapearDiccionarioAItem
+    function mapearDiccionarioAItem(d) {
+      const fechaRaw = d.fechaOrden || d.FechaOrden || d.fechaOrdenStr || d.FechaOrdenStr;
+      let dt = new Date();
+      if (fechaRaw) {
+        if (typeof fechaRaw === 'string') {
+          const clean = fechaRaw.split('T')[0];
+          const parts = clean.split('-');
+          if (parts.length === 3) {
+            dt = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+          } else {
+            dt = new Date(fechaRaw);
+          }
+        } else {
+          dt = new Date(fechaRaw);
         }
-        return new Date(val);
       }
-      return new Date(val);
-    }
-
-    function formatYMD(d) {
-      const yyyy = d.getFullYear();
-      const mm = String(d.getMonth() + 1).padStart(2, '0');
-      const dd = String(d.getDate()).padStart(2, '0');
-      return `${yyyy}-${mm}-${dd}`;
-    }
-
-    function calcularSemanaConInicioLunes(d) {
-      const copia = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-      const diaOffsetLunes = (copia.getDay() + 6) % 7;
-      const lunes = new Date(copia);
-      lunes.setDate(copia.getDate() - diaOffsetLunes);
-      const domingo = new Date(lunes);
-      domingo.setDate(lunes.getDate() + 6);
-
-      const dateUtc = new Date(Date.UTC(copia.getFullYear(), copia.getMonth(), copia.getDate()));
-      const diaUtc = dateUtc.getUTCDay() === 0 ? 7 : dateUtc.getUTCDay();
-      dateUtc.setUTCDate(dateUtc.getUTCDate() + 4 - diaUtc);
-      const anoSemana = dateUtc.getUTCFullYear();
-      const inicioAno = new Date(Date.UTC(anoSemana, 0, 1));
-      const numSemana = Math.ceil((((dateUtc - inicioAno) / 86400000) + 1) / 7);
-
-      const pad = n => String(n).padStart(2, '0');
-      const rangoTexto = `${pad(lunes.getDate())}/${pad(lunes.getMonth() + 1)} al ${pad(domingo.getDate())}/${pad(domingo.getMonth() + 1)}`;
 
       return {
-        semana: numSemana,
-        anoSemana: anoSemana,
-        semanaClave: `${anoSemana}-S${pad(numSemana)}`,
-        semanaEtiqueta: `Sem. ${pad(numSemana)} (${rangoTexto})`
+        FechaOrden: dt,
+        Tipo: (d.tipo || d.Tipo || '').toString().trim(),
+        TipoChuleta: (d.tipoChuleta || d.TipoChuleta || '').toString().trim(),
+        Plantilla: parseInt(d.plantilla ?? d.Plantilla ?? 0, 10) || 0,
+        NPlantilla: (d.nPlantilla || d.NPlantilla || '').toString().trim(),
+        Ttra: parseInt(d.ttra ?? d.Ttra ?? 0, 10) || 0,
+        NTtra: (d.nTtra || d.NTtra || '').toString().trim(),
+        Producto: (d.producto || d.Producto || '').toString().trim(),
+        CodigoCorto: (d.codigoCorto || d.CodigoCorto || '').toString().trim(),
+        Nombre: (d.nombre || d.Nombre || '').toString().trim(),
+        TipoInforme: (d.tipoInforme || d.TipoInforme || '').toString().trim(),
+        Unidades: Number(d.unidades ?? d.Unidades) || 0,
+        Kilos: Number(d.kilos ?? d.Kilos) || 0,
+        CostoTotal: Number(d.costoTotal ?? d.CostoTotal) || 0,
+        VentaTotal: Number(d.ventaTotal ?? d.VentaTotal) || 0
       };
     }
 
-    function procesarDatos(items) {
-      enrichedData = items.map(d => {
-        const fechaRaw = d.fechaOrden || d.FechaOrden || d.fechaOrdenStr || d.FechaOrdenStr;
-        const dObj = parseDate(fechaRaw);
-        const yyyy = dObj.getFullYear();
-        const mm = String(dObj.getMonth() + 1).padStart(2, '0');
-        const semInfo = calcularSemanaConInicioLunes(dObj);
+    // =========================================================================
+    // 🛠️ FILTROS Y CONTROLES LOCALES
+    // =========================================================================
+    function poblarListasFiltros() {
+      const tipos = [...new Set(rawData.map(d => d.Tipo).filter(Boolean))].sort();
+      const tiposChuleta = [...new Set(rawData.map(d => d.TipoChuleta).filter(Boolean))].sort();
+      const plantillas = [...new Set(rawData.map(d => d.NPlantilla).filter(Boolean))].sort();
 
-        return {
-          ...d,
-          Tipo: (d.tipo || d.Tipo || 'SIN TIPO').trim(),
-          TipoChuleta: (d.tipoChuleta || d.TipoChuleta || 'SIN CLASIFICAR').trim(),
-          Plantilla: d.plantilla ?? d.Plantilla ?? 0,
-          NPlantilla: (d.nPlantilla || d.NPlantilla || 'Sin Nombre').trim(),
-          Ttra: d.ttra ?? d.Ttra ?? 0,
-          NTtra: (d.nTtra || d.NTtra || '').trim(),
-          Producto: (d.producto || d.Producto || '').trim(),
-          CodigoCorto: (d.codigoCorto || d.CodigoCorto || '').trim(),
-          Nombre: (d.nombre || d.Nombre || '').trim(),
-          TipoInforme: (d.tipoInforme || d.TipoInforme || '').trim(),
-          Unidades: Number(d.unidades ?? d.Unidades) || 0,
-          Kilos: Number(d.kilos ?? d.Kilos) || 0,
-          CostoTotal: Number(d.costoTotal ?? d.CostoTotal) || 0,
-          VentaTotal: Number(d.ventaTotal ?? d.VentaTotal) || 0,
+      const selTipo = document.getElementById('tipoFilter');
+      selTipo.innerHTML = '<option value="ALL">-- Todos los Tipos --</option>';
+      tipos.forEach(t => selTipo.innerHTML += `<option value="${t}">${t}</option>`);
+      selTipo.value = tipoFiltro;
 
-          _dateObj: dObj,
-          _ymd: formatYMD(dObj),
-          _dia: formatYMD(dObj),
-          _semana: semInfo.semanaClave,
-          _semanaEtiqueta: semInfo.semanaEtiqueta,
-          _mes: `${yyyy}-${mm}`,
-          _anual: `${yyyy}`
-        };
-      });
+      const selChuleta = document.getElementById('tipoChuletaFilter');
+      selChuleta.innerHTML = '<option value="ALL">-- Todos (Fresco/Congelado) --</option>';
+      tiposChuleta.forEach(tc => selChuleta.innerHTML += `<option value="${tc}">${tc}</option>`);
+      selChuleta.value = tipoChuletaFiltro;
 
-      poblarFiltrosDinamicos();
-      applyFilters();
+      const selPlan = document.getElementById('plantillaFilter');
+      selPlan.innerHTML = '<option value="ALL">-- Todas las Plantillas --</option>';
+      plantillas.forEach(p => selPlan.innerHTML += `<option value="${p}">${p}</option>`);
+      selPlan.value = plantillaFiltro;
     }
 
-    function poblarFiltrosDinamicos() {
-      const selectTipo = document.getElementById('tipoFilter');
-      const valTipoActual = selectTipo.value;
-      const tipos = [...new Set(enrichedData.map(d => d.Tipo))].filter(Boolean).sort();
+    function aplicarFiltrosLocales() {
+      datosFiltrados = rawData.filter(d =>
+        (tipoFiltro === "ALL" || d.Tipo === tipoFiltro) &&
+        (tipoChuletaFiltro === "ALL" || d.TipoChuleta === tipoChuletaFiltro) &&
+        (plantillaFiltro === "ALL" || d.NPlantilla === plantillaFiltro)
+      );
 
-      selectTipo.innerHTML = '<option value="ALL">-- Todos los Tipos --</option>';
-      tipos.forEach(t => {
-        const opt = document.createElement('option');
-        opt.value = t;
-        opt.textContent = t;
-        selectTipo.appendChild(opt);
-      });
-      if (tipos.includes(valTipoActual)) selectTipo.value = valTipoActual;
-
-      const selectTipoChuleta = document.getElementById('tipoChuletaFilter');
-      const valChuletaActual = selectTipoChuleta.value;
-      const tiposChuleta = [...new Set(enrichedData.map(d => d.TipoChuleta))].filter(Boolean).sort();
-
-      selectTipoChuleta.innerHTML = '<option value="ALL">-- Todos (Fresco/Congelado) --</option>';
-      tiposChuleta.forEach(tc => {
-        const opt = document.createElement('option');
-        opt.value = tc;
-        opt.textContent = tc;
-        selectTipoChuleta.appendChild(opt);
-      });
-      if (tiposChuleta.includes(valChuletaActual)) selectTipoChuleta.value = valChuletaActual;
-
-      const selectPlantilla = document.getElementById('plantillaFilter');
-      const valPlanActual = selectPlantilla.value;
-      const plantillas = [...new Set(enrichedData.map(d => d.NPlantilla))].filter(Boolean).sort();
-
-      selectPlantilla.innerHTML = '<option value="ALL">-- Todas las Plantillas --</option>';
-      plantillas.forEach(p => {
-        const opt = document.createElement('option');
-        opt.value = p;
-        opt.textContent = p;
-        selectPlantilla.appendChild(opt);
-      });
-      if (plantillas.includes(valPlanActual)) selectPlantilla.value = valPlanActual;
+      calcularKPIs();
+      actualizarBadgesSegmentadores();
+      actualizarGraficoTemporal();
+      renderPlantillasChart();
+      renderMatrizJerarquica();
     }
 
-    function applyFilters() {
-      const tipoSel = document.getElementById('tipoFilter').value;
-      const chuletaSel = document.getElementById('tipoChuletaFilter').value;
-      const plantillaSel = document.getElementById('plantillaFilter').value;
+    function resetFiltros() {
+      inicializarFechas();
+      tipoFiltro = "ALL";
+      tipoChuletaFiltro = "ALL";
+      plantillaFiltro = "ALL";
+      serieTemporalFiltro = "semanal";
+      modoMatrizActivo = "semanal";
+      textoBusqueda = "";
 
-      filteredData = enrichedData.filter(d => {
-        const matchTipo = (tipoSel === 'ALL') || (d.Tipo === tipoSel);
-        const matchChuleta = (chuletaSel === 'ALL') || (d.TipoChuleta === chuletaSel);
-        const matchPlan = (plantillaSel === 'ALL') || (d.NPlantilla === plantillaSel);
-        return matchTipo && matchChuleta && matchPlan;
-      });
+      document.getElementById('tipoFilter').value = "ALL";
+      document.getElementById('tipoChuletaFilter').value = "ALL";
+      document.getElementById('plantillaFilter').value = "ALL";
+      document.getElementById('temporalFilter').value = "semanal";
+      document.getElementById('tableSearchInput').value = "";
 
-      updateDashboard();
-    }
+      cambiarModoMatriz("semanal");
 
-    function resetFilters() {
-      inicializarFechasPorDefecto();
-      document.getElementById('tipoFilter').value = 'ALL';
-      document.getElementById('tipoChuletaFilter').value = 'ALL';
-      document.getElementById('plantillaFilter').value = 'ALL';
-      document.getElementById('temporalFilter').value = 'semanal';
-      cambiarPestanaMatriz('semanal', false);
-      document.getElementById('tableSearchInput').value = '';
-      if (enrichedData && enrichedData.length > 0) {
-        applyFilters();
+      if (rawData.length > 0) {
+        aplicarFiltrosLocales();
       } else {
-        inicializarDashboardVacio();
+        reporteGenerado = false;
+        actualizarEstadoUI('neutral', 'Listo para consultar');
+        resetMetricas();
       }
-      mostrarToast("Filtros reestablecidos", 2000);
+      mostrarToast("↺ Filtros reestablecidos");
+    }
+
+    function resetMetricas() {
+      document.getElementById('kpiOrigen').textContent = "0.00 kg";
+      document.getElementById('kpiResultado').textContent = "0.00 kg";
+      document.getElementById('kpiRendimiento').textContent = "0.00%";
+      document.getElementById('kpiPerdida').textContent = "0.00 kg";
+      document.getElementById('kpiPerdidaSub').textContent = "0.00% de la MP";
+      document.getElementById('kpiVolumenTotal').textContent = "0.00 kg";
+      document.getElementById('kpiRegistrosSub').textContent = "0 registros analizados";
+
+      if (chartTemporalObj) { chartTemporalObj.destroy(); chartTemporalObj = null; }
+      if (chartPlantillasObj) { chartPlantillasObj.destroy(); chartPlantillasObj = null; }
+
+      document.getElementById('tableMatrixBody').innerHTML = `
+        <tr>
+          <td colspan="7" style="text-align: center; padding: 55px 20px; color: var(--text-muted);">
+            <div style="font-size: 2.2rem; margin-bottom: 10px;">📋</div>
+            <div style="font-weight: 700; font-size: 1.05rem; color: var(--navy-peony); margin-bottom: 6px;">
+              Dashboard listo para generar reporte
+            </div>
+            <div style="font-size: 0.85rem; max-width: 520px; margin: 0 auto; line-height: 1.5;">
+              Las fechas están configuradas para los últimos 7 días.<br />
+              Ajuste el rango si lo requiere y haga clic en <strong style="color: var(--blue-sapphire);">"🚀 Generar Reporte"</strong> para cargar los datos.
+            </div>
+          </td>
+        </tr>
+      `;
+      document.getElementById('tableMatrixFoot').innerHTML = "";
     }
 
     // =========================================================================
-    // 🧮 CÁLCULO DE MÉTRICAS Y RENDIMIENTO
+    // 🧮 CÁLCULO DE KPIS Y MÉTRICAS DE GRUPO (IDÉNTICO A BLAZOR)
     // =========================================================================
-    function calculateMetrics(dataset) {
+    function calcularMetricasGrupo(rows) {
       let origen = 0;
       let resultado = 0;
       let harina = 0;
       let merma = 0;
       let totalKilos = 0;
 
-      dataset.forEach(d => {
-        const k = Number(d.Kilos) || 0;
-        totalKilos += k;
+      rows.forEach(d => {
+        totalKilos += d.Kilos;
         const info = (d.TipoInforme || '').toUpperCase();
 
-        if (d.Ttra === 13 || d.NTtra === 'ORIGEN') {
-          origen += k;
+        if (d.Ttra === 13 || d.NTtra === "ORIGEN") {
+          origen += d.Kilos;
         }
 
-        if (d.Ttra === 4 || d.NTtra === 'RESULTADO') {
-          if (info.includes('HARINA')) {
-            harina += k;
-          } else if (info.includes('MERMA')) {
-            merma += k;
+        if (d.Ttra === 4 || d.NTtra === "RESULTADO") {
+          if (info.includes("HARINA")) {
+            harina += d.Kilos;
+          } else if (info.includes("MERMA")) {
+            merma += d.Kilos;
           } else {
-            resultado += k;
+            resultado += d.Kilos;
           }
         }
       });
 
-      const rend = origen > 0 ? (resultado / origen) * 100 : 0;
+      const perdida = harina + merma;
+      const rendimiento = origen > 0 ? (resultado / origen) * 100 : 0;
+
       return {
         origen,
         resultado,
         harina,
         merma,
-        perdida: (harina + merma),
-        rendimiento: rend,
+        perdida,
+        rendimiento,
         totalKilos
       };
     }
 
-    function updateDashboard() {
-      updateKPIs();
-      renderTemporalChart();
-      renderPlantillasChart();
+    function calcularKPIs() {
+      const m = calcularMetricasGrupo(datosFiltrados);
+
+      document.getElementById('kpiOrigen').textContent = formatKg(m.origen) + ' kg';
+      document.getElementById('kpiResultado').textContent = formatKg(m.resultado) + ' kg';
+      document.getElementById('kpiRendimiento').textContent = m.rendimiento.toFixed(2) + '%';
+      document.getElementById('kpiPerdida').textContent = formatKg(m.perdida) + ' kg';
+
+      const pctPerdida = m.origen > 0 ? (m.perdida / m.origen) * 100 : 0;
+      document.getElementById('kpiPerdidaSub').textContent = pctPerdida.toFixed(2) + '% de la MP';
+
+      document.getElementById('kpiVolumenTotal').textContent = formatKg(m.totalKilos) + ' kg';
+      document.getElementById('kpiRegistrosSub').textContent = `${datosFiltrados.length.toLocaleString('es-PE')} registros analizados`;
+    }
+
+    function formatKg(val) {
+      return Number(val || 0).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function getRendimientoBadge(rendimiento) {
+      let badgeClass = "badge-good";
+      if (rendimiento < 75) badgeClass = "badge-low";
+      else if (rendimiento < 85) badgeClass = "badge-mid";
+      return `<span class="badge-rend ${badgeClass}">${Number(rendimiento || 0).toFixed(2)}%</span>`;
+    }
+
+    // =========================================================================
+    // 📅 CÁLCULO DE PERIODOS (ISO-8601 ESTRICTO: LUNES COMO PRIMER DÍA)
+    // =========================================================================
+    function getWeekOfYearISO(d) {
+      const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+      const dayNum = date.getUTCDay() === 0 ? 7 : date.getUTCDay();
+      date.setUTCDate(date.getUTCDate() + 4 - dayNum);
+      const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+      return Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
+    }
+
+    function getYearOfISOWeek(d) {
+      const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+      const dayNum = date.getUTCDay() === 0 ? 7 : date.getUTCDay();
+      date.setUTCDate(date.getUTCDate() + 4 - dayNum);
+      return date.getUTCFullYear();
+    }
+
+    function obtenerPeriodoKey(fecha) {
+      const yyyy = fecha.getFullYear();
+      const mm = String(fecha.getMonth() + 1).padStart(2, '0');
+      const dd = String(fecha.getDate()).padStart(2, '0');
+
+      switch (modoMatrizActivo) {
+        case "diario":
+          return `${yyyy}-${mm}-${dd}`;
+        case "semanal": {
+          const w = getWeekOfYearISO(fecha);
+          const y = getYearOfISOWeek(fecha);
+          return `${y}-S${String(w).padStart(2, '0')}`;
+        }
+        case "mensual":
+          return `${yyyy}-${mm}`;
+        default: {
+          const w = getWeekOfYearISO(fecha);
+          const y = getYearOfISOWeek(fecha);
+          return `${y}-S${String(w).padStart(2, '0')}`;
+        }
+      }
+    }
+
+    function obtenerPeriodoLabel(key) {
+      if (modoMatrizActivo === "diario") {
+        const parts = key.split('-');
+        if (parts.length === 3) {
+          const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+          const diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+          return `${key} (${diasSemana[d.getDay()]})`;
+        }
+        return key;
+      } else if (modoMatrizActivo === "semanal") {
+        const parts = key.split("-S");
+        return parts.length === 2 ? `Semana ${parts[1]} (${parts[0]})` : key;
+      } else if (modoMatrizActivo === "mensual") {
+        const parts = key.split("-");
+        if (parts.length === 2) {
+          const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+          const mIdx = parseInt(parts[1], 10) - 1;
+          const mesNombre = (mIdx >= 0 && mIdx < 12) ? meses[mIdx] : parts[1];
+          return `${mesNombre} ${parts[0]}`;
+        }
+        return key;
+      }
+      return key;
+    }
+
+    function actualizarBadgesSegmentadores() {
+      const totalDiarios = new Set(datosFiltrados.map(d => {
+        const y = d.FechaOrden.getFullYear();
+        const m = String(d.FechaOrden.getMonth() + 1).padStart(2, '0');
+        const day = String(d.FechaOrden.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+      })).size;
+
+      const totalSemanales = new Set(datosFiltrados.map(d => {
+        const w = getWeekOfYearISO(d.FechaOrden);
+        const y = getYearOfISOWeek(d.FechaOrden);
+        return `${y}-S${String(w).padStart(2, '0')}`;
+      })).size;
+
+      const totalMensuales = new Set(datosFiltrados.map(d => {
+        const y = d.FechaOrden.getFullYear();
+        const m = String(d.FechaOrden.getMonth() + 1).padStart(2, '0');
+        return `${y}-${m}`;
+      })).size;
+
+      document.getElementById('badgeDiario').textContent = totalDiarios;
+      document.getElementById('badgeSemanal').textContent = totalSemanales;
+      document.getElementById('badgeMensual').textContent = totalMensuales;
+    }
+
+    function cambiarModoMatriz(modo) {
+      modoMatrizActivo = modo;
+      serieTemporalFiltro = modo;
+
+      document.querySelectorAll('.matrix-tab-btn').forEach(b => b.classList.remove('active'));
+      const activeBtn = document.getElementById(`tabMatriz${modo.charAt(0).toUpperCase() + modo.slice(1)}`);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      const tempSelect = document.getElementById('temporalFilter');
+      if (tempSelect) tempSelect.value = modo;
+
+      const titulos = {
+        diario: "📅 Matriz Jerárquica Diaria (Día ➔ Tipo Proceso ➔ Tipo Chuleta ➔ Plantilla)",
+        semanal: "📆 Matriz Jerárquica Semanal (Semana ➔ Tipo Proceso ➔ Tipo Chuleta ➔ Plantilla)",
+        mensual: "📊 Matriz Jerárquica Mensual (Mes ➔ Tipo Proceso ➔ Tipo Chuleta ➔ Plantilla)"
+      };
+      document.getElementById('matrixTitle').textContent = titulos[modo] || "🥩 Matriz Jerárquica de Rendimiento";
+
+      actualizarGraficoTemporal();
       renderMatrizJerarquica();
     }
 
-    function updateKPIs() {
-      const m = calculateMetrics(filteredData);
-
-      document.getElementById('kpiOrigen').textContent = m.origen.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' kg';
-      document.getElementById('kpiResultado').textContent = m.resultado.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' kg';
-      document.getElementById('kpiRendimiento').textContent = m.rendimiento.toFixed(2) + '%';
-      document.getElementById('kpiPerdida').textContent = m.perdida.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' kg';
-
-      const pct = m.origen > 0 ? ((m.perdida / m.origen) * 100).toFixed(2) : '0.00';
-      document.getElementById('kpiPerdidaPct').textContent = `${pct}% de la Materia Prima`;
-
-      document.getElementById('kpiVolumenTotal').textContent = m.totalKilos.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' kg';
-      document.getElementById('kpiRegistros').textContent = `${filteredData.length.toLocaleString('es-PE')} registros filtrados`;
-    }
-
     // =========================================================================
-    // 📈 GRÁFICO TEMPORAL (Diario / Semanal / Mensual / Anual)
+    // 📈 GRÁFICOS (CHART.JS)
     // =========================================================================
-    function renderTemporalChart() {
-      const mode = document.getElementById('temporalFilter').value;
-      const fieldMap = {
-        diario: '_dia',
-        semanal: '_semana',
-        mensual: '_mes',
-        anual: '_anual'
-      };
+    function actualizarGraficoTemporal() {
+      const mode = serieTemporalFiltro;
       const titleMap = {
-        diario: 'Diaria',
-        semanal: 'Semanal',
-        mensual: 'Mensual',
-        anual: 'Anual'
+        diario: "Diaria",
+        semanal: "Semanal",
+        mensual: "Mensual",
+        anual: "Anual"
       };
+      document.getElementById('chartTemporalTitle').textContent = `Evolución Temporal del Rendimiento (${titleMap[mode] || 'Semanal'})`;
 
-      document.getElementById('chartTimeSeriesTitle').textContent = `Evolución Temporal del Rendimiento (${titleMap[mode]})`;
+      if (datosFiltrados.length === 0) {
+        if (chartTemporalObj) { chartTemporalObj.destroy(); chartTemporalObj = null; }
+        return;
+      }
 
-      const timeField = fieldMap[mode];
       const groups = {};
+      datosFiltrados.forEach(item => {
+        let key = "";
+        const yyyy = item.FechaOrden.getFullYear();
+        const mm = String(item.FechaOrden.getMonth() + 1).padStart(2, '0');
+        const dd = String(item.FechaOrden.getDate()).padStart(2, '0');
 
-      filteredData.forEach(d => {
-        const key = d[timeField];
-        if (!key) return;
+        if (mode === "diario") key = `${yyyy}-${mm}-${dd}`;
+        else if (mode === "semanal") key = `${getYearOfISOWeek(item.FechaOrden)}-S${String(getWeekOfYearISO(item.FechaOrden)).padStart(2, '0')}`;
+        else if (mode === "mensual") key = `${yyyy}-${mm}`;
+        else if (mode === "anual") key = `${yyyy}`;
+        else key = `${getYearOfISOWeek(item.FechaOrden)}-S${String(getWeekOfYearISO(item.FechaOrden)).padStart(2, '0')}`;
+
         if (!groups[key]) groups[key] = [];
-        groups[key].push(d);
+        groups[key].push(item);
       });
 
       const sortedKeys = Object.keys(groups).sort();
-      const rendValues = sortedKeys.map(k => calculateMetrics(groups[k]).rendimiento.toFixed(2));
-      const origenValues = sortedKeys.map(k => calculateMetrics(groups[k]).origen.toFixed(2));
-      const resultadoValues = sortedKeys.map(k => calculateMetrics(groups[k]).resultado.toFixed(2));
+      const rendValues = sortedKeys.map(k => Math.round(calcularMetricasGrupo(groups[k]).rendimiento * 100) / 100);
+      const origenValues = sortedKeys.map(k => Math.round(calcularMetricasGrupo(groups[k]).origen * 100) / 100);
+      const resultadoValues = sortedKeys.map(k => Math.round(calcularMetricasGrupo(groups[k]).resultado * 100) / 100);
 
       if (chartTemporalObj) chartTemporalObj.destroy();
 
@@ -1649,14 +1897,15 @@
             {
               label: 'Rendimiento (%)',
               data: rendValues,
-              borderColor: '#1295C1',
-              backgroundColor: 'rgba(18, 149, 193, 0.12)',
+              borderColor: GRAFICOS_PALETA.temporal.rendimientoLine,
+              backgroundColor: GRAFICOS_PALETA.temporal.rendimientoFill,
               borderWidth: 3,
-              pointBackgroundColor: '#223A5E',
-              pointBorderColor: '#FFFFFF',
-              pointBorderWidth: 1.5,
-              pointRadius: 4,
-              pointHoverRadius: 6,
+              pointBackgroundColor: GRAFICOS_PALETA.temporal.rendimientoPoint,
+              pointBorderColor: GRAFICOS_PALETA.temporal.rendimientoPointBorder,
+              pointBorderWidth: 2,
+              pointRadius: 4.5,
+              pointHoverRadius: 6.5,
+              pointHoverBackgroundColor: GRAFICOS_PALETA.temporal.rendimientoHoverPoint,
               fill: true,
               tension: 0.25,
               yAxisID: 'y'
@@ -1665,7 +1914,8 @@
               type: 'bar',
               label: 'Kilos Origen',
               data: origenValues,
-              backgroundColor: 'rgba(34, 58, 94, 0.65)',
+              backgroundColor: GRAFICOS_PALETA.temporal.kilosOrigenBar,
+              hoverBackgroundColor: GRAFICOS_PALETA.temporal.kilosOrigenHover,
               borderRadius: 4,
               yAxisID: 'y1'
             },
@@ -1673,7 +1923,8 @@
               type: 'bar',
               label: 'Kilos Resultado',
               data: resultadoValues,
-              backgroundColor: 'rgba(0, 125, 126, 0.65)',
+              backgroundColor: GRAFICOS_PALETA.temporal.kilosResultadoBar,
+              hoverBackgroundColor: GRAFICOS_PALETA.temporal.kilosResultadoHover,
               borderRadius: 4,
               yAxisID: 'y1'
             }
@@ -1684,11 +1935,13 @@
           maintainAspectRatio: false,
           interaction: { mode: 'index', intersect: false },
           plugins: {
-            legend: { position: 'top', labels: { boxWidth: 12, font: { family: 'Inter', size: 11, weight: 600 } } },
+            legend: { position: 'top', labels: { boxWidth: 12, color: '#2E2A2F', font: { family: 'Inter', size: 11, weight: '600' } } },
             tooltip: {
-              backgroundColor: '#0F172A',
-              titleFont: { family: 'Inter', size: 12 },
-              bodyFont: { family: 'Inter', size: 11 },
+              backgroundColor: '#1C2833',
+              titleColor: '#F4D03F',
+              bodyColor: '#FFFFFF',
+              borderColor: 'rgba(244, 208, 63, 0.4)',
+              borderWidth: 1,
               padding: 10,
               callbacks: {
                 label: (ctx) => {
@@ -1704,19 +1957,19 @@
             y: {
               beginAtZero: true,
               max: 100,
-              ticks: { callback: v => v + '%', font: { family: 'Inter', size: 10 } },
-              title: { display: true, text: 'Rendimiento %', font: { family: 'Inter', size: 11, weight: 600 } },
-              grid: { color: '#F1F5F9' }
+              ticks: { callback: v => v + '%', color: '#5D6D7E', font: { family: 'Inter', size: 10 } },
+              title: { display: true, text: 'Rendimiento %', color: '#2E2A2F', font: { family: 'Inter', size: 11, weight: '600' } },
+              grid: { color: '#E2E8F0' }
             },
             y1: {
               beginAtZero: true,
               position: 'right',
               grid: { drawOnChartArea: false },
-              ticks: { callback: v => Number(v).toLocaleString('es-PE'), font: { family: 'Inter', size: 10 } },
-              title: { display: true, text: 'Kilos (kg)', font: { family: 'Inter', size: 11, weight: 600 } }
+              ticks: { callback: v => Number(v).toLocaleString('es-PE'), color: '#5D6D7E', font: { family: 'Inter', size: 10 } },
+              title: { display: true, text: 'Kilos (kg)', color: '#2E2A2F', font: { family: 'Inter', size: 11, weight: '600' } }
             },
             x: {
-              ticks: { font: { family: 'Inter', size: 10 } },
+              ticks: { color: '#5D6D7E', font: { family: 'Inter', size: 10 } },
               grid: { display: false }
             }
           }
@@ -1724,35 +1977,34 @@
       });
     }
 
-    // =========================================================================
-    // 📊 GRÁFICO POR PLANTILLA
-    // =========================================================================
     function renderPlantillasChart() {
-      if (!filteredData || filteredData.length === 0) {
-        if (chartPlantillasObj) {
-          chartPlantillasObj.destroy();
-          chartPlantillasObj = null;
-        }
+      if (datosFiltrados.length === 0) {
+        if (chartPlantillasObj) { chartPlantillasObj.destroy(); chartPlantillasObj = null; }
         return;
       }
 
-      const pMap = {};
-      filteredData.forEach(d => {
-        const key = d.NPlantilla || 'Sin Nombre';
-        if (!pMap[key]) pMap[key] = [];
-        pMap[key].push(d);
+      const planGroups = {};
+      datosFiltrados.forEach(d => {
+        const key = (d.NPlantilla || 'Sin Nombre').trim();
+        if (!planGroups[key]) planGroups[key] = [];
+        planGroups[key].push(d);
       });
 
-      const metrics = Object.entries(pMap).map(([name, rows]) => {
-        const m = calculateMetrics(rows);
-        return { name, ...m };
+      const planMetrics = Object.entries(planGroups).map(([name, rows]) => {
+        const m = calcularMetricasGrupo(rows);
+        return { name, metricas: m };
       })
-        .filter(p => p.origen > 0)
-        .sort((a, b) => b.rendimiento - a.rendimiento)
+        .filter(p => p.metricas.origen > 0)
+        .sort((a, b) => b.metricas.rendimiento - a.metricas.rendimiento)
         .slice(0, 15);
 
-      const labels = metrics.map(p => p.name.length > 22 ? p.name.substring(0, 22) + '...' : p.name);
-      const dataRend = metrics.map(p => p.rendimiento.toFixed(2));
+      const labels = planMetrics.map(p => p.name.length > 22 ? p.name.substring(0, 22) + "..." : p.name);
+      const dataRend = planMetrics.map(p => Math.round(p.metricas.rendimiento * 100) / 100);
+
+      // Armonización con la paleta Industrial Slate & Gold (10 colores exactos)
+      const coloresRanking = planMetrics.map((_, i) => GRAFICOS_PALETA.rankingPlantillas[i % GRAFICOS_PALETA.rankingPlantillas.length]);
+      const bordesRanking = coloresRanking;
+      const hoverColoresRanking = planMetrics.map(() => "#D4AC0D"); // Rich Gold destacado al interactuar
 
       if (chartPlantillasObj) chartPlantillasObj.destroy();
 
@@ -1764,8 +2016,13 @@
           datasets: [{
             label: 'Rendimiento %',
             data: dataRend,
-            backgroundColor: dataRend.map(r => r >= 85 ? '#10B981' : (r >= 75 ? '#F59E0B' : '#EF4444')),
-            borderRadius: 6
+            backgroundColor: coloresRanking,
+            borderColor: bordesRanking,
+            borderWidth: 1.5,
+            hoverBackgroundColor: hoverColoresRanking,
+            hoverBorderColor: "#B7950B",
+            borderRadius: 6,
+            barThickness: 18
           }]
         },
         options: {
@@ -1775,9 +2032,23 @@
           plugins: {
             legend: { display: false },
             tooltip: {
-              backgroundColor: '#0F172A',
+              backgroundColor: "#1C2833",
+              titleColor: "#F4D03F",
+              titleFont: { family: 'Inter', weight: '700', size: 12 },
+              bodyFont: { family: 'Inter', size: 11 },
+              bodyColor: '#FFFFFF',
+              borderColor: "#34495E",
+              borderWidth: 1,
+              padding: 10,
               callbacks: {
-                label: ctx => ` Rendimiento: ${ctx.raw}%`
+                label: (ctx) => {
+                  const item = planMetrics[ctx.dataIndex];
+                  return [
+                    ` Rendimiento: ${ctx.raw}%`,
+                    ` Kilos Origen: ${formatKg(item.metricas.origen)}`,
+                    ` Kilos Resultado: ${formatKg(item.metricas.resultado)}`
+                  ];
+                }
               }
             }
           },
@@ -1785,11 +2056,12 @@
             x: {
               beginAtZero: true,
               max: 100,
-              ticks: { callback: v => v + '%', font: { family: 'Inter', size: 10 } },
-              grid: { color: '#F1F5F9' }
+              ticks: { callback: v => v + '%', color: PANTONE_THEME.textMuted, font: { family: 'Inter', size: 10 } },
+              title: { display: true, text: 'Rendimiento (%)', color: PANTONE_THEME.foreground, font: { family: 'Inter', weight: '600', size: 11 } },
+              grid: { color: PANTONE_THEME.grid }
             },
             y: {
-              ticks: { font: { family: 'Inter', size: 10 } },
+              ticks: { color: PANTONE_THEME.foreground, font: { family: 'Inter', weight: '600', size: 10 } },
               grid: { display: false }
             }
           }
@@ -1798,441 +2070,302 @@
     }
 
     // =========================================================================
-    // 🥩 MATRIZ JERÁRQUICA: Periodo ➔ Tipo ➔ Tipo Chuleta ➔ Plantilla - NPlantilla
+    // 🥩 MATRIZ JERÁRQUICA: Periodo ➔ Tipo ➔ Tipo Chuleta ➔ Plantilla
     // =========================================================================
-    function formatKg(val) {
-      return Number(val || 0).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    }
+    function construirJerarquiaPeriodos() {
+      const periodosAgrupados = new Map();
 
-    function formatPeriodoNombre(modo, key) {
-      if (!key || key === 'SIN_FECHA') return 'Sin Fecha Registrada';
-      if (modo === 'diario') {
-        const parts = key.split('-');
-        if (parts.length === 3) {
-          const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
-          const diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-          const diaNombre = diasSemana[d.getDay()];
-          return `${key} (${diaNombre})`;
-        }
-        return key;
-      } else if (modo === 'semanal') {
-        const filaEj = (filteredData || []).find(d => d._semana === key);
-        if (filaEj && filaEj._semanaEtiqueta) {
-          return filaEj._semanaEtiqueta;
-        }
-        const parts = key.split('-S');
-        if (parts.length === 2) {
-          return `Semana ${parts[1]} (${parts[0]})`;
-        }
-        return key;
-      } else if (modo === 'mensual') {
-        const parts = key.split('-');
-        if (parts.length === 2) {
-          const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-          const mIdx = parseInt(parts[1], 10) - 1;
-          const mesNombre = (mIdx >= 0 && mIdx < 12) ? meses[mIdx] : parts[1];
-          return `${mesNombre} ${parts[0]}`;
-        }
-        return key;
-      }
-      return key;
-    }
-
-    function getRendimientoBadge(rendimiento) {
-      let badgeClass = 'badge-good';
-      if (rendimiento < 75) badgeClass = 'badge-low';
-      else if (rendimiento < 85) badgeClass = 'badge-mid';
-      return `<span class="badge-rend ${badgeClass}">${Number(rendimiento || 0).toFixed(2)}%</span>`;
-    }
-
-    function actualizarBadgesPestanas() {
-      const dias = new Set(filteredData.map(d => d._dia).filter(Boolean)).size;
-      const semanas = new Set(filteredData.map(d => d._semana).filter(Boolean)).size;
-      const meses = new Set(filteredData.map(d => d._mes).filter(Boolean)).size;
-
-      const bDia = document.getElementById('badgeDiario');
-      const bSem = document.getElementById('badgeSemanal');
-      const bMes = document.getElementById('badgeMensual');
-
-      if (bDia) bDia.textContent = dias;
-      if (bSem) bSem.textContent = semanas;
-      if (bMes) bMes.textContent = meses;
-    }
-
-    function cambiarPestanaMatriz(modo, sincronizarFiltro = true) {
-      modoMatrizActivo = modo;
-
-      // Actualizar botón activo de pestañas
-      document.querySelectorAll('.matrix-tab-btn').forEach(btn => btn.classList.remove('active'));
-      const activeBtn = document.getElementById(`tabMatriz${modo.charAt(0).toUpperCase() + modo.slice(1)}`);
-      if (activeBtn) activeBtn.classList.add('active');
-
-      // Sincronizar select temporal si se llamó desde la pestaña
-      if (sincronizarFiltro) {
-        const tempSelect = document.getElementById('temporalFilter');
-        if (tempSelect && tempSelect.value !== modo) {
-          tempSelect.value = modo;
-          renderTemporalChart();
-        }
-      }
-
-      // Actualizar título de la matriz
-      const titulos = {
-        diario: '📅 Matriz Jerárquica Diaria (Día ➔ Tipo ➔ Tipo Chuleta ➔ Plantilla)',
-        semanal: '📆 Matriz Jerárquica Semanal (Semana ➔ Tipo ➔ Tipo Chuleta ➔ Plantilla)',
-        mensual: '📊 Matriz Jerárquica Mensual (Mes ➔ Tipo ➔ Tipo Chuleta ➔ Plantilla)'
-      };
-      const titleEl = document.getElementById('matrixTitle');
-      if (titleEl) titleEl.textContent = titulos[modo] || 'Matriz Jerárquica';
-
-      renderMatrizJerarquica();
-    }
-
-    // Agrupador jerárquico 4 niveles: Periodo ➔ Tipo ➔ Tipo Chuleta ➔ Plantilla - NPlantilla
-    function agruparDatosJerarquicos(data, timeField) {
-      const periodoMap = new Map();
-
-      data.forEach(d => {
-        // Nivel 1: Periodo (Día, Semana o Mes)
-        const pKey = d[timeField] || 'SIN_FECHA';
-        if (!periodoMap.has(pKey)) {
-          periodoMap.set(pKey, {
-            pKey,
-            pLabel: formatPeriodoNombre(modoMatrizActivo, pKey),
+      datosFiltrados.forEach(d => {
+        const pKey = obtenerPeriodoKey(d.FechaOrden);
+        if (!periodosAgrupados.has(pKey)) {
+          periodosAgrupados.set(pKey, {
+            periodoKey: pKey,
+            periodoLabel: obtenerPeriodoLabel(pKey),
             rows: [],
-            tiposMap: new Map()
+            tipos: new Map()
           });
         }
-        const pObj = periodoMap.get(pKey);
+        const pObj = periodosAgrupados.get(pKey);
         pObj.rows.push(d);
 
-        // Nivel 2: Tipo
-        const tKey = d.Tipo || 'SIN TIPO';
-        if (!pObj.tiposMap.has(tKey)) {
-          pObj.tiposMap.set(tKey, {
-            tKey,
+        const tKey = d.Tipo || "SIN TIPO";
+        if (!pObj.tipos.has(tKey)) {
+          pObj.tipos.set(tKey, {
+            tipoKey: tKey,
             rows: [],
-            chuletasMap: new Map()
+            chuletas: new Map()
           });
         }
-        const tObj = pObj.tiposMap.get(tKey);
+        const tObj = pObj.tipos.get(tKey);
         tObj.rows.push(d);
 
-        // Nivel 3: Tipo Chuleta
-        const cKey = d.TipoChuleta || 'SIN CLASIFICAR';
-        if (!tObj.chuletasMap.has(cKey)) {
-          tObj.chuletasMap.set(cKey, {
-            cKey,
+        const cKey = d.TipoChuleta || "SIN CLASIFICAR";
+        if (!tObj.chuletas.has(cKey)) {
+          tObj.chuletas.set(cKey, {
+            chuletaKey: cKey,
             rows: [],
-            plantillasMap: new Map()
+            plantillas: new Map()
           });
         }
-        const cObj = tObj.chuletasMap.get(cKey);
+        const cObj = tObj.chuletas.get(cKey);
         cObj.rows.push(d);
 
-        // Nivel 4: Plantilla - NPlantilla (Combinado)
-        const planKey = `${d.Plantilla || 0} - ${d.NPlantilla || 'Sin Nombre'}`;
-        if (!cObj.plantillasMap.has(planKey)) {
-          cObj.plantillasMap.set(planKey, {
-            id: d.Plantilla || 0,
-            name: d.NPlantilla || 'Sin Nombre',
-            planKey,
+        const planKey = `${d.Plantilla} - ${d.NPlantilla || 'Sin Nombre'}`;
+        if (!cObj.plantillas.has(planKey)) {
+          cObj.plantillas.set(planKey, {
+            idPlantilla: d.Plantilla,
+            nombrePlantilla: d.NPlantilla || 'Sin Nombre',
+            planKey: planKey,
             rows: []
           });
         }
-        cObj.plantillasMap.get(planKey).rows.push(d);
+        cObj.plantillas.get(planKey).rows.push(d);
       });
 
-      return periodoMap;
+      return periodosAgrupados;
     }
 
     function renderMatrizJerarquica() {
-      const tbody = document.getElementById('tablePlantillasBody');
-      const tfoot = document.getElementById('tablePlantillasFoot');
+      const tbody = document.getElementById('tableMatrixBody');
+      const tfoot = document.getElementById('tableMatrixFoot');
       if (!tbody) return;
 
-      actualizarBadgesPestanas();
-
-      const timeFieldMap = {
-        diario: '_dia',
-        semanal: '_semana',
-        mensual: '_mes'
-      };
-      const timeField = timeFieldMap[modoMatrizActivo] || '_semana';
-
-      if (!filteredData || filteredData.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 36px; color: var(--text-muted); font-size: 0.9rem;">❌ No hay registros que coincidan con los filtros seleccionados.</td></tr>`;
-        if (tfoot) tfoot.innerHTML = '';
+      if (!reporteGenerado) {
+        resetMetricas();
         return;
       }
 
-      const periodoMap = agruparDatosJerarquicos(filteredData, timeField);
-      const sortedPeriodos = Array.from(periodoMap.keys()).sort();
+      if (datosFiltrados.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 36px; color: var(--text-muted); font-size: 0.9rem;">❌ No hay registros que coincidan con los filtros seleccionados.</td></tr>`;
+        if (tfoot) tfoot.innerHTML = "";
+        return;
+      }
 
-      let tbodyHtml = '';
+      const periodosMap = construirJerarquiaPeriodos();
+      const sortedPeriodoKeys = Array.from(periodosMap.keys()).sort();
 
-      sortedPeriodos.forEach(pKey => {
-        const pObj = periodoMap.get(pKey);
-        const pM = calculateMetrics(pObj.rows);
+      let html = "";
+      const q = textoBusqueda.trim().toLowerCase();
+
+      sortedPeriodoKeys.forEach(pKey => {
+        const pGrupo = periodosMap.get(pKey);
+        const pMetricas = calcularMetricasGrupo(pGrupo.rows);
         const isPCollapsed = collapsedPeriodos.has(pKey);
-        const iconPeriodo = isPCollapsed ? '▶' : '▼';
+        const iconPeriodo = isPCollapsed ? "▶" : "▼";
 
-        // 1. Fila de Nivel 1: PERIODO
-        tbodyHtml += `
-          <tr class="row-periodo ${isPCollapsed ? 'collapsed' : ''}" onclick="toggleColapsoPeriodo('${pKey}')" data-period="${pKey}">
+        const pCoincide = !q || pKey.toLowerCase().includes(q) || pGrupo.periodoLabel.toLowerCase().includes(q);
+
+        // Fila Nivel 1: PERIODO TEMPORAL
+        html += `
+          <tr class="row-periodo ${isPCollapsed ? 'collapsed' : ''}" onclick="toggleColapsoPeriodo('${pKey}')" data-periodo-key="${pKey}">
             <td>
               <span class="tree-toggle-icon">${iconPeriodo}</span>
-              <span class="periodo-title">📅 ${pObj.pLabel}</span>
-              <span class="periodo-count">${pObj.tiposMap.size} tipos | ${pObj.rows.length} regs</span>
+              <span class="periodo-title">📅 ${pGrupo.periodoLabel}</span>
+              <span class="periodo-count">${pGrupo.tipos.size} tipos | ${pGrupo.rows.length} regs</span>
             </td>
-            <td class="text-right num-col">${formatKg(pM.origen)}</td>
-            <td class="text-right num-col">${formatKg(pM.resultado)}</td>
-            <td class="text-right num-col" style="color: #CBD5E1;">${formatKg(pM.harina)}</td>
-            <td class="text-right num-col" style="color: #FCA5A5;">${formatKg(pM.merma)}</td>
-            <td class="text-right num-col">${formatKg(pM.perdida)}</td>
-            <td class="text-right">${getRendimientoBadge(pM.rendimiento)}</td>
+            <td class="text-right num-col">${formatKg(pMetricas.origen)}</td>
+            <td class="text-right num-col">${formatKg(pMetricas.resultado)}</td>
+            <td class="text-right num-col" style="color: var(--pantone-gray-light);">${formatKg(pMetricas.harina)}</td>
+            <td class="text-right num-col" style="color: #FCA5A5;">${formatKg(pMetricas.merma)}</td>
+            <td class="text-right num-col">${formatKg(pMetricas.perdida)}</td>
+            <td class="text-right">${getRendimientoBadge(pMetricas.rendimiento)}</td>
           </tr>
         `;
 
-        // 2. Filas de Nivel 2: TIPO
-        const sortedTipos = Array.from(pObj.tiposMap.values()).sort((a, b) => a.tKey.localeCompare(b.tKey));
+        if (!isPCollapsed) {
+          const sortedTipos = Array.from(pGrupo.tipos.values()).sort((a, b) => a.tipoKey.localeCompare(b.tipoKey));
 
-        sortedTipos.forEach(tObj => {
-          const tM = calculateMetrics(tObj.rows);
-          const tFullKey = `${pKey}___${tObj.tKey}`;
-          const isTCollapsed = collapsedTipos.has(tFullKey);
-          const iconTipo = isTCollapsed ? '▶' : '▼';
-          const displayTipoStyle = isPCollapsed ? 'display: none;' : '';
+          sortedTipos.forEach(tGrupo => {
+            const tMetricas = calcularMetricasGrupo(tGrupo.rows);
+            const tFullKey = `${pKey}___${tGrupo.tipoKey}`;
+            const isTCollapsed = collapsedTipos.has(tFullKey);
+            const iconTipo = isTCollapsed ? "▶" : "▼";
+            const tCoincide = !q || tGrupo.tipoKey.toLowerCase().includes(q);
 
-          tbodyHtml += `
-            <tr class="row-tipo ${isTCollapsed ? 'collapsed' : ''}" onclick="toggleColapsoTipo('${tFullKey}')" 
-                data-parent-period="${pKey}" data-tipo-key="${tFullKey}" style="${displayTipoStyle}">
-              <td style="padding-left: 28px;">
-                <span class="tree-toggle-icon">${iconTipo}</span>
-                <span class="tipo-badge">🏷️ Tipo: ${tObj.tKey}</span>
-                <span class="tipo-count">${tObj.chuletasMap.size} tipos chuleta</span>
-              </td>
-              <td class="text-right num-col font-bold">${formatKg(tM.origen)}</td>
-              <td class="text-right num-col font-bold text-teal">${formatKg(tM.resultado)}</td>
-              <td class="text-right num-col text-muted">${formatKg(tM.harina)}</td>
-              <td class="text-right num-col text-danger">${formatKg(tM.merma)}</td>
-              <td class="text-right num-col font-bold">${formatKg(tM.perdida)}</td>
-              <td class="text-right">${getRendimientoBadge(tM.rendimiento)}</td>
-            </tr>
-          `;
-
-          // 3. Filas de Nivel 3: TIPO CHULETA
-          const sortedChuletas = Array.from(tObj.chuletasMap.values()).sort((a, b) => a.cKey.localeCompare(b.cKey));
-
-          sortedChuletas.forEach(cObj => {
-            const cM = calculateMetrics(cObj.rows);
-            const cFullKey = `${tFullKey}___${cObj.cKey}`;
-            const isCCollapsed = collapsedChuletas.has(cFullKey);
-            const iconChuleta = isCCollapsed ? '▶' : '▼';
-            const displayChuletaStyle = (isPCollapsed || isTCollapsed) ? 'display: none;' : '';
-
-            tbodyHtml += `
-              <tr class="row-chuleta ${isCCollapsed ? 'collapsed' : ''}" onclick="toggleColapsoChuleta('${cFullKey}')" 
-                  data-parent-period="${pKey}" data-parent-tipo="${tFullKey}" data-chuleta-key="${cFullKey}" style="${displayChuletaStyle}">
-                <td style="padding-left: 48px;">
-                  <span class="tree-toggle-icon">${iconChuleta}</span>
-                  <span class="chuleta-badge">❄️ Tipo Chuleta: ${cObj.cKey}</span>
-                  <span class="tipo-count">${cObj.plantillasMap.size} plantillas</span>
+            // Fila Nivel 2: TIPO PROCESO
+            html += `
+              <tr class="row-tipo ${isTCollapsed ? 'collapsed' : ''}" onclick="toggleColapsoTipo('${tFullKey}')" data-tipo-fullkey="${tFullKey}">
+                <td style="padding-left: 28px;">
+                  <span class="tree-toggle-icon">${iconTipo}</span>
+                  <span class="tipo-badge">🏷️ Tipo: ${tGrupo.tipoKey}</span>
+                  <span class="tipo-count">${tGrupo.chuletas.size} tipos chuleta</span>
                 </td>
-                <td class="text-right num-col font-bold">${formatKg(cM.origen)}</td>
-                <td class="text-right num-col font-bold text-teal">${formatKg(cM.resultado)}</td>
-                <td class="text-right num-col text-muted">${formatKg(cM.harina)}</td>
-                <td class="text-right num-col text-danger">${formatKg(cM.merma)}</td>
-                <td class="text-right num-col font-bold">${formatKg(cM.perdida)}</td>
-                <td class="text-right">${getRendimientoBadge(cM.rendimiento)}</td>
+                <td class="text-right num-col font-bold">${formatKg(tMetricas.origen)}</td>
+                <td class="text-right num-col font-bold text-teal">${formatKg(tMetricas.resultado)}</td>
+                <td class="text-right num-col text-muted">${formatKg(tMetricas.harina)}</td>
+                <td class="text-right num-col text-danger">${formatKg(tMetricas.merma)}</td>
+                <td class="text-right num-col font-bold">${formatKg(tMetricas.perdida)}</td>
+                <td class="text-right">${getRendimientoBadge(tMetricas.rendimiento)}</td>
               </tr>
             `;
 
-            // 4. Filas de Nivel 4: PLANTILLA-NPLANTILLA (Fila Combinada)
-            const sortedPlantillas = Array.from(cObj.plantillasMap.values()).sort((a, b) => a.id - b.id);
-            const displayPlantillaStyle = (isPCollapsed || isTCollapsed || isCCollapsed) ? 'display: none;' : '';
+            if (!isTCollapsed) {
+              const sortedChuletas = Array.from(tGrupo.chuletas.values()).sort((a, b) => a.chuletaKey.localeCompare(b.chuletaKey));
 
-            sortedPlantillas.forEach(plan => {
-              const planM = calculateMetrics(plan.rows);
-              const searchStr = `${pObj.pLabel} ${tObj.tKey} ${cObj.cKey} ${plan.planKey}`.toLowerCase();
+              sortedChuletas.forEach(cGrupo => {
+                const cMetricas = calcularMetricasGrupo(cGrupo.rows);
+                const cFullKey = `${tFullKey}___${cGrupo.chuletaKey}`;
+                const isCCollapsed = collapsedChuletas.has(cFullKey);
+                const iconChuleta = isCCollapsed ? "▶" : "▼";
+                const cCoincide = !q || cGrupo.chuletaKey.toLowerCase().includes(q);
 
-              tbodyHtml += `
-                <tr class="row-plantilla" data-parent-period="${pKey}" data-parent-tipo="${tFullKey}" data-parent-chuleta="${cFullKey}" data-search="${searchStr}" style="${displayPlantillaStyle}">
-                  <td style="padding-left: 68px;">
-                    <div class="plantilla-tag-composite">
-                      <span class="plantilla-code">${plan.id || '-'}</span>
-                      <span class="plantilla-name">${plan.name}</span>
-                    </div>
-                  </td>
-                  <td class="text-right num-col">${formatKg(planM.origen)}</td>
-                  <td class="text-right num-col text-teal">${formatKg(planM.resultado)}</td>
-                  <td class="text-right num-col text-muted">${formatKg(planM.harina)}</td>
-                  <td class="text-right num-col text-danger">${formatKg(planM.merma)}</td>
-                  <td class="text-right num-col">${formatKg(planM.perdida)}</td>
-                  <td class="text-right">${getRendimientoBadge(planM.rendimiento)}</td>
-                </tr>
-              `;
-            });
+                // Fila Nivel 3: TIPO CHULETA
+                html += `
+                  <tr class="row-chuleta ${isCCollapsed ? 'collapsed' : ''}" onclick="toggleColapsoChuleta('${cFullKey}')" data-chuleta-fullkey="${cFullKey}">
+                    <td style="padding-left: 54px;">
+                      <span class="tree-toggle-icon">${iconChuleta}</span>
+                      <span class="chuleta-badge">❄️ Tipo Chuleta: ${cGrupo.chuletaKey}</span>
+                      <span class="tipo-count">${cGrupo.plantillas.size} plantillas</span>
+                    </td>
+                    <td class="text-right num-col font-bold">${formatKg(cMetricas.origen)}</td>
+                    <td class="text-right num-col font-bold text-teal">${formatKg(cMetricas.resultado)}</td>
+                    <td class="text-right num-col text-muted">${formatKg(cMetricas.harina)}</td>
+                    <td class="text-right num-col text-danger">${formatKg(cMetricas.merma)}</td>
+                    <td class="text-right num-col font-bold">${formatKg(cMetricas.perdida)}</td>
+                    <td class="text-right">${getRendimientoBadge(cMetricas.rendimiento)}</td>
+                  </tr>
+                `;
+
+                if (!isCCollapsed) {
+                  const sortedPlantillas = Array.from(cGrupo.plantillas.values()).sort((a, b) => a.idPlantilla - b.idPlantilla);
+
+                  sortedPlantillas.forEach(plan => {
+                    const planMetricas = calcularMetricasGrupo(plan.rows);
+                    const planSearch = `${pGrupo.periodoLabel} ${tGrupo.tipoKey} ${cGrupo.chuletaKey} ${plan.planKey}`.toLowerCase();
+
+                    // Fila Nivel 4: PLANTILLA - NPLANTILLA
+                    html += `
+                      <tr class="row-plantilla" data-search="${planSearch}">
+                        <td style="padding-left: 80px;">
+                          <div class="plantilla-tag-composite">
+                            <span class="plantilla-code">${plan.idPlantilla > 0 ? plan.idPlantilla : '-'}</span>
+                            <span class="plantilla-name">${plan.nombrePlantilla}</span>
+                          </div>
+                        </td>
+                        <td class="text-right num-col">${formatKg(planMetricas.origen)}</td>
+                        <td class="text-right num-col text-teal">${formatKg(planMetricas.resultado)}</td>
+                        <td class="text-right num-col text-muted">${formatKg(planMetricas.harina)}</td>
+                        <td class="text-right num-col text-danger">${formatKg(planMetricas.merma)}</td>
+                        <td class="text-right num-col">${formatKg(planMetricas.perdida)}</td>
+                        <td class="text-right">${getRendimientoBadge(planMetricas.rendimiento)}</td>
+                      </tr>
+                    `;
+                  });
+                }
+              });
+            }
           });
-        });
+        }
       });
 
-      tbody.innerHTML = tbodyHtml;
+      tbody.innerHTML = html;
 
-      // 5. Fila Total General Consolidado
-      const globalM = calculateMetrics(filteredData);
+      // Fila Consolidada en Footer
+      const totalGlobal = calcularMetricasGrupo(datosFiltrados);
       if (tfoot) {
         tfoot.innerHTML = `
           <tr class="row-grand-total">
             <td>
               <span style="font-size: 0.95rem;">🏆 TOTAL GENERAL CONSOLIDADO</span>
-              <span style="font-size: 0.75rem; font-weight: normal; opacity: 0.8; margin-left: 8px;">(${sortedPeriodos.length} periodos | ${filteredData.length.toLocaleString('es-PE')} registros)</span>
+              <span style="font-size: 0.75rem; font-weight: normal; opacity: 0.8; margin-left: 8px;">
+                (${sortedPeriodoKeys.length} periodos | ${datosFiltrados.length.toLocaleString('es-PE')} registros)
+              </span>
             </td>
-            <td class="text-right num-col">${formatKg(globalM.origen)}</td>
-            <td class="text-right num-col" style="color: var(--cool-blue);">${formatKg(globalM.resultado)}</td>
-            <td class="text-right num-col" style="color: #CBD5E1;">${formatKg(globalM.harina)}</td>
-            <td class="text-right num-col" style="color: #FCA5A5;">${formatKg(globalM.merma)}</td>
-            <td class="text-right num-col">${formatKg(globalM.perdida)}</td>
-            <td class="text-right">${getRendimientoBadge(globalM.rendimiento)}</td>
+            <td class="text-right num-col">${formatKg(totalGlobal.origen)}</td>
+            <td class="text-right num-col" style="color: var(--pantone-yellow);">${formatKg(totalGlobal.resultado)}</td>
+            <td class="text-right num-col" style="color: var(--pantone-gray-light);">${formatKg(totalGlobal.harina)}</td>
+            <td class="text-right num-col" style="color: #FCA5A5;">${formatKg(totalGlobal.merma)}</td>
+            <td class="text-right num-col">${formatKg(totalGlobal.perdida)}</td>
+            <td class="text-right">${getRendimientoBadge(totalGlobal.rendimiento)}</td>
           </tr>
         `;
       }
     }
 
-    function toggleColapsoPeriodo(pKey) {
-      if (collapsedPeriodos.has(pKey)) {
-        collapsedPeriodos.delete(pKey);
-      } else {
-        collapsedPeriodos.add(pKey);
-      }
+    // =========================================================================
+    // 📂 EXPANDIR / COLAPSAR / FILTRAR BÚSQUEDA
+    // =========================================================================
+    function toggleColapsoPeriodo(periodoKey) {
+      if (collapsedPeriodos.has(periodoKey)) collapsedPeriodos.delete(periodoKey);
+      else collapsedPeriodos.add(periodoKey);
       renderMatrizJerarquica();
     }
 
-    function toggleColapsoTipo(tFullKey) {
-      if (collapsedTipos.has(tFullKey)) {
-        collapsedTipos.delete(tFullKey);
-      } else {
-        collapsedTipos.add(tFullKey);
-      }
+    function toggleColapsoTipo(fullKey) {
+      if (collapsedTipos.has(fullKey)) collapsedTipos.delete(fullKey);
+      else collapsedTipos.add(fullKey);
       renderMatrizJerarquica();
     }
 
-    function toggleColapsoChuleta(cFullKey) {
-      if (collapsedChuletas.has(cFullKey)) {
-        collapsedChuletas.delete(cFullKey);
-      } else {
-        collapsedChuletas.add(cFullKey);
-      }
+    function toggleColapsoChuleta(fullKey) {
+      if (collapsedChuletas.has(fullKey)) collapsedChuletas.delete(fullKey);
+      else collapsedChuletas.add(fullKey);
       renderMatrizJerarquica();
     }
 
-    function toggleExpandirTodo(expandir) {
+    function expandirTodo(expandir) {
       if (expandir) {
         collapsedPeriodos.clear();
         collapsedTipos.clear();
         collapsedChuletas.clear();
       } else {
-        const timeFieldMap = { diario: '_dia', semanal: '_semana', mensual: '_mes' };
-        const timeField = timeFieldMap[modoMatrizActivo] || '_semana';
-        filteredData.forEach(d => {
-          const pKey = d[timeField] || 'SIN_FECHA';
+        const periodosMap = construirJerarquiaPeriodos();
+        periodosMap.forEach((pGrupo, pKey) => {
           collapsedPeriodos.add(pKey);
-          const tKey = d.Tipo || 'SIN TIPO';
-          const tFullKey = `${pKey}___${tKey}`;
-          collapsedTipos.add(tFullKey);
-          const cKey = d.TipoChuleta || 'SIN CLASIFICAR';
-          collapsedChuletas.add(`${tFullKey}___${cKey}`);
+          pGrupo.tipos.forEach((tGrupo, tKey) => {
+            const tFullKey = `${pKey}___${tKey}`;
+            collapsedTipos.add(tFullKey);
+            tGrupo.chuletas.forEach((cGrupo, cKey) => {
+              collapsedChuletas.add(`${tFullKey}___${cKey}`);
+            });
+          });
         });
       }
       renderMatrizJerarquica();
     }
 
     function filtrarMatrizTexto() {
-      const q = (document.getElementById('tableSearchInput').value || '').trim().toLowerCase();
-      const rows = document.querySelectorAll('#tablePlantillasBody tr');
+      textoBusqueda = (document.getElementById('tableSearchInput').value || '').trim().toLowerCase();
+      const rows = document.querySelectorAll('#tableMatrixBody tr');
 
-      if (!q) {
-        renderMatrizJerarquica();
+      if (!textoBusqueda) {
+        rows.forEach(r => r.style.display = '');
         return;
       }
 
-      const periodosQueCoinciden = new Set();
-      const tiposQueCoinciden = new Set();
-      const chuletasQueCoinciden = new Set();
-
       rows.forEach(r => {
         const text = (r.textContent || '').toLowerCase();
-        const matches = text.includes(q) || ((r.dataset.search || '').includes(q));
-        if (matches) {
-          if (r.classList.contains('row-plantilla')) {
-            periodosQueCoinciden.add(r.dataset.parentPeriod);
-            tiposQueCoinciden.add(r.dataset.parentTipo);
-            chuletasQueCoinciden.add(r.dataset.parentChuleta);
-          } else if (r.classList.contains('row-chuleta')) {
-            periodosQueCoinciden.add(r.dataset.parentPeriod);
-            tiposQueCoinciden.add(r.dataset.parentTipo);
-            chuletasQueCoinciden.add(r.dataset.chuletaKey);
-          } else if (r.classList.contains('row-tipo')) {
-            periodosQueCoinciden.add(r.dataset.parentPeriod);
-            tiposQueCoinciden.add(r.dataset.tipoKey);
-          } else if (r.classList.contains('row-periodo')) {
-            periodosQueCoinciden.add(r.dataset.period);
-          }
-        }
-      });
-
-      rows.forEach(r => {
-        if (r.classList.contains('row-periodo')) {
-          r.style.display = periodosQueCoinciden.has(r.dataset.period) ? '' : 'none';
-        } else if (r.classList.contains('row-tipo')) {
-          const pMatch = periodosQueCoinciden.has(r.dataset.parentPeriod);
-          const tMatch = tiposQueCoinciden.has(r.dataset.tipoKey);
-          r.style.display = (pMatch && (tMatch || r.textContent.toLowerCase().includes(q))) ? '' : 'none';
-        } else if (r.classList.contains('row-chuleta')) {
-          const pMatch = periodosQueCoinciden.has(r.dataset.parentPeriod);
-          const tMatch = tiposQueCoinciden.has(r.dataset.parentTipo);
-          const cMatch = chuletasQueCoinciden.has(r.dataset.chuletaKey);
-          r.style.display = (pMatch && tMatch && (cMatch || r.textContent.toLowerCase().includes(q))) ? '' : 'none';
-        } else if (r.classList.contains('row-plantilla')) {
-          const pMatch = periodosQueCoinciden.has(r.dataset.parentPeriod);
-          const tMatch = tiposQueCoinciden.has(r.dataset.parentTipo);
-          const cMatch = chuletasQueCoinciden.has(r.dataset.parentChuleta);
-          const selfMatch = (r.dataset.search || '').includes(q);
-          r.style.display = (pMatch && tMatch && cMatch && selfMatch) ? '' : 'none';
-        }
+        const searchVal = (r.dataset.search || '').toLowerCase();
+        r.style.display = (text.includes(textoBusqueda) || searchVal.includes(textoBusqueda)) ? '' : 'none';
       });
     }
 
     // =========================================================================
-    // 📊 EXPORTACIÓN A EXCEL (.XLSX) ACTUALIZADA
+    // 📊 EXPORTACIONES A EXCEL (SheetJS .xlsx)
     // =========================================================================
     function exportarMatrizExcel() {
-      if (!filteredData || filteredData.length === 0) {
-        mostrarToast("⚠️ No hay datos filtrados para exportar", 3000);
+      if (datosFiltrados.length === 0) {
+        mostrarToast("⚠️ No hay datos para exportar", 3000);
         return;
       }
 
-      mostrarToast("⏳ Generando archivo Excel...", 2000);
+      mostrarToast("⏳ Generando Matriz en Excel...", 2000);
 
-      const timeFieldMap = { diario: '_dia', semanal: '_semana', mensual: '_mes' };
-      const timeField = timeFieldMap[modoMatrizActivo] || '_semana';
-      const periodoMap = agruparDatosJerarquicos(filteredData, timeField);
-      const sortedPeriodos = Array.from(periodoMap.keys()).sort();
+      const periodosMap = construirJerarquiaPeriodos();
+      const sortedKeys = Array.from(periodosMap.keys()).sort();
+      const rowsExcel = [];
 
-      const filasJerarquia = [];
-      const filasPlana = [];
+      sortedKeys.forEach(pKey => {
+        const pGrupo = periodosMap.get(pKey);
+        const pM = calcularMetricasGrupo(pGrupo.rows);
 
-      sortedPeriodos.forEach(pKey => {
-        const pObj = periodoMap.get(pKey);
-        const pM = calculateMetrics(pObj.rows);
-
-        // Fila Nivel 1: Subtotal Periodo
-        filasJerarquia.push({
+        // Nivel 1: Subtotal Periodo
+        rowsExcel.push({
           "Nivel": "PERIODO",
-          "Periodo": pObj.pLabel,
+          "Periodo": pGrupo.periodoLabel,
           "Tipo": "(Todos)",
           "Tipo Chuleta": "(Todos)",
-          "Plantilla - NPlantilla": `SUBTOTAL ${pObj.pLabel.toUpperCase()}`,
+          "Plantilla - NPlantilla": `SUBTOTAL ${pGrupo.periodoLabel.toUpperCase()}`,
           "Kilos Origen (kg)": Math.round(pM.origen * 100) / 100,
           "Kilos Resultado (kg)": Math.round(pM.resultado * 100) / 100,
           "Harinas (kg)": Math.round(pM.harina * 100) / 100,
@@ -2241,19 +2374,16 @@
           "Rendimiento (%)": Math.round(pM.rendimiento * 100) / 100
         });
 
-        const sortedTipos = Array.from(pObj.tiposMap.values()).sort((a, b) => a.tKey.localeCompare(b.tKey));
+        pGrupo.tipos.forEach(tGrupo => {
+          const tM = calcularMetricasGrupo(tGrupo.rows);
 
-        sortedTipos.forEach(tObj => {
-          const tM = calculateMetrics(tObj.rows);
-          const tFullKey = `${pKey}___${tObj.tKey}`;
-
-          // Fila Nivel 2: Subtotal Tipo
-          filasJerarquia.push({
+          // Nivel 2: Subtotal Tipo
+          rowsExcel.push({
             "Nivel": "TIPO",
-            "Periodo": pObj.pLabel,
-            "Tipo": tObj.tKey,
+            "Periodo": pGrupo.periodoLabel,
+            "Tipo": tGrupo.tipoKey,
             "Tipo Chuleta": "(Todos)",
-            "Plantilla - NPlantilla": `SUBTOTAL TIPO ${tObj.tKey}`,
+            "Plantilla - NPlantilla": `SUBTOTAL ${tGrupo.tipoKey.toUpperCase()}`,
             "Kilos Origen (kg)": Math.round(tM.origen * 100) / 100,
             "Kilos Resultado (kg)": Math.round(tM.resultado * 100) / 100,
             "Harinas (kg)": Math.round(tM.harina * 100) / 100,
@@ -2262,18 +2392,16 @@
             "Rendimiento (%)": Math.round(tM.rendimiento * 100) / 100
           });
 
-          const sortedChuletas = Array.from(tObj.chuletasMap.values()).sort((a, b) => a.cKey.localeCompare(b.cKey));
+          tGrupo.chuletas.forEach(cGrupo => {
+            const cM = calcularMetricasGrupo(cGrupo.rows);
 
-          sortedChuletas.forEach(cObj => {
-            const cM = calculateMetrics(cObj.rows);
-
-            // Fila Nivel 3: Subtotal Tipo Chuleta
-            filasJerarquia.push({
+            // Nivel 3: Subtotal Tipo Chuleta
+            rowsExcel.push({
               "Nivel": "TIPO_CHULETA",
-              "Periodo": pObj.pLabel,
-              "Tipo": tObj.tKey,
-              "Tipo Chuleta": cObj.cKey,
-              "Plantilla - NPlantilla": `SUBTOTAL ${cObj.cKey}`,
+              "Periodo": pGrupo.periodoLabel,
+              "Tipo": tGrupo.tipoKey,
+              "Tipo Chuleta": cGrupo.chuletaKey,
+              "Plantilla - NPlantilla": `SUBTOTAL ${cGrupo.chuletaKey}`,
               "Kilos Origen (kg)": Math.round(cM.origen * 100) / 100,
               "Kilos Resultado (kg)": Math.round(cM.resultado * 100) / 100,
               "Harinas (kg)": Math.round(cM.harina * 100) / 100,
@@ -2282,34 +2410,16 @@
               "Rendimiento (%)": Math.round(cM.rendimiento * 100) / 100
             });
 
-            const sortedPlantillas = Array.from(cObj.plantillasMap.values()).sort((a, b) => a.id - b.id);
+            cGrupo.plantillas.forEach(plan => {
+              const planM = calcularMetricasGrupo(plan.rows);
 
-            sortedPlantillas.forEach(plan => {
-              const planM = calculateMetrics(plan.rows);
-
-              // Fila Nivel 4: Detalle Plantilla - NPlantilla
-              filasJerarquia.push({
+              // Nivel 4: Detalle Plantilla
+              rowsExcel.push({
                 "Nivel": "PLANTILLA",
-                "Periodo": pObj.pLabel,
-                "Tipo": tObj.tKey,
-                "Tipo Chuleta": cObj.cKey,
+                "Periodo": pGrupo.periodoLabel,
+                "Tipo": tGrupo.tipoKey,
+                "Tipo Chuleta": cGrupo.chuletaKey,
                 "Plantilla - NPlantilla": plan.planKey,
-                "Kilos Origen (kg)": Math.round(planM.origen * 100) / 100,
-                "Kilos Resultado (kg)": Math.round(planM.resultado * 100) / 100,
-                "Harinas (kg)": Math.round(planM.harina * 100) / 100,
-                "Merma (kg)": Math.round(planM.merma * 100) / 100,
-                "Total Pérdida (kg)": Math.round(planM.perdida * 100) / 100,
-                "Rendimiento (%)": Math.round(planM.rendimiento * 100) / 100
-              });
-
-              // Fila Plana para Tablas Dinámicas
-              filasPlana.push({
-                "Periodo": pObj.pLabel,
-                "Tipo": tObj.tKey,
-                "Tipo Chuleta": cObj.cKey,
-                "Plantilla - NPlantilla": plan.planKey,
-                "Cód. Plantilla": plan.id || 0,
-                "Nombre Plantilla": plan.name,
                 "Kilos Origen (kg)": Math.round(planM.origen * 100) / 100,
                 "Kilos Resultado (kg)": Math.round(planM.resultado * 100) / 100,
                 "Harinas (kg)": Math.round(planM.harina * 100) / 100,
@@ -2322,206 +2432,95 @@
         });
       });
 
-      // Fila Total General Consolidado
-      const globalM = calculateMetrics(filteredData);
-      filasJerarquia.push({
+      // Total General Consolidado
+      const totalGlobal = calcularMetricasGrupo(datosFiltrados);
+      rowsExcel.push({
         "Nivel": "TOTAL_GENERAL",
         "Periodo": "CONSOLIDADO",
         "Tipo": "TOTAL",
         "Tipo Chuleta": "-",
         "Plantilla - NPlantilla": "TOTAL GENERAL CONSOLIDADO",
-        "Kilos Origen (kg)": Math.round(globalM.origen * 100) / 100,
-        "Kilos Resultado (kg)": Math.round(globalM.resultado * 100) / 100,
-        "Harinas (kg)": Math.round(globalM.harina * 100) / 100,
-        "Merma (kg)": Math.round(globalM.merma * 100) / 100,
-        "Total Pérdida (kg)": Math.round(globalM.perdida * 100) / 100,
-        "Rendimiento (%)": Math.round(globalM.rendimiento * 100) / 100
+        "Kilos Origen (kg)": Math.round(totalGlobal.origen * 100) / 100,
+        "Kilos Resultado (kg)": Math.round(totalGlobal.resultado * 100) / 100,
+        "Harinas (kg)": Math.round(totalGlobal.harina * 100) / 100,
+        "Merma (kg)": Math.round(totalGlobal.merma * 100) / 100,
+        "Total Pérdida (kg)": Math.round(totalGlobal.perdida * 100) / 100,
+        "Rendimiento (%)": Math.round(totalGlobal.rendimiento * 100) / 100
       });
 
       const fechaHoy = new Date().toISOString().slice(0, 10).replace(/-/g, '');
       const nombreArchivo = `Matriz_Rendimiento_${modoMatrizActivo.toUpperCase()}_${fechaHoy}.xlsx`;
 
-      if (typeof XLSX !== "undefined") {
-        const wb = XLSX.utils.book_new();
-
-        const wsJerarquia = XLSX.utils.json_to_sheet(filasJerarquia);
-        wsJerarquia['!cols'] = [
-          { wch: 14 }, // Nivel
-          { wch: 20 }, // Periodo
-          { wch: 18 }, // Tipo
-          { wch: 18 }, // Tipo Chuleta
-          { wch: 38 }, // Plantilla - NPlantilla
-          { wch: 16 }, // Kilos Origen
-          { wch: 18 }, // Kilos Resultado
-          { wch: 14 }, // Harinas
-          { wch: 14 }, // Merma
-          { wch: 16 }, // Total Pérdida
-          { wch: 15 }  // Rendimiento (%)
-        ];
-        XLSX.utils.book_append_sheet(wb, wsJerarquia, "Matriz_Jerarquica");
-
-        const wsPlana = XLSX.utils.json_to_sheet(filasPlana);
-        wsPlana['!cols'] = [
-          { wch: 20 }, // Periodo
-          { wch: 18 }, // Tipo
-          { wch: 18 }, // Tipo Chuleta
-          { wch: 38 }, // Plantilla - NPlantilla
-          { wch: 14 }, // Cód. Plantilla
-          { wch: 30 }, // Nombre Plantilla
-          { wch: 16 }, // Kilos Origen
-          { wch: 18 }, // Kilos Resultado
-          { wch: 14 }, // Harinas
-          { wch: 14 }, // Merma
-          { wch: 16 }, // Total Pérdida
-          { wch: 15 }  // Rendimiento (%)
-        ];
-        XLSX.utils.book_append_sheet(wb, wsPlana, "Data_Plana");
-
-        XLSX.writeFile(wb, nombreArchivo);
-        mostrarToast(`📊 Archivo Excel (.xlsx) descargado exitosamente`);
-      } else {
-        exportarExcelFallback(filasJerarquia, nombreArchivo.replace('.xlsx', '.xls'));
-      }
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.json_to_sheet(rowsExcel);
+      ws['!cols'] = [
+        { wch: 14 }, { wch: 20 }, { wch: 18 }, { wch: 18 }, { wch: 38 },
+        { wch: 16 }, { wch: 18 }, { wch: 14 }, { wch: 14 }, { wch: 16 }, { wch: 15 }
+      ];
+      XLSX.utils.book_append_sheet(wb, ws, "Matriz_Jerarquica");
+      XLSX.writeFile(wb, nombreArchivo);
+      mostrarToast("📊 Archivo Matriz Excel descargado exitosamente");
     }
 
-    function exportarExcelFallback(filas, nombreArchivo) {
-      if (filas.length === 0) return;
-      const headers = Object.keys(filas[0]);
-      let html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">`;
-      html += `<head><meta charset="utf-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Matriz_Rendimiento</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body>`;
-      html += `<table border="1"><thead><tr style="background:#223A5E;color:#FFFFFF;font-weight:bold;">`;
-      headers.forEach(h => html += `<th>${h}</th>`);
-      html += `</tr></thead><tbody>`;
-
-      filas.forEach(f => {
-        let style = "";
-        if (f.Nivel === "PERIODO") style = "background:#1E293B;color:#FFFFFF;font-weight:bold;";
-        else if (f.Nivel === "TIPO") style = "background:#29384D;color:#FFFFFF;font-weight:bold;";
-        else if (f.Nivel === "TIPO_CHULETA") style = "background:#EBF3FA;color:#0F172A;font-weight:bold;";
-        else if (f.Nivel === "TOTAL_GENERAL") style = "background:#0F172A;color:#FFFFFF;font-weight:bold;";
-
-        html += `<tr style="${style}">`;
-        headers.forEach(h => {
-          const val = f[h];
-          const isNum = typeof val === 'number';
-          html += `<td style="${isNum ? 'text-align:right;' : ''}">${val !== null && val !== undefined ? val : ''}</td>`;
-        });
-        html += `</tr>`;
-      });
-
-      html += `</tbody></table></body></html>`;
-
-      const blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = nombreArchivo;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      mostrarToast(`📊 Archivo Excel descargado exitosamente`);
-    }
-
-    // =========================================================================
-    // 📄 EXPORTACIÓN DE DATA PLANA DEL SP A EXCEL (.xlsx)
-    // =========================================================================
     function exportarDataPlanaExcel() {
-      const dataAExportar = (filteredData && filteredData.length > 0) ? filteredData : rawData;
-
-      if (!dataAExportar || dataAExportar.length === 0) {
-        mostrarToast("⚠️ No hay datos cargados para exportar. Genere el reporte primero.", 3500);
+      if (datosFiltrados.length === 0) {
+        mostrarToast("⚠️ No hay datos para exportar", 3000);
         return;
       }
 
-      mostrarToast("⏳ Preparando data plana del Procedimiento Almacenado...", 2000);
+      mostrarToast("⏳ Generando Data Plana SP...", 2000);
 
-      const filasSpPlana = dataAExportar.map(d => {
-        const fechaRaw = d.fechaOrden || d.FechaOrden || d.fechaOrdenStr || d.FechaOrdenStr;
-        const fechaStr = d._ymd || (fechaRaw ? String(fechaRaw).split('T')[0] : '');
-        const kilos = Number(d.kilos ?? d.Kilos) || 0;
-        const unidades = Number(d.unidades ?? d.Unidades) || 0;
-        const costo = Number(d.costoTotal ?? d.CostoTotal) || 0;
-        const venta = Number(d.ventaTotal ?? d.VentaTotal) || 0;
-        const margen = Math.round((venta - costo) * 100) / 100;
-        const pctMargen = venta > 0 ? Math.round(((venta - costo) / venta) * 10000) / 100 : 0;
-        const costoKg = kilos > 0 ? Math.round((costo / kilos) * 1000) / 1000 : 0;
-        const ventaKg = kilos > 0 ? Math.round((venta / kilos) * 1000) / 1000 : 0;
+      const filas = datosFiltrados.map(d => {
+        const y = d.FechaOrden.getFullYear();
+        const m = String(d.FechaOrden.getMonth() + 1).padStart(2, '0');
+        const day = String(d.FechaOrden.getDate()).padStart(2, '0');
+        const fechaStr = `${y}-${m}-${day}`;
 
         return {
           "FechaOrden": fechaStr,
-          "Tipo": (d.tipo || d.Tipo || '').trim(),
-          "TipoChuleta": (d.tipoChuleta || d.TipoChuleta || '').trim(),
-          "Plantilla": d.plantilla ?? d.Plantilla ?? 0,
-          "NPlantilla": (d.nPlantilla || d.NPlantilla || '').trim(),
-          "Plantilla - NPlantilla": `${d.plantilla ?? d.Plantilla ?? 0} - ${(d.nPlantilla || d.NPlantilla || '').trim()}`,
-          "Ttra": d.ttra ?? d.Ttra ?? 0,
-          "NTtra": (d.nTtra || d.NTtra || '').trim(),
-          "Producto": (d.producto || d.Producto || '').trim(),
-          "CodigoCorto": (d.codigoCorto || d.CodigoCorto || '').trim(),
-          "Nombre": (d.nombre || d.Nombre || '').trim(),
-          "TipoInforme": (d.tipoInforme || d.TipoInforme || '').trim(),
-          "Unidades": Math.round(unidades * 100) / 100,
-          "Kilos": Math.round(kilos * 100) / 100,
-          "CostoTotal": Math.round(costo * 100) / 100,
-          "VentaTotal": Math.round(venta * 100) / 100,
-          "MargenBruto": margen,
-          "PctMargen": pctMargen,
-          "CostoPorKilo": costoKg,
-          "VentaPorKilo": ventaKg
+          "Tipo": d.Tipo,
+          "TipoChuleta": d.TipoChuleta,
+          "Plantilla": d.Plantilla,
+          "NPlantilla": d.NPlantilla,
+          "Plantilla - NPlantilla": `${d.Plantilla} - ${d.NPlantilla}`,
+          "Ttra": d.Ttra,
+          "NTtra": d.NTtra,
+          "Producto": d.Producto,
+          "CodigoCorto": d.CodigoCorto,
+          "Nombre": d.Nombre,
+          "TipoInforme": d.TipoInforme,
+          "Unidades": Math.round(d.Unidades * 100) / 100,
+          "Kilos": Math.round(d.Kilos * 100) / 100,
+          "CostoTotal": Math.round(d.CostoTotal * 100) / 100,
+          "VentaTotal": Math.round(d.VentaTotal * 100) / 100
         };
       });
 
       const fIni = document.getElementById('fechaInicio')?.value || '';
       const fFin = document.getElementById('fechaFin')?.value || '';
-      const rangoStr = (fIni && fFin) ? `_${fIni.replace(/-/g, '')}_al_${fFin.replace(/-/g, '')}` : `_${new Date().toISOString().slice(0, 10).replace(/-/g, '')}`;
+      const rangoStr = (fIni && fFin) ? `_${fIni.replace(/-/g, '')}_a_${fFin.replace(/-/g, '')}` : `_${new Date().toISOString().slice(0, 10).replace(/-/g, '')}`;
       const nombreArchivo = `Data_Plana_Sp_Informe_Prod_Chuletas${rangoStr}.xlsx`;
 
-      if (typeof XLSX !== "undefined") {
-        const wb = XLSX.utils.book_new();
-
-        const wsSp = XLSX.utils.json_to_sheet(filasSpPlana);
-        wsSp['!cols'] = [
-          { wch: 13 }, // FechaOrden
-          { wch: 18 }, // Tipo
-          { wch: 16 }, // TipoChuleta
-          { wch: 10 }, // Plantilla
-          { wch: 32 }, // NPlantilla
-          { wch: 38 }, // Plantilla - NPlantilla
-          { wch: 8 },  // Ttra
-          { wch: 14 }, // NTtra
-          { wch: 14 }, // Producto
-          { wch: 14 }, // CodigoCorto
-          { wch: 36 }, // Nombre
-          { wch: 14 }, // TipoInforme
-          { wch: 12 }, // Unidades
-          { wch: 14 }, // Kilos
-          { wch: 14 }, // CostoTotal
-          { wch: 14 }, // VentaTotal
-          { wch: 14 }, // MargenBruto
-          { wch: 12 }, // PctMargen
-          { wch: 14 }, // CostoPorKilo
-          { wch: 14 }  // VentaPorKilo
-        ];
-        XLSX.utils.book_append_sheet(wb, wsSp, "Sp_Informe_Prod_Chuletas");
-
-        XLSX.writeFile(wb, nombreArchivo);
-        mostrarToast(`📄 Data Plana del SP descargada (${filasSpPlana.length} filas sin totales)`);
-      } else {
-        exportarExcelFallback(filasSpPlana, nombreArchivo.replace('.xlsx', '.xls'));
-      }
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.json_to_sheet(filas);
+      ws['!cols'] = [
+        { wch: 13 }, { wch: 18 }, { wch: 16 }, { wch: 10 }, { wch: 32 }, { wch: 38 },
+        { wch: 8 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 36 }, { wch: 14 },
+        { wch: 12 }, { wch: 14 }, { wch: 14 }, { wch: 14 }
+      ];
+      XLSX.utils.book_append_sheet(wb, ws, "Sp_Informe_Prod_Chuletas");
+      XLSX.writeFile(wb, nombreArchivo);
+      mostrarToast(`📄 Data Plana del SP descargada (${filas.length} filas)`);
     }
 
-    const exportarMatrizCSV = exportarMatrizExcel;
-    const renderPlantillasTable = renderMatrizJerarquica;
-
     // =========================================================================
-    // 💡 INTERFAZ Y HELPERS
+    // 💡 FEEDBACK VISUAL Y ALERTAS
     // =========================================================================
     function actualizarEstadoUI(tipo, texto) {
-      const dot = document.querySelector('.status-dot');
-      const txt = document.getElementById('apiStatusText');
-      dot.className = `status-dot ${tipo}`;
-      txt.textContent = texto;
+      const dot = document.getElementById('statusDot');
+      const txt = document.getElementById('statusText');
+      if (dot) dot.className = `status-dot ${tipo}`;
+      if (txt) txt.textContent = texto;
     }
 
     function mostrarCargando(visible, titulo = 'Cargando', mensaje = 'Por favor espere...') {
@@ -2535,14 +2534,26 @@
       }
     }
 
-    function mostrarToast(mensaje, duracionMs = 4000) {
+    function mostrarToast(mensaje, duracionMs = 3500) {
       const toast = document.getElementById('toastNotification');
       const msgEl = document.getElementById('toastMsg');
-      msgEl.textContent = mensaje;
-      toast.classList.add('show');
-      setTimeout(() => {
-        toast.classList.remove('show');
-      }, duracionMs);
+      if (msgEl) msgEl.textContent = mensaje;
+      if (toast) {
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), duracionMs);
+      }
+    }
+
+    function mostrarError(mensaje) {
+      const alertBox = document.getElementById('alertError');
+      const errorTxt = document.getElementById('errorText');
+      if (errorTxt) errorTxt.textContent = mensaje;
+      if (alertBox) alertBox.classList.add('show');
+    }
+
+    function cerrarError() {
+      const alertBox = document.getElementById('alertError');
+      if (alertBox) alertBox.classList.remove('show');
     }
   </script>
 </body>

@@ -894,14 +894,36 @@
             },
             {
                 id: 'resumen-pl-ptc',
-                titulo: 'Resumen Planilla PTC: Real vs Planificado',
+                titulo: 'Resumen PTC: Cumplimiento Real vs Planificado',
                 archivo: 'ResumenPl_PTC.html',
                 categoria: 'CUMPLIMIENTOS',
                 categoriaNombre: 'Cumplimientos PTC',
                 categoriaClase: 'cat-cumplimientos',
                 icono: '⏱️',
                 endpoint: 'GET /api/ResumenPl',
-                descripcion: 'Comparativa de horas hombre (HH), planilla real asignada y cumplimiento versus presupuesto planificado.'
+                descripcion: 'Comparativa del cumplimiento versus presupuesto planificado.'
+            },
+            {
+                id: 'cumplimiento-embutidos',
+                titulo: 'Cumplimiento Embutidos: Pedidos vs Atendido',
+                archivo: 'CumplimientosEmbutidos.html',
+                categoria: 'CUMPLIMIENTOS',
+                categoriaNombre: 'Cumplimientos PTC',
+                categoriaClase: 'cat-cumplimientos',
+                icono: '🌭',
+                endpoint: 'GET /api/CumplimientosEmbutidos',
+                descripcion: 'Comparativo detallado de pedidos solicitados vs atendido real en embutidos por semana (T_Cumplientos).'
+            },
+            {
+                id: 'cumplimiento-embutidos-tendencia',
+                titulo: 'Tendencia Cumplimiento Embutidos',
+                archivo: 'CumplimientosEmbutidos_Tendencia.html',
+                categoria: 'CUMPLIMIENTOS',
+                categoriaNombre: 'Cumplimientos PTC',
+                categoriaClase: 'cat-cumplimientos',
+                icono: '📈',
+                endpoint: 'GET /api/CumplimientosEmbutidos',
+                descripcion: 'Curva y tendencia histórica del porcentaje de cumplimiento de embutidos frente a la meta del 100%.'
             },
 
             // COSTOS & PRESUPUESTO (3)

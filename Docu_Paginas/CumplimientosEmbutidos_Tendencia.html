@@ -1,0 +1,2091 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cumplimiento Embutidos - Tendencia de Cumplimiento</title>
+
+    <!-- Fuentes Google Fonts: Inter y JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Chart.js y Plugins -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+    <!-- SheetJS para exportar a Excel (.xlsx) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <!-- Configuración compartida de conexión a la API -->
+    <script src="config.js"></script>
+
+    <style>
+        /* =========================================================================
+           🎨 PALETA PANTONE INDUSTRIAL DARK (Dark Cyan Edition)
+           ========================================================================= */
+        :root {
+            --pantone-yellow: #F4D03F;
+            --pantone-yellow-light: #F8CC5A;
+            --pantone-gold: #BAA063;
+            --pantone-dark: #2E2A2F;
+            --pantone-darker: #252C37;
+            --pantone-gray-dark: #605C5E;
+            --pantone-gray-med: #878994;
+            --pantone-gray-light: #CDCAC0;
+            --table-accent: #F4D03F;
+
+            --bg-main: #252C37;
+            --bg-card: #2E2A2F;
+            --bg-card-alt: #232024;
+            --border-card: #3D393E;
+            --border-subtle: #4D474F;
+
+            --accent-cyan: #F4D03F;
+            --accent-gold: #BAA063;
+            --accent-blue: #48B2CF;
+            --text-primary: #FFFFFF;
+            --text-secondary: #CDCAC0;
+            --text-muted: #878994;
+
+            --pedidos-color: #F4D03F;
+            --atendido-color: #BAA063;
+            --positive: #10B981;
+            --warning: #F59E0B;
+            --negative: #EF4444;
+            --neutral: #878994;
+
+            --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.4);
+            --radius-md: 10px;
+            --radius-sm: 6px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-main);
+            background-image: radial-gradient(circle at 50% 0%, #2E2A2F 0%, #252C37 80%);
+            color: var(--text-primary);
+            padding: 24px;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Scrollbars elegantes en tema oscuro */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-main);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-card);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-gold);
+        }
+
+        .dashboard-container {
+            max-width: 1720px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* HEADER */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-card);
+            padding-bottom: 18px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .header-title-box {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .header h1 {
+            color: var(--text-primary);
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 0.3px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header h1 span.highlight {
+            color: var(--accent-cyan);
+            text-shadow: 0 0 14px rgba(244, 208, 63, 0.35);
+        }
+
+        .header-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            font-size: 11.5px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            letter-spacing: 0.3px;
+        }
+
+        .badge-cyan {
+            background: rgba(244, 208, 63, 0.12);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(244, 208, 63, 0.35);
+        }
+
+        .badge-gold {
+            background: rgba(186, 160, 99, 0.15);
+            color: var(--accent-gold);
+            border: 1px solid rgba(186, 160, 99, 0.35);
+        }
+
+        .badge-subtle {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-card);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        /* Botones de acción */
+        .btn {
+            padding: 8px 16px;
+            font-size: 12.5px;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .btn-reload {
+            background: rgba(244, 208, 63, 0.12);
+            color: var(--accent-cyan);
+            border: 1px solid var(--accent-cyan);
+            box-shadow: 0 0 10px rgba(244, 208, 63, 0.1);
+        }
+
+        .btn-reload:hover {
+            background: var(--accent-cyan);
+            color: var(--pantone-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 0 15px rgba(244, 208, 63, 0.35);
+        }
+
+        .btn-export {
+            background: rgba(16, 185, 129, 0.12);
+            color: var(--positive);
+            border: 1px solid var(--positive);
+        }
+
+        .btn-export:hover {
+            background: var(--positive);
+            color: #FFFFFF;
+            transform: translateY(-1px);
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
+        }
+
+        /* Banner de Estado y Conexión */
+        .status-strip {
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            padding: 10px 18px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            font-size: 12.5px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+        }
+
+        .status-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: var(--neutral);
+            display: inline-block;
+        }
+
+        .status-dot.online {
+            background: var(--positive);
+            box-shadow: 0 0 10px var(--positive);
+        }
+
+        .status-dot.offline {
+            background: var(--negative);
+            box-shadow: 0 0 10px var(--negative);
+        }
+
+        .status-dot.loading {
+            background: var(--accent-cyan);
+            box-shadow: 0 0 10px var(--accent-cyan);
+            animation: pulse 1.2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 0.3;
+                transform: scale(0.9);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.15);
+            }
+
+            100% {
+                opacity: 0.3;
+                transform: scale(0.9);
+            }
+        }
+
+        /* KPI CONTAINER */
+        .kpi-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+        }
+
+        .kpi-card {
+            background: var(--bg-card);
+            padding: 18px 20px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-card);
+            border-left: 4px solid var(--accent-cyan);
+            box-shadow: var(--shadow-card);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5), 0 0 15px rgba(244, 208, 63, 0.1);
+        }
+
+        .kpi-card.gold {
+            border-left-color: var(--accent-gold);
+        }
+
+        .kpi-card.green {
+            border-left-color: var(--positive);
+        }
+
+        .kpi-card.red {
+            border-left-color: var(--negative);
+        }
+
+        .kpi-card.blue {
+            border-left-color: var(--accent-blue);
+        }
+
+        .kpi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .kpi-title {
+            font-size: 11px;
+            color: var(--text-secondary);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+        }
+
+        .kpi-icon {
+            font-size: 18px;
+            opacity: 0.85;
+        }
+
+        .kpi-value {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin: 10px 0 4px 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -0.5px;
+        }
+
+        .kpi-sub {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .kpi-bar-wrapper {
+            margin-top: 10px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .kpi-bar {
+            height: 100%;
+            background: var(--accent-cyan);
+            border-radius: 3px;
+            transition: width 0.6s ease;
+        }
+
+        /* FILTROS */
+        .filter-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            background: var(--bg-card);
+            padding: 16px 20px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-card);
+            align-items: flex-end;
+            box-shadow: var(--shadow-card);
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex: 1;
+            min-width: 170px;
+        }
+
+        .filter-group.grow-2 {
+            flex: 2;
+            min-width: 260px;
+        }
+
+        .filter-group label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 9px 12px;
+            font-size: 12.5px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-card);
+            outline: none;
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            font-weight: 500;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .filter-group select:focus,
+        .filter-group input:focus {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 10px rgba(244, 208, 63, 0.25);
+        }
+
+        .btn-reset {
+            padding: 9px 16px;
+            font-size: 12px;
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            background: rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+            height: 38px;
+        }
+
+        .btn-reset:hover {
+            background: var(--accent-cyan);
+            color: var(--pantone-dark);
+            border-color: var(--accent-cyan);
+        }
+
+        /* GRID DEL DASHBOARD */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1.1fr;
+            gap: 20px;
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border-radius: var(--radius-md);
+            padding: 20px 22px;
+            box-shadow: var(--shadow-card);
+            border: 1px solid var(--border-card);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--border-card);
+            padding-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .card-header h3 {
+            font-size: 15px;
+            color: var(--text-primary);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-header-badge {
+            font-size: 11px;
+            color: var(--text-secondary);
+            background: rgba(255, 255, 255, 0.05);
+            padding: 3px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--border-card);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 350px;
+            width: 100%;
+        }
+
+        .chart-container.trend-chart {
+            height: 320px;
+        }
+
+        .chart-container.compact {
+            height: 320px;
+        }
+
+        /* Botones de switch de modo en gráfico de línea */
+        .chart-mode-group {
+            display: inline-flex;
+            background: var(--bg-main);
+            border: 1px solid var(--border-card);
+            border-radius: 6px;
+            padding: 2px;
+            gap: 2px;
+        }
+
+        .btn-chart-mode {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .btn-chart-mode.active {
+            background: var(--accent-cyan);
+            color: var(--pantone-dark);
+            box-shadow: 0 0 10px rgba(244, 208, 63, 0.3);
+        }
+
+        /* TABLA DE DETALLE */
+        .table-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .table-wrapper {
+            max-height: 520px;
+            overflow-y: auto;
+            overflow-x: auto;
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-sm);
+            background: var(--bg-card-alt);
+        }
+
+        table.detail-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12.5px;
+            text-align: left;
+            color: var(--text-primary);
+        }
+
+        table.detail-table th {
+            position: sticky;
+            top: 0;
+            background-color: #353036;
+            color: var(--accent-cyan);
+            padding: 11px 14px;
+            font-weight: 700;
+            z-index: 3;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--border-card);
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.15s ease;
+        }
+
+        table.detail-table th:hover {
+            background-color: #3e3840;
+        }
+
+        table.detail-table td {
+            padding: 9px 14px;
+            border-bottom: 1px solid rgba(61, 57, 62, 0.6);
+            font-variant-numeric: tabular-nums;
+        }
+
+        table.detail-table tbody tr:hover {
+            background-color: rgba(244, 208, 63, 0.04);
+        }
+
+        table.detail-table tfoot td {
+            position: sticky;
+            bottom: 0;
+            background: #272328;
+            color: var(--accent-cyan);
+            font-weight: 800;
+            border-top: 2px solid var(--accent-cyan);
+            padding: 12px 14px;
+            z-index: 2;
+        }
+
+        .col-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .col-num {
+            text-align: right;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+        }
+
+        .chip-code {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--border-card);
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-size: 11.5px;
+            color: var(--accent-gold);
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .chip-code:hover {
+            border-color: var(--accent-gold);
+            background: rgba(186, 160, 99, 0.15);
+        }
+
+        /* Badges de estado de cumplimiento */
+        .status-badge {
+            font-size: 10.5px;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .status-badge.cumplido {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--positive);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+        }
+
+        .status-badge.parcial {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.4);
+        }
+
+        .status-badge.critico {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--negative);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+        }
+
+        .status-badge.sin-pedido {
+            background: rgba(135, 137, 148, 0.15);
+            color: var(--neutral);
+            border: 1px solid rgba(135, 137, 148, 0.4);
+        }
+
+        /* Mini barra de progreso en tabla */
+        .table-progress-cell {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .table-progress-bar {
+            flex: 1;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 3px;
+            overflow: hidden;
+            min-width: 60px;
+        }
+
+        .table-progress-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        /* TOAST NOTIFICACIÓN */
+        #toastBox {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #2E2A2F;
+            border: 1px solid var(--accent-cyan);
+            color: var(--text-primary);
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            display: none;
+            align-items: center;
+            gap: 10px;
+            z-index: 9999;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Empty state */
+        .empty-state {
+            padding: 40px 20px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .empty-state span {
+            font-size: 32px;
+            display: block;
+            margin-bottom: 10px;
+            opacity: 0.6;
+        }
+
+        /* Responsive */
+        @media (max-width: 1080px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .full-width {
+                grid-column: span 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-container">
+
+        <!-- HEADER -->
+        <header class="header">
+            <div class="header-title-box">
+                <h1>
+                    <span>📈 TENDENCIA DE CUMPLIMIENTO:</span>
+                    <span class="highlight">EMBUTIDOS</span>
+                </h1>
+                <div class="header-meta">
+                    <span class="badge badge-cyan">Controlador: /api/CumplimientosEmbutidos</span>
+                    <span class="badge badge-gold">Hoja: CumplimientosEmb</span>
+                    <span class="badge badge-subtle">Tabla: T_Cumplientos</span>
+                    <span class="badge badge-subtle" id="semanaRangoBadge">Semana: Cargando...</span>
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <button class="btn btn-reload" id="btnRecargar" onclick="recargarDatos(true)"
+                    title="Forzar relectura del archivo Excel en la API">
+                    <span id="reloadIcon">🔄</span> Recargar Datos
+                </button>
+                <button class="btn btn-export" id="btnExportar" onclick="exportarExcel()"
+                    title="Descargar datos en formato Excel (.xlsx)">
+                    <span>📥</span> Exportar Excel
+                </button>
+            </div>
+        </header>
+
+        <!-- BANNER DE ESTADO -->
+        <div class="status-strip">
+            <div class="status-indicator">
+                <span class="status-dot loading" id="statusDot"></span>
+                <span id="statusText">Conectando a la API .NET...</span>
+            </div>
+            <div style="color: var(--text-muted); font-size: 11.5px;" id="statusTimestamp">
+                Última sincronización: —
+            </div>
+        </div>
+
+        <!-- FILTROS -->
+        <section class="filter-bar">
+            <!-- Filtro de Semana (Obligatorio con cálculo Lunes a Domingo) -->
+            <div class="filter-group">
+                <label for="filtroSemana">📅 Semana (Lunes a Domingo)</label>
+                <select id="filtroSemana" onchange="aplicarFiltros()">
+                    <option value="">Todas las semanas</option>
+                </select>
+            </div>
+
+            <!-- Buscador por texto -->
+            <div class="filter-group grow-2">
+                <label for="filtroBusqueda">🔍 Buscar Producto o Código</label>
+                <input type="text" id="filtroBusqueda" placeholder="Filtrar por código (ej. 05813) o descripción..."
+                    oninput="aplicarFiltros()">
+            </div>
+
+            <!-- Filtro de Cumplimiento -->
+            <div class="filter-group">
+                <label for="filtroEstado">🎯 Nivel Cumplimiento</label>
+                <select id="filtroEstado" onchange="aplicarFiltros()">
+                    <option value="TODOS">Todos los niveles</option>
+                    <option value="CUMPLIDO">✔ Cumplido (≥ 100%)</option>
+                    <option value="PARCIAL">▲ Parcial (80% - 99%)</option>
+                    <option value="CRITICO">✖ Crítico (&lt; 80%)</option>
+                    <option value="DEFICIT">Diferencia Negativa (Déficit)</option>
+                </select>
+            </div>
+
+            <!-- Botón Limpiar -->
+            <button class="btn-reset" onclick="limpiarFiltros()" title="Restablecer todos los filtros">
+                ✕ Limpiar
+            </button>
+        </section>
+
+        <!-- TARJETAS KPI (SIN DECIMALES) -->
+        <section class="kpi-container">
+            <!-- 1. Total Pedidos -->
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-title">Total Pedidos</span>
+                    <span class="kpi-icon">📋</span>
+                </div>
+                <div class="kpi-value" id="kpiTotalPedidos" style="color: var(--pedidos-color);">0 kg</div>
+                <div class="kpi-sub">
+                    <span>Volumen programado solicitado</span>
+                </div>
+                <div class="kpi-bar-wrapper">
+                    <div class="kpi-bar" style="width: 100%; background: var(--pedidos-color);"></div>
+                </div>
+            </div>
+
+            <!-- 2. Total Atendido -->
+            <div class="kpi-card gold">
+                <div class="kpi-header">
+                    <span class="kpi-title">Total Atendido</span>
+                    <span class="kpi-icon">🚚</span>
+                </div>
+                <div class="kpi-value" id="kpiTotalAtendido" style="color: var(--atendido-color);">0 kg</div>
+                <div class="kpi-sub">
+                    <span>Kilos despachados / reales</span>
+                </div>
+                <div class="kpi-bar-wrapper">
+                    <div class="kpi-bar" id="kpiBarAtendido" style="width: 0%; background: var(--atendido-color);">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Diferencia Neta -->
+            <div class="kpi-card green" id="cardDiferencia">
+                <div class="kpi-header">
+                    <span class="kpi-title">Diferencia Neta</span>
+                    <span class="kpi-icon">⚖️</span>
+                </div>
+                <div class="kpi-value" id="kpiDiferencia">0 kg</div>
+                <div class="kpi-sub" id="kpiDiferenciaSub">
+                    <span>Atendido vs Pedidos</span>
+                </div>
+                <div class="kpi-bar-wrapper">
+                    <div class="kpi-bar" id="kpiBarDiferencia" style="width: 100%;"></div>
+                </div>
+            </div>
+
+            <!-- 4. % Cumplimiento General -->
+            <div class="kpi-card blue" id="cardCumplimiento">
+                <div class="kpi-header">
+                    <span class="kpi-title">% Cumplimiento Global</span>
+                    <span class="kpi-icon">🎯</span>
+                </div>
+                <div class="kpi-value" id="kpiCumplimiento">0%</div>
+                <div class="kpi-sub" id="kpiCumplimientoSub">
+                    <span>Ponderado total kilos</span>
+                </div>
+                <div class="kpi-bar-wrapper">
+                    <div class="kpi-bar" id="kpiBarCumplimiento" style="width: 0%;"></div>
+                </div>
+            </div>
+
+            <!-- 5. Resumen de SKUs -->
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-title">Productos Evaluados</span>
+                    <span class="kpi-icon">🏷️</span>
+                </div>
+                <div class="kpi-value" id="kpiTotalSkus">0</div>
+                <div class="kpi-sub" id="kpiSkusDetalle">
+                    <span>0 cumplidos • 0 en déficit</span>
+                </div>
+                <div class="kpi-bar-wrapper">
+                    <div class="kpi-bar" id="kpiBarSkus" style="width: 0%; background: var(--accent-blue);"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- =========================================================================
+             📈 SECCIÓN PRINCIPAL: GRÁFICO DE LÍNEAS DE TENDENCIA DE % CUMPLIMIENTO
+             ========================================================================= -->
+        <section class="card full-width">
+            <div class="card-header">
+                <h3>
+                    <span>📈 Tendencia del % de Cumplimiento</span>
+                    <span style="font-size: 12px; color: var(--accent-gold); font-weight: normal; margin-left: 8px;">
+                        (Línea Meta Corporativa: 100%)
+                    </span>
+                </h3>
+                <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                    <div class="chart-mode-group">
+                        <button class="btn-chart-mode active" id="btnModoSemanal" onclick="cambiarModoTendencia('SEMANAL')">
+                            📅 Por Semanas
+                        </button>
+                        <button class="btn-chart-mode" id="btnModoProducto" onclick="cambiarModoTendencia('PRODUCTO')">
+                            🏷️ Por Producto
+                        </button>
+                    </div>
+                    <span class="card-header-badge" id="trendSubtitleBadge">Tendencia Semanal</span>
+                </div>
+            </div>
+            <div class="chart-container trend-chart">
+                <canvas id="chartTendencia"></canvas>
+            </div>
+        </section>
+
+        <!-- GRÁFICOS ANALÍTICOS SECUNDARIOS -->
+        <section class="dashboard-grid">
+            <!-- Gráfico 2: Comparativo por Producto (Barras Horizontales) -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>📊 Comparativa por Producto: Pedidos vs Atendido (kg)</h3>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <span class="card-header-badge" id="chart1Badge">Mostrando SKUs</span>
+                        <select id="filtroTopChart" onchange="actualizarGraficoComparativo()"
+                            style="background: var(--bg-main); color: var(--text-primary); border: 1px solid var(--border-card); border-radius: 4px; padding: 2px 6px; font-size: 11px;">
+                            <option value="15">Top 15 por Pedidos</option>
+                            <option value="25" selected>Top 25 SKUs</option>
+                            <option value="TODOS">Todos los SKUs</option>
+                            <option value="DEFICIT">Solo en Déficit</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="chart-container" style="height: 380px;">
+                    <canvas id="chartComparativo"></canvas>
+                </div>
+            </div>
+
+            <!-- Gráfico 3: Distribución de Cumplimiento (Donut) -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>🍩 Distribución de Cumplimiento de SKUs</h3>
+                    <span class="card-header-badge">Semáforo de Desempeño</span>
+                </div>
+                <div class="chart-container compact">
+                    <canvas id="chartDistribucion"></canvas>
+                </div>
+            </div>
+
+            <!-- TABLA DE DETALLE (Full Width) -->
+            <div class="card full-width">
+                <div class="card-header">
+                    <h3>📋 Detalle Completo de Cumplimiento por Producto</h3>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <span class="card-header-badge" id="tableCountBadge">0 registros</span>
+                    </div>
+                </div>
+
+                <div class="table-wrapper">
+                    <table class="detail-table" id="tablaDetalle">
+                        <thead>
+                            <tr>
+                                <th onclick="ordenarTabla('semana')">Semana ↕</th>
+                                <th onclick="ordenarTabla('codigo')">Código ↕</th>
+                                <th onclick="ordenarTabla('descripcion')">Descripción del Producto ↕</th>
+                                <th class="col-num" onclick="ordenarTabla('pedidos')">Pedidos (kg) ↕</th>
+                                <th class="col-num" onclick="ordenarTabla('atendido')">Atendido (kg) ↕</th>
+                                <th class="col-num" onclick="ordenarTabla('diferencia')">Diferencia (kg) ↕</th>
+                                <th onclick="ordenarTabla('cumplimiento')" style="min-width: 140px;">% Cumplimiento ↕
+                                </th>
+                                <th style="text-align: center;">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaBody">
+                            <tr>
+                                <td colspan="8" class="empty-state">
+                                    <span>⏳</span>
+                                    Cargando datos desde la API...
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tfoot id="tablaFoot">
+                            <tr>
+                                <td colspan="3">TOTALES GENERALES</td>
+                                <td class="col-num" id="footPedidos">0</td>
+                                <td class="col-num" id="footAtendido">0</td>
+                                <td class="col-num" id="footDiferencia">0</td>
+                                <td id="footCumplimiento" style="font-family: 'JetBrains Mono', monospace;">0%</td>
+                                <td style="text-align: center;" id="footEstado">—</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- CAJA TOAST -->
+    <div id="toastBox">
+        <span id="toastIcon">✔</span>
+        <span id="toastMessage">Operación realizada</span>
+    </div>
+
+    <!-- =========================================================================
+         ⚙️ JAVASCRIPT: LÓGICA DE CONEXIÓN, TENDENCIA, CÁLCULOS Y RENDERIZADO
+         ========================================================================= -->
+    <script>
+        // =========================================================================
+        // 1. CONFIGURACIÓN DE CONEXIÓN HÍBRIDA A LA API .NET (Regla Obligatoria)
+        // =========================================================================
+        const APP_CONFIG = {
+            servidor: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.servidor)
+                ? GLOBAL_CONFIG.servidor
+                : "RAEVSALL001",
+            puertos: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.puertos)
+                ? GLOBAL_CONFIG.puertos
+                : [8080, 5000]
+        };
+
+        function generarBasesApi() {
+            if (typeof generarBasesApiGlobal === 'function') {
+                return generarBasesApiGlobal();
+            }
+            const bases = [];
+            if (typeof window !== 'undefined' && window.location && window.location.origin && window.location.protocol.startsWith('http')) {
+                bases.push(window.location.origin);
+            }
+            for (const puerto of APP_CONFIG.puertos) {
+                const base = `http://${APP_CONFIG.servidor}:${puerto}`;
+                if (!bases.includes(base)) bases.push(base);
+            }
+            // Fallbacks locales
+            bases.push("http://localhost:8080", "http://localhost:5000", "http://127.0.0.1:8080", "http://127.0.0.1:5000");
+            return bases;
+        }
+
+        // Endpoint del controlador CumplimientosEmbutidosController
+        APP_CONFIG.controllerPath = "/api/CumplimientosEmbutidos";
+        APP_CONFIG.timeoutMs = 25000;
+
+        let apiBaseActiva = null;
+
+        // Fetch con AbortController y timeout
+        async function fetchConTimeout(url, timeoutMs = 10000) {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+                const res = await fetch(url, { signal: controller.signal });
+                clearTimeout(id);
+                return res;
+            } catch (err) {
+                clearTimeout(id);
+                throw err;
+            }
+        }
+
+        // Detección automática del servidor API activo
+        async function detectarServidorApi() {
+            const bases = generarBasesApi();
+            for (const base of bases) {
+                try {
+                    const res = await fetchConTimeout(`${base}${APP_CONFIG.controllerPath}`, 3500);
+                    if (res.ok) {
+                        return base;
+                    }
+                } catch (e) {
+                    try {
+                        const pingRes = await fetchConTimeout(`${base}/`, 2000);
+                        if (pingRes.ok) return base;
+                    } catch (errPing) {
+                    }
+                }
+            }
+            return null;
+        }
+
+        // =========================================================================
+        // 2. REGLA ESTÁNDAR: CÁLCULO DE SEMANAS (INICIO EN LUNES)
+        // =========================================================================
+        function parsearSemanaYRango(semanaStr) {
+            if (!semanaStr) return { semanaRaw: '', ano: 0, numSemana: 0, rangoTexto: '', etiqueta: 'N/A' };
+            const s = String(semanaStr).trim();
+            let ano = 0;
+            let numSemana = 0;
+
+            if (s.length === 6) {
+                if (s.startsWith("2626")) {
+                    ano = 2026;
+                    numSemana = parseInt(s.slice(4), 10);
+                } else if (s.startsWith("20")) {
+                    ano = parseInt(s.slice(0, 4), 10);
+                    numSemana = parseInt(s.slice(4), 10);
+                } else {
+                    ano = parseInt("20" + s.slice(0, 2), 10);
+                    numSemana = parseInt(s.slice(4), 10);
+                }
+            } else if (s.length >= 4 && !isNaN(parseInt(s))) {
+                const n = parseInt(s, 10);
+                if (n > 1000) {
+                    ano = Math.floor(n / 100);
+                    numSemana = n % 100;
+                } else {
+                    numSemana = n;
+                    ano = new Date().getFullYear();
+                }
+            } else {
+                numSemana = parseInt(s, 10) || 0;
+                ano = new Date().getFullYear();
+            }
+
+            if (ano >= 2000 && numSemana > 0 && numSemana <= 53) {
+                const jan4 = new Date(Date.UTC(ano, 0, 4));
+                const dayOfWeek = jan4.getUTCDay() === 0 ? 7 : jan4.getUTCDay();
+                const mondayWeek1 = new Date(jan4.getTime() - ((dayOfWeek - 1) * 86400000));
+                const monday = new Date(mondayWeek1.getTime() + ((numSemana - 1) * 7 * 86400000));
+                const sunday = new Date(monday.getTime() + (6 * 86400000));
+
+                const pad = n => String(n).padStart(2, '0');
+                const rangoTexto = `${pad(monday.getUTCDate())}/${pad(monday.getUTCMonth() + 1)} al ${pad(sunday.getUTCDate())}/${pad(sunday.getUTCMonth() + 1)}`;
+
+                return {
+                    semanaRaw: s,
+                    ano: ano,
+                    numSemana: numSemana,
+                    rangoTexto: rangoTexto,
+                    etiqueta: `Sem. ${pad(numSemana)} (${rangoTexto} - ${ano})`
+                };
+            }
+
+            return {
+                semanaRaw: s,
+                ano: ano,
+                numSemana: numSemana,
+                rangoTexto: '',
+                etiqueta: `Semana ${s}`
+            };
+        }
+
+        // =========================================================================
+        // 3. ESTADO Y VARIABLES GLOBALES
+        // =========================================================================
+        let datosOriginales = [];
+        let datosFiltrados = [];
+        let ordenActual = { columna: 'pedidos', direccion: 'desc' };
+        let modoTendenciaActual = 'SEMANAL'; // 'SEMANAL' o 'PRODUCTO'
+
+        // Instancias de Chart.js
+        let chartTendenciaInstance = null;
+        let chartComparativoInstance = null;
+        let chartDistribucionInstance = null;
+
+        // Formateador numérico sin decimales (Enteros con separadores de miles)
+        const formatoKg = new Intl.NumberFormat('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        const formatoEntero = new Intl.NumberFormat('es-PE', { maximumFractionDigits: 0 });
+
+        // =========================================================================
+        // 4. INICIALIZACIÓN Y CARGA DE DATOS
+        // =========================================================================
+        window.addEventListener('DOMContentLoaded', async () => {
+            actualizarEstadoConexion('loading', 'Detectando servidor API .NET...');
+            await recargarDatos(false);
+        });
+
+        async function recargarDatos(forzarRecarga = false) {
+            const btn = document.getElementById('btnRecargar');
+            const icon = document.getElementById('reloadIcon');
+            if (icon) icon.style.display = 'inline-block';
+            if (btn) btn.disabled = true;
+
+            try {
+                actualizarEstadoConexion('loading', 'Conectando con el endpoint de CumplimientosEmbutidos...');
+
+                if (!apiBaseActiva) {
+                    apiBaseActiva = await detectarServidorApi();
+                }
+
+                if (!apiBaseActiva) {
+                    throw new Error("No se pudo conectar a la API en puertos [8080, 5000]. Verifica que el servicio esté iniciado.");
+                }
+
+                const url = `${apiBaseActiva}${APP_CONFIG.controllerPath}${forzarRecarga ? '?recargar=true' : ''}`;
+                const response = await fetchConTimeout(url, APP_CONFIG.timeoutMs);
+
+                if (!response.ok) {
+                    throw new Error(`Error HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                if (!Array.isArray(data)) {
+                    throw new Error("La respuesta de la API no contiene una lista válida de registros.");
+                }
+
+                datosOriginales = data.map(item => {
+                    const pedidos = Number(item.pedidos ?? item.Pedidos ?? 0);
+                    const atendido = Number(item.atendido ?? item.Atendido ?? 0);
+                    const diferencia = Number(item.diferencia ?? item.Diferencia ?? (atendido - pedidos));
+                    const cumplimiento = pedidos > 0 ? (atendido / pedidos) * 100 : (atendido > 0 ? 100 : 0);
+
+                    return {
+                        semana: String(item.semana ?? item.Semana ?? '').trim(),
+                        codigo: String(item.codigo ?? item.Codigo ?? '').trim(),
+                        descripcion: String(item.descripcion ?? item.Descripcion ?? '').trim(),
+                        pedidos: pedidos,
+                        atendido: atendido,
+                        diferencia: diferencia,
+                        cumplimiento: cumplimiento,
+                        infoSemana: parsearSemanaYRango(item.semana ?? item.Semana)
+                    };
+                });
+
+                actualizarEstadoConexion('online', `Conectado a ${apiBaseActiva} • ${datosOriginales.length} registros cargados`);
+                document.getElementById('statusTimestamp').textContent = `Última sincronización: ${new Date().toLocaleTimeString()}`;
+
+                poblarSelectorSemanas();
+                aplicarFiltros();
+                mostrarToast(`Datos sincronizados (${datosOriginales.length} registros)`, '✔');
+
+            } catch (error) {
+                console.error("Error al cargar datos:", error);
+                actualizarEstadoConexion('offline', error.message || 'Error de conexión');
+                mostrarErrorEnTabla(error.message);
+                mostrarToast("Fallo al conectar con la API", "✖");
+            } finally {
+                if (btn) btn.disabled = false;
+            }
+        }
+
+        function actualizarEstadoConexion(estado, mensaje) {
+            const dot = document.getElementById('statusDot');
+            const txt = document.getElementById('statusText');
+            dot.className = `status-dot ${estado}`;
+            txt.textContent = mensaje;
+        }
+
+        // =========================================================================
+        // 5. SELECTOR DE SEMANAS Y FILTROS
+        // =========================================================================
+        function poblarSelectorSemanas() {
+            const select = document.getElementById('filtroSemana');
+            const valorPrevio = select.value;
+
+            const semanasSet = new Set();
+            datosOriginales.forEach(d => {
+                if (d.semana) semanasSet.add(d.semana);
+            });
+
+            const semanasArr = Array.from(semanasSet).sort().reverse();
+
+            select.innerHTML = '<option value="">Todas las semanas</option>';
+            semanasArr.forEach(sem => {
+                const info = parsearSemanaYRango(sem);
+                const opt = document.createElement('option');
+                opt.value = sem;
+                opt.textContent = info.etiqueta;
+                select.appendChild(opt);
+            });
+
+            if (valorPrevio && semanasArr.includes(valorPrevio)) {
+                select.value = valorPrevio;
+            } else {
+                select.value = ""; // Por defecto: "Todas las semanas"
+            }
+        }
+
+        function cambiarModoTendencia(nuevoModo) {
+            modoTendenciaActual = nuevoModo;
+            document.getElementById('btnModoSemanal').className = `btn-chart-mode ${nuevoModo === 'SEMANAL' ? 'active' : ''}`;
+            document.getElementById('btnModoProducto').className = `btn-chart-mode ${nuevoModo === 'PRODUCTO' ? 'active' : ''}`;
+            actualizarGraficoTendencia();
+        }
+
+        function aplicarFiltros() {
+            const semanaSel = document.getElementById('filtroSemana').value.trim();
+            const busqueda = document.getElementById('filtroBusqueda').value.trim().toLowerCase();
+            const estadoSel = document.getElementById('filtroEstado').value;
+
+            const badgeSemana = document.getElementById('semanaRangoBadge');
+            if (semanaSel) {
+                const infoSem = parsearSemanaYRango(semanaSel);
+                badgeSemana.textContent = infoSem.etiqueta;
+                badgeSemana.className = "badge badge-cyan";
+            } else {
+                badgeSemana.textContent = "Todas las Semanas";
+                badgeSemana.className = "badge badge-subtle";
+            }
+
+            datosFiltrados = datosOriginales.filter(item => {
+                if (semanaSel && item.semana !== semanaSel) return false;
+
+                if (busqueda) {
+                    const coincideCodigo = item.codigo.toLowerCase().includes(busqueda);
+                    const coincideDesc = item.descripcion.toLowerCase().includes(busqueda);
+                    if (!coincideCodigo && !coincideDesc) return false;
+                }
+
+                if (estadoSel === 'CUMPLIDO' && item.cumplimiento < 100) return false;
+                if (estadoSel === 'PARCIAL' && (item.cumplimiento < 80 || item.cumplimiento >= 100)) return false;
+                if (estadoSel === 'CRITICO' && item.cumplimiento >= 80) return false;
+                if (estadoSel === 'DEFICIT' && item.diferencia >= 0) return false;
+
+                return true;
+            });
+
+            reordenarDatosFiltrados();
+
+            renderizarKpis();
+            actualizarGraficoTendencia();
+            actualizarGraficoComparativo();
+            actualizarGraficoDistribucion();
+            renderizarTabla();
+        }
+
+        function limpiarFiltros() {
+            document.getElementById('filtroBusqueda').value = '';
+            document.getElementById('filtroEstado').value = 'TODOS';
+            if (document.getElementById('filtroSemana').options.length > 1) {
+                document.getElementById('filtroSemana').selectedIndex = 1;
+            } else {
+                document.getElementById('filtroSemana').value = '';
+            }
+            aplicarFiltros();
+            mostrarToast("Filtros restablecidos", "↺");
+        }
+
+        // =========================================================================
+        // 6. RENDERIZADO DE KPIS (SIN DECIMALES)
+        // =========================================================================
+        function renderizarKpis() {
+            let totalPedidos = 0;
+            let totalAtendido = 0;
+            let skusCumplidos = 0;
+            let skusDeficit = 0;
+
+            datosFiltrados.forEach(d => {
+                totalPedidos += d.pedidos;
+                totalAtendido += d.atendido;
+                if (d.cumplimiento >= 100) {
+                    skusCumplidos++;
+                } else if (d.diferencia < 0) {
+                    skusDeficit++;
+                }
+            });
+
+            const diferenciaNeta = totalAtendido - totalPedidos;
+            const cumplimientoPonderado = totalPedidos > 0 ? (totalAtendido / totalPedidos) * 100 : (totalAtendido > 0 ? 100 : 0);
+
+            // 1. Total Pedidos
+            document.getElementById('kpiTotalPedidos').textContent = `${formatoKg.format(totalPedidos)} kg`;
+
+            // 2. Total Atendido
+            document.getElementById('kpiTotalAtendido').textContent = `${formatoKg.format(totalAtendido)} kg`;
+            const pctAtendidoBar = totalPedidos > 0 ? Math.min((totalAtendido / totalPedidos) * 100, 100) : 0;
+            document.getElementById('kpiBarAtendido').style.width = `${pctAtendidoBar}%`;
+
+            // 3. Diferencia Neta
+            const elDif = document.getElementById('kpiDiferencia');
+            const cardDif = document.getElementById('cardDiferencia');
+            const subDif = document.getElementById('kpiDiferenciaSub');
+            const signo = diferenciaNeta >= 0 ? '+' : '';
+            elDif.textContent = `${signo}${formatoKg.format(diferenciaNeta)} kg`;
+
+            if (diferenciaNeta >= 0) {
+                elDif.style.color = "var(--positive)";
+                cardDif.className = "kpi-card green";
+                subDif.innerHTML = `<span style="color: var(--positive);">✔ Superávit neto en despachos</span>`;
+                document.getElementById('kpiBarDiferencia').style.background = "var(--positive)";
+            } else {
+                elDif.style.color = "var(--negative)";
+                cardDif.className = "kpi-card red";
+                subDif.innerHTML = `<span style="color: var(--negative);">✖ Déficit acumulado en despachos</span>`;
+                document.getElementById('kpiBarDiferencia').style.background = "var(--negative)";
+            }
+
+            // 4. Cumplimiento
+            const elCump = document.getElementById('kpiCumplimiento');
+            const cardCump = document.getElementById('cardCumplimiento');
+            const barCump = document.getElementById('kpiBarCumplimiento');
+            elCump.textContent = `${Math.round(cumplimientoPonderado)}%`;
+
+            barCump.style.width = `${Math.min(cumplimientoPonderado, 100)}%`;
+            if (cumplimientoPonderado >= 100) {
+                elCump.style.color = "var(--positive)";
+                barCump.style.background = "var(--positive)";
+                cardCump.className = "kpi-card green";
+            } else if (cumplimientoPonderado >= 80) {
+                elCump.style.color = "var(--warning)";
+                barCump.style.background = "var(--warning)";
+                cardCump.className = "kpi-card gold";
+            } else {
+                elCump.style.color = "var(--negative)";
+                barCump.style.background = "var(--negative)";
+                cardCump.className = "kpi-card red";
+            }
+
+            // 5. SKUs
+            document.getElementById('kpiTotalSkus').textContent = formatoEntero.format(datosFiltrados.length);
+            document.getElementById('kpiSkusDetalle').textContent = `${skusCumplidos} cumplidos (≥100%) • ${skusDeficit} en déficit`;
+            const pctSkus = datosFiltrados.length > 0 ? (skusCumplidos / datosFiltrados.length) * 100 : 0;
+            document.getElementById('kpiBarSkus').style.width = `${pctSkus}%`;
+        }
+
+        // =========================================================================
+        // 7. 📈 GRÁFICO DE LÍNEAS: TENDENCIA DEL % DE CUMPLIMIENTO
+        // =========================================================================
+        function actualizarGraficoTendencia() {
+            const ctx = document.getElementById('chartTendencia').getContext('2d');
+            const badgeSub = document.getElementById('trendSubtitleBadge');
+
+            let labels = [];
+            let valoresCumplimiento = [];
+            let meta100 = [];
+            let detalles = [];
+            let pointBgColors = [];
+            let pointRadii = [];
+            let pointBorderWidths = [];
+
+            const semanaSeleccionada = document.getElementById('filtroSemana').value.trim();
+            const busqueda = document.getElementById('filtroBusqueda').value.trim().toLowerCase();
+            const estadoSel = document.getElementById('filtroEstado').value;
+
+            if (modoTendenciaActual === 'SEMANAL') {
+                // MODO SEMANAL: Agrupa SIEMPRE por TODAS las semanas disponibles en datosOriginales
+                const mapaSemanas = new Map();
+
+                // Fuente de datos para la tendencia: toma TODOS los datos históricos
+                // Si el usuario aplicó búsqueda por producto, muestra la tendencia de ese producto a través de todas las semanas
+                let fuente = datosOriginales;
+                if (busqueda) {
+                    fuente = fuente.filter(x => x.codigo.toLowerCase().includes(busqueda) || x.descripcion.toLowerCase().includes(busqueda));
+                }
+                if (estadoSel === 'CUMPLIDO') fuente = fuente.filter(x => x.cumplimiento >= 100);
+                else if (estadoSel === 'PARCIAL') fuente = fuente.filter(x => x.cumplimiento >= 80 && x.cumplimiento < 100);
+                else if (estadoSel === 'CRITICO') fuente = fuente.filter(x => x.cumplimiento < 80);
+                else if (estadoSel === 'DEFICIT') fuente = fuente.filter(x => x.diferencia < 0);
+
+                fuente.forEach(item => {
+                    if (!item.semana) return;
+                    if (!mapaSemanas.has(item.semana)) {
+                        mapaSemanas.set(item.semana, { pedidos: 0, atendido: 0, infoSem: item.infoSemana || parsearSemanaYRango(item.semana) });
+                    }
+                    const s = mapaSemanas.get(item.semana);
+                    s.pedidos += item.pedidos;
+                    s.atendido += item.atendido;
+                });
+
+                // Orden cronológico estricto (por año y número de semana)
+                const semanasOrdenadas = Array.from(mapaSemanas.keys()).sort((a, b) => {
+                    const infA = mapaSemanas.get(a).infoSem;
+                    const infB = mapaSemanas.get(b).infoSem;
+                    const numA = (infA.ano || 2026) * 100 + (infA.numSemana || 0);
+                    const numB = (infB.ano || 2026) * 100 + (infB.numSemana || 0);
+                    return numA - numB;
+                });
+
+                semanasOrdenadas.forEach(semKey => {
+                    const obj = mapaSemanas.get(semKey);
+                    const pct = obj.pedidos > 0 ? Math.round((obj.atendido / obj.pedidos) * 100) : (obj.atendido > 0 ? 100 : 0);
+                    const info = obj.infoSem;
+                    const etiqueta = info.rangoTexto 
+                        ? `Sem. ${String(info.numSemana).padStart(2, '0')} (${info.rangoTexto})` 
+                        : `Sem. ${semKey}`;
+
+                    labels.push(etiqueta);
+                    valoresCumplimiento.push(pct);
+                    meta100.push(100);
+                    detalles.push({
+                        semanaKey: semKey,
+                        etiqueta: etiqueta,
+                        pedidos: Math.round(obj.pedidos),
+                        atendido: Math.round(obj.atendido),
+                        diferencia: Math.round(obj.atendido - obj.pedidos)
+                    });
+
+                    // Si esta semana es la seleccionada en el filtro, resaltarla con un punto brillante
+                    const esSeleccionada = (semanaSeleccionada && semKey === semanaSeleccionada);
+                    if (esSeleccionada) {
+                        pointBgColors.push('#FFFFFF');
+                        pointRadii.push(9);
+                        pointBorderWidths.push(4);
+                    } else {
+                        pointBgColors.push(pct >= 100 ? '#10B981' : (pct >= 80 ? '#F4D03F' : '#EF4444'));
+                        pointRadii.push(6);
+                        pointBorderWidths.push(2);
+                    }
+                });
+
+                const semTexto = semanasOrdenadas.length > 0
+                    ? `${semanasOrdenadas.length} Semanas: ${labels[0]?.split(' ')[0] || ''} a ${labels[labels.length - 1]?.split(' ')[0] || ''}`
+                    : '0 Semanas';
+                badgeSub.textContent = `Tendencia de Todas las Semanas (${semTexto})`;
+
+            } else {
+                // MODO POR PRODUCTO: Muestra la curva de cumplimiento de los productos filtrados
+                const productosOrdenados = [...datosFiltrados]
+                    .filter(x => x.pedidos > 0 || x.atendido > 0)
+                    .sort((a, b) => b.pedidos - a.pedidos)
+                    .slice(0, 30); // Top 30 para visualización óptima
+
+                productosOrdenados.forEach(prod => {
+                    const pct = Math.round(prod.cumplimiento);
+                    labels.push(prod.descripcion || prod.codigo);
+                    valoresCumplimiento.push(pct);
+                    meta100.push(100);
+                    pointBgColors.push(pct >= 100 ? '#10B981' : (pct >= 80 ? '#F4D03F' : '#EF4444'));
+                    pointRadii.push(5.5);
+                    pointBorderWidths.push(2);
+                    detalles.push({
+                        semanaKey: prod.semana,
+                        etiqueta: prod.descripcion,
+                        pedidos: Math.round(prod.pedidos),
+                        atendido: Math.round(prod.atendido),
+                        diferencia: Math.round(prod.diferencia)
+                    });
+                });
+
+                badgeSub.textContent = `Curva de Cumplimiento (${productosOrdenados.length} SKUs principales)`;
+            }
+
+            if (chartTendenciaInstance) {
+                chartTendenciaInstance.destroy();
+            }
+
+            // Crear gradiente debajo de la línea
+            const gradientFill = ctx.createLinearGradient(0, 0, 0, 300);
+            gradientFill.addColorStop(0, 'rgba(244, 208, 63, 0.35)');
+            gradientFill.addColorStop(0.7, 'rgba(244, 208, 63, 0.08)');
+            gradientFill.addColorStop(1, 'rgba(244, 208, 63, 0.0)');
+
+            chartTendenciaInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: '% Cumplimiento',
+                            data: valoresCumplimiento,
+                            borderColor: '#F4D03F',
+                            backgroundColor: gradientFill,
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.35,
+                            pointBackgroundColor: pointBgColors,
+                            pointBorderColor: '#2E2A2F',
+                            pointBorderWidth: pointBorderWidths,
+                            pointRadius: pointRadii,
+                            pointHoverRadius: 9,
+                            pointHoverBackgroundColor: '#FFFFFF',
+                            pointHoverBorderColor: '#F4D03F',
+                            pointHoverBorderWidth: 3,
+                            datalabels: {
+                                display: true,
+                                align: 'top',
+                                offset: 4,
+                                color: '#FFFFFF',
+                                font: { family: 'JetBrains Mono', size: 11, weight: 'bold' },
+                                formatter: val => `${val}%`
+                            }
+                        },
+                        {
+                            label: 'Meta Corporativa (100%)',
+                            data: meta100,
+                            borderColor: '#EF4444',
+                            borderWidth: 2,
+                            borderDash: [6, 4],
+                            fill: false,
+                            pointRadius: 0,
+                            datalabels: {
+                                display: false
+                            }
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    onClick: (event, elements) => {
+                        if (elements && elements.length > 0 && modoTendenciaActual === 'SEMANAL') {
+                            const index = elements[0].index;
+                            const semKey = detalles[index]?.semanaKey;
+                            if (semKey) {
+                                const selectSem = document.getElementById('filtroSemana');
+                                selectSem.value = (selectSem.value === semKey) ? '' : semKey;
+                                aplicarFiltros();
+                                mostrarToast(selectSem.value ? `Filtro aplicado: Semana ${semKey}` : 'Mostrando todas las semanas', '📅');
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                color: '#CDCAC0',
+                                font: { family: 'Inter', size: 12, weight: 'bold' },
+                                usePointStyle: true,
+                                boxWidth: 12
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#2E2A2F',
+                            titleColor: '#F4D03F',
+                            bodyColor: '#FFFFFF',
+                            borderColor: '#3D393E',
+                            borderWidth: 1,
+                            padding: 12,
+                            titleFont: { family: 'Inter', size: 12, weight: 'bold' },
+                            bodyFont: { family: 'JetBrains Mono', size: 12 },
+                            callbacks: {
+                                label: function (context) {
+                                    if (context.datasetIndex === 1) {
+                                        return ` Meta: 100%`;
+                                    }
+                                    const val = context.parsed.y || 0;
+                                    return ` Cumplimiento: ${val}%`;
+                                },
+                                afterBody: function (contexts) {
+                                    if (contexts.length > 0) {
+                                        const idx = contexts[0].dataIndex;
+                                        const d = detalles[idx];
+                                        if (d) {
+                                            const difSigno = d.diferencia >= 0 ? '+' : '';
+                                            return [
+                                                ` Pedidos: ${formatoKg.format(d.pedidos)} kg`,
+                                                ` Atendido: ${formatoKg.format(d.atendido)} kg`,
+                                                ` Diferencia: ${difSigno}${formatoKg.format(d.diferencia)} kg`
+                                            ];
+                                        }
+                                    }
+                                    return [];
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: {
+                                color: '#CDCAC0',
+                                font: { family: 'Inter', size: 11, weight: '500' },
+                                maxRotation: 45,
+                                minRotation: 0
+                            }
+                        },
+                        y: {
+                            grid: { color: 'rgba(255, 255, 255, 0.06)' },
+                            suggestedMin: 0,
+                            suggestedMax: 125,
+                            ticks: {
+                                color: '#878994',
+                                font: { family: 'JetBrains Mono', size: 11 },
+                                callback: val => `${val}%`
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // =========================================================================
+        // 8. GRÁFICOS SECUNDARIOS: BARRAS HORIZONTALES Y DONUT
+        // =========================================================================
+        function actualizarGraficoComparativo() {
+            const ctx = document.getElementById('chartComparativo').getContext('2d');
+            const filtroTop = document.getElementById('filtroTopChart').value;
+
+            let lista = [...datosFiltrados];
+            if (filtroTop === 'DEFICIT') {
+                lista = lista.filter(x => x.diferencia < 0).sort((a, b) => a.diferencia - b.diferencia);
+            } else if (filtroTop !== 'TODOS') {
+                const limite = parseInt(filtroTop, 10) || 20;
+                lista = lista.sort((a, b) => b.pedidos - a.pedidos).slice(0, limite);
+            }
+
+            document.getElementById('chart1Badge').textContent = `Mostrando ${lista.length} de ${datosFiltrados.length} SKUs`;
+
+            const labels = lista.map(x => x.descripcion || x.codigo);
+            const dataPedidos = lista.map(x => Math.round(x.pedidos));
+            const dataAtendido = lista.map(x => Math.round(x.atendido));
+
+            if (chartComparativoInstance) {
+                chartComparativoInstance.destroy();
+            }
+
+            chartComparativoInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Pedidos (kg)',
+                            data: dataPedidos,
+                            backgroundColor: '#F4D03F',
+                            borderColor: '#F8CC5A',
+                            borderWidth: 1,
+                            borderRadius: 4,
+                            barPercentage: 0.8,
+                            categoryPercentage: 0.85
+                        },
+                        {
+                            label: 'Atendido (kg)',
+                            data: dataAtendido,
+                            backgroundColor: '#BAA063',
+                            borderColor: '#CDCAC0',
+                            borderWidth: 1,
+                            borderRadius: 4,
+                            barPercentage: 0.8,
+                            categoryPercentage: 0.85
+                        }
+                    ]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                color: '#CDCAC0',
+                                font: { family: 'Inter', size: 12, weight: 'bold' },
+                                boxWidth: 14,
+                                usePointStyle: true
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#2E2A2F',
+                            titleColor: '#F4D03F',
+                            bodyColor: '#FFFFFF',
+                            borderColor: '#3D393E',
+                            borderWidth: 1,
+                            padding: 12,
+                            titleFont: { family: 'Inter', size: 12, weight: 'bold' },
+                            bodyFont: { family: 'JetBrains Mono', size: 12 },
+                            callbacks: {
+                                label: function (context) {
+                                    const val = context.parsed.x || 0;
+                                    return ` ${context.dataset.label}: ${formatoKg.format(val)} kg`;
+                                },
+                                afterBody: function (contexts) {
+                                    if (contexts.length > 0) {
+                                        const idx = contexts[0].dataIndex;
+                                        const item = lista[idx];
+                                        if (item) {
+                                            const pct = Math.round(item.cumplimiento);
+                                            const dif = Math.round(item.diferencia);
+                                            const difStr = (dif >= 0 ? '+' : '') + formatoKg.format(dif);
+                                            return [` Cumplimiento: ${pct}%`, ` Diferencia: ${difStr} kg`];
+                                        }
+                                    }
+                                    return [];
+                                }
+                            }
+                        },
+                        datalabels: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: {
+                                color: '#878994',
+                                font: { family: 'JetBrains Mono', size: 10.5 },
+                                callback: val => formatoEntero.format(val)
+                            }
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: {
+                                color: '#CDCAC0',
+                                font: { family: 'Inter', size: 11, weight: '500' },
+                                autoSkip: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function actualizarGraficoDistribucion() {
+            const ctx = document.getElementById('chartDistribucion').getContext('2d');
+
+            let cumplidos = 0;
+            let parciales = 0;
+            let criticos = 0;
+            let sinPedido = 0;
+
+            datosFiltrados.forEach(d => {
+                if (d.pedidos === 0 && d.atendido === 0) {
+                    sinPedido++;
+                } else if (d.cumplimiento >= 100) {
+                    cumplidos++;
+                } else if (d.cumplimiento >= 80) {
+                    parciales++;
+                } else {
+                    criticos++;
+                }
+            });
+
+            if (chartDistribucionInstance) {
+                chartDistribucionInstance.destroy();
+            }
+
+            chartDistribucionInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Cumplido (≥100%)', 'Parcial (80%-99%)', 'Crítico (<80%)', 'Sin Pedido'],
+                    datasets: [{
+                        data: [cumplidos, parciales, criticos, sinPedido],
+                        backgroundColor: ['#10B981', '#F59E0B', '#EF4444', '#605C5E'],
+                        borderColor: '#2E2A2F',
+                        borderWidth: 3,
+                        hoverOffset: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '68%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#CDCAC0',
+                                font: { family: 'Inter', size: 11.5, weight: '600' },
+                                padding: 14,
+                                usePointStyle: true
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#2E2A2F',
+                            titleColor: '#F4D03F',
+                            bodyColor: '#FFFFFF',
+                            borderColor: '#3D393E',
+                            borderWidth: 1,
+                            padding: 10,
+                            callbacks: {
+                                label: function (context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const val = context.raw || 0;
+                                    const pct = total > 0 ? Math.round((val / total) * 100) : 0;
+                                    return ` ${context.label}: ${val} SKUs (${pct}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // =========================================================================
+        // 9. RENDERIZADO DE LA TABLA Y ORDENAMIENTO
+        // =========================================================================
+        function ordenarTabla(columna) {
+            if (ordenActual.columna === columna) {
+                ordenActual.direccion = ordenActual.direccion === 'asc' ? 'desc' : 'asc';
+            } else {
+                ordenActual.columna = columna;
+                ordenActual.direccion = ['pedidos', 'atendido', 'diferencia', 'cumplimiento'].includes(columna) ? 'desc' : 'asc';
+            }
+            reordenarDatosFiltrados();
+            renderizarTabla();
+        }
+
+        function reordenarDatosFiltrados() {
+            const col = ordenActual.columna;
+            const dir = ordenActual.direccion === 'asc' ? 1 : -1;
+
+            datosFiltrados.sort((a, b) => {
+                let vA = a[col];
+                let vB = b[col];
+
+                if (typeof vA === 'string') {
+                    return vA.localeCompare(vB) * dir;
+                }
+                return (vA - vB) * dir;
+            });
+        }
+
+        function renderizarTabla() {
+            const tbody = document.getElementById('tablaBody');
+            document.getElementById('tableCountBadge').textContent = `${datosFiltrados.length} productos`;
+
+            if (datosFiltrados.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="empty-state">
+                            <span>🔍</span>
+                            No se encontraron registros con los filtros seleccionados.
+                        </td>
+                    </tr>`;
+                actualizarTotalesTabla(0, 0, 0, 0);
+                return;
+            }
+
+            let html = '';
+            let sumaPedidos = 0;
+            let sumaAtendido = 0;
+
+            datosFiltrados.forEach(item => {
+                sumaPedidos += item.pedidos;
+                sumaAtendido += item.atendido;
+
+                const difSigno = item.diferencia >= 0 ? '+' : '';
+                const difColor = item.diferencia >= 0 ? 'var(--positive)' : 'var(--negative)';
+
+                let badgeClass = 'cumplido';
+                let badgeTxt = '✔ CUMPLIDO';
+                let barColor = 'var(--positive)';
+
+                if (item.pedidos === 0 && item.atendido === 0) {
+                    badgeClass = 'sin-pedido';
+                    badgeTxt = '— SIN PEDIDO';
+                    barColor = 'var(--neutral)';
+                } else if (item.cumplimiento >= 100) {
+                    badgeClass = 'cumplido';
+                    badgeTxt = '✔ CUMPLIDO';
+                    barColor = 'var(--positive)';
+                } else if (item.cumplimiento >= 80) {
+                    badgeClass = 'parcial';
+                    badgeTxt = '▲ PARCIAL';
+                    barColor = 'var(--warning)';
+                } else {
+                    badgeClass = 'critico';
+                    badgeTxt = '✖ CRÍTICO';
+                    barColor = 'var(--negative)';
+                }
+
+                const pctBar = Math.min(item.cumplimiento, 100);
+
+                html += `
+                    <tr>
+                        <td class="col-mono" style="color: var(--accent-cyan); font-weight: 700;">${item.semana}</td>
+                        <td>
+                            <span class="chip-code" onclick="copiarCodigo('${item.codigo}')" title="Clic para copiar código">${item.codigo}</span>
+                        </td>
+                        <td style="font-weight: 600;">${item.descripcion}</td>
+                        <td class="col-num" style="color: var(--pedidos-color);">${formatoKg.format(item.pedidos)}</td>
+                        <td class="col-num" style="color: var(--atendido-color);">${formatoKg.format(item.atendido)}</td>
+                        <td class="col-num" style="color: ${difColor}; font-weight: 700;">${difSigno}${formatoKg.format(item.diferencia)}</td>
+                        <td>
+                            <div class="table-progress-cell">
+                                <span class="col-mono" style="font-weight: 700; min-width: 46px;">${Math.round(item.cumplimiento)}%</span>
+                                <div class="table-progress-bar">
+                                    <div class="table-progress-fill" style="width: ${pctBar}%; background: ${barColor};"></div>
+                                </div>
+                            </div>
+                        </td>
+                        <td style="text-align: center;">
+                            <span class="status-badge ${badgeClass}">${badgeTxt}</span>
+                        </td>
+                    </tr>`;
+            });
+
+            tbody.innerHTML = html;
+            const sumaDif = sumaAtendido - sumaPedidos;
+            const cumpPond = sumaPedidos > 0 ? (sumaAtendido / sumaPedidos) * 100 : 0;
+            actualizarTotalesTabla(sumaPedidos, sumaAtendido, sumaDif, cumpPond);
+        }
+
+        function actualizarTotalesTabla(pedidos, atendido, diferencia, cumplimiento) {
+            document.getElementById('footPedidos').textContent = formatoKg.format(pedidos);
+            document.getElementById('footAtendido').textContent = formatoKg.format(atendido);
+
+            const elDif = document.getElementById('footDiferencia');
+            const signo = diferencia >= 0 ? '+' : '';
+            elDif.textContent = `${signo}${formatoKg.format(diferencia)}`;
+            elDif.style.color = diferencia >= 0 ? 'var(--positive)' : 'var(--negative)';
+
+            const elCump = document.getElementById('footCumplimiento');
+            elCump.textContent = `${Math.round(cumplimiento)}%`;
+            elCump.style.color = cumplimiento >= 100 ? 'var(--positive)' : (cumplimiento >= 80 ? 'var(--warning)' : 'var(--negative)');
+
+            document.getElementById('footEstado').textContent = cumplimiento >= 100 ? 'CUMPLIDO' : (cumplimiento >= 80 ? 'PARCIAL' : 'DÉFICIT');
+        }
+
+        function mostrarErrorEnTabla(mensaje) {
+            const tbody = document.getElementById('tablaBody');
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="8" class="empty-state" style="color: var(--negative);">
+                        <span>⚠️</span>
+                        <strong>Error al cargar información:</strong><br>
+                        ${mensaje}<br><br>
+                        <button class="btn btn-reload" onclick="recargarDatos(true)">Reintentar Conexión</button>
+                    </td>
+                </tr>`;
+        }
+
+        // =========================================================================
+        // 10. EXPORTACIÓN A EXCEL (.XLSX)
+        // =========================================================================
+        function exportarExcel() {
+            if (!datosFiltrados || datosFiltrados.length === 0) {
+                mostrarToast("No hay registros para exportar", "⚠️");
+                return;
+            }
+
+            try {
+                const filasExport = datosFiltrados.map(d => ({
+                    "Semana": d.semana,
+                    "Rango Semana": d.infoSemana ? d.infoSemana.rangoTexto : '',
+                    "Código": d.codigo,
+                    "Descripción": d.descripcion,
+                    "Pedidos (kg)": Math.round(d.pedidos),
+                    "Atendido (kg)": Math.round(d.atendido),
+                    "Diferencia (kg)": Math.round(d.diferencia),
+                    "% Cumplimiento": Math.round(d.cumplimiento),
+                    "Estado": d.cumplimiento >= 100 ? "CUMPLIDO" : (d.cumplimiento >= 80 ? "PARCIAL" : "CRÍTICO")
+                }));
+
+                const worksheet = XLSX.utils.json_to_sheet(filasExport);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, "Cumplimiento_Embutidos");
+
+                const semanaSel = document.getElementById('filtroSemana').value || 'Todas';
+                const fechaStr = new Date().toISOString().slice(0, 10);
+                const nombreArchivo = `Cumplimiento_Embutidos_Tendencia_${semanaSel}_${fechaStr}.xlsx`;
+
+                XLSX.writeFile(workbook, nombreArchivo);
+                mostrarToast(`Archivo descargado: ${nombreArchivo}`, "📥");
+            } catch (err) {
+                console.error("Error al exportar:", err);
+                mostrarToast("Error al generar archivo Excel", "✖");
+            }
+        }
+
+        function copiarCodigo(codigo) {
+            navigator.clipboard.writeText(codigo).then(() => {
+                mostrarToast(`Código ${codigo} copiado al portapapeles`, '📋');
+            }).catch(() => { });
+        }
+
+        let toastTimeout = null;
+        function mostrarToast(mensaje, icono = '✔') {
+            const toast = document.getElementById('toastBox');
+            document.getElementById('toastMessage').textContent = mensaje;
+            document.getElementById('toastIcon').textContent = icono;
+            toast.style.display = 'flex';
+
+            if (toastTimeout) clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3200);
+        }
+    </script>
+</body>
+
+</html>

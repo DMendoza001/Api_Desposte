@@ -13,8 +13,9 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
         rel="stylesheet">
 
-    <!-- Chart.js -->
+    <!-- Chart.js & ChartDataLabels Plugin -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
 
     <!-- Configuración compartida de conexión a la API -->
     <script src="config.js"></script>
@@ -1219,26 +1220,41 @@
                     <div class="section-body" style="display: flex; flex-direction: column; gap: 16px;">
                         <!-- SSO Cards -->
                         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
-                            <div
-                                style="background: var(--pantone-bg); padding: 12px; border-radius: var(--radius-sm); border-left: 3px solid var(--color-success);">
+                            <div id="cardSsoDesposte"
+                                style="background: var(--pantone-bg); padding: 12px; border-radius: var(--radius-sm); border-left: 3px solid var(--color-success); transition: all 0.2s;">
                                 <div style="font-size: 11px; font-weight: 700; color: var(--pantone-gray-dark);">
                                     DESPOSTE SSO</div>
-                                <div style="font-size: 20px; font-weight: 800; font-family: 'JetBrains Mono', monospace;"
-                                    id="ssoDesposteVal">0</div>
+                                <div style="display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-top: 2px;">
+                                    <div style="font-size: 20px; font-weight: 800; font-family: 'JetBrains Mono', monospace;"
+                                        id="ssoDesposteVal">0</div>
+                                    <div style="font-size: 11px; font-weight: 600;" id="ssoDesposteTipo"></div>
+                                </div>
+                                <div style="font-size: 11px; color: var(--pantone-gray-med); margin-top: 4px; min-height: 14px;"
+                                    id="ssoDesposteObs"></div>
                             </div>
-                            <div
-                                style="background: var(--pantone-bg); padding: 12px; border-radius: var(--radius-sm); border-left: 3px solid var(--color-success);">
+                            <div id="cardSsoChuletas"
+                                style="background: var(--pantone-bg); padding: 12px; border-radius: var(--radius-sm); border-left: 3px solid var(--color-success); transition: all 0.2s;">
                                 <div style="font-size: 11px; font-weight: 700; color: var(--pantone-gray-dark);">
                                     CHULETAS SSO</div>
-                                <div style="font-size: 20px; font-weight: 800; font-family: 'JetBrains Mono', monospace;"
-                                    id="ssoChuletasVal">0</div>
+                                <div style="display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-top: 2px;">
+                                    <div style="font-size: 20px; font-weight: 800; font-family: 'JetBrains Mono', monospace;"
+                                        id="ssoChuletasVal">0</div>
+                                    <div style="font-size: 11px; font-weight: 600;" id="ssoChuletasTipo"></div>
+                                </div>
+                                <div style="font-size: 11px; color: var(--pantone-gray-med); margin-top: 4px; min-height: 14px;"
+                                    id="ssoChuletasObs"></div>
                             </div>
-                            <div
-                                style="background: var(--pantone-bg); padding: 12px; border-radius: var(--radius-sm); border-left: 3px solid var(--color-success);">
+                            <div id="cardSsoCongelado"
+                                style="background: var(--pantone-bg); padding: 12px; border-radius: var(--radius-sm); border-left: 3px solid var(--color-success); transition: all 0.2s;">
                                 <div style="font-size: 11px; font-weight: 700; color: var(--pantone-gray-dark);">
                                     CONGELADO SSO</div>
-                                <div style="font-size: 20px; font-weight: 800; font-family: 'JetBrains Mono', monospace;"
-                                    id="ssoCongeladoVal">0</div>
+                                <div style="display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-top: 2px;">
+                                    <div style="font-size: 20px; font-weight: 800; font-family: 'JetBrains Mono', monospace;"
+                                        id="ssoCongeladoVal">0</div>
+                                    <div style="font-size: 11px; font-weight: 600;" id="ssoCongeladoTipo"></div>
+                                </div>
+                                <div style="font-size: 11px; color: var(--pantone-gray-med); margin-top: 4px; min-height: 14px;"
+                                    id="ssoCongeladoObs"></div>
                             </div>
                         </div>
 
@@ -2016,6 +2032,10 @@
                 gChartProduccion.destroy();
             }
 
+            if (typeof ChartDataLabels !== 'undefined') {
+                Chart.register(ChartDataLabels);
+            }
+
             const esUnicaColumna = labels.length === 1;
 
             gChartProduccion = new Chart(ctx, {
@@ -2052,6 +2072,21 @@
                                 color: '#2E2A2F'
                             }
                         },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'top',
+                            offset: 4,
+                            color: '#2E2A2F',
+                            font: {
+                                family: 'JetBrains Mono',
+                                size: 11,
+                                weight: '700'
+                            },
+                            formatter: function (value) {
+                                if (value === null || value === undefined || value === 0) return '';
+                                return `${formatearNumero(value)} ${unidadCorta}`;
+                            }
+                        },
                         tooltip: {
                             callbacks: {
                                 label: function (context) {
@@ -2063,6 +2098,7 @@
                     scales: {
                         y: {
                             beginAtZero: true,
+                            grace: '15%',
                             grid: { color: '#E2E8F0' },
                             ticks: {
                                 font: { family: 'JetBrains Mono', size: 11 },
@@ -2117,21 +2153,100 @@
             });
         }
 
+        // Función centralizada para clasificar eventos de SSO:
+        // ACC. MORTAL, ACC. INCAPACITANTE, PRIMER AUXILIO, INCIDENTE DE SEGURIDAD
+        function analizarSsoArea(row) {
+            if (!row) {
+                return {
+                    total: 0,
+                    mortal: 0,
+                    incap: 0,
+                    aux: 0,
+                    inc: 0,
+                    observacion: '',
+                    descripcionTipos: '',
+                    textoCompleto: '0'
+                };
+            }
+
+            const mortal = Number(row['ACC. MORTAL']) || 0;
+            const incap = Number(row['ACC. INCAPACITANTE']) || 0;
+            const aux = Number(row['PRIMER AUXILIO']) || 0;
+            const inc = Number(row['INCIDENTE DE SEGURIDAD']) || 0;
+            const obs = (row.OBSERVACION || '').toString().trim();
+            const total = mortal + incap + aux + inc;
+
+            const partes = [];
+            if (mortal > 0) partes.push(`${mortal} Acc. Mortal`);
+            if (incap > 0) partes.push(`${incap} Acc. Incapacitante`);
+            if (aux > 0) partes.push(`${aux} Primer Auxilio`);
+            if (inc > 0) partes.push(`${inc} Incidente de Seguridad`);
+
+            const descripcionTipos = partes.join(', ');
+            let textoCompleto = "0";
+
+            if (partes.length > 0) {
+                textoCompleto = obs ? `${descripcionTipos} (${obs})` : descripcionTipos;
+            } else if (obs) {
+                textoCompleto = `0 (${obs})`;
+            }
+
+            return {
+                total,
+                mortal,
+                incap,
+                aux,
+                inc,
+                observacion: obs,
+                descripcionTipos,
+                textoCompleto
+            };
+        }
+
         // 4. SSO y Resumen de Calidad
         function renderizarSsoYCalidadResumen(sso, detalle) {
-            const getSsoVal = (area) => {
-                const row = sso.find(r => normalizarTexto(r.AREA).includes(area));
-                if (!row) return 0;
-                const mortal = Number(row['ACC. MORTAL']) || 0;
-                const incap = Number(row['ACC. INCAPACITANTE']) || 0;
-                const aux = Number(row['PRIMER AUXILIO']) || 0;
-                const inc = Number(row['INCIDENTE DE SEGURIDAD']) || 0;
-                return mortal + incap + aux + inc;
+            const actualizarCardSso = (areaKey, idVal, idTipo, idObs, idCard) => {
+                const row = sso.find(r => normalizarTexto(r.AREA).includes(areaKey));
+                const info = analizarSsoArea(row);
+
+                const elemVal = document.getElementById(idVal);
+                const elemTipo = document.getElementById(idTipo);
+                const elemObs = document.getElementById(idObs);
+                const elemCard = document.getElementById(idCard);
+
+                if (elemVal) elemVal.innerText = info.total;
+                if (elemTipo) {
+                    if (info.total === 0) {
+                        elemTipo.innerHTML = `<span style="color: var(--color-success); font-size: 11px; font-weight: 600;">Sin incidentes</span>`;
+                    } else if (info.mortal > 0 || info.incap > 0) {
+                        elemTipo.innerHTML = `<span style="color: var(--color-danger); font-size: 11px; font-weight: 700;">⚠️ ${info.descripcionTipos}</span>`;
+                    } else {
+                        elemTipo.innerHTML = `<span style="color: #D97706; font-size: 11px; font-weight: 700;">⚠️ ${info.descripcionTipos}</span>`;
+                    }
+                }
+                if (elemObs) {
+                    if (info.observacion) {
+                        elemObs.innerText = `💬 ${info.observacion}`;
+                        elemObs.title = info.observacion;
+                    } else {
+                        elemObs.innerText = '';
+                        elemObs.title = '';
+                    }
+                }
+                if (elemCard) {
+                    if (info.total === 0) {
+                        elemCard.style.borderLeftColor = 'var(--color-success)';
+                    } else if (info.mortal > 0 || info.incap > 0) {
+                        elemCard.style.borderLeftColor = 'var(--color-danger)';
+                    } else {
+                        elemCard.style.borderLeftColor = '#F59E0B';
+                    }
+                }
             };
 
-            document.getElementById('ssoDesposteVal').innerText = getSsoVal('DESPOSTE');
-            document.getElementById('ssoChuletasVal').innerText = getSsoVal('CHULETAS');
-            document.getElementById('ssoCongeladoVal').innerText = getSsoVal('CONGELADO');
+            actualizarCardSso('DESPOSTE', 'ssoDesposteVal', 'ssoDesposteTipo', 'ssoDesposteObs', 'cardSsoDesposte');
+            actualizarCardSso('CHULETAS', 'ssoChuletasVal', 'ssoChuletasTipo', 'ssoChuletasObs', 'cardSsoChuletas');
+            actualizarCardSso('CONGELADO', 'ssoCongeladoVal', 'ssoCongeladoTipo', 'ssoCongeladoObs', 'cardSsoCongelado');
 
             // Conteo por secciones en detalle
             const getCountSeccion = (patron) => {
@@ -2449,19 +2564,8 @@
             ordenAreas.forEach(areaKey => {
                 const row = sso.find(r => normalizarTexto(r.AREA).includes(areaKey));
                 const nombreArea = capitalizarTexto(areaKey);
-                let ssoVal = "0";
-                if (row) {
-                    const totalInc = (Number(row['ACC. MORTAL']) || 0) +
-                        (Number(row['ACC. INCAPACITANTE']) || 0) +
-                        (Number(row['PRIMER AUXILIO']) || 0) +
-                        (Number(row['INCIDENTE DE SEGURIDAD']) || 0);
-                    if (totalInc > 0) {
-                        ssoVal = `${totalInc} (${row.OBSERVACION || 'Incidente registrado'})`;
-                    } else if (row.OBSERVACION) {
-                        ssoVal = row.OBSERVACION;
-                    }
-                }
-                txt += `- ${nombreArea}: ${ssoVal}\n`;
+                const info = analizarSsoArea(row);
+                txt += `- ${nombreArea}: ${info.textoCompleto}\n`;
             });
             txt += `\n`;
 
