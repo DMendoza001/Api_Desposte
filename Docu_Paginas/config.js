@@ -44,3 +44,52 @@ function generarBasesApiGlobal() {
     return bases;
 }
 
+// =========================================================================
+// 🛡️ GUARDIÁN DE ACCESO: BLOQUEO AUTOMÁTICO DE DASHBOARDS EN PRUEBA
+// =========================================================================
+(function verificarAccesoDashboard() {
+    if (typeof window === 'undefined' || !window.location) return;
+
+    var path = window.location.pathname || "";
+    var fileName = path.substring(path.lastIndexOf('/') + 1) || "";
+    if (!fileName || fileName.toLowerCase() === "index.html") return;
+
+    // Verificar si el usuario actual cuenta con sesión activa de Administrador
+    var esAdmin = false;
+    try {
+        if (sessionStorage.getItem('desposte_admin_pin')) esAdmin = true;
+        if (document.cookie && document.cookie.indexOf('desposte_admin=') !== -1) esAdmin = true;
+    } catch (e) { }
+
+    if (esAdmin) return;
+
+    function ejecutarBloqueo() {
+        // Redirigir de inmediato al portal principal
+        var rutaIndex = window.location.protocol.startsWith('http')
+            ? "index.html?bloqueado=" + encodeURIComponent(fileName)
+            : "index.html?bloqueado=" + encodeURIComponent(fileName);
+        window.location.replace(rutaIndex);
+    }
+
+    try {
+        // 1. Revisar si está deshabilitado en LocalStorage
+        var local = localStorage.getItem('portal_dashboards_estado');
+        if (local) {
+            var estadosLocal = JSON.parse(local);
+            if (estadosLocal && estadosLocal[fileName] === false) {
+                ejecutarBloqueo();
+                return;
+            }
+        }
+
+        // 2. Revisar dashboards_estado.json
+        fetch("dashboards_estado.json?_t=" + Date.now())
+            .then(function (res) { return res.json(); })
+            .then(function (estados) {
+                if (estados && estados[fileName] === false) {
+                    ejecutarBloqueo();
+                }
+            })
+            .catch(function () { });
+    } catch (err) { }
+})();

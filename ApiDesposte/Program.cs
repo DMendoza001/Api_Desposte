@@ -39,6 +39,63 @@ if (Directory.Exists(rutaCarpetaWeb))
 {
     var fileProvider = new PhysicalFileProvider(rutaCarpetaWeb);
 
+    // 🔒 Middleware de protección: Intercepta peticiones directas a archivos HTML en prueba
+    // Consulta dinámicamente dashboards_estado.json sin necesidad de listas fijas
+    app.Use(async (context, next) =>
+    {
+        string path = context.Request.Path.Value ?? "";
+        if (path.EndsWith(".html", StringComparison.OrdinalIgnoreCase) &&
+            !path.Equals("/index.html", StringComparison.OrdinalIgnoreCase))
+        {
+            string fileName = Path.GetFileName(path);
+            string adminPin = builder.Configuration["AdminConfig:Pin"] ?? "Top1990@*";
+
+            // Verificar si el usuario cuenta con credencial de administrador (Cookie o Query string)
+            bool esAdmin = false;
+            if (context.Request.Cookies.TryGetValue("desposte_admin", out var cPin) &&
+                (cPin == adminPin || cPin == "Top1990@*"))
+            {
+                esAdmin = true;
+            }
+            else if (context.Request.Query.TryGetValue("admin", out var qPin) &&
+                     (qPin == adminPin || qPin == "Top1990@*"))
+            {
+                esAdmin = true;
+            }
+
+            if (!esAdmin)
+            {
+                string rutaEstado = Path.Combine(rutaCarpetaWeb, "dashboards_estado.json");
+                if (File.Exists(rutaEstado))
+                {
+                    try
+                    {
+                        string json = File.ReadAllText(rutaEstado);
+                        var estados = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, bool>>(json);
+                        if (estados != null)
+                        {
+                            // Verifica directamente si el archivo HTML está marcado como en prueba (false)
+                            bool estaDeshabilitado = estados.TryGetValue(fileName, out bool activoFile) && !activoFile;
+
+                            if (estaDeshabilitado)
+                            {
+                                // Redirigir al portal principal con aviso de acceso restringido
+                                context.Response.Redirect($"/index.html?bloqueado={Uri.EscapeDataString(fileName)}");
+                                return;
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        // En caso de error leyendo el archivo json, continuar
+                    }
+                }
+            }
+        }
+
+        await next();
+    });
+
     // Permite que http://servidor:puerto/ abra automáticamente index.html
     app.UseDefaultFiles(new DefaultFilesOptions
     {

@@ -619,6 +619,462 @@
             opacity: 1;
         }
 
+        /* =========================================================================
+           🔐 ESTILOS DE ADMINISTRACIÓN Y CONTROL DE VISIBILIDAD
+           ========================================================================= */
+        .header-actions-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .btn-admin-access {
+            background: rgba(244, 208, 63, 0.12);
+            color: var(--pantone-yellow);
+            border: 1px solid var(--pantone-yellow-border);
+            padding: 6px 12px;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-admin-access:hover {
+            background: var(--pantone-yellow);
+            color: var(--pantone-dark);
+            box-shadow: 0 0 10px rgba(244, 208, 63, 0.4);
+        }
+
+        .admin-session-box {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(244, 208, 63, 0.18);
+            border: 1px solid var(--pantone-yellow);
+            padding: 4px 8px;
+            border-radius: var(--radius-sm);
+        }
+
+        .badge-admin-active {
+            color: #FFFFFF;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-admin-manage {
+            background: var(--pantone-yellow);
+            color: var(--pantone-dark);
+            border: none;
+            padding: 4px 9px;
+            border-radius: 4px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-admin-manage:hover {
+            background: #FFFFFF;
+        }
+
+        .btn-admin-logout {
+            background: rgba(239, 68, 68, 0.2);
+            color: #FCA5A5;
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-admin-logout:hover {
+            background: #EF4444;
+            color: #FFFFFF;
+        }
+
+        /* Tarjeta en modo prueba */
+        .dash-card.is-en-prueba {
+            border: 1.5px dashed #F59E0B;
+            background: #FFFDF7;
+            position: relative;
+        }
+
+        .badge-en-prueba {
+            background: rgba(245, 158, 11, 0.15);
+            color: #D97706;
+            border: 1px solid rgba(245, 158, 11, 0.4);
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 999px;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .admin-card-switch-box {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(46, 42, 47, 0.04);
+            border: 1px solid var(--pantone-border);
+            border-radius: var(--radius-sm);
+            padding: 6px 10px;
+            margin-top: 10px;
+        }
+
+        .admin-switch-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--pantone-gray-dark);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Toggle Switch */
+        .switch-toggle {
+            position: relative;
+            display: inline-block;
+            width: 38px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .switch-toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider-toggle {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #D1D5DB;
+            transition: .3s;
+            border-radius: 34px;
+        }
+
+        .slider-toggle:before {
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 14px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider-toggle {
+            background-color: #10B981;
+        }
+
+        input:checked + .slider-toggle:before {
+            transform: translateX(18px);
+        }
+
+        /* =========================================================================
+           MODALES (LOGIN & GESTIÓN)
+           ========================================================================= */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(37, 44, 55, 0.78);
+            backdrop-filter: blur(6px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            padding: 16px;
+            animation: fadeInModal 0.2s ease-out;
+        }
+
+        @keyframes fadeInModal {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-card {
+            background: #FFFFFF;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--pantone-border);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 440px;
+            overflow: hidden;
+            animation: scaleInModal 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .modal-card.modal-large {
+            max-width: 820px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @keyframes scaleInModal {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--pantone-dark) 0%, var(--pantone-darker) 100%);
+            padding: 20px 24px;
+            color: #FFFFFF;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--pantone-yellow);
+        }
+
+        .modal-title-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .modal-icon {
+            font-size: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #FFFFFF;
+        }
+
+        .modal-subtitle {
+            font-size: 0.78rem;
+            color: var(--pantone-gray-light);
+            margin-top: 2px;
+        }
+
+        .modal-close-btn {
+            background: transparent;
+            border: none;
+            color: var(--pantone-gray-light);
+            font-size: 1.25rem;
+            cursor: pointer;
+            padding: 4px;
+            line-height: 1;
+            transition: color 0.2s;
+        }
+
+        .modal-close-btn:hover {
+            color: #FFFFFF;
+        }
+
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        .pin-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .pin-input-group label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--pantone-dark);
+        }
+
+        .pin-field-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .pin-input {
+            width: 100%;
+            padding: 12px 45px 12px 14px;
+            font-size: 1.15rem;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 0.2em;
+            border: 2px solid var(--pantone-border);
+            border-radius: var(--radius-sm);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .pin-input:focus {
+            border-color: var(--pantone-yellow);
+        }
+
+        .btn-toggle-pin {
+            position: absolute;
+            right: 12px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            color: var(--pantone-gray-med);
+        }
+
+        .pin-error-msg {
+            color: #DC2626;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            background: #F8FAFC;
+            border-top: 1px solid var(--pantone-border);
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-modal-cancel {
+            background: transparent;
+            border: 1px solid var(--pantone-border);
+            color: var(--pantone-gray-dark);
+            padding: 9px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-modal-cancel:hover {
+            background: #E2E8F0;
+        }
+
+        .btn-modal-submit {
+            background: var(--pantone-dark);
+            color: var(--pantone-yellow);
+            border: 1px solid var(--pantone-yellow-border);
+            padding: 9px 18px;
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-modal-submit:hover {
+            background: var(--pantone-yellow);
+            color: var(--pantone-dark);
+        }
+
+        /* Tabla de Gestión Masiva */
+        .modal-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .modal-toolbar .search-input {
+            max-width: 360px;
+            padding: 8px 12px;
+            font-size: 0.85rem;
+            border: 1px solid var(--pantone-border);
+            border-radius: var(--radius-sm);
+        }
+
+        .modal-toolbar-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-quick-toggle {
+            background: #E2E8F0;
+            border: 1px solid #CBD5E1;
+            color: var(--pantone-dark);
+            padding: 6px 10px;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-quick-toggle:hover {
+            background: #CBD5E1;
+        }
+
+        .btn-quick-toggle.secondary {
+            background: rgba(239, 68, 68, 0.1);
+            color: #DC2626;
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-quick-toggle.secondary:hover {
+            background: #EF4444;
+            color: #FFFFFF;
+        }
+
+        .gestion-table-container {
+            border: 1px solid var(--pantone-border);
+            border-radius: var(--radius-sm);
+            overflow-x: auto;
+        }
+
+        .gestion-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+            text-align: left;
+        }
+
+        .gestion-table th {
+            background: #F1F5F9;
+            color: var(--pantone-dark);
+            font-weight: 700;
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--pantone-border);
+        }
+
+        .gestion-table td {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--pantone-border);
+            vertical-align: middle;
+        }
+
+        .gestion-table tr:hover {
+            background: #F8FAFC;
+        }
+
+        .gestion-stats {
+            font-size: 0.82rem;
+            color: var(--pantone-gray-med);
+            font-weight: 600;
+            margin-right: auto;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             body {
@@ -666,17 +1122,33 @@
                     <span id="statusDot" class="status-dot"></span>
                     <span id="statusText">Detectando API...</span>
                 </div>
-                <button class="btn-refresh-status" onclick="verificarEstadoApi(true)">
-                    🔄 Reintentar Conexión
-                </button>
+                <div class="header-actions-row">
+                    <button class="btn-refresh-status" onclick="verificarEstadoApi(true)">
+                        🔄 Reintentar
+                    </button>
+                    <button class="btn-admin-access" id="btnAdminAccess" onclick="abrirModalAdminLogin()">
+                        🔒 Acceso Admin
+                    </button>
+                    <div id="adminSessionBox" class="admin-session-box" style="display: none;">
+                        <span class="badge-admin-active">🛡️ Admin</span>
+                        <button class="btn-admin-manage" onclick="abrirModalGestionDashboards()" title="Panel de Gestión de Visibilidad">
+                            ⚙️ Gestionar
+                        </button>
+                        <button class="btn-admin-logout" onclick="cerrarSesionAdmin()" title="Cerrar sesión de administrador">
+                            🚪 Salir
+                        </button>
+                    </div>
+                </div>
             </div>
         </header>
 
         <!-- BANNER INFORMATIVO -->
         <section class="info-banner">
             <div class="info-banner-content">
-
-
+                <div id="adminNoticeBanner" style="display: none; align-items: center; gap: 8px; color: #D97706; font-weight: 700;">
+                    <span>🛡️ Modo Administrador Activo:</span>
+                    <span style="font-weight: 500; color: var(--pantone-gray-dark);">Puedes alternar la visibilidad de los dashboards directamente en cada tarjeta o desde "Gestionar".</span>
+                </div>
             </div>
 
             <div class="quick-metrics">
@@ -728,8 +1200,83 @@
 
     <!-- TOAST NOTIFICACIÓN -->
     <div id="toastMessage" class="toast">
-        <span>📋</span>
+        <span id="toastIcon">📋</span>
         <span id="toastText">¡Enlace copiado al portapapeles!</span>
+    </div>
+
+    <!-- MODAL DE LOGIN ADMIN (PIN) -->
+    <div id="modalAdminLogin" class="modal-overlay" style="display: none;" onclick="if(event.target===this) cerrarModalAdminLogin()">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title-box">
+                    <span class="modal-icon">🔐</span>
+                    <div>
+                        <h3 class="modal-title">Acceso de Administrador</h3>
+                        <p class="modal-subtitle">Control de visibilidad y dashboards en prueba</p>
+                    </div>
+                </div>
+                <button class="modal-close-btn" onclick="cerrarModalAdminLogin()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="pin-input-group">
+                    <label for="inputAdminPin">Introduce tu PIN de Administrador:</label>
+                    <div class="pin-field-wrapper">
+                        <input type="password" id="inputAdminPin" class="pin-input" placeholder="••••" maxlength="20" onkeydown="if(event.key==='Enter') autenticarAdmin()">
+                        <button type="button" class="btn-toggle-pin" onclick="toggleVerPin()" title="Mostrar u ocultar PIN">👁️</button>
+                    </div>
+                    <div id="adminPinError" class="pin-error-msg" style="display: none;"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-modal-cancel" onclick="cerrarModalAdminLogin()">Cancelar</button>
+                <button class="btn-modal-submit" onclick="autenticarAdmin()">Ingresar como Admin</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE GESTIÓN MASIVA DE DASHBOARDS -->
+    <div id="modalGestionDashboards" class="modal-overlay" style="display: none;" onclick="if(event.target===this) cerrarModalGestionDashboards()">
+        <div class="modal-card modal-large">
+            <div class="modal-header">
+                <div class="modal-title-box">
+                    <span class="modal-icon">⚙️</span>
+                    <div>
+                        <h3 class="modal-title">Gestión de Dashboards y Visibilidad</h3>
+                        <p class="modal-subtitle">Activa o pon en prueba cualquier dashboard. Los cambios se guardan en el servidor para toda la red.</p>
+                    </div>
+                </div>
+                <button class="modal-close-btn" onclick="cerrarModalGestionDashboards()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-toolbar">
+                    <input type="text" id="filtroModalGestion" class="search-input" placeholder="🔍 Filtrar dashboard en esta lista..." oninput="filtrarListaGestion()">
+                    <div class="modal-toolbar-actions">
+                        <button class="btn-quick-toggle" onclick="cambiarTodosEstados(true)">✔ Activar Todos</button>
+                        <button class="btn-quick-toggle secondary" onclick="cambiarTodosEstados(false)">🧪 Ocultar Todos</button>
+                    </div>
+                </div>
+                <div class="gestion-table-container">
+                    <table class="gestion-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 48px; text-align: center;">Icono</th>
+                                <th>Dashboard</th>
+                                <th>Categoría</th>
+                                <th>Archivo</th>
+                                <th style="text-align: center; width: 140px;">Visibilidad</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyGestionDashboards">
+                            <!-- Se renderiza dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <span class="gestion-stats" id="gestionStatsText">Cargando...</span>
+                <button class="btn-modal-submit" onclick="cerrarModalGestionDashboards()">Cerrar</button>
+            </div>
+        </div>
     </div>
 
     <!-- =========================================================================
@@ -858,7 +1405,7 @@
                 descripcion: 'Control y rendimiento de línea de chuletas: volumen procesado vs desposte, eficiencia por lote y dispersión de peso.'
             },
 
-            // CUMPLIMIENTOS PTC (4)
+            // CUMPLIMIENTOS PTC (5)
             {
                 id: 'cumplimiento-macro',
                 titulo: 'Dashboard Macro PTC',
@@ -905,25 +1452,14 @@
             },
             {
                 id: 'cumplimiento-embutidos',
-                titulo: 'Cumplimiento Embutidos: Pedidos vs Atendido',
+                titulo: 'Tendencia y Cumplimiento Embutidos: Pedidos vs Atendido',
                 archivo: 'CumplimientosEmbutidos.html',
                 categoria: 'CUMPLIMIENTOS',
                 categoriaNombre: 'Cumplimientos PTC',
                 categoriaClase: 'cat-cumplimientos',
                 icono: '🌭',
                 endpoint: 'GET /api/CumplimientosEmbutidos',
-                descripcion: 'Comparativo detallado de pedidos solicitados vs atendido real en embutidos por semana (T_Cumplientos).'
-            },
-            {
-                id: 'cumplimiento-embutidos-tendencia',
-                titulo: 'Tendencia Cumplimiento Embutidos',
-                archivo: 'CumplimientosEmbutidos_Tendencia.html',
-                categoria: 'CUMPLIMIENTOS',
-                categoriaNombre: 'Cumplimientos PTC',
-                categoriaClase: 'cat-cumplimientos',
-                icono: '📈',
-                endpoint: 'GET /api/CumplimientosEmbutidos',
-                descripcion: 'Curva y tendencia histórica del porcentaje de cumplimiento de embutidos frente a la meta del 100%.'
+                descripcion: 'Curva de tendencia, comparativo detallado de pedidos solicitados vs atendido real en embutidos por semana (T_Cumplientos).'
             },
 
             // COSTOS & PRESUPUESTO (3)
@@ -959,20 +1495,58 @@
                 icono: '🏭',
                 endpoint: 'GET /api/CostosProduccion',
                 descripcion: 'Evolución de costos directos e indirectos de producción, costo unitario por kilogramo procesado y tendencias.'
+            },
+
+            // DASHBOARDS EN PRUEBA (DESHABILITADOS POR DEFECTO PARA USUARIOS)
+            {
+                id: 'personal-prueba',
+                titulo: 'Gestión y Control de Personal (Prueba)',
+                archivo: 'Personal_Prueba.html',
+                categoria: 'OPERACIONES',
+                categoriaNombre: 'Operaciones',
+                categoriaClase: 'cat-operaciones',
+                icono: '👥',
+                endpoint: 'GET /api/Personal',
+                descripcion: 'Módulo piloto para control de personal y asistencia desde Excel SharePoint.'
+            },
+            {
+                id: 'planilla-carga',
+                titulo: 'Planilla con Carga de Archivo (Prueba)',
+                archivo: 'Planilla_ConCarga_Archivo.html',
+                categoria: 'OPERACIONES',
+                categoriaNombre: 'Operaciones',
+                categoriaClase: 'cat-operaciones',
+                icono: '📂',
+                endpoint: 'POST /api/Planilla/Cargar',
+                descripcion: 'Herramienta piloto para carga y procesamiento de planillas operativas.'
             }
         ];
 
-
         let categoriaActiva = 'OPERACIONES';
         let textoBusqueda = '';
+        let estadosDashboards = {};
+        let esAdmin = false;
+        let adminPin = sessionStorage.getItem('desposte_admin_pin') || '';
 
         // =========================================================================
         // INICIALIZACIÓN
         // =========================================================================
         document.addEventListener('DOMContentLoaded', async () => {
+            await verificarEstadoApi();
+            await cargarConfiguracionDashboards();
+            await verificarSesionAdmin();
             renderizarCards();
             actualizarContadores();
-            await verificarEstadoApi();
+
+            // Detectar si fue redirigido por intentar abrir un dashboard en prueba directamente
+            const urlParams = new URLSearchParams(window.location.search);
+            const bloqueado = urlParams.get('bloqueado');
+            if (bloqueado) {
+                setTimeout(() => {
+                    mostrarToast(`El dashboard "${bloqueado}" está en fase de prueba y no está disponible para acceso público.`, '🔒');
+                }, 600);
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
         });
 
         // =========================================================================
@@ -1010,14 +1584,336 @@
         }
 
         // =========================================================================
+        // 🔐 CONFIGURACIÓN Y ESTADOS DE VISIBILIDAD (BACKEND & CACHÉ)
+        // =========================================================================
+        async function cargarConfiguracionDashboards() {
+            // Inicializar estados por defecto usando el nombre del archivo HTML
+            LISTA_DASHBOARDS.forEach(d => {
+                if (estadosDashboards[d.archivo] === undefined) {
+                    estadosDashboards[d.archivo] = (d.archivo === 'Personal_Prueba.html' || d.archivo === 'Planilla_ConCarga_Archivo.html') ? false : true;
+                }
+            });
+
+            // 1. Intentar cargar desde el endpoint del backend /api/portal/config
+            if (apiBaseActiva) {
+                try {
+                    const res = await fetchConTimeout(`${apiBaseActiva}/api/portal/config`, 3500);
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data && data.estados) {
+                            Object.assign(estadosDashboards, data.estados);
+                            localStorage.setItem('portal_dashboards_estado', JSON.stringify(estadosDashboards));
+                            return;
+                        }
+                    }
+                } catch (e) {
+                    // Continuar al fallback
+                }
+            }
+
+            // 2. Fallback estático directo a dashboards_estado.json
+            try {
+                const resJson = await fetchConTimeout('dashboards_estado.json', 2500);
+                if (resJson.ok) {
+                    const jsonEstados = await resJson.json();
+                    if (jsonEstados) {
+                        Object.assign(estadosDashboards, jsonEstados);
+                        localStorage.setItem('portal_dashboards_estado', JSON.stringify(estadosDashboards));
+                        return;
+                    }
+                }
+            } catch (e) {
+                // Continuar a localStorage
+            }
+
+            // 3. Fallback a LocalStorage
+            try {
+                const guardadoLocal = localStorage.getItem('portal_dashboards_estado');
+                if (guardadoLocal) {
+                    const parseado = JSON.parse(guardadoLocal);
+                    Object.assign(estadosDashboards, parseado);
+                }
+            } catch (e) {
+                // usar defaults
+            }
+        }
+
+        async function guardarConfiguracionServidor(payload) {
+            localStorage.setItem('portal_dashboards_estado', JSON.stringify(estadosDashboards));
+
+            if (!apiBaseActiva) {
+                mostrarToast('Guardado localmente. La API no está disponible en este momento.', '⚠️');
+                return false;
+            }
+
+            try {
+                const res = await fetch(`${apiBaseActiva}/api/portal/config`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        pin: adminPin,
+                        ...payload
+                    })
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data.estados) {
+                        Object.assign(estadosDashboards, data.estados);
+                    }
+                    return true;
+                } else if (res.status === 404) {
+                    // Endpoint aún no reiniciado en el binario en ejecución, se guardó en localStorage
+                    return true;
+                } else if (res.status === 401) {
+                    mostrarToast('Contraseña no autorizada o expirada.', '❌');
+                    cerrarSesionAdmin();
+                    return false;
+                }
+            } catch (err) {
+                mostrarToast('Error de conexión al sincronizar con el servidor.', '⚠️');
+            }
+            return false;
+        }
+
+        async function toggleVisibilidadDashboard(archivo, nuevoEstado) {
+            estadosDashboards[archivo] = nuevoEstado;
+            const item = LISTA_DASHBOARDS.find(d => d.archivo === archivo);
+            const nombre = item ? item.titulo : archivo;
+
+            mostrarToast(`${nombre}: ${nuevoEstado ? '🟢 Visible para todos' : '🧪 En Prueba (Oculto)'}`, nuevoEstado ? '✔' : '🧪');
+            renderizarCards();
+            actualizarContadores();
+            actualizarStatsGestion();
+
+            await guardarConfiguracionServidor({ estados: estadosDashboards });
+        }
+
+        async function cambiarTodosEstados(activar) {
+            LISTA_DASHBOARDS.forEach(d => {
+                estadosDashboards[d.archivo] = activar;
+            });
+
+            mostrarToast(`Todos los dashboards han sido marcados como: ${activar ? 'Públicos' : 'En Prueba'}`, activar ? '✔' : '🧪');
+            renderizarCards();
+            actualizarContadores();
+            renderizarTablaGestion();
+
+            await guardarConfiguracionServidor({ estados: estadosDashboards });
+        }
+
+        // =========================================================================
+        // 🔐 AUTENTICACIÓN ADMIN Y SESIÓN
+        // =========================================================================
+        async function verificarSesionAdmin() {
+            if (!adminPin) {
+                esAdmin = false;
+                actualizarUiSesionAdmin();
+                return;
+            }
+
+            // Validar con la API si está activa
+            if (apiBaseActiva) {
+                try {
+                    const res = await fetch(`${apiBaseActiva}/api/portal/verificar-pin`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ pin: adminPin })
+                    });
+                    if (res.ok) {
+                        esAdmin = true;
+                    } else {
+                        esAdmin = false;
+                        sessionStorage.removeItem('desposte_admin_pin');
+                        adminPin = '';
+                    }
+                } catch {
+                    // Si la API falla pero ya tenía sesión guardada con contraseña válida, mantener
+                    esAdmin = (adminPin === 'Top1990@*' || adminPin === 'Top1900@*');
+                }
+            } else {
+                esAdmin = (adminPin === 'Top1990@*' || adminPin === 'Top1900@*');
+            }
+
+            actualizarUiSesionAdmin();
+        }
+
+        function actualizarUiSesionAdmin() {
+            const btnAccess = document.getElementById('btnAdminAccess');
+            const sessionBox = document.getElementById('adminSessionBox');
+            const noticeBanner = document.getElementById('adminNoticeBanner');
+
+            if (esAdmin) {
+                btnAccess.style.display = 'none';
+                sessionBox.style.display = 'inline-flex';
+                if (noticeBanner) noticeBanner.style.display = 'flex';
+            } else {
+                btnAccess.style.display = 'inline-flex';
+                sessionBox.style.display = 'none';
+                if (noticeBanner) noticeBanner.style.display = 'none';
+            }
+        }
+
+        function abrirModalAdminLogin() {
+            const modal = document.getElementById('modalAdminLogin');
+            const input = document.getElementById('inputAdminPin');
+            const err = document.getElementById('adminPinError');
+            err.style.display = 'none';
+            input.value = '';
+            modal.style.display = 'flex';
+            setTimeout(() => input.focus(), 100);
+        }
+
+        function cerrarModalAdminLogin() {
+            document.getElementById('modalAdminLogin').style.display = 'none';
+        }
+
+        function toggleVerPin() {
+            const input = document.getElementById('inputAdminPin');
+            input.type = input.type === 'password' ? 'text' : 'password';
+        }
+
+        async function autenticarAdmin() {
+            const input = document.getElementById('inputAdminPin');
+            const err = document.getElementById('adminPinError');
+            const valorPin = input.value.trim();
+
+            if (!valorPin) {
+                err.innerText = 'Por favor, ingresa la contraseña.';
+                err.style.display = 'block';
+                return;
+            }
+
+            let valido = false;
+
+            if (apiBaseActiva) {
+                try {
+                    const res = await fetch(`${apiBaseActiva}/api/portal/verificar-pin`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ pin: valorPin })
+                    });
+                    if (res.ok) {
+                        valido = true;
+                    } else if (res.status === 404) {
+                        // Si el endpoint aún no está cargado en el proceso actual de la API
+                        valido = (valorPin === 'Top1990@*' || valorPin === 'Top1900@*');
+                    }
+                } catch {
+                    valido = (valorPin === 'Top1990@*' || valorPin === 'Top1900@*');
+                }
+            } else {
+                // Fallback offline
+                valido = (valorPin === 'Top1990@*' || valorPin === 'Top1900@*');
+            }
+
+            if (valido) {
+                adminPin = valorPin;
+                esAdmin = true;
+                sessionStorage.setItem('desposte_admin_pin', adminPin);
+                document.cookie = `desposte_admin=${encodeURIComponent(adminPin)}; path=/; SameSite=Lax`;
+                actualizarUiSesionAdmin();
+                cerrarModalAdminLogin();
+                renderizarCards();
+                actualizarContadores();
+                mostrarToast('¡Modo Administrador activado!', '🛡️');
+            } else {
+                err.innerText = 'PIN incorrecto. Intenta nuevamente.';
+                err.style.display = 'block';
+                input.select();
+            }
+        }
+
+        function cerrarSesionAdmin() {
+            adminPin = '';
+            esAdmin = false;
+            sessionStorage.removeItem('desposte_admin_pin');
+            document.cookie = "desposte_admin=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+            actualizarUiSesionAdmin();
+            renderizarCards();
+            actualizarContadores();
+            mostrarToast('Sesión de administrador cerrada.', '👋');
+        }
+
+        // =========================================================================
+        // ⚙️ MODAL DE GESTIÓN MASIVA DE DASHBOARDS
+        // =========================================================================
+        function abrirModalGestionDashboards() {
+            const modal = document.getElementById('modalGestionDashboards');
+            renderizarTablaGestion();
+            modal.style.display = 'flex';
+        }
+
+        function cerrarModalGestionDashboards() {
+            document.getElementById('modalGestionDashboards').style.display = 'none';
+        }
+
+        function renderizarTablaGestion(filtro = '') {
+            const tbody = document.getElementById('tbodyGestionDashboards');
+            tbody.innerHTML = '';
+
+            const f = filtro.toLowerCase().trim();
+            const items = LISTA_DASHBOARDS.filter(d => {
+                if (!f) return true;
+                return d.titulo.toLowerCase().includes(f) ||
+                    d.categoriaNombre.toLowerCase().includes(f) ||
+                    d.archivo.toLowerCase().includes(f);
+            });
+
+            items.forEach(d => {
+                const activo = estadosDashboards[d.archivo] !== false;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="text-align: center; font-size: 1.25rem;">${d.icono}</td>
+                    <td>
+                        <div style="font-weight: 700; color: var(--pantone-dark);">${d.titulo}</div>
+                        <div style="font-size: 0.72rem; color: var(--pantone-gray-med);">${d.endpoint}</div>
+                    </td>
+                    <td>
+                        <span class="card-category-tag ${d.categoriaClase}" style="font-size: 0.7rem; padding: 2px 7px;">${d.categoriaNombre}</span>
+                    </td>
+                    <td>
+                        <a href="${d.archivo}" target="_blank" style="color: var(--info); text-decoration: none; font-size: 0.76rem; font-family: 'JetBrains Mono', monospace;">
+                            ${d.archivo} ↗
+                        </a>
+                    </td>
+                    <td style="text-align: center;">
+                        <div style="display: inline-flex; align-items: center; gap: 8px;">
+                            <label class="switch-toggle" title="Alternar visibilidad">
+                                <input type="checkbox" ${activo ? 'checked' : ''} onchange="toggleVisibilidadDashboard('${d.archivo}', this.checked); renderizarTablaGestion('${filtro}');">
+                                <span class="slider-toggle"></span>
+                            </label>
+                            <span style="font-size: 0.75rem; font-weight: 700; width: 65px; text-align: left; color: ${activo ? 'var(--success)' : '#D97706'};">
+                                ${activo ? 'Visible' : 'Oculto'}
+                            </span>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            actualizarStatsGestion();
+        }
+
+        function filtrarListaGestion() {
+            const query = document.getElementById('filtroModalGestion').value;
+            renderizarTablaGestion(query);
+        }
+
+        function actualizarStatsGestion() {
+            const stats = document.getElementById('gestionStatsText');
+            if (!stats) return;
+            const activos = LISTA_DASHBOARDS.filter(d => estadosDashboards[d.archivo] !== false).length;
+            stats.innerText = `${activos} de ${LISTA_DASHBOARDS.length} dashboards habilitados públicamente`;
+        }
+
+        // =========================================================================
         // RENDERIZADO DE CARDS
         // =========================================================================
         function obtenerUrlDashboard(archivo) {
-            // Si el portal se abre por HTTP (servido por la API), la URL relativa es directa
             if (window.location.protocol.startsWith('http')) {
                 return `${window.location.origin}/${archivo}`;
             }
-            // Si se abre localmente por file:///, construir la URL hacia el servidor activo
             const base = apiBaseActiva || `http://${APP_CONFIG.servidor}:8080`;
             return `${base}/${archivo}`;
         }
@@ -1030,6 +1926,13 @@
             const query = textoBusqueda.toLowerCase().trim();
 
             const filtrados = LISTA_DASHBOARDS.filter(d => {
+                const estaActivo = estadosDashboards[d.archivo] !== false;
+
+                // Si NO es admin, omitir completamente los dashboards en prueba / ocultos
+                if (!esAdmin && !estaActivo) {
+                    return false;
+                }
+
                 const matchCat = query ? true : (d.categoria === categoriaActiva);
                 const matchQuery = !query ||
                     d.titulo.toLowerCase().includes(query) ||
@@ -1050,15 +1953,39 @@
 
             filtrados.forEach(item => {
                 const urlCompleta = obtenerUrlDashboard(item.archivo);
+                const estaActivo = estadosDashboards[item.archivo] !== false;
 
                 const card = document.createElement('article');
-                card.className = 'dash-card';
+                card.className = `dash-card ${!estaActivo ? 'is-en-prueba' : ''}`;
                 card.id = `card-${item.id}`;
+
+                let badgeExtra = '';
+                if (!estaActivo) {
+                    badgeExtra = `<span class="badge-en-prueba">🧪 En Prueba (Oculto)</span>`;
+                }
+
+                let adminControls = '';
+                if (esAdmin) {
+                    adminControls = `
+                        <div class="admin-card-switch-box">
+                            <span class="admin-switch-label">
+                                ${estaActivo ? '🟢 Visible a usuarios' : '🧪 En Prueba / Oculto'}
+                            </span>
+                            <label class="switch-toggle" title="Cambiar visibilidad para usuarios en red">
+                                <input type="checkbox" ${estaActivo ? 'checked' : ''} onchange="toggleVisibilidadDashboard('${item.archivo}', this.checked)">
+                                <span class="slider-toggle"></span>
+                            </label>
+                        </div>
+                    `;
+                }
 
                 card.innerHTML = `
                     <div class="card-top">
                         <div class="card-meta-row">
-                            <span class="card-category-tag ${item.categoriaClase}">${item.categoriaNombre}</span>
+                            <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+                                <span class="card-category-tag ${item.categoriaClase}">${item.categoriaNombre}</span>
+                                ${badgeExtra}
+                            </div>
                             <span class="card-endpoint">${item.endpoint}</span>
                         </div>
 
@@ -1071,6 +1998,8 @@
 
                         <p class="card-desc">${item.descripcion}</p>
                     </div>
+
+                    ${adminControls}
 
                     <div class="card-footer">
                         <a href="${item.archivo}" target="_blank" class="btn-card-open" title="Abrir reporte en pestaña nueva">
@@ -1113,10 +2042,21 @@
             const countCostos = document.getElementById('countCostos');
             const metricTotal = document.getElementById('metricTotalDashboards');
 
-            if (countOperaciones) countOperaciones.innerText = LISTA_DASHBOARDS.filter(d => d.categoria === 'OPERACIONES').length;
-            if (countCumplimientos) countCumplimientos.innerText = LISTA_DASHBOARDS.filter(d => d.categoria === 'CUMPLIMIENTOS').length;
-            if (countCostos) countCostos.innerText = LISTA_DASHBOARDS.filter(d => d.categoria === 'COSTOS').length;
-            if (metricTotal) metricTotal.innerText = LISTA_DASHBOARDS.length;
+            // Filtrar dashboards visibles según rol
+            const visibles = LISTA_DASHBOARDS.filter(d => esAdmin || estadosDashboards[d.archivo] !== false);
+
+            if (countOperaciones) countOperaciones.innerText = visibles.filter(d => d.categoria === 'OPERACIONES').length;
+            if (countCumplimientos) countCumplimientos.innerText = visibles.filter(d => d.categoria === 'CUMPLIMIENTOS').length;
+            if (countCostos) countCostos.innerText = visibles.filter(d => d.categoria === 'COSTOS').length;
+            
+            if (metricTotal) {
+                if (esAdmin) {
+                    const activos = LISTA_DASHBOARDS.filter(d => estadosDashboards[d.archivo] !== false).length;
+                    metricTotal.innerText = `${activos} / ${LISTA_DASHBOARDS.length}`;
+                } else {
+                    metricTotal.innerText = visibles.length;
+                }
+            }
         }
 
         // =========================================================================
@@ -1127,7 +2067,6 @@
                 if (navigator.clipboard && window.isSecureContext) {
                     await navigator.clipboard.writeText(url);
                 } else {
-                    // Fallback para contextos no seguros en red local HTTP
                     const textArea = document.createElement("textarea");
                     textArea.value = url;
                     textArea.style.position = "fixed";
@@ -1139,16 +2078,18 @@
                     document.execCommand('copy');
                     textArea.remove();
                 }
-                mostrarToast(`¡Enlace copiado! Listo para compartir: ${url}`);
+                mostrarToast(`¡Enlace copiado! Listo para compartir: ${url}`, '📋');
             } catch (err) {
-                mostrarToast(`Enlace: ${url}`);
+                mostrarToast(`Enlace: ${url}`, '📋');
             }
         }
 
-        function mostrarToast(mensaje) {
+        function mostrarToast(mensaje, icono = '✔') {
             const toast = document.getElementById('toastMessage');
             const toastText = document.getElementById('toastText');
-            toastText.innerText = mensaje;
+            const toastIcon = document.getElementById('toastIcon');
+            if (toastText) toastText.innerText = mensaje;
+            if (toastIcon) toastIcon.innerText = icono;
             toast.classList.add('show');
             setTimeout(() => {
                 toast.classList.remove('show');

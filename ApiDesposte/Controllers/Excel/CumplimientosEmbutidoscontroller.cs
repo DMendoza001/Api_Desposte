@@ -26,12 +26,12 @@ namespace ApiDesposte.Controllers.Excel
                 return rutaOneDrive;
             }
 
-            // Fallback dinámico buscando directorios OneDrive de la corporación
+            // Fallback dinámico buscando directorios OneDrive en el perfil del usuario actual
             try
             {
                 var dirBase = new DirectoryInfo(userProfile);
-                var oneDriveDir = dirBase.GetDirectories("OneDrive*").FirstOrDefault();
-                if (oneDriveDir != null)
+                var oneDriveDirs = dirBase.GetDirectories("OneDrive*");
+                foreach (var oneDriveDir in oneDriveDirs)
                 {
                     string rutaAlt = Path.Combine(oneDriveDir.FullName, @"Desposte-03\PlantasCore\Planificacion\Cumplimiento_PTC.xlsm");
                     if (System.IO.File.Exists(rutaAlt))
@@ -45,7 +45,7 @@ namespace ApiDesposte.Controllers.Excel
                 // Ignorar error al explorar directorios
             }
 
-            return @"C:\Users\dennis.mendoza\OneDrive - Corporación Rico SAC\Desposte-03\PlantasCore\Planificacion\Cumplimiento_PTC.xlsm";
+            return rutaOneDrive;
         }
 
         private XLWorkbook CargarWorkbookEnMemoria(string rutaExcel)
