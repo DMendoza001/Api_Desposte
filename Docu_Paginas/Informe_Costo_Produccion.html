@@ -1775,13 +1775,13 @@
                 }
             });
 
-            // Top 10 Alzas
+            // Top 10 Alzas (Azul Acero Plomizo)
             const topAlzas = [...articulosConVar].filter(x => x.varFinal > 0).sort((a, b) => b.varFinal - a.varFinal).slice(0, 10);
-            renderizarBarChart("chartTopAlzas", topAlzas, PALETTE.darkSlate, "#E74C3C");
+            renderizarBarChart("chartTopAlzas", topAlzas, "#2C4760", "rgba(58, 91, 120, 0.90)");
 
-            // Top 10 Bajas
+            // Top 10 Bajas (Plomo Pizarra Azulado)
             const topBajas = [...articulosConVar].filter(x => x.varFinal < 0).sort((a, b) => a.varFinal - b.varFinal).slice(0, 10);
-            renderizarBarChart("chartTopBajas", topBajas, PALETTE.tealDeep, PALETTE.mintGreen);
+            renderizarBarChart("chartTopBajas", topBajas, "#525D69", "rgba(108, 122, 137, 0.86)");
 
             // Gráfico de Tendencia Histórica de los 5 Artículos más relevantes
             renderizarTendenciaHistorica();

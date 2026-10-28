@@ -17,3 +17,9 @@ Todo cálculo, análisis, reporte o agregación semanal en el proyecto (tanto en
 - **El primer día de la semana es obligatoriamente el LUNES** (y termina en Domingo).
 - Utilizar el cálculo estándar ISO-8601 (`(d.getDay() + 6) % 7` en JS, `ISOWeek.GetWeekOfYear` en C#).
 - En presentaciones visuales semanales (gráficos/tablas), incluir preferentemente el rango `Sem. XX (DD/MM al DD/MM)`.
+
+### 3. Conexión Dinámica a Archivos Excel en OneDrive (Regla Obligatoria)
+Todo controlador en C# .NET (`ApiDesposte/Controllers/Excel/`) que consuma archivos Excel locales sincronizados en OneDrive debe seguir estrictamente lo definido en [.agents/rules/conexion-excel-onedrive.md](file:///.agents/rules/conexion-excel-onedrive.md):
+- **Nunca hardcodear el usuario en la ruta física** (ej. `C:\Users\dennis.mendoza\...`).
+- Utilizar obligatoriamente `ObtenerRutaExcel()` resolviendo el perfil dinámicamente con `Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)` y `Path.Combine(userProfile, @"OneDrive - Corporación Rico SAC\...")`.
+- Abrir siempre el archivo en modo compartido (`FileShare.ReadWrite | FileShare.Delete`) cargándolo en memoria (`MemoryStream`).

@@ -1991,8 +1991,10 @@
               type: 'bar',
               label: 'Personal Retirado (Bajas)',
               data: dataRet,
-              backgroundColor: PANTONE_THEME.dataColors[1], // #2E2A2F
-              hoverBackgroundColor: PANTONE_THEME.dataColors[3], // #605C5E
+              backgroundColor: 'rgba(58, 91, 120, 0.88)', // Azul Acero Plomizo (#3A5B78)
+              borderColor: '#2C4760',
+              borderWidth: 1,
+              hoverBackgroundColor: '#2C4257', // Deep Slate Navy
               borderRadius: 6,
               barThickness: 24,
               yAxisID: 'y1'
@@ -2071,10 +2073,22 @@
       const labelsRanking = cecosOrdenados.map(c => `${c.cecosCod} · ${c.nCentroCosto}`);
       const dataRanking = cecosOrdenados.map(c => Number(c.indiceRotacionAcum.toFixed(2)));
 
-      // Aplicar armónicamente la paleta Pantone Industrial a cada barra por CECO
-      const coloresRanking = cecosOrdenados.map((_, i) => PANTONE_THEME.dataColors[i % PANTONE_THEME.dataColors.length]);
-      const bordesRanking = cecosOrdenados.map((_, i) => PANTONE_THEME.dataColors[(i + 1) % PANTONE_THEME.dataColors.length]);
-      const hoverColoresRanking = cecosOrdenados.map(() => PANTONE_THEME.tableAccent);
+      // Escala gradual de Azules Plomizos y Plomos Pizarra para barras por CECO
+      const paletaAzulesPlomos = [
+        'rgba(44, 66, 87, 0.92)', 'rgba(53, 83, 110, 0.90)', 'rgba(62, 98, 130, 0.90)',
+        'rgba(72, 111, 145, 0.88)', 'rgba(82, 122, 154, 0.88)', 'rgba(52, 73, 94, 0.90)',
+        'rgba(91, 127, 149, 0.88)', 'rgba(74, 96, 116, 0.88)', 'rgba(99, 130, 154, 0.86)',
+        'rgba(93, 109, 126, 0.88)', 'rgba(110, 138, 159, 0.86)', 'rgba(108, 122, 137, 0.86)',
+        'rgba(124, 149, 168, 0.85)', 'rgba(133, 146, 158, 0.85)', 'rgba(149, 165, 178, 0.85)'
+      ];
+      const bordesAzulesPlomos = [
+        '#1E2F3F', '#263D52', '#2E4B64', '#365773', '#3E617D',
+        '#253544', '#456376', '#374857', '#4B6578', '#465360',
+        '#546C7E', '#525D69', '#5F7485', '#68737D', '#758591'
+      ];
+      const coloresRanking = cecosOrdenados.map((_, i) => paletaAzulesPlomos[i % paletaAzulesPlomos.length]);
+      const bordesRanking = cecosOrdenados.map((_, i) => bordesAzulesPlomos[i % bordesAzulesPlomos.length]);
+      const hoverColoresRanking = cecosOrdenados.map(() => '#2C4760');
 
       const ctxR = document.getElementById('chartCecosRanking').getContext('2d');
       chartCecosRanking = new Chart(ctxR, {

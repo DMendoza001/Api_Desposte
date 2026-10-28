@@ -1272,23 +1272,58 @@
     const PANTONE_THEME = INDUSTRIAL_SLATE_GOLD;
 
     // =========================================================================
-    // 📊 PALETA GRÁFICA: INDUSTRIAL SLATE & GOLD
-    // Paleta calibrada con los 10 tonos exactos oficiales
+    // 📊 PALETA GRÁFICA: AZULES PLOMIZOS (SLATE BLUE) Y PLOMOS INDUSTRIALES
+    // Tonos desaturados de acero y pizarra que armonizan con Industrial Slate & Gold
     // =========================================================================
     const GRAFICOS_PALETA = {
-      // 10 tonos exactos de la paleta "Industrial Slate & Gold"
-      rankingPlantillas: INDUSTRIAL_SLATE_GOLD.dataColors,
-      // Gráfico de Evolución Temporal (Línea Gold + Barras dobles en tonos Slate)
+      // Escala gradual de Azules con tendencia al Plomo y Grises Pizarra (Top 15 Plantillas)
+      rankingPlantillas: [
+        "rgba(44, 66, 87, 0.92)",   // 01. Deep Slate Navy (#2C4257)
+        "rgba(53, 83, 110, 0.90)",  // 02. Muted Steel Blue (#35536E)
+        "rgba(62, 98, 130, 0.90)",  // 03. Industrial Slate Blue (#3E6282)
+        "rgba(72, 111, 145, 0.88)", // 04. Smoky Cerulean Slate (#486F91)
+        "rgba(82, 122, 154, 0.88)", // 05. Blue-Gray Pewter (#527A9A)
+        "rgba(52, 73, 94, 0.90)",   // 06. Dark Slate Plomo (#34495E)
+        "rgba(91, 127, 149, 0.88)", // 07. Cool Steel Slate (#5B7F95)
+        "rgba(74, 96, 116, 0.88)",  // 08. Medium Slate Blue-Gray (#4A6074)
+        "rgba(99, 130, 154, 0.86)", // 09. Muted Air Force Slate (#63829A)
+        "rgba(93, 109, 126, 0.88)", // 10. Cool Slate Plomo (#5D6D7E)
+        "rgba(110, 138, 159, 0.86)",// 11. Dusty Blue-Slate (#6E8A9F)
+        "rgba(108, 122, 137, 0.86)",// 12. Balanced Pewter Plomo (#6C7A89)
+        "rgba(124, 149, 168, 0.85)",// 13. Mist Blue-Gray (#7C95A8)
+        "rgba(133, 146, 158, 0.85)",// 14. Silver Slate Plomo (#85929E)
+        "rgba(149, 165, 178, 0.85)" // 15. Pale Metallic Slate (#95A5B2)
+      ],
+      rankingPlantillasBorder: [
+        "#1E2F3F",
+        "#263D52",
+        "#2E4B64",
+        "#365773",
+        "#3E617D",
+        "#253544",
+        "#456376",
+        "#374857",
+        "#4B6578",
+        "#465360",
+        "#546C7E",
+        "#525D69",
+        "#5F7485",
+        "#68737D",
+        "#758591"
+      ],
+      // Gráfico de Evolución Temporal (Línea Gold + Barras en Plomo Pizarra y Azul Plomizo)
       temporal: {
-        rendimientoLine: "#F4D03F",                    // 01. Vivid Gold
-        rendimientoFill: "rgba(244, 208, 63, 0.16)",
-        rendimientoPoint: "#2C3E50",                   // 05. Midnight Slate
+        rendimientoLine: "#F4D03F",                    // 01. Vivid Gold (contraste principal)
+        rendimientoFill: "rgba(58, 91, 120, 0.12)",    // Sombreado sutil en azul pizarra
+        rendimientoPoint: "#1C2833",                   // Charcoal Slate
         rendimientoPointBorder: "#F4D03F",
-        rendimientoHoverPoint: "#D4AC0D",              // 06. Rich Gold
-        kilosOrigenBar: "rgba(52, 73, 94, 0.88)",      // 02. Slate Dark (#34495E)
-        kilosOrigenHover: "#1C2833",                   // 07. Charcoal Slate (#1C2833)
-        kilosResultadoBar: "rgba(93, 109, 126, 0.88)", // 03. Slate Med (#5D6D7E)
-        kilosResultadoHover: "#2C3E50"                 // 05. Midnight Slate (#2C3E50)
+        rendimientoHoverPoint: "#D4AC0D",              // Rich Gold
+        kilosOrigenBar: "rgba(115, 128, 142, 0.85)",   // Plomo Pizarra Neutro (#73808E)
+        kilosOrigenBorder: "#5D6D7E",                  // Borde Plomo Medio (#5D6D7E)
+        kilosOrigenHover: "#475569",                   // Hover Plomo Oscuro (#475569)
+        kilosResultadoBar: "rgba(58, 91, 120, 0.90)",  // Azul Acero Plomizo (#3A5B78)
+        kilosResultadoBorder: "#2C4760",               // Borde Azul Pizarra (#2C4760)
+        kilosResultadoHover: "#243B50"                 // Hover Azul Pizarra Profundo (#243B50)
       }
     };
 
@@ -1915,8 +1950,11 @@
               label: 'Kilos Origen',
               data: origenValues,
               backgroundColor: GRAFICOS_PALETA.temporal.kilosOrigenBar,
+              borderColor: GRAFICOS_PALETA.temporal.kilosOrigenBorder,
+              borderWidth: 1,
               hoverBackgroundColor: GRAFICOS_PALETA.temporal.kilosOrigenHover,
-              borderRadius: 4,
+              hoverBorderColor: GRAFICOS_PALETA.temporal.kilosOrigenBorder,
+              borderRadius: 5,
               yAxisID: 'y1'
             },
             {
@@ -1924,8 +1962,11 @@
               label: 'Kilos Resultado',
               data: resultadoValues,
               backgroundColor: GRAFICOS_PALETA.temporal.kilosResultadoBar,
+              borderColor: GRAFICOS_PALETA.temporal.kilosResultadoBorder,
+              borderWidth: 1,
               hoverBackgroundColor: GRAFICOS_PALETA.temporal.kilosResultadoHover,
-              borderRadius: 4,
+              hoverBorderColor: GRAFICOS_PALETA.temporal.kilosResultadoBorder,
+              borderRadius: 5,
               yAxisID: 'y1'
             }
           ]
@@ -2001,10 +2042,10 @@
       const labels = planMetrics.map(p => p.name.length > 22 ? p.name.substring(0, 22) + "..." : p.name);
       const dataRend = planMetrics.map(p => Math.round(p.metricas.rendimiento * 100) / 100);
 
-      // Armonización con la paleta Industrial Slate & Gold (10 colores exactos)
+      // Armonización en gama de Azules Plomizos y Plomos Industriales (Slate Blue & Pewter)
       const coloresRanking = planMetrics.map((_, i) => GRAFICOS_PALETA.rankingPlantillas[i % GRAFICOS_PALETA.rankingPlantillas.length]);
-      const bordesRanking = coloresRanking;
-      const hoverColoresRanking = planMetrics.map(() => "#D4AC0D"); // Rich Gold destacado al interactuar
+      const bordesRanking = planMetrics.map((_, i) => GRAFICOS_PALETA.rankingPlantillasBorder[i % GRAFICOS_PALETA.rankingPlantillasBorder.length]);
+      const hoverColoresRanking = planMetrics.map(() => "#2C4760"); // Azul Pizarra profundo al interactuar
 
       if (chartPlantillasObj) chartPlantillasObj.destroy();
 
@@ -2020,7 +2061,7 @@
             borderColor: bordesRanking,
             borderWidth: 1.5,
             hoverBackgroundColor: hoverColoresRanking,
-            hoverBorderColor: "#B7950B",
+            hoverBorderColor: "#1E2F3F",
             borderRadius: 6,
             barThickness: 18
           }]

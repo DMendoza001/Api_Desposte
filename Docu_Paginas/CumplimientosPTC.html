@@ -3359,7 +3359,11 @@
             const dataKilos = barras.map(b => b.kilos);
 
             const colores = [
-                '#1295C1', '#223A5E', '#007D7E', '#43928E', '#4E6E81', '#10587F'
+                'rgba(44, 66, 87, 0.92)', 'rgba(62, 98, 130, 0.90)', 'rgba(82, 122, 154, 0.88)',
+                'rgba(93, 109, 126, 0.88)', 'rgba(110, 138, 159, 0.86)', 'rgba(133, 146, 158, 0.85)'
+            ];
+            const bordes = [
+                '#1E2F3F', '#2E4B64', '#3E617D', '#465360', '#546C7E', '#68737D'
             ];
 
             chartProdTipoInstance = new Chart(ctx.getContext('2d'), {
@@ -3370,8 +3374,10 @@
                         label: 'Kilos Producidos',
                         data: dataKilos,
                         backgroundColor: colores.slice(0, labels.length),
+                        borderColor: bordes.slice(0, labels.length),
+                        hoverBackgroundColor: '#243B50',
                         borderRadius: 6,
-                        borderWidth: 0,
+                        borderWidth: 1,
                         barPercentage: 0.55
                     }]
                 },
@@ -3613,7 +3619,11 @@
             const dataKilos = barras.map(b => b.kilos);
 
             const colores = [
-                '#10587F', '#1295C1', '#223A5E', '#4E6E81', '#43928E', '#007D7E'
+                'rgba(53, 83, 110, 0.90)', 'rgba(72, 111, 145, 0.88)', 'rgba(91, 127, 149, 0.88)',
+                'rgba(74, 96, 116, 0.88)', 'rgba(108, 122, 137, 0.86)', 'rgba(124, 149, 168, 0.85)'
+            ];
+            const bordes = [
+                '#263D52', '#365773', '#456376', '#374857', '#525D69', '#5F7485'
             ];
 
             chartDemOrigenInstance = new Chart(ctx.getContext('2d'), {
@@ -3624,8 +3634,10 @@
                         label: 'Kilos Demandados',
                         data: dataKilos,
                         backgroundColor: colores.slice(0, labels.length),
+                        borderColor: bordes.slice(0, labels.length),
+                        hoverBackgroundColor: '#243B50',
                         borderRadius: 6,
-                        borderWidth: 0,
+                        borderWidth: 1,
                         barPercentage: 0.55
                     }]
                 },

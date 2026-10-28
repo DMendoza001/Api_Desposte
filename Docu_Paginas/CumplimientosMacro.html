@@ -1429,8 +1429,12 @@
             });
 
             const bgColors = [
-                '#156586', '#156586', '#156586', '#156586', // PROD PY
-                '#195B78', '#195B78', '#195B78'             // PEDIDO PY
+                'rgba(58, 91, 120, 0.90)', 'rgba(58, 91, 120, 0.90)', 'rgba(58, 91, 120, 0.90)', 'rgba(58, 91, 120, 0.90)', // PROD PY (Azul Acero Plomizo)
+                'rgba(108, 122, 137, 0.86)', 'rgba(108, 122, 137, 0.86)', 'rgba(108, 122, 137, 0.86)'                      // PEDIDO PY (Plomo Pizarra)
+            ];
+            const borderColors = [
+                '#486F91', '#486F91', '#486F91', '#486F91',
+                '#85929E', '#85929E', '#85929E'
             ];
 
             chartDesglose = new Chart(ctx, {
@@ -1440,9 +1444,10 @@
                     datasets: [{
                         data: dataValues,
                         backgroundColor: bgColors,
+                        hoverBackgroundColor: '#2C4257',
                         borderRadius: 4,
                         borderWidth: 1,
-                        borderColor: '#2D6B8C',
+                        borderColor: borderColors,
                         barPercentage: 0.55
                     }]
                 },

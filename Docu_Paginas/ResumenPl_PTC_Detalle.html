@@ -1,0 +1,2489 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Cumplimiento PTC Detalle - Real vs Planificación (SubPlanta / SKU)</title>
+
+    <!-- Fuentes Google Fonts: Inter y JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Chart.js y Plugins -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+    <!-- SheetJS para exportar a Excel (.xlsx) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <!-- Configuración compartida de conexión a la API -->
+    <script src="config.js"></script>
+
+    <style>
+        /* =========================================================================
+           🎨 TEMA: INDUSTRIAL SLATE, STEEL BLUE & GOLD (tema_colores_industrial_slate_blue.json)
+           ========================================================================= */
+        :root {
+            /* Tokens Base Industrial Slate & Gold */
+            --isg-gold-bright: #F4D03F;
+            --isg-slate-dark: #34495E;
+            --isg-slate-med: #5D6D7E;
+            --isg-slate-cool: #85929E;
+            --isg-slate-deep: #2C3E50;
+            --isg-gold-rich: #D4AC0D;
+            --isg-slate-charcoal: #1C2833;
+            --isg-slate-silver: #AEB6BF;
+            --isg-slate-stone: #7F8C8D;
+            --isg-gold-bronze: #B7950B;
+
+            /* Tokens de Gráficos Azules Plomizos y Plomos */
+            --chart-slate-navy: #2C4257;
+            --chart-steel-blue: #3A5B78;
+            --chart-cerulean-slate: #486F91;
+            --chart-pewter-blue: #527A9A;
+            --chart-plomo-neutro: #73808E;
+            --chart-plomo-pizarra: #6C7A89;
+
+            /* Mapeo de tokens estructurales */
+            --pantone-yellow: #F4D03F;
+            --pantone-yellow-light: #F8CC5A;
+            --pantone-yellow-soft: rgba(244, 208, 63, 0.16);
+            --pantone-yellow-border: rgba(244, 208, 63, 0.45);
+            --pantone-gold: #D4AC0D;
+            --pantone-gold-soft: rgba(212, 172, 13, 0.14);
+            --pantone-gold-border: rgba(212, 172, 13, 0.4);
+            --pantone-dark: #2C3E50;
+            --pantone-darker: #1C2833;
+            --pantone-gray-dark: #34495E;
+            --pantone-gray-med: #5D6D7E;
+            --pantone-gray-light: #AEB6BF;
+
+            --bg-canvas: #F2F4F8;
+            --bg-card: #FFFFFF;
+            --bg-card-alt: #F8FAFC;
+            --border-ui: #E2E8F0;
+            --border-subtle: #EDF2F7;
+            --text-dark: #2E2A2F;
+            --text-muted: #5D6D7E;
+
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+
+            --shadow-sm: 0 1px 3px rgba(28, 40, 51, 0.06), 0 1px 2px rgba(28, 40, 51, 0.04);
+            --shadow-md: 0 4px 6px -1px rgba(28, 40, 51, 0.08), 0 2px 4px -1px rgba(28, 40, 51, 0.04);
+            --shadow-lg: 0 10px 15px -3px rgba(28, 40, 51, 0.12), 0 4px 6px -2px rgba(28, 40, 51, 0.06);
+
+            --radius-sm: 8px;
+            --radius-md: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-canvas);
+            color: var(--text-dark);
+            padding: 20px 24px;
+            min-height: 100vh;
+        }
+
+        .dashboard-container {
+            max-width: 1780px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+        }
+
+        /* HEADER */
+        .dashboard-header {
+            background: linear-gradient(135deg, var(--pantone-dark) 0%, var(--pantone-darker) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-left: 6px solid var(--pantone-yellow);
+            border-radius: 12px;
+            padding: 22px 28px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+            color: #FFFFFF;
+        }
+
+        .dashboard-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--pantone-yellow), var(--pantone-gold), var(--chart-pewter-blue));
+        }
+
+        .header-title-group {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            background: var(--pantone-yellow-soft);
+            border: 1px solid var(--pantone-yellow-border);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--pantone-yellow);
+            flex-shrink: 0;
+        }
+
+        .header-title {
+            font-size: 1.45rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: #FFFFFF;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .badge-tag {
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            border-radius: 6px;
+            background: rgba(82, 122, 154, 0.25);
+            color: #E2E8F0;
+            border: 1px solid rgba(124, 149, 168, 0.45);
+        }
+
+        .header-subtitle {
+            font-size: 0.86rem;
+            color: var(--pantone-gray-light);
+            margin-top: 4px;
+            font-weight: 400;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 0.8rem;
+            padding: 6px 14px;
+            border-radius: 9999px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(8px);
+            color: #FFFFFF;
+            font-weight: 600;
+        }
+
+        .status-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background-color: var(--pantone-gray-med);
+            display: inline-block;
+        }
+
+        .status-dot.online {
+            background-color: #10B981;
+            box-shadow: 0 0 8px #10B981;
+        }
+
+        .status-dot.loading {
+            background-color: var(--pantone-yellow);
+            animation: pulse 1s infinite alternate;
+        }
+
+        .status-dot.error {
+            background-color: #EF4444;
+        }
+
+        @keyframes pulse {
+            from {
+                opacity: 0.4;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 0.84rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid var(--border-ui);
+            background: #FFFFFF;
+            color: var(--pantone-dark);
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            background: var(--bg-card-alt);
+            border-color: var(--chart-pewter-blue);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--pantone-yellow) 0%, var(--pantone-yellow-light) 100%);
+            border: 1px solid rgba(244, 208, 63, 0.6);
+            color: var(--pantone-darker);
+            font-weight: 700;
+            box-shadow: 0 2px 6px rgba(244, 208, 63, 0.35);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--pantone-yellow-light) 0%, var(--pantone-gold) 100%);
+            color: var(--pantone-darker);
+            border-color: var(--pantone-gold);
+        }
+
+        .btn-excel {
+            background: #F0FDF4;
+            border: 1px solid #86EFAC;
+            color: #166534;
+            font-weight: 700;
+        }
+
+        .btn-excel:hover {
+            background: #166534;
+            border-color: #166534;
+            color: #FFFFFF;
+        }
+
+        /* CARD GENERAL */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-ui);
+            border-radius: 12px;
+            padding: 20px 24px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* FILTROS SECTION */
+        .filter-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .filter-title {
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: var(--pantone-dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: -0.01em;
+        }
+
+        .filter-quick-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .filter-quick-btn {
+            background: var(--bg-card-alt);
+            border: 1px solid var(--border-ui);
+            color: var(--text-muted);
+            padding: 6px 13px;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .filter-quick-btn:hover {
+            color: var(--text-dark);
+            background: #EEF2F6;
+            border-color: var(--chart-pewter-blue);
+        }
+
+        .filter-quick-btn.active {
+            background: var(--chart-slate-navy);
+            border-color: var(--chart-slate-navy);
+            color: #FFFFFF;
+        }
+
+        .filter-quick-btn.active-subplanta {
+            background: var(--chart-steel-blue);
+            border-color: var(--chart-slate-navy);
+            color: #FFFFFF;
+        }
+
+        .filter-quick-btn.active-semana {
+            background: var(--pantone-darker);
+            border-color: var(--pantone-yellow);
+            color: var(--pantone-yellow);
+        }
+
+        .years-pills-container,
+        .subplanta-pills-container,
+        .weeks-pills-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            max-height: 180px;
+            overflow-y: auto;
+            padding: 4px 2px;
+        }
+
+        .year-pill,
+        .subplanta-pill,
+        .week-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            background: #FFFFFF;
+            border: 1px solid var(--border-ui);
+            color: var(--text-dark);
+            transition: all 0.15s ease;
+            user-select: none;
+        }
+
+        .year-pill:hover,
+        .subplanta-pill:hover {
+            border-color: var(--chart-pewter-blue);
+            background: var(--bg-card-alt);
+        }
+
+        .year-pill.selected {
+            background: var(--pantone-yellow-soft);
+            border-color: var(--pantone-gold);
+            color: var(--pantone-darker);
+            font-weight: 700;
+        }
+
+        .subplanta-pill.selected {
+            background: rgba(58, 91, 120, 0.14);
+            border-color: var(--chart-steel-blue);
+            color: var(--chart-slate-navy);
+            font-weight: 700;
+        }
+
+        /* COMBOBOX MULTI-SELECCIÓN DE SEMANAS */
+        .week-filter-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .week-combobox-wrapper {
+            position: relative;
+            min-width: 360px;
+            max-width: 480px;
+            flex: 1;
+        }
+
+        .week-combobox-trigger {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 9px 14px;
+            background: #FFFFFF;
+            border: 1px solid #CBD5E1;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.84rem;
+            font-weight: 600;
+            color: var(--pantone-dark);
+            transition: all 0.18s ease;
+            user-select: none;
+            box-shadow: 0 1px 2px rgba(28, 40, 51, 0.04);
+        }
+
+        .week-combobox-trigger:hover,
+        .week-combobox-wrapper.open .week-combobox-trigger {
+            border-color: var(--chart-pewter-blue);
+            box-shadow: 0 0 0 3px rgba(82, 122, 154, 0.14);
+        }
+
+        .week-combobox-trigger-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .week-combobox-chevron {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            transition: transform 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .week-combobox-wrapper.open .week-combobox-chevron {
+            transform: rotate(180deg);
+            color: var(--chart-slate-navy);
+        }
+
+        .week-combobox-dropdown {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            right: 0;
+            background: #FFFFFF;
+            border: 1px solid #CBD5E1;
+            border-radius: 10px;
+            box-shadow: 0 12px 24px -4px rgba(28, 40, 51, 0.14), 0 4px 8px -2px rgba(28, 40, 51, 0.08);
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .week-combobox-wrapper.open .week-combobox-dropdown {
+            display: flex;
+        }
+
+        .week-combobox-search-bar {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border-ui);
+            background: #F8FAFC;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .week-combobox-search-input {
+            width: 100%;
+            padding: 7px 11px;
+            border: 1px solid #CBD5E1;
+            border-radius: 6px;
+            font-size: 0.82rem;
+            outline: none;
+            color: var(--text-dark);
+            background: #FFFFFF;
+        }
+
+        .week-combobox-search-input:focus {
+            border-color: var(--chart-pewter-blue);
+            box-shadow: 0 0 0 2px rgba(82, 122, 154, 0.14);
+        }
+
+        .week-combobox-actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .week-combo-action-btn {
+            font-size: 0.73rem;
+            font-weight: 600;
+            padding: 4px 9px;
+            border-radius: 5px;
+            border: 1px solid #CBD5E1;
+            background: #FFFFFF;
+            color: var(--chart-slate-navy);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .week-combo-action-btn:hover {
+            background: #E6EEF6;
+            border-color: var(--chart-pewter-blue);
+        }
+
+        .week-combobox-list {
+            max-height: 260px;
+            overflow-y: auto;
+            padding: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .week-combobox-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 7px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.82rem;
+            color: var(--text-dark);
+            transition: background 0.12s ease;
+            user-select: none;
+        }
+
+        .week-combobox-item:hover {
+            background: #F1F5F9;
+        }
+
+        .week-combobox-item.checked {
+            background: #EBF2F8;
+            font-weight: 600;
+            color: var(--chart-slate-navy);
+        }
+
+        .week-combobox-item-left {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+        }
+
+        .week-combobox-item input[type="checkbox"] {
+            width: 15px;
+            height: 15px;
+            accent-color: var(--chart-steel-blue);
+            cursor: pointer;
+        }
+
+        .week-combobox-range {
+            font-size: 0.74rem;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .pill-badge-count {
+            background: #E2E8F0;
+            font-size: 0.72rem;
+            padding: 2px 7px;
+            border-radius: 12px;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .week-pill.selected .pill-badge-count {
+            background: rgba(244, 208, 63, 0.22);
+            color: var(--pantone-yellow);
+            font-weight: 700;
+        }
+
+        .selection-summary-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px solid var(--border-ui);
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .selection-summary-bar b {
+            color: var(--pantone-dark);
+        }
+
+        /* KPI GRID */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px;
+        }
+
+        .kpi-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-ui);
+            border-top: 4px solid var(--kpi-accent, var(--chart-slate-navy));
+            border-radius: 10px;
+            padding: 18px 22px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--chart-pewter-blue);
+            box-shadow: var(--shadow-md);
+        }
+
+        .kpi-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .kpi-value {
+            font-size: 1.7rem;
+            font-weight: 800;
+            color: var(--pantone-darker);
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+        }
+
+        .kpi-unit {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .kpi-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.78rem;
+            color: var(--pantone-gray-dark);
+            padding-top: 6px;
+            border-top: 1px solid var(--border-ui);
+            font-weight: 500;
+        }
+
+        .badge-kpi {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.75rem;
+            font-family: 'JetBrains Mono', 'Inter', monospace;
+            text-align: center;
+            min-width: 52px;
+            background: #EDF2F7;
+            color: var(--pantone-dark);
+        }
+
+        .badge-good,
+        .badge-success {
+            background-color: #DCFCE7 !important;
+            color: #166534 !important;
+            border: 1px solid #86EFAC !important;
+        }
+
+        .badge-mid,
+        .badge-warning {
+            background-color: var(--pantone-yellow-soft) !important;
+            color: #854D0E !important;
+            border: 1px solid var(--pantone-yellow-border) !important;
+        }
+
+        .badge-low,
+        .badge-danger {
+            background-color: #FEE2E2 !important;
+            color: #991B1B !important;
+            border: 1px solid #FCA5A5 !important;
+        }
+
+        .val-positive {
+            color: #166534 !important;
+            font-weight: 700;
+        }
+
+        .val-negative {
+            color: #991B1B !important;
+            font-weight: 700;
+        }
+
+        /* GRÁFICO */
+        .chart-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-ui);
+            border-radius: 12px;
+            padding: 22px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .chart-top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-ui);
+        }
+
+        .chart-title {
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            color: var(--pantone-dark);
+            text-transform: uppercase;
+        }
+
+        /* TABLA MATRIZ (ESTILO CLARO Y LIMPIO - SLATE BLUE & PEWTER SUAVE) */
+        .matrix-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-ui);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+        }
+
+        .matrix-header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 14px;
+            padding-bottom: 14px;
+            margin-bottom: 14px;
+            border-bottom: 1px solid var(--border-ui);
+        }
+
+        .matrix-header-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--chart-slate-navy);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .matrix-hierarchy-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 999px;
+            background: #EEF3F8;
+            border: 1px solid #CBD5E1;
+            color: var(--chart-slate-navy);
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+
+        .matrix-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #F8FAFC;
+            border: 1px solid #CBD5E1;
+            padding: 8px 14px;
+            border-radius: 8px;
+            width: 380px;
+            max-width: 100%;
+            transition: all 0.2s ease;
+        }
+
+        .search-box:focus-within {
+            background: #FFFFFF;
+            border-color: var(--chart-pewter-blue);
+            box-shadow: 0 0 0 3px rgba(82, 122, 154, 0.14);
+        }
+
+        .search-box input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-dark);
+            font-size: 0.85rem;
+            width: 100%;
+        }
+
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            max-height: 640px;
+            border: 1px solid #CBD5E1;
+            border-radius: 8px;
+            background: #FFFFFF;
+        }
+
+        .matrix-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 0.83rem;
+            text-align: left;
+        }
+
+        .matrix-table th {
+            background-color: #EEF2F6;
+            color: #2C4257;
+            font-weight: 700;
+            font-size: 0.77rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            padding: 11px 14px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            white-space: nowrap;
+            border-bottom: 2px solid #B8C4D0;
+        }
+
+        .matrix-table th.num-col,
+        .matrix-table td.num-cell {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+            font-family: 'JetBrains Mono', 'Inter', monospace;
+        }
+
+        .matrix-table td {
+            padding: 8px 14px;
+            border-bottom: 1px solid #EDF2F7;
+            color: #334155;
+        }
+
+        /* NIVEL 1: SEMANA (TONO AZUL-PLOMO CLARO Y SUAVE) */
+        .level-1 td {
+            background-color: #E3ECF5 !important;
+            color: #1E2F3F !important;
+            font-weight: 700;
+            border-bottom: 1px solid #C5D3E2 !important;
+            border-top: 1px solid #D5E0EC !important;
+        }
+
+        .level-1:hover td {
+            background-color: #D8E4F0 !important;
+        }
+
+        /* NIVEL 2: SUBPLANTA (TONO GRIS-AZULADO MUY CLARO) */
+        .level-2 td {
+            background-color: #F1F5F9 !important;
+            color: #2C4257 !important;
+            font-weight: 700;
+            border-bottom: 1px solid #E2E8F0 !important;
+        }
+
+        .level-2:hover td {
+            background-color: #E8EFF6 !important;
+        }
+
+        /* NIVEL 3: CODIGOCORTO Y NOMBRE (FONDO CLARO Y LIMPIO) */
+        .level-3 td {
+            background-color: #FFFFFF !important;
+            color: #334155 !important;
+            font-weight: 500;
+        }
+
+        .level-3:nth-child(even) td {
+            background-color: #FAFBFD !important;
+        }
+
+        .level-3:hover td {
+            background-color: #F1F5F9 !important;
+        }
+
+        .tag-subplanta {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 2px 9px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            background: #E2ECF5;
+            color: #2C4257;
+            border: 1px solid #B8C9DA;
+        }
+
+        /* FOOTER TOTAL GENERAL (CLARO Y ELEGANTE) */
+        .row-grand-total td {
+            background: #E2E8F0 !important;
+            color: #1E2F3F !important;
+            font-weight: 800;
+            position: sticky;
+            bottom: 0;
+            z-index: 9;
+            padding: 11px 14px;
+            border-top: 2px solid #94A3B8 !important;
+        }
+
+        /* DIVISIONES ENTRE GRUPOS DE COLUMNAS EN LA MATRIZ */
+        .matrix-table th.col-group-com-start,
+        .matrix-table th.col-group-dist-start,
+        .matrix-table th.col-group-prog-start {
+            border-left: 1px solid #CBD5E1 !important;
+        }
+
+        .matrix-table td.col-group-com-start,
+        .matrix-table td.col-group-dist-start,
+        .matrix-table td.col-group-prog-start {
+            border-left: 1px solid #E2E8F0 !important;
+        }
+
+        .toggle-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            border-radius: 5px;
+            background: #FFFFFF;
+            color: #2C4257;
+            border: 1px solid #94A3B8;
+            font-family: monospace;
+            font-size: 0.82rem;
+            font-weight: 800;
+            cursor: pointer;
+            margin-right: 8px;
+            user-select: none;
+            transition: all 0.15s ease;
+        }
+
+        .toggle-icon:hover {
+            background: #2C4257;
+            color: #FFFFFF;
+            border-color: #2C4257;
+        }
+
+        .sku-code-badge {
+            display: inline-block;
+            background: #EEF2F6;
+            color: #2C4257;
+            border: 1px solid #CBD5E1;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.74rem;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 5px;
+            margin-right: 8px;
+        }
+
+        .sku-name-text {
+            font-weight: 500;
+            color: #334155;
+        }
+
+        .toast-notification {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--pantone-darker);
+            border: 1px solid rgba(244, 208, 63, 0.4);
+            border-radius: 8px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #FFFFFF;
+            font-size: 0.86rem;
+            font-weight: 500;
+            box-shadow: var(--shadow-lg);
+            transform: translateY(120%);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 10000;
+        }
+
+        .toast-notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-container">
+
+        <!-- HEADER -->
+        <header class="dashboard-header">
+            <div class="header-title-group">
+                <div class="header-icon">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 3v18h18"></path>
+                        <path d="m19 9-5 5-4-4-3 3"></path>
+                    </svg>
+                </div>
+                <div>
+                    <div class="header-title">
+                        Dashboard Cumplimiento PTC Detalle - Real vs Planificación
+                        <span class="badge-tag">SubPlanta • CódigoCorto • Nombre</span>
+                    </div>
+                    <div class="header-subtitle">
+                        Maestro: <b>T_CodigoRelacion</b> (Auxiliares) • Tablas: <b>T_Produccion</b>, <b>T_DemandaPy</b>,
+                        <b>T_Distribucion</b> y <b>T_ResProd_Py_DB</b>
+                    </div>
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <div class="status-badge" id="apiStatusBadge">
+                    <span class="status-dot"></span>
+                    <span id="apiStatusText">Buscando servidor...</span>
+                </div>
+
+                <button class="btn btn-excel" onclick="exportarExcel()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Exportar Excel Detallado
+                </button>
+
+                <button class="btn btn-primary" onclick="recargarDatosAPI(true)">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+                    </svg>
+                    Actualizar
+                </button>
+            </div>
+        </header>
+
+        <!-- FILTROS (AÑO, SUBPLANTA Y SEMANAS) -->
+        <section class="card">
+            <!-- 1. FILTRO AÑO -->
+            <div class="filter-section-header">
+                <div class="filter-title">1. Filtro General por Año (Multi-Selección)</div>
+                <div class="filter-quick-actions">
+                    <button class="filter-quick-btn active" id="btnQuickYearAll"
+                        onclick="seleccionarFiltroRapidoAnio('all')">Todos los Años</button>
+                </div>
+            </div>
+            <div class="years-pills-container" id="yearsPillsContainer"></div>
+
+            <div style="border-top: 1px solid var(--border-ui); margin: 14px 0 12px 0;"></div>
+
+            <!-- 2. FILTRO SUBPLANTA -->
+            <div class="filter-section-header">
+                <div class="filter-title" style="color: var(--chart-steel-blue);">2. Filtro por SubPlanta
+                    (Multi-Selección)</div>
+                <div class="filter-quick-actions">
+                    <button class="filter-quick-btn active-subplanta" id="btnQuickSpAll"
+                        onclick="seleccionarFiltroRapidoSubPlanta('all')">Todas las SubPlantas</button>
+                </div>
+            </div>
+            <div class="subplanta-pills-container" id="subplantaPillsContainer"></div>
+
+            <div style="border-top: 1px solid var(--border-ui); margin: 14px 0 12px 0;"></div>
+
+            <!-- 3. FILTRO SEMANAS (COMBOBOX MULTI-SELECCIÓN) -->
+            <div class="filter-section-header">
+                <div class="filter-title" style="color: var(--pantone-dark);">3. Filtro por Semana ISO-8601 (Lunes a
+                    Domingo)</div>
+                <div class="filter-quick-actions">
+                    <button class="filter-quick-btn" id="btnQuickLatest"
+                        onclick="seleccionarFiltroRapidoSemana('latest')">Última Semana</button>
+                    <button class="filter-quick-btn" id="btnQuickLast4"
+                        onclick="seleccionarFiltroRapidoSemana('last4')">Últimas 4 Semanas</button>
+                    <button class="filter-quick-btn active active-semana" id="btnQuickAll"
+                        onclick="seleccionarFiltroRapidoSemana('all')">Todas las Semanas</button>
+                </div>
+            </div>
+
+            <div class="week-filter-row">
+                <div class="week-combobox-wrapper" id="weekComboboxWrapper">
+                    <div class="week-combobox-trigger" onclick="toggleWeekDropdown(event)">
+                        <div class="week-combobox-trigger-left">
+                            <span>📅</span>
+                            <span id="weekComboboxLabel">Seleccionar semanas...</span>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span class="pill-badge-count" id="weekComboboxCount">0</span>
+                            <span class="week-combobox-chevron">▼</span>
+                        </div>
+                    </div>
+
+                    <div class="week-combobox-dropdown" id="weekComboboxDropdown" onclick="event.stopPropagation()">
+                        <div class="week-combobox-search-bar">
+                            <input type="text" id="weekSearchInput" class="week-combobox-search-input"
+                                placeholder="Buscar semana o fecha (ej. 202644 o 26/10)..."
+                                oninput="filtrarOpcionesSemanaCombobox()">
+                            <div class="week-combobox-actions">
+                                <button type="button" class="week-combo-action-btn"
+                                    onclick="seleccionarFiltroRapidoSemana('all')">✓ Todas</button>
+                                <button type="button" class="week-combo-action-btn"
+                                    onclick="seleccionarFiltroRapidoSemana('last4')">Últimas 4</button>
+                                <button type="button" class="week-combo-action-btn"
+                                    onclick="seleccionarFiltroRapidoSemana('latest')">Última</button>
+                            </div>
+                        </div>
+                        <div class="week-combobox-list" id="weekComboboxList"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="selection-summary-bar">
+                <span id="selectedWeeksSummary">Cargando filtros...</span>
+            </div>
+        </section>
+
+        <!-- KPIs COMPARATIVOS -->
+        <section class="kpi-grid">
+            <div class="kpi-card" style="--kpi-accent: var(--chart-slate-navy);">
+                <span class="kpi-label">Producción Real Total (T_Produccion)</span>
+                <div class="kpi-value" id="kpiRealVal">0.00<span class="kpi-unit">kg</span></div>
+                <div class="kpi-footer">
+                    <span id="kpiSkusCount">0 SKUs activos</span>
+                    <span class="badge-kpi badge-success">Ejecutado</span>
+                </div>
+            </div>
+
+            <div class="kpi-card" style="--kpi-accent: var(--chart-cerulean-slate);">
+                <span class="kpi-label">Vs Proyección Comercial (T_DemandaPy)</span>
+                <div class="kpi-value" id="kpiPctComercial">0.0<span class="kpi-unit">%</span></div>
+                <div class="kpi-footer">
+                    <span id="kpiDifComercial">Dif: 0.00 kg</span>
+                    <span id="kpiPlanComercial" class="badge-kpi">Py: 0.00 kg</span>
+                </div>
+            </div>
+
+            <div class="kpi-card" style="--kpi-accent: var(--isg-slate-med);">
+                <span class="kpi-label">Vs Pedido Distribución (T_Distribucion)</span>
+                <div class="kpi-value" id="kpiPctDistribucion">0.0<span class="kpi-unit">%</span></div>
+                <div class="kpi-footer">
+                    <span id="kpiDifDistribucion">Dif: 0.00 kg</span>
+                    <span id="kpiPlanDistribucion" class="badge-kpi">Dist: 0.00 kg</span>
+                </div>
+            </div>
+
+            <div class="kpi-card" style="--kpi-accent: var(--isg-slate-cool);">
+                <span class="kpi-label">Vs Programa Producción (T_ResProd_Py_DB)</span>
+                <div class="kpi-value" id="kpiPctPrograma">0.0<span class="kpi-unit">%</span></div>
+                <div class="kpi-footer">
+                    <span id="kpiDifPrograma">Dif: 0.00 kg</span>
+                    <span id="kpiPlanPrograma" class="badge-kpi">Prog: 0.00 kg</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- GRÁFICO COMPARATIVO POR SEMANA (BARRAS CON ETIQUETAS) -->
+        <section class="chart-card">
+            <div class="chart-top-bar">
+                <div class="chart-title">Comparativo Semanal: Real vs Planes de Demanda, Distribución y Programa</div>
+
+                <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                    <!-- Filtro de Semanas exclusivo del Gráfico (Preselección: Últimas 8 semanas) -->
+                    <div class="week-combobox-wrapper" id="chartWeekComboboxWrapper"
+                        style="min-width: 310px; max-width: 390px;">
+                        <div class="week-combobox-trigger" style="padding: 6px 12px; font-size: 0.8rem;"
+                            onclick="toggleChartWeekDropdown(event)">
+                            <div class="week-combobox-trigger-left">
+                                <span>📅</span>
+                                <span id="chartWeekComboboxLabel">Últimas 8 semanas...</span>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                <span class="pill-badge-count" id="chartWeekComboboxCount">0</span>
+                                <span class="week-combobox-chevron">▼</span>
+                            </div>
+                        </div>
+
+                        <div class="week-combobox-dropdown" id="chartWeekComboboxDropdown"
+                            onclick="event.stopPropagation()">
+                            <div class="week-combobox-search-bar">
+                                <input type="text" id="chartWeekSearchInput" class="week-combobox-search-input"
+                                    placeholder="Buscar semana o fecha en gráfico..."
+                                    oninput="filtrarOpcionesSemanaGraficoCombobox()">
+                                <div class="week-combobox-actions">
+                                    <button type="button" class="week-combo-action-btn"
+                                        onclick="seleccionarFiltroRapidoSemanaGrafico('last8')">Últimas 8</button>
+                                    <button type="button" class="week-combo-action-btn"
+                                        onclick="seleccionarFiltroRapidoSemanaGrafico('last4')">Últimas 4</button>
+                                    <button type="button" class="week-combo-action-btn"
+                                        onclick="seleccionarFiltroRapidoSemanaGrafico('latest')">Última</button>
+                                    <button type="button" class="week-combo-action-btn"
+                                        onclick="seleccionarFiltroRapidoSemanaGrafico('all')">✓ Todas</button>
+                                </div>
+                            </div>
+                            <div class="week-combobox-list" id="chartWeekComboboxList"></div>
+                        </div>
+                    </div>
+
+                    <div
+                        style="display:flex; gap:4px; align-items:center; background:#E5E9F0; padding:3px 4px; border-radius:8px; border: 1px solid var(--border-ui);">
+                        <button class="filter-quick-btn active" id="btnUnitTn" style="padding:3px 8px; font-size:0.75rem;"
+                            onclick="cambiarUnidadGrafico('Tn')">Tn</button>
+                        <button class="filter-quick-btn" id="btnUnitKg" style="padding:3px 8px; font-size:0.75rem;"
+                            onclick="cambiarUnidadGrafico('Kg')">Kg</button>
+                    </div>
+                </div>
+            </div>
+            <div style="height:430px; margin-top:14px;">
+                <canvas id="chartComparativo"></canvas>
+            </div>
+        </section>
+
+        <!-- MATRIZ DETALLADA JERÁRQUICA POR SEMANA, SUBPLANTA, CODIGOCORTO Y NOMBRE -->
+        <section class="matrix-card">
+            <div class="matrix-header-top">
+                <div class="matrix-header-title" id="matrixHeaderTitle">
+                    📊 Matriz Comparativa por Jerarquía
+                </div>
+                <div class="matrix-hierarchy-pill">
+                    <span>📅</span>
+                    <span>Jerarquía: <b>Semana ➔ SubPlanta ➔ CódigoCorto - Nombre</b></span>
+                </div>
+            </div>
+
+            <div class="matrix-toolbar">
+                <div class="search-box">
+                    <span>🔍</span>
+                    <input type="text" id="searchMatriz" placeholder="Buscar Semana, SubPlanta, CódigoCorto o Nombre..."
+                        oninput="filtrarMatriz()">
+                </div>
+                <div style="display:flex; gap:8px;" id="treeActionButtons">
+                    <button class="btn" style="padding:6px 12px; font-size:0.78rem;"
+                        onclick="toggleExpandirTodo(true)">⊞ Expandir Todo</button>
+                    <button class="btn" style="padding:6px 12px; font-size:0.78rem;"
+                        onclick="toggleExpandirTodo(false)">⊟ Contraer Todo</button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="matrix-table" id="tbMatriz">
+                    <thead id="theadMatriz"></thead>
+                    <tbody id="tbodyMatriz">
+                        <tr>
+                            <td colspan="8" style="text-align:center; padding:30px; color:var(--text-muted);">
+                                Cargando información de las 4 tablas...
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tfoot id="tfootMatriz"></tfoot>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <!-- TOAST -->
+    <div id="toastNotification" class="toast-notification">
+        <span id="toastIcon">ℹ️</span>
+        <span id="toastMsg">Mensaje</span>
+    </div>
+
+    <script>
+        // =========================================================================
+        // 🎨 PALETA DEL TEMA (tema_colores_industrial_slate_blue.json)
+        // =========================================================================
+        const THEME_SLATE_BLUE = {
+            comparativoCuatroSeries: [
+                { serie: 1, label: 'Producción Real', backgroundColor: 'rgba(44, 66, 87, 0.92)', borderColor: '#1E2F3F', hoverBackgroundColor: '#1E2F3F' },
+                { serie: 2, label: 'Proyección Comercial', backgroundColor: 'rgba(72, 111, 145, 0.88)', borderColor: '#365773', hoverBackgroundColor: '#365773' },
+                { serie: 3, label: 'Pedido Distribución', backgroundColor: 'rgba(93, 109, 126, 0.88)', borderColor: '#465360', hoverBackgroundColor: '#465360' },
+                { serie: 4, label: 'Prog. Producción', backgroundColor: 'rgba(133, 146, 158, 0.85)', borderColor: '#68737D', hoverBackgroundColor: '#68737D' }
+            ]
+        };
+
+        // =========================================================================
+        // ⚙️ CONFIGURACIÓN DE CONEXIÓN HÍBRIDA A LA API .NET (Regla Obligatoria)
+        // =========================================================================
+        const APP_CONFIG = {
+            servidor: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.servidor)
+                ? GLOBAL_CONFIG.servidor
+                : "RAEVSALL001",
+            puertos: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.puertos)
+                ? GLOBAL_CONFIG.puertos
+                : [8080, 5000],
+            controllerPath: "/api/CumplimientoPtcTablas",
+            timeoutMs: 30000
+        };
+
+        function generarBasesApi() {
+            if (typeof generarBasesApiGlobal === 'function') {
+                return generarBasesApiGlobal();
+            }
+            const bases = [];
+            for (const puerto of APP_CONFIG.puertos) {
+                bases.push(`http://${APP_CONFIG.servidor}:${puerto}`);
+            }
+            return bases;
+        }
+
+        let apiBaseActiva = null;
+        let cachedInitialPayload = null;
+
+        // Fetch con AbortController y timeout configurable
+        async function fetchConTimeout(url, timeoutMs = 10000) {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+                const res = await fetch(url, { signal: controller.signal });
+                clearTimeout(id);
+                return res;
+            } catch (err) {
+                clearTimeout(id);
+                throw err;
+            }
+        }
+
+        // Detección automática del host API activo (con fallback a ping raíz)
+        async function detectarServidorApi() {
+            const bases = generarBasesApi();
+            for (const base of bases) {
+                try {
+                    const res = await fetchConTimeout(`${base}${APP_CONFIG.controllerPath}`, 3500);
+                    if (res.ok) {
+                        try { cachedInitialPayload = await res.json(); } catch (_) { }
+                        return base;
+                    }
+                } catch (e) {
+                    try {
+                        const pingRes = await fetchConTimeout(`${base}/`, 2500);
+                        if (pingRes.ok) return base;
+                    } catch (errPing) { }
+                }
+            }
+            return null;
+        }
+
+        // =========================================================================
+        // 📅 CÁLCULO ISO-8601 DE SEMANAS (Lunes a Domingo - Regla Obligatoria)
+        // =========================================================================
+        function obtenerRangoSemanaISO(semanaNum) {
+            const sStr = String(semanaNum);
+            if (sStr.length < 5) return `Sem. ${semanaNum}`;
+            const anio = parseInt(sStr.substring(0, 4), 10);
+            const sem = parseInt(sStr.substring(4), 10);
+            if (!anio || !sem || sem < 1 || sem > 53) return `Sem. ${semanaNum}`;
+
+            // El 4 de enero siempre pertenece a la semana ISO 1
+            const simple = new Date(Date.UTC(anio, 0, 4));
+            const dayOfWeek = (simple.getUTCDay() + 6) % 7; // 0 = Lunes, 6 = Domingo
+            const isoWeek1Monday = new Date(simple);
+            isoWeek1Monday.setUTCDate(simple.getUTCDate() - dayOfWeek + (sem - 1) * 7);
+
+            const sunday = new Date(isoWeek1Monday);
+            sunday.setUTCDate(isoWeek1Monday.getUTCDate() + 6);
+
+            const fmt = (d) => `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
+            return `Sem. ${String(sem).padStart(2, '0')} (${fmt(isoWeek1Monday)} al ${fmt(sunday)})`;
+        }
+
+        // =========================================================================
+        // 🗂️ ESTADO GLOBAL DEL DASHBOARD
+        // =========================================================================
+        let consolidatedRows = []; // Registros unificados por (Semana, SubPlanta, CodigoCorto)
+        let selectedYears = new Set();
+        let selectedSubPlantas = new Set();
+        let selectedWeeks = new Set();
+        let selectedChartWeeks = new Set(); // Selección de semanas para el gráfico (preselección: últimas 8 semanas)
+        let aniosDisponibles = [];
+        let subPlantasDisponibles = [];
+        let semanasDisponibles = [];
+
+        let chartInstance = null;
+        let unidadGrafico = 'Tn';
+        let expandedNodes = new Set();
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            initChartDefaults();
+            document.addEventListener('click', (e) => {
+                const wrapper = document.getElementById('weekComboboxWrapper');
+                if (wrapper && !wrapper.contains(e.target)) {
+                    wrapper.classList.remove('open');
+                }
+                const chartWrapper = document.getElementById('chartWeekComboboxWrapper');
+                if (chartWrapper && !chartWrapper.contains(e.target)) {
+                    chartWrapper.classList.remove('open');
+                }
+            });
+            await inicializarDashboard();
+        });
+
+        function initChartDefaults() {
+            if (typeof ChartDataLabels !== 'undefined') {
+                Chart.register(ChartDataLabels);
+            }
+            Chart.defaults.color = '#5D6D7E';
+            Chart.defaults.font.family = "'Inter', sans-serif";
+        }
+
+        async function inicializarDashboard() {
+            const statusBadge = document.getElementById('apiStatusBadge');
+            const statusText = document.getElementById('apiStatusText');
+            statusText.textContent = `Buscando ${APP_CONFIG.servidor}...`;
+            document.querySelector('.status-dot').className = 'status-dot loading';
+
+            try {
+                apiBaseActiva = await detectarServidorApi();
+
+                if (!apiBaseActiva) {
+                    throw new Error(`No se pudo conectar a ${APP_CONFIG.servidor} en puertos ${APP_CONFIG.puertos.join('/')}`);
+                }
+
+                const urlObj = new URL(apiBaseActiva);
+                statusBadge.innerHTML = `<span class="status-dot online"></span><span>En Línea (${urlObj.host})</span>`;
+                mostrarToast(`Conectado al servidor en ${urlObj.host}`, '✅');
+                await recargarDatosAPI(false);
+            } catch (err) {
+                console.error("Error al inicializar:", err);
+                statusBadge.innerHTML = `<span class="status-dot error"></span><span style="color:#EF4444">Sin Conexión</span>`;
+                mostrarToast(`Error de conexión: ${err.message}`, '⚠️');
+            }
+        }
+
+        // =========================================================================
+        // 🔄 LECTURA Y CONSOLIDACIÓN EN JS DE LAS 4 TABLAS CRUDAS DEL EXCEL
+        // =========================================================================
+        function extraerCampo(obj, ...claves) {
+            if (!obj) return null;
+            for (const k of claves) {
+                if (obj[k] !== undefined && obj[k] !== null) return obj[k];
+            }
+            const objKeys = Object.keys(obj);
+            for (const k of claves) {
+                const kLower = String(k).toLowerCase();
+                const foundKey = objKeys.find(ok => ok.toLowerCase() === kLower);
+                if (foundKey !== undefined && obj[foundKey] !== undefined && obj[foundKey] !== null) {
+                    return obj[foundKey];
+                }
+            }
+            return null;
+        }
+
+        function normalizarCodigoCorto(valor) {
+            if (valor === null || valor === undefined) return '';
+            const raw = String(valor).trim();
+            if (!raw) return '';
+            // Si es numérico (ej. 5408 o "5408"), asegurar formato estándar de 5 dígitos ("05408")
+            if (/^\d+$/.test(raw) && raw.length < 5) {
+                return raw.padStart(5, '0');
+            }
+            return raw;
+        }
+
+        async function recargarDatosAPI(forzar = false) {
+            mostrarToast("Leyendo T_CodigoRelacion, T_Produccion, T_DemandaPy, T_ResProd_Py_DB y T_Distribucion...", "⏳");
+            try {
+                let payload = null;
+                if (!forzar && cachedInitialPayload) {
+                    payload = cachedInitialPayload;
+                    cachedInitialPayload = null;
+                } else {
+                    const url = `${apiBaseActiva}${APP_CONFIG.controllerPath}${forzar ? '?recargar=true' : ''}`;
+                    const res = await fetchConTimeout(url, APP_CONFIG.timeoutMs);
+                    if (!res.ok) throw new Error("Error al obtener las tablas desde la API");
+                    payload = await res.json();
+                }
+
+                const tablas = payload.tablas || payload.Tablas || payload;
+                const tProduccion = extraerCampo(tablas, 'T_Produccion', 't_Produccion', 't_produccion') || [];
+                const tDemandaPy = extraerCampo(tablas, 'T_DemandaPy', 't_DemandaPy', 't_demandapy') || [];
+                const tResProdPyDb = extraerCampo(tablas, 'T_ResProd_Py_DB', 't_ResProd_Py_DB', 't_resprod_py_db') || [];
+                const tDistribucion = extraerCampo(tablas, 'T_Distribucion', 't_Distribucion', 't_distribucion') || [];
+                let tCodigoRelacion = extraerCampo(tablas, 'T_CodigoRelacion', 't_CodigoRelacion', 't_codigorelacion') || [];
+
+                // Fallback por si el endpoint individual de T_CodigoRelacion está disponible por separado
+                if (tCodigoRelacion.length === 0) {
+                    try {
+                        const resRel = await fetchConTimeout(`${apiBaseActiva}${APP_CONFIG.controllerPath}/T_CodigoRelacion${forzar ? '?recargar=true' : ''}`, 8000);
+                        if (resRel.ok) {
+                            const dataRel = await resRel.json();
+                            if (Array.isArray(dataRel)) tCodigoRelacion = dataRel;
+                        }
+                    } catch (_) { }
+                }
+
+                procesarYConsolidarTablas(tProduccion, tDemandaPy, tDistribucion, tResProdPyDb, tCodigoRelacion);
+
+                aniosDisponibles = [...new Set(consolidatedRows.map(d => d.Anio))].filter(Boolean).sort((a, b) => a - b);
+                subPlantasDisponibles = [...new Set(consolidatedRows.map(d => d.SubPlanta))].filter(Boolean).sort();
+                semanasDisponibles = [...new Set(consolidatedRows.map(d => d.Semana))].filter(Boolean).sort((a, b) => a - b);
+
+                if (selectedYears.size === 0) aniosDisponibles.forEach(y => selectedYears.add(y));
+                if (selectedSubPlantas.size === 0) subPlantasDisponibles.forEach(sp => selectedSubPlantas.add(sp));
+                if (selectedWeeks.size === 0) semanasDisponibles.forEach(s => selectedWeeks.add(s));
+                if (selectedChartWeeks.size === 0) {
+                    semanasDisponibles.slice(-8).forEach(s => selectedChartWeeks.add(s));
+                }
+
+                // Por defecto expandir la primera SubPlanta y la última Semana
+                if (expandedNodes.size === 0) {
+                    if (subPlantasDisponibles.length > 0) expandedNodes.add(`sp_${subPlantasDisponibles[0]}`);
+                    if (semanasDisponibles.length > 0) {
+                        const ultSem = semanasDisponibles[semanasDisponibles.length - 1];
+                        expandedNodes.add(`sem_${ultSem}`);
+                        if (subPlantasDisponibles.length > 0) {
+                            expandedNodes.add(`sem_${ultSem}_sp_${subPlantasDisponibles[0]}`);
+                        }
+                    }
+                }
+
+                construirPildorasAnio();
+                construirPildorasSubPlanta();
+                construirPildorasSemana();
+                construirComboboxSemanaGrafico();
+
+                actualizarVista();
+                mostrarToast(
+                    `Cargado: Maestro(${tCodigoRelacion.length}) • Prod(${tProduccion.length}) • Dem(${tDemandaPy.length}) • Dist(${tDistribucion.length}) • Prog(${tResProdPyDb.length})`,
+                    "✅"
+                );
+            } catch (e) {
+                console.error(e);
+                mostrarToast(e.message, "❌");
+            }
+        }
+
+        function procesarYConsolidarTablas(tProduccion, tDemandaPy, tDistribucion, tResProdPyDb, tCodigoRelacion = []) {
+            // 1. Tabla maestra oficial: T_CodigoRelacion (Hoja Auxiliares)
+            //    Campo Clave: CodigoCorto | Campo Agrupador 1: Nombre | Campo Agrupador 2: SubPlanta
+            const mapaRelacionMaestro = new Map();
+
+            tCodigoRelacion.forEach(row => {
+                const rawCod = extraerCampo(row, 'CodigoCorto', 'codigoCorto', 'Codigo', 'codigo');
+                const codNorm = normalizarCodigoCorto(rawCod);
+                if (!codNorm) return;
+
+                const nomOficial = String(extraerCampo(row, 'Nombre', 'nombre', 'Descripcion', 'descripcion') ?? '').trim();
+                const spOficial = String(extraerCampo(row, 'SubPlanta', 'subPlanta', 'Subplanta', 'subplanta') ?? '').trim().toUpperCase();
+
+                const registroMaestro = {
+                    CodigoCorto: codNorm,
+                    Nombre: nomOficial,
+                    SubPlanta: spOficial
+                };
+
+                mapaRelacionMaestro.set(codNorm, registroMaestro);
+                const rawTrim = String(rawCod).trim();
+                if (rawTrim) mapaRelacionMaestro.set(rawTrim, registroMaestro);
+                if (/^\d+$/.test(codNorm)) {
+                    mapaRelacionMaestro.set(String(parseInt(codNorm, 10)), registroMaestro);
+                }
+            });
+
+            // 2. Catálogo secundario de respaldo (solo por si algún CodigoCorto no existiera en T_CodigoRelacion)
+            const catalogoFallback = new Map();
+
+            const registrarEnFallback = (lista) => {
+                lista.forEach(row => {
+                    const rawCod = extraerCampo(row, 'CodigoCorto', 'codigoCorto');
+                    const codNorm = normalizarCodigoCorto(rawCod);
+                    if (!codNorm) return;
+                    const nom = String(extraerCampo(row, 'Nombre', 'nombre') ?? '').trim();
+                    const sp = String(extraerCampo(row, 'SubPlanta', 'subPlanta') ?? '').trim().toUpperCase();
+
+                    if (!catalogoFallback.has(codNorm)) {
+                        catalogoFallback.set(codNorm, { Nombre: nom, SubPlanta: sp });
+                    } else {
+                        const actual = catalogoFallback.get(codNorm);
+                        if (!actual.Nombre && nom) actual.Nombre = nom;
+                        if (!actual.SubPlanta && sp) actual.SubPlanta = sp;
+                    }
+                });
+            };
+
+            registrarEnFallback(tProduccion);
+            registrarEnFallback(tDemandaPy);
+            registrarEnFallback(tDistribucion);
+            registrarEnFallback(tResProdPyDb);
+
+            // 3. Acumular por llave (Semana | SubPlanta | CodigoCorto) usando T_CodigoRelacion como verdad absoluta
+            const mapaConsolidado = new Map();
+
+            const acumularTabla = (lista, tipoCampo) => {
+                lista.forEach(row => {
+                    const semRaw = extraerCampo(row, 'Semana', 'semana');
+                    const sem = parseInt(semRaw, 10);
+                    if (!sem || isNaN(sem)) return;
+
+                    const rawCod = extraerCampo(row, 'CodigoCorto', 'codigoCorto');
+                    const codNorm = normalizarCodigoCorto(rawCod) || 'SIN-COD';
+
+                    // Buscar primero en T_CodigoRelacion (Auxiliares) por CodigoCorto
+                    const relOficial = mapaRelacionMaestro.get(codNorm)
+                        || (rawCod !== null && rawCod !== undefined ? mapaRelacionMaestro.get(String(rawCod).trim()) : null);
+                    const infoFallback = catalogoFallback.get(codNorm) || {};
+
+                    const cod = (relOficial && relOficial.CodigoCorto) ? relOficial.CodigoCorto : codNorm;
+
+                    // El Nombre y la SubPlanta los define prioritariamente T_CodigoRelacion
+                    let sp = (relOficial && relOficial.SubPlanta)
+                        ? relOficial.SubPlanta
+                        : (infoFallback.SubPlanta || String(extraerCampo(row, 'SubPlanta', 'subPlanta') ?? '').trim().toUpperCase());
+                    if (!sp) sp = 'DESPOSTE';
+
+                    let nom = (relOficial && relOficial.Nombre)
+                        ? relOficial.Nombre
+                        : (infoFallback.Nombre || String(extraerCampo(row, 'Nombre', 'nombre') ?? '').trim());
+                    if (!nom) nom = 'SIN NOMBRE';
+
+                    const kilos = Number(extraerCampo(row, 'Kilos', 'kilos') ?? 0) || 0;
+
+                    const sStr = String(sem);
+                    const anio = sStr.length >= 4 ? parseInt(sStr.substring(0, 4), 10) : 0;
+                    const nSem = sStr.length >= 5 ? parseInt(sStr.substring(4), 10) : 0;
+
+                    const key = `${sem}|${sp}|${cod}`;
+                    if (!mapaConsolidado.has(key)) {
+                        mapaConsolidado.set(key, {
+                            Semana: sem,
+                            Anio: anio,
+                            NSemana: nSem,
+                            SubPlanta: sp,
+                            CodigoCorto: cod,
+                            Nombre: nom,
+                            PRODUCCION_REAL: 0,
+                            PROYECCION_COMERCIAL: 0,
+                            PEDIDO_DISTRIBUCION: 0,
+                            PROG_PRODUCCION: 0
+                        });
+                    }
+
+                    const item = mapaConsolidado.get(key);
+                    item[tipoCampo] += kilos;
+                });
+            };
+
+            acumularTabla(tProduccion, 'PRODUCCION_REAL');
+            acumularTabla(tDemandaPy, 'PROYECCION_COMERCIAL');
+            acumularTabla(tDistribucion, 'PEDIDO_DISTRIBUCION');
+            acumularTabla(tResProdPyDb, 'PROG_PRODUCCION');
+
+            consolidatedRows = Array.from(mapaConsolidado.values()).sort((a, b) =>
+                a.Semana - b.Semana ||
+                a.SubPlanta.localeCompare(b.SubPlanta) ||
+                a.CodigoCorto.localeCompare(b.CodigoCorto, undefined, { numeric: true })
+            );
+        }
+
+        // =========================================================================
+        // 🎛️ PÍLDORAS DE FILTROS (AÑO, SUBPLANTA, SEMANA)
+        // =========================================================================
+        function construirPildorasAnio() {
+            const container = document.getElementById('yearsPillsContainer');
+            container.innerHTML = '';
+            aniosDisponibles.forEach(y => {
+                const count = consolidatedRows.filter(d => d.Anio === y).length;
+                const pill = document.createElement('div');
+                pill.className = `year-pill ${selectedYears.has(y) ? 'selected' : ''}`;
+                pill.innerHTML = `<span>Año ${y}</span><span class="pill-badge-count">${count} SKUs-sem</span>`;
+                pill.onclick = () => {
+                    if (selectedYears.has(y)) {
+                        if (selectedYears.size > 1) selectedYears.delete(y);
+                    } else selectedYears.add(y);
+                    construirPildorasAnio();
+                    construirPildorasSemana();
+                    construirComboboxSemanaGrafico();
+                    actualizarVista();
+                };
+                container.appendChild(pill);
+            });
+            document.getElementById('btnQuickYearAll').classList.toggle('active', selectedYears.size === aniosDisponibles.length);
+        }
+
+        function seleccionarFiltroRapidoAnio() {
+            selectedYears.clear();
+            aniosDisponibles.forEach(y => selectedYears.add(y));
+            construirPildorasAnio();
+            construirPildorasSemana();
+            construirComboboxSemanaGrafico();
+            actualizarVista();
+        }
+
+        function construirPildorasSubPlanta() {
+            const container = document.getElementById('subplantaPillsContainer');
+            container.innerHTML = '';
+            subPlantasDisponibles.forEach(sp => {
+                const skusUnicos = new Set(consolidatedRows.filter(d => d.SubPlanta === sp).map(d => d.CodigoCorto)).size;
+                const pill = document.createElement('div');
+                pill.className = `subplanta-pill ${selectedSubPlantas.has(sp) ? 'selected' : ''}`;
+                pill.innerHTML = `<span>${sp}</span><span class="pill-badge-count">${skusUnicos} SKUs</span>`;
+                pill.onclick = () => {
+                    if (selectedSubPlantas.has(sp)) {
+                        if (selectedSubPlantas.size > 1) selectedSubPlantas.delete(sp);
+                    } else selectedSubPlantas.add(sp);
+                    construirPildorasSubPlanta();
+                    actualizarVista();
+                };
+                container.appendChild(pill);
+            });
+            document.getElementById('btnQuickSpAll').classList.toggle('active-subplanta', selectedSubPlantas.size === subPlantasDisponibles.length);
+        }
+
+        function seleccionarFiltroRapidoSubPlanta() {
+            selectedSubPlantas.clear();
+            subPlantasDisponibles.forEach(sp => selectedSubPlantas.add(sp));
+            construirPildorasSubPlanta();
+            actualizarVista();
+        }
+
+        function toggleWeekDropdown(e) {
+            if (e) e.stopPropagation();
+            const wrapper = document.getElementById('weekComboboxWrapper');
+            if (!wrapper) return;
+            wrapper.classList.toggle('open');
+            if (wrapper.classList.contains('open')) {
+                const input = document.getElementById('weekSearchInput');
+                if (input) setTimeout(() => input.focus(), 40);
+            }
+        }
+
+        function construirPildorasSemana() {
+            const listContainer = document.getElementById('weekComboboxList');
+            if (!listContainer) return;
+            listContainer.innerHTML = '';
+
+            const semanasValidas = semanasDisponibles.filter(s => {
+                const anio = parseInt(String(s).substring(0, 4), 10);
+                return selectedYears.has(anio);
+            });
+
+            const filtroTexto = (document.getElementById('weekSearchInput')?.value || '').trim().toLowerCase();
+
+            // Mostrar de más reciente a más antigua en el desplegable para fácil selección
+            const semanasOrdenadasDesc = [...semanasValidas].sort((a, b) => b - a);
+
+            semanasOrdenadasDesc.forEach(s => {
+                const rangoStr = obtenerRangoSemanaISO(s);
+                const textoBusqueda = `sem ${s} ${rangoStr}`.toLowerCase();
+                if (filtroTexto && !textoBusqueda.includes(filtroTexto)) return;
+
+                const isSelected = selectedWeeks.has(s);
+                const item = document.createElement('label');
+                item.className = `week-combobox-item ${isSelected ? 'checked' : ''}`;
+                item.innerHTML = `
+                    <div class="week-combobox-item-left">
+                        <input type="checkbox" ${isSelected ? 'checked' : ''}>
+                        <span>Sem ${s}</span>
+                    </div>
+                    <span class="week-combobox-range">${rangoStr}</span>
+                `;
+                const checkbox = item.querySelector('input[type="checkbox"]');
+                checkbox.addEventListener('change', () => {
+                    if (checkbox.checked) {
+                        selectedWeeks.add(s);
+                    } else {
+                        if (selectedWeeks.size > 1) {
+                            selectedWeeks.delete(s);
+                        } else {
+                            checkbox.checked = true;
+                            return;
+                        }
+                    }
+                    construirPildorasSemana();
+                    actualizarVista();
+                });
+                listContainer.appendChild(item);
+            });
+
+            // Actualizar texto resumen del combobox
+            const seleccionadasEnAnio = semanasValidas.filter(s => selectedWeeks.has(s));
+            const labelEl = document.getElementById('weekComboboxLabel');
+            const countEl = document.getElementById('weekComboboxCount');
+
+            if (countEl) countEl.textContent = `${seleccionadasEnAnio.length} / ${semanasValidas.length}`;
+
+            if (labelEl) {
+                if (seleccionadasEnAnio.length === 0) {
+                    labelEl.textContent = 'Ninguna semana seleccionada';
+                } else if (seleccionadasEnAnio.length === semanasValidas.length) {
+                    labelEl.textContent = `Todas las semanas (${semanasValidas.length})`;
+                } else if (seleccionadasEnAnio.length === 1) {
+                    const u = seleccionadasEnAnio[0];
+                    labelEl.textContent = `Sem ${u} — ${obtenerRangoSemanaISO(u)}`;
+                } else if (seleccionadasEnAnio.length <= 3) {
+                    labelEl.textContent = seleccionadasEnAnio.map(s => `Sem ${s}`).join(', ');
+                } else {
+                    const ultimas = seleccionadasEnAnio.slice(-2).map(s => `Sem ${s}`).join(', ');
+                    labelEl.textContent = `${seleccionadasEnAnio.length} semanas seleccionadas (...${ultimas})`;
+                }
+            }
+
+            const ultimas4 = semanasValidas.slice(-4);
+            const esUltimas4 = semanasValidas.length >= 4
+                && seleccionadasEnAnio.length === ultimas4.length
+                && ultimas4.every(s => selectedWeeks.has(s));
+
+            document.getElementById('btnQuickAll')?.classList.toggle('active-semana', seleccionadasEnAnio.length === semanasValidas.length);
+            document.getElementById('btnQuickLast4')?.classList.toggle('active-semana', esUltimas4);
+            document.getElementById('btnQuickLatest')?.classList.toggle(
+                'active-semana',
+                seleccionadasEnAnio.length === 1 && semanasValidas.length > 0 && selectedWeeks.has(semanasValidas[semanasValidas.length - 1])
+            );
+        }
+
+        function filtrarOpcionesSemanaCombobox() {
+            construirPildorasSemana();
+        }
+
+        function seleccionarFiltroRapidoSemana(modo) {
+            selectedWeeks.clear();
+            const semanasValidas = semanasDisponibles.filter(s => {
+                const anio = parseInt(String(s).substring(0, 4), 10);
+                return selectedYears.has(anio);
+            });
+
+            if (modo === 'all') {
+                semanasValidas.forEach(s => selectedWeeks.add(s));
+            } else if (modo === 'last4') {
+                semanasValidas.slice(-4).forEach(s => selectedWeeks.add(s));
+            } else if (modo === 'latest') {
+                if (semanasValidas.length > 0) selectedWeeks.add(semanasValidas[semanasValidas.length - 1]);
+            }
+            construirPildorasSemana();
+            actualizarVista();
+        }
+
+        // =========================================================================
+        // 📅 COMBOBOX MULTI-SELECCIÓN DE SEMANAS PARA EL GRÁFICO (ÚLTIMAS 8 SEMANAS)
+        // =========================================================================
+        function toggleChartWeekDropdown(e) {
+            if (e) e.stopPropagation();
+            const wrapper = document.getElementById('chartWeekComboboxWrapper');
+            if (!wrapper) return;
+            wrapper.classList.toggle('open');
+            if (wrapper.classList.contains('open')) {
+                const input = document.getElementById('chartWeekSearchInput');
+                if (input) setTimeout(() => input.focus(), 40);
+            }
+        }
+
+        function construirComboboxSemanaGrafico() {
+            const listContainer = document.getElementById('chartWeekComboboxList');
+            if (!listContainer) return;
+            listContainer.innerHTML = '';
+
+            const semanasValidas = semanasDisponibles.filter(s => {
+                const anio = parseInt(String(s).substring(0, 4), 10);
+                return selectedYears.has(anio);
+            });
+
+            // Si al cambiar de año ninguna semana del gráfico coincide con el año actual, preseleccionar las últimas 8
+            if (semanasValidas.length > 0 && !semanasValidas.some(s => selectedChartWeeks.has(s))) {
+                semanasValidas.slice(-8).forEach(s => selectedChartWeeks.add(s));
+            }
+
+            const filtroTexto = (document.getElementById('chartWeekSearchInput')?.value || '').trim().toLowerCase();
+            const semanasOrdenadasDesc = [...semanasValidas].sort((a, b) => b - a);
+
+            semanasOrdenadasDesc.forEach(s => {
+                const rangoStr = obtenerRangoSemanaISO(s);
+                const textoBusqueda = `sem ${s} ${rangoStr}`.toLowerCase();
+                if (filtroTexto && !textoBusqueda.includes(filtroTexto)) return;
+
+                const isSelected = selectedChartWeeks.has(s);
+                const item = document.createElement('label');
+                item.className = `week-combobox-item ${isSelected ? 'checked' : ''}`;
+                item.innerHTML = `
+                    <div class="week-combobox-item-left">
+                        <input type="checkbox" ${isSelected ? 'checked' : ''}>
+                        <span>Sem ${s}</span>
+                    </div>
+                    <span class="week-combobox-range">${rangoStr}</span>
+                `;
+                const checkbox = item.querySelector('input[type="checkbox"]');
+                checkbox.addEventListener('change', () => {
+                    if (checkbox.checked) {
+                        selectedChartWeeks.add(s);
+                    } else {
+                        if (selectedChartWeeks.size > 1) {
+                            selectedChartWeeks.delete(s);
+                        } else {
+                            checkbox.checked = true;
+                            return;
+                        }
+                    }
+                    construirComboboxSemanaGrafico();
+                    renderizarGrafico(obtenerFilasFiltradasGrafico());
+                });
+                listContainer.appendChild(item);
+            });
+
+            const seleccionadasEnAnio = semanasValidas.filter(s => selectedChartWeeks.has(s));
+            const labelEl = document.getElementById('chartWeekComboboxLabel');
+            const countEl = document.getElementById('chartWeekComboboxCount');
+
+            if (countEl) countEl.textContent = `${seleccionadasEnAnio.length} / ${semanasValidas.length}`;
+
+            const ultimas8 = semanasValidas.slice(-8);
+            const esUltimas8 = semanasValidas.length > 0
+                && seleccionadasEnAnio.length === ultimas8.length
+                && ultimas8.every(s => selectedChartWeeks.has(s));
+
+            if (labelEl) {
+                if (seleccionadasEnAnio.length === 0) {
+                    labelEl.textContent = 'Ninguna semana';
+                } else if (esUltimas8 && semanasValidas.length > 1) {
+                    labelEl.textContent = `Últimas ${ultimas8.length} semanas (${ultimas8[0]} - ${ultimas8[ultimas8.length - 1]})`;
+                } else if (seleccionadasEnAnio.length === semanasValidas.length) {
+                    labelEl.textContent = `Todas las semanas (${semanasValidas.length})`;
+                } else if (seleccionadasEnAnio.length === 1) {
+                    const u = seleccionadasEnAnio[0];
+                    labelEl.textContent = `Sem ${u} — ${obtenerRangoSemanaISO(u)}`;
+                } else if (seleccionadasEnAnio.length <= 3) {
+                    labelEl.textContent = seleccionadasEnAnio.map(s => `Sem ${s}`).join(', ');
+                } else {
+                    const ultimas = seleccionadasEnAnio.slice(-2).map(s => `Sem ${s}`).join(', ');
+                    labelEl.textContent = `${seleccionadasEnAnio.length} semanas (...${ultimas})`;
+                }
+            }
+        }
+
+        function filtrarOpcionesSemanaGraficoCombobox() {
+            construirComboboxSemanaGrafico();
+        }
+
+        function seleccionarFiltroRapidoSemanaGrafico(modo) {
+            selectedChartWeeks.clear();
+            const semanasValidas = semanasDisponibles.filter(s => {
+                const anio = parseInt(String(s).substring(0, 4), 10);
+                return selectedYears.has(anio);
+            });
+
+            if (modo === 'last8') {
+                semanasValidas.slice(-8).forEach(s => selectedChartWeeks.add(s));
+            } else if (modo === 'last4') {
+                semanasValidas.slice(-4).forEach(s => selectedChartWeeks.add(s));
+            } else if (modo === 'latest') {
+                if (semanasValidas.length > 0) selectedChartWeeks.add(semanasValidas[semanasValidas.length - 1]);
+            } else if (modo === 'all') {
+                semanasValidas.forEach(s => selectedChartWeeks.add(s));
+            }
+            construirComboboxSemanaGrafico();
+            renderizarGrafico(obtenerFilasFiltradasGrafico());
+        }
+
+        function obtenerFilasFiltradasGrafico() {
+            return consolidatedRows.filter(d =>
+                selectedYears.has(d.Anio) &&
+                selectedSubPlantas.has(d.SubPlanta) &&
+                selectedChartWeeks.has(d.Semana)
+            );
+        }
+
+        function obtenerFilasFiltradas() {
+            return consolidatedRows.filter(d =>
+                selectedYears.has(d.Anio) &&
+                selectedSubPlantas.has(d.SubPlanta) &&
+                selectedWeeks.has(d.Semana)
+            );
+        }
+
+        // =========================================================================
+        // 🧮 FORMATOS Y CÁLCULO DE KPIS
+        // =========================================================================
+        function formatKg(n) {
+            return (n || 0).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function formatKgMatriz(n) {
+            if (n === null || n === undefined || isNaN(n)) return '0';
+            return Math.round(n).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        }
+
+        function calcPct(real, meta) {
+            if (!meta || meta === 0) return 0;
+            return (real / meta) * 100;
+        }
+
+        function badgeHtml(pct) {
+            if (pct === null || pct === undefined || isNaN(pct) || !isFinite(pct)) {
+                return `<span class="badge-kpi badge-low">0.0%</span>`;
+            }
+            let cls = 'badge-good';
+            if (pct < 85) cls = 'badge-low';
+            else if (pct < 98) cls = 'badge-mid';
+            return `<span class="badge-kpi ${cls}">${pct.toFixed(1)}%</span>`;
+        }
+
+        function actualizarVista() {
+            const filtrados = obtenerFilasFiltradas();
+            const skusDistintos = new Set(filtrados.map(d => d.CodigoCorto)).size;
+
+            const summary = document.getElementById('selectedWeeksSummary');
+            summary.innerHTML = `Mostrando: Años <b>[${Array.from(selectedYears).join(', ')}]</b> • SubPlantas <b>[${selectedSubPlantas.size} seleccionadas]</b> • Semanas <b>[${selectedWeeks.size} seleccionadas]</b> • SKUs Únicos: <b>${skusDistintos}</b>`;
+
+            actualizarKPIs(filtrados, skusDistintos);
+            renderizarGrafico(obtenerFilasFiltradasGrafico());
+            renderizarMatriz(filtrados);
+        }
+
+        function actualizarKPIs(data, skusDistintos) {
+            let real = 0, com = 0, dist = 0, prog = 0;
+
+            data.forEach(d => {
+                real += d.PRODUCCION_REAL;
+                com += d.PROYECCION_COMERCIAL;
+                dist += d.PEDIDO_DISTRIBUCION;
+                prog += d.PROG_PRODUCCION;
+            });
+
+            document.getElementById('kpiRealVal').innerHTML = `${formatKg(real)}<span class="kpi-unit">kg</span>`;
+            document.getElementById('kpiSkusCount').textContent = `${skusDistintos} SKUs con movimiento`;
+
+            const pCom = calcPct(real, com);
+            const pDist = calcPct(real, dist);
+            const pProg = calcPct(real, prog);
+
+            document.getElementById('kpiPctComercial').innerHTML = `${pCom.toFixed(1)}<span class="kpi-unit">%</span>`;
+            document.getElementById('kpiPlanComercial').textContent = `Py: ${formatKg(com)} kg`;
+            document.getElementById('kpiDifComercial').textContent = `Dif: ${formatKg(real - com)} kg`;
+            document.getElementById('kpiDifComercial').className = real >= com ? 'val-positive' : 'val-negative';
+
+            document.getElementById('kpiPctDistribucion').innerHTML = `${pDist.toFixed(1)}<span class="kpi-unit">%</span>`;
+            document.getElementById('kpiPlanDistribucion').textContent = `Dist: ${formatKg(dist)} kg`;
+            document.getElementById('kpiDifDistribucion').textContent = `Dif: ${formatKg(real - dist)} kg`;
+            document.getElementById('kpiDifDistribucion').className = real >= dist ? 'val-positive' : 'val-negative';
+
+            document.getElementById('kpiPctPrograma').innerHTML = `${pProg.toFixed(1)}<span class="kpi-unit">%</span>`;
+            document.getElementById('kpiPlanPrograma').textContent = `Prog: ${formatKg(prog)} kg`;
+            document.getElementById('kpiDifPrograma').textContent = `Dif: ${formatKg(real - prog)} kg`;
+            document.getElementById('kpiDifPrograma').className = real >= prog ? 'val-positive' : 'val-negative';
+        }
+
+        function cambiarUnidadGrafico(u) {
+            unidadGrafico = u;
+            document.getElementById('btnUnitTn').classList.toggle('active', u === 'Tn');
+            document.getElementById('btnUnitKg').classList.toggle('active', u === 'Kg');
+            renderizarGrafico(obtenerFilasFiltradasGrafico());
+        }
+
+        // =========================================================================
+        // 📊 RENDERIZADO DEL GRÁFICO DE BARRAS (TEMA SLATE BLUE & PLOMO)
+        // =========================================================================
+        function renderizarGrafico(data) {
+            const ctx = document.getElementById('chartComparativo').getContext('2d');
+            if (chartInstance) chartInstance.destroy();
+
+            const semanas = [...new Set(data.map(d => d.Semana))].sort((a, b) => a - b);
+            const factor = unidadGrafico === 'Tn' ? 1000 : 1;
+
+            const dReal = [], dCom = [], dDist = [], dProg = [];
+
+            semanas.forEach(s => {
+                const sub = data.filter(d => d.Semana === s);
+                dReal.push(Math.round(sub.reduce((acc, c) => acc + c.PRODUCCION_REAL, 0) / factor));
+                dCom.push(Math.round(sub.reduce((acc, c) => acc + c.PROYECCION_COMERCIAL, 0) / factor));
+                dDist.push(Math.round(sub.reduce((acc, c) => acc + c.PEDIDO_DISTRIBUCION, 0) / factor));
+                dProg.push(Math.round(sub.reduce((acc, c) => acc + c.PROG_PRODUCCION, 0) / factor));
+            });
+
+            const sColors = THEME_SLATE_BLUE.comparativoCuatroSeries;
+
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: semanas.map(s => obtenerRangoSemanaISO(s)),
+                    datasets: [
+                        {
+                            label: 'Producción Real (T_Produccion)',
+                            data: dReal,
+                            backgroundColor: sColors[0].backgroundColor,
+                            borderColor: sColors[0].borderColor,
+                            hoverBackgroundColor: sColors[0].hoverBackgroundColor,
+                            borderWidth: 1,
+                            borderRadius: 4
+                        },
+                        {
+                            label: 'Proyección Comercial (T_DemandaPy)',
+                            data: dCom,
+                            backgroundColor: sColors[1].backgroundColor,
+                            borderColor: sColors[1].borderColor,
+                            hoverBackgroundColor: sColors[1].hoverBackgroundColor,
+                            borderWidth: 1,
+                            borderRadius: 4
+                        },
+                        {
+                            label: 'Pedido Distribución (T_Distribucion)',
+                            data: dDist,
+                            backgroundColor: sColors[2].backgroundColor,
+                            borderColor: sColors[2].borderColor,
+                            hoverBackgroundColor: sColors[2].hoverBackgroundColor,
+                            borderWidth: 1,
+                            borderRadius: 4
+                        },
+                        {
+                            label: 'Prog. Producción (T_ResProd_Py_DB)',
+                            data: dProg,
+                            backgroundColor: sColors[3].backgroundColor,
+                            borderColor: sColors[3].borderColor,
+                            hoverBackgroundColor: sColors[3].hoverBackgroundColor,
+                            borderWidth: 1,
+                            borderRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: {
+                        padding: { top: 36, bottom: 10 }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                boxWidth: 14,
+                                font: { weight: 600, size: 11 },
+                                color: '#2E2A2F'
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#1C2833',
+                            titleColor: '#F4D03F',
+                            bodyColor: '#FFFFFF',
+                            borderColor: '#34495E',
+                            borderWidth: 1,
+                            padding: 10,
+                            callbacks: {
+                                label: ctx => ` ${ctx.dataset.label}: ${ctx.raw.toLocaleString('es-PE')} ${unidadGrafico}`
+                            }
+                        },
+                        datalabels: {
+                            display: true,
+                            anchor: 'end',
+                            align: 'top',
+                            offset: 2,
+                            color: '#2E2A2F',
+                            font: {
+                                family: "'Inter', sans-serif",
+                                weight: '700',
+                                size: 9.5
+                            },
+                            formatter: val => {
+                                if (!val || val === 0) return '';
+                                if (unidadGrafico === 'Kg' && val >= 1000) {
+                                    return (val / 1000).toFixed(1) + 'k';
+                                }
+                                return Number(val).toLocaleString('es-PE');
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { weight: 600, size: 10.5 }, color: '#5D6D7E' }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#E2E8F0' },
+                            ticks: { callback: v => `${v.toLocaleString('es-PE')} ${unidadGrafico}`, color: '#5D6D7E' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // =========================================================================
+        // 📋 MATRIZ JERÁRQUICA: SEMANA ➔ SUBPLANTA ➔ CODIGOCORTO Y NOMBRE (TONOS CLAROS)
+        // =========================================================================
+        function renderizarMatriz(data) {
+            const thead = document.getElementById('theadMatriz');
+            const tbody = document.getElementById('tbodyMatriz');
+            const tfoot = document.getElementById('tfootMatriz');
+            tbody.innerHTML = '';
+            tfoot.innerHTML = '';
+
+            const term = (document.getElementById('searchMatriz').value || '').trim().toUpperCase();
+
+            // Filtrado por texto de búsqueda
+            const dataBuscada = term.length === 0 ? data : data.filter(d =>
+                String(d.Semana).includes(term) ||
+                d.SubPlanta.toUpperCase().includes(term) ||
+                d.CodigoCorto.toUpperCase().includes(term) ||
+                d.Nombre.toUpperCase().includes(term)
+            );
+
+            thead.innerHTML = `
+                <tr>
+                    <th style="min-width:410px;">Semana / SubPlanta / CódigoCorto - Nombre</th>
+                    <th class="num-col" style="color:#1E2F3F;">Prod. Real (kg)</th>
+                    <th class="num-col col-group-com-start">Proy. Comercial (kg)</th>
+                    <th class="num-col">% Cumpl. Com.</th>
+                    <th class="num-col col-group-dist-start">Ped. Distribución (kg)</th>
+                    <th class="num-col">% Cumpl. Dist.</th>
+                    <th class="num-col col-group-prog-start">Prog. Producción (kg)</th>
+                    <th class="num-col">% Cumpl. Prog.</th>
+                </tr>
+            `;
+
+            if (dataBuscada.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:30px; color:var(--text-muted);">No hay datos que coincidan con los filtros seleccionados.</td></tr>';
+                return;
+            }
+
+            // Totales Globales para el Footer
+            let totalReal = 0, totalCom = 0, totalDist = 0, totalProg = 0;
+            dataBuscada.forEach(d => {
+                totalReal += d.PRODUCCION_REAL;
+                totalCom += d.PROYECCION_COMERCIAL;
+                totalDist += d.PEDIDO_DISTRIBUCION;
+                totalProg += d.PROG_PRODUCCION;
+            });
+
+            renderizarJerarquiaSemanaSubPlantaSku(dataBuscada, tbody, term.length > 0);
+            renderizarFooterTotal(tfoot, totalReal, totalCom, totalDist, totalProg);
+        }
+
+        // Jerarquía de 3 niveles: Semana ➔ SubPlanta ➔ (CodigoCorto + Nombre)
+        function renderizarJerarquiaSemanaSubPlantaSku(data, tbody, forceExpand) {
+            const mapSem = new Map();
+            data.forEach(d => {
+                if (!mapSem.has(d.Semana)) {
+                    mapSem.set(d.Semana, {
+                        Semana: d.Semana,
+                        real: 0, com: 0, dist: 0, prog: 0,
+                        subPlantas: new Map()
+                    });
+                }
+                const sNode = mapSem.get(d.Semana);
+                sNode.real += d.PRODUCCION_REAL;
+                sNode.com += d.PROYECCION_COMERCIAL;
+                sNode.dist += d.PEDIDO_DISTRIBUCION;
+                sNode.prog += d.PROG_PRODUCCION;
+
+                if (!sNode.subPlantas.has(d.SubPlanta)) {
+                    sNode.subPlantas.set(d.SubPlanta, {
+                        SubPlanta: d.SubPlanta,
+                        real: 0, com: 0, dist: 0, prog: 0,
+                        skus: new Map()
+                    });
+                }
+                const spNode = sNode.subPlantas.get(d.SubPlanta);
+                spNode.real += d.PRODUCCION_REAL;
+                spNode.com += d.PROYECCION_COMERCIAL;
+                spNode.dist += d.PEDIDO_DISTRIBUCION;
+                spNode.prog += d.PROG_PRODUCCION;
+
+                const skuKey = d.CodigoCorto;
+                if (!spNode.skus.has(skuKey)) {
+                    spNode.skus.set(skuKey, {
+                        CodigoCorto: d.CodigoCorto,
+                        Nombre: d.Nombre,
+                        real: 0, com: 0, dist: 0, prog: 0
+                    });
+                }
+                const skuNode = spNode.skus.get(skuKey);
+                skuNode.real += d.PRODUCCION_REAL;
+                skuNode.com += d.PROYECCION_COMERCIAL;
+                skuNode.dist += d.PEDIDO_DISTRIBUCION;
+                skuNode.prog += d.PROG_PRODUCCION;
+            });
+
+            const semList = Array.from(mapSem.values()).sort((a, b) => b.Semana - a.Semana);
+
+            semList.forEach(sNode => {
+                const sId = `sem_${sNode.Semana}`;
+                const isSemExpanded = expandedNodes.has(sId) || forceExpand;
+
+                const trSem = document.createElement('tr');
+                trSem.className = 'level-1';
+                trSem.innerHTML = `
+                    <td>
+                        <span class="toggle-icon" onclick="toggleNode('${sId}')">${isSemExpanded ? '−' : '+'}</span>
+                        <b style="color:#1E2F3F;">📅 Semana ${sNode.Semana}</b>
+                        <span style="font-size:0.75rem; color:#5D6D7E; font-weight:600; margin-left:8px;">${obtenerRangoSemanaISO(sNode.Semana)} • ${sNode.subPlantas.size} SubPlantas</span>
+                    </td>
+                    <td class="num-cell" style="color:#1E2F3F;"><b>${formatKgMatriz(sNode.real)}</b></td>
+                    <td class="num-cell col-group-com-start"><b>${formatKgMatriz(sNode.com)}</b></td>
+                    <td class="num-cell">${badgeHtml(calcPct(sNode.real, sNode.com))}</td>
+                    <td class="num-cell col-group-dist-start"><b>${formatKgMatriz(sNode.dist)}</b></td>
+                    <td class="num-cell">${badgeHtml(calcPct(sNode.real, sNode.dist))}</td>
+                    <td class="num-cell col-group-prog-start"><b>${formatKgMatriz(sNode.prog)}</b></td>
+                    <td class="num-cell">${badgeHtml(calcPct(sNode.real, sNode.prog))}</td>
+                `;
+                tbody.appendChild(trSem);
+
+                if (isSemExpanded) {
+                    const spList = Array.from(sNode.subPlantas.values()).sort((a, b) => b.real - a.real || a.SubPlanta.localeCompare(b.SubPlanta));
+                    spList.forEach(spNode => {
+                        const spId = `sem_${sNode.Semana}_sp_${spNode.SubPlanta}`;
+                        const isSpExpanded = expandedNodes.has(spId) || forceExpand;
+
+                        const trSp = document.createElement('tr');
+                        trSp.className = 'level-2';
+                        trSp.innerHTML = `
+                            <td style="padding-left: 34px;">
+                                <span class="toggle-icon" onclick="toggleNode('${spId}')">${isSpExpanded ? '−' : '+'}</span>
+                                <span class="tag-subplanta">🏭 ${spNode.SubPlanta}</span>
+                                <span style="font-size:0.74rem; color:#5D6D7E; font-weight:600; margin-left:6px;">(${spNode.skus.size} SKUs)</span>
+                            </td>
+                            <td class="num-cell" style="color:#1E2F3F;"><b>${formatKgMatriz(spNode.real)}</b></td>
+                            <td class="num-cell col-group-com-start"><b>${formatKgMatriz(spNode.com)}</b></td>
+                            <td class="num-cell">${badgeHtml(calcPct(spNode.real, spNode.com))}</td>
+                            <td class="num-cell col-group-dist-start"><b>${formatKgMatriz(spNode.dist)}</b></td>
+                            <td class="num-cell">${badgeHtml(calcPct(spNode.real, spNode.dist))}</td>
+                            <td class="num-cell col-group-prog-start"><b>${formatKgMatriz(spNode.prog)}</b></td>
+                            <td class="num-cell">${badgeHtml(calcPct(spNode.real, spNode.prog))}</td>
+                        `;
+                        tbody.appendChild(trSp);
+
+                        if (isSpExpanded) {
+                            const skusOrdenados = Array.from(spNode.skus.values()).sort((a, b) =>
+                                b.real - a.real || a.CodigoCorto.localeCompare(b.CodigoCorto, undefined, { numeric: true })
+                            );
+
+                            skusOrdenados.forEach(sku => {
+                                const trSku = document.createElement('tr');
+                                trSku.className = 'level-3';
+                                trSku.innerHTML = `
+                                    <td style="padding-left: 64px;">
+                                        <span class="sku-code-badge">${sku.CodigoCorto}</span>
+                                        <span class="sku-name-text">${sku.Nombre}</span>
+                                    </td>
+                                    <td class="num-cell" style="font-weight:700; color:#2C4257;">${formatKgMatriz(sku.real)}</td>
+                                    <td class="num-cell col-group-com-start">${formatKgMatriz(sku.com)}</td>
+                                    <td class="num-cell">${badgeHtml(calcPct(sku.real, sku.com))}</td>
+                                    <td class="num-cell col-group-dist-start">${formatKgMatriz(sku.dist)}</td>
+                                    <td class="num-cell">${badgeHtml(calcPct(sku.real, sku.dist))}</td>
+                                    <td class="num-cell col-group-prog-start">${formatKgMatriz(sku.prog)}</td>
+                                    <td class="num-cell">${badgeHtml(calcPct(sku.real, sku.prog))}</td>
+                                `;
+                                tbody.appendChild(trSku);
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        function renderizarFooterTotal(tfoot, totalReal, totalCom, totalDist, totalProg) {
+            tfoot.innerHTML = `
+                <tr class="row-grand-total">
+                    <td>🏆 TOTAL GENERAL CONSOLIDADO</td>
+                    <td class="num-cell" style="color:#1E2F3F;">${formatKgMatriz(totalReal)}</td>
+                    <td class="num-cell col-group-com-start">${formatKgMatriz(totalCom)}</td>
+                    <td class="num-cell">${badgeHtml(calcPct(totalReal, totalCom))}</td>
+                    <td class="num-cell col-group-dist-start">${formatKgMatriz(totalDist)}</td>
+                    <td class="num-cell">${badgeHtml(calcPct(totalReal, totalDist))}</td>
+                    <td class="num-cell col-group-prog-start">${formatKgMatriz(totalProg)}</td>
+                    <td class="num-cell">${badgeHtml(calcPct(totalReal, totalProg))}</td>
+                </tr>
+            `;
+        }
+
+        function toggleNode(id) {
+            if (expandedNodes.has(id)) expandedNodes.delete(id);
+            else expandedNodes.add(id);
+            renderizarMatriz(obtenerFilasFiltradas());
+        }
+
+        function toggleExpandirTodo(exp) {
+            expandedNodes.clear();
+            if (exp) {
+                const filtrados = obtenerFilasFiltradas();
+                filtrados.forEach(d => {
+                    expandedNodes.add(`sem_${d.Semana}`);
+                    expandedNodes.add(`sem_${d.Semana}_sp_${d.SubPlanta}`);
+                });
+            }
+            renderizarMatriz(obtenerFilasFiltradas());
+        }
+
+        function filtrarMatriz() {
+            renderizarMatriz(obtenerFilasFiltradas());
+        }
+
+        function exportarExcel() {
+            const data = obtenerFilasFiltradas();
+            if (data.length === 0) {
+                mostrarToast("No hay datos para exportar", "⚠️");
+                return;
+            }
+
+            // Hoja 1: Agrupado por SubPlanta, CodigoCorto y Nombre
+            const mapAgrupado = new Map();
+            data.forEach(d => {
+                const key = `${d.SubPlanta}|${d.CodigoCorto}`;
+                if (!mapAgrupado.has(key)) {
+                    mapAgrupado.set(key, {
+                        SubPlanta: d.SubPlanta,
+                        CodigoCorto: d.CodigoCorto,
+                        Nombre: d.Nombre,
+                        PRODUCCION_REAL: 0,
+                        PROYECCION_COMERCIAL: 0,
+                        PEDIDO_DISTRIBUCION: 0,
+                        PROG_PRODUCCION: 0
+                    });
+                }
+                const obj = mapAgrupado.get(key);
+                obj.PRODUCCION_REAL += d.PRODUCCION_REAL;
+                obj.PROYECCION_COMERCIAL += d.PROYECCION_COMERCIAL;
+                obj.PEDIDO_DISTRIBUCION += d.PEDIDO_DISTRIBUCION;
+                obj.PROG_PRODUCCION += d.PROG_PRODUCCION;
+            });
+
+            const filasAgrupadas = Array.from(mapAgrupado.values()).map(d => ({
+                "SubPlanta": d.SubPlanta,
+                "CodigoCorto": d.CodigoCorto,
+                "Nombre": d.Nombre,
+                "Producción Real (kg)": Math.round(d.PRODUCCION_REAL),
+                "Proyección Comercial (kg)": Math.round(d.PROYECCION_COMERCIAL),
+                "% Cumpl. Comercial": Number(calcPct(d.PRODUCCION_REAL, d.PROYECCION_COMERCIAL).toFixed(1)),
+                "Pedido Distribución (kg)": Math.round(d.PEDIDO_DISTRIBUCION),
+                "% Cumpl. Distribución": Number(calcPct(d.PRODUCCION_REAL, d.PEDIDO_DISTRIBUCION).toFixed(1)),
+                "Programa Producción (kg)": Math.round(d.PROG_PRODUCCION),
+                "% Cumpl. Programa": Number(calcPct(d.PRODUCCION_REAL, d.PROG_PRODUCCION).toFixed(1))
+            }));
+
+            // Hoja 2: Detalle por Semana, SubPlanta, CodigoCorto y Nombre
+            const filasSemanal = data.map(d => ({
+                "Año": d.Anio,
+                "Semana": d.Semana,
+                "SubPlanta": d.SubPlanta,
+                "CodigoCorto": d.CodigoCorto,
+                "Nombre": d.Nombre,
+                "Producción Real (kg)": Math.round(d.PRODUCCION_REAL),
+                "Proyección Comercial (kg)": Math.round(d.PROYECCION_COMERCIAL),
+                "% Cumpl. Comercial": Number(calcPct(d.PRODUCCION_REAL, d.PROYECCION_COMERCIAL).toFixed(1)),
+                "Pedido Distribución (kg)": Math.round(d.PEDIDO_DISTRIBUCION),
+                "% Cumpl. Distribución": Number(calcPct(d.PRODUCCION_REAL, d.PEDIDO_DISTRIBUCION).toFixed(1)),
+                "Programa Producción (kg)": Math.round(d.PROG_PRODUCCION),
+                "% Cumpl. Programa": Number(calcPct(d.PRODUCCION_REAL, d.PROG_PRODUCCION).toFixed(1))
+            }));
+
+            const wb = XLSX.utils.book_new();
+            const wsAgrupado = XLSX.utils.json_to_sheet(filasAgrupadas);
+            const wsSemanal = XLSX.utils.json_to_sheet(filasSemanal);
+            XLSX.utils.book_append_sheet(wb, wsAgrupado, "Agrupado_SubPlanta_SKU");
+            XLSX.utils.book_append_sheet(wb, wsSemanal, "Detalle_Semanal_SKU");
+            XLSX.writeFile(wb, `Cumplimiento_PTC_Detalle_SKU_${new Date().toISOString().slice(0, 10)}.xlsx`);
+            mostrarToast("Archivo Excel descargado exitosamente", "✅");
+        }
+
+        function mostrarToast(msg, icon = 'ℹ️') {
+            const toast = document.getElementById('toastNotification');
+            document.getElementById('toastIcon').textContent = icon;
+            document.getElementById('toastMsg').textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3500);
+        }
+    </script>
+</body>
+
+</html>

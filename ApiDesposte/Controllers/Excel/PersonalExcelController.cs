@@ -1,4 +1,4 @@
-﻿using ClosedXML.Excel;
+using ClosedXML.Excel;
 using Microsoft.AspNetCore.Mvc;
 using System.IO;
 
@@ -8,10 +8,14 @@ namespace ApiDesposte.Controllers.Excel
     [Route("api/[controller]")]
     public class PersonalExcelController : ControllerBase
     {
-        // Ruta al archivo sincronizado localmente por OneDrive / SharePoint
-        private readonly string _rutaExcel = @"C:\Users\Dennis\OneDrive - Corporación Rico SAC\Desposte-03\Desarrollos\Informes\AtencionesTopico001.xlsx";
         private readonly string _nombreHoja = "Prueba";
         private readonly string _nombreTabla = "T_Personal";
+
+        private string ObtenerRutaExcel()
+        {
+            string userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            return Path.Combine(userProfile, @"OneDrive - Corporación Rico SAC\Desposte-03\Desarrollos\Informes\AtencionesTopico001.xlsx");
+        }
 
         // 1. LECTURA: Listar todo el personal
         [HttpGet("listar")]
@@ -19,10 +23,11 @@ namespace ApiDesposte.Controllers.Excel
         {
             try
             {
+                string rutaExcel = ObtenerRutaExcel();
                 var lista = new List<object>();
 
                 // Abrir en modo lectura compartida para no chocar con bloqueos
-                using (var stream = new FileStream(_rutaExcel, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                using (var stream = new FileStream(rutaExcel, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
                 using (var workbook = new XLWorkbook(stream))
                 {
                     var hoja = workbook.Worksheet(_nombreHoja);
@@ -52,7 +57,8 @@ namespace ApiDesposte.Controllers.Excel
         {
             try
             {
-                using (var stream = new FileStream(_rutaExcel, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
+                string rutaExcel = ObtenerRutaExcel();
+                using (var stream = new FileStream(rutaExcel, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
                 using (var workbook = new XLWorkbook(stream))
                 {
                     var hoja = workbook.Worksheet(_nombreHoja);
@@ -80,7 +86,7 @@ namespace ApiDesposte.Controllers.Excel
                 }
 
                 // FORZAR A ONEDRIVE / SHAREPOINT A DETECTAR EL CAMBIO DE INMEDIATO
-                System.IO.File.SetLastWriteTime(_rutaExcel, DateTime.Now);
+                System.IO.File.SetLastWriteTime(rutaExcel, DateTime.Now);
 
                 return Ok(new { exito = true, mensaje = "Persona registrada correctamente y sincronizando con SharePoint." });
             }
@@ -100,7 +106,8 @@ namespace ApiDesposte.Controllers.Excel
         {
             try
             {
-                using (var stream = new FileStream(_rutaExcel, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
+                string rutaExcel = ObtenerRutaExcel();
+                using (var stream = new FileStream(rutaExcel, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
                 using (var workbook = new XLWorkbook(stream))
                 {
                     var hoja = workbook.Worksheet(_nombreHoja);
@@ -121,7 +128,7 @@ namespace ApiDesposte.Controllers.Excel
                 }
 
                 // FORZAR A ONEDRIVE / SHAREPOINT A DETECTAR EL CAMBIO DE INMEDIATO
-                System.IO.File.SetLastWriteTime(_rutaExcel, DateTime.Now);
+                System.IO.File.SetLastWriteTime(rutaExcel, DateTime.Now);
 
                 return Ok(new { exito = true, mensaje = "Datos actualizados correctamente y sincronizando con SharePoint." });
             }
@@ -141,7 +148,8 @@ namespace ApiDesposte.Controllers.Excel
         {
             try
             {
-                using (var stream = new FileStream(_rutaExcel, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
+                string rutaExcel = ObtenerRutaExcel();
+                using (var stream = new FileStream(rutaExcel, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
                 using (var workbook = new XLWorkbook(stream))
                 {
                     var hoja = workbook.Worksheet(_nombreHoja);
@@ -161,7 +169,7 @@ namespace ApiDesposte.Controllers.Excel
                 }
 
                 // FORZAR A ONEDRIVE / SHAREPOINT A DETECTAR EL CAMBIO DE INMEDIATO
-                System.IO.File.SetLastWriteTime(_rutaExcel, DateTime.Now);
+                System.IO.File.SetLastWriteTime(rutaExcel, DateTime.Now);
 
                 return Ok(new { exito = true, mensaje = "Registro eliminado correctamente y sincronizando con SharePoint." });
             }

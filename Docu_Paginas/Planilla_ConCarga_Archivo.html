@@ -568,7 +568,11 @@
                     datasets: [{
                         label: 'Gasto HE (S/)',
                         data: Object.values(cecoGroup),
-                        backgroundColor: '#10B981'
+                        backgroundColor: 'rgba(72, 111, 145, 0.88)',
+                        borderColor: '#527A9A',
+                        hoverBackgroundColor: '#3E6282',
+                        borderWidth: 1,
+                        borderRadius: 4
                     }]
                 },
                 options: {
@@ -633,7 +637,16 @@
                     datasets: [{
                         label: 'Total Horas Extras',
                         data: sortedTop.map(x => x[1].toFixed(2)),
-                        backgroundColor: '#F59E0B'
+                        backgroundColor: [
+                            'rgba(53, 83, 110, 0.90)', 'rgba(62, 98, 130, 0.90)', 'rgba(72, 111, 145, 0.88)',
+                            'rgba(82, 122, 154, 0.88)', 'rgba(91, 127, 149, 0.88)', 'rgba(74, 96, 116, 0.88)',
+                            'rgba(99, 130, 154, 0.86)', 'rgba(93, 109, 126, 0.88)', 'rgba(110, 138, 159, 0.86)',
+                            'rgba(124, 149, 168, 0.85)'
+                        ],
+                        borderColor: '#456376',
+                        hoverBackgroundColor: '#2C4760',
+                        borderWidth: 1,
+                        borderRadius: 4
                     }]
                 },
                 options: {

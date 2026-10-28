@@ -644,11 +644,11 @@
             const datosGrupo = agrupar(data, obtenerNombreCampo(data[0], ['Ngrupo', 'Grupo', 'GRUPO']), campoMonto, true);
             const datosClase = agrupar(data, obtenerNombreCampo(data[0], ['Nclase', 'Clase', 'CLASE']), campoMonto, true);
 
-            // 3. Render / Update de Gráficos
-            actualizarGrafico('chartMes', 'bar', datosMes.etiquetas, datosMes.valores, '#1F4E78');
+            // 3. Render / Update de Gráficos (Azules Plomizos y Plomos Pizarra)
+            actualizarGrafico('chartMes', 'bar', datosMes.etiquetas, datosMes.valores, 'rgba(58, 91, 120, 0.90)');
             actualizarGrafico('chartTrimestre', 'doughnut', datosTrim.etiquetas, datosTrim.valores, PALETA);
-            actualizarGrafico('chartGrupo', 'bar-h', datosGrupo.etiquetas, datosGrupo.valores, '#2A6F8A');
-            actualizarGrafico('chartClase', 'bar-h', datosClase.etiquetas, datosClase.valores, '#7E9FAA');
+            actualizarGrafico('chartGrupo', 'bar-h', datosGrupo.etiquetas, datosGrupo.valores, 'rgba(74, 96, 116, 0.88)');
+            actualizarGrafico('chartClase', 'bar-h', datosClase.etiquetas, datosClase.valores, 'rgba(108, 122, 137, 0.86)');
 
             // 4. Matrices Dinámicas (Mensual y Resumen)
             renderizarMatrizMensual(data, campoMonto);

@@ -1,0 +1,166 @@
+{
+  "name": "Industrial Slate, Steel Blue & Gold",
+  "version": "1.0.0",
+  "description": "Tema corporativo Industrial Slate & Gold con paleta de gráficos de barras en Azules Plomizos (Slate Blue) y Plomos Pizarra (Pewter/Slate).",
+  "dataColors": [
+    "#2C4257",
+    "#3A5B78",
+    "#486F91",
+    "#527A9A",
+    "#5D6D7E",
+    "#6C7A89",
+    "#7C95A8",
+    "#85929E",
+    "#95A5B2",
+    "#F4D03F",
+    "#D4AC0D",
+    "#34495E"
+  ],
+  "background": "#F2F4F8",
+  "foreground": "#2E2A2F",
+  "tableAccent": "#F4D03F",
+  "good": "#10B981",
+  "neutral": "#F59E0B",
+  "bad": "#EF4444",
+  "maximum": "#2C4257",
+  "center": "#527A9A",
+  "minimum": "#95A5B2",
+  "paletaBase": {
+    "industrialSlateAndGold": {
+      "goldBright": "#F4D03F",
+      "goldLight": "#F8CC5A",
+      "goldRich": "#D4AC0D",
+      "goldBronze": "#B7950B",
+      "slateCharcoal": "#1C2833",
+      "slateDeep": "#2C3E50",
+      "slateDark": "#34495E",
+      "slateMed": "#5D6D7E",
+      "slateStone": "#7F8C8D",
+      "slateCool": "#85929E",
+      "slateSilver": "#AEB6BF"
+    },
+    "azulesPlomizosYPlomos": [
+      { "orden": 1, "nombre": "Deep Slate Navy", "hex": "#2C4257", "rgba": "rgba(44, 66, 87, 0.92)", "borde": "#1E2F3F" },
+      { "orden": 2, "nombre": "Muted Steel Blue", "hex": "#35536E", "rgba": "rgba(53, 83, 110, 0.90)", "borde": "#263D52" },
+      { "orden": 3, "nombre": "Industrial Slate Blue", "hex": "#3E6282", "rgba": "rgba(62, 98, 130, 0.90)", "borde": "#2E4B64" },
+      { "orden": 4, "nombre": "Smoky Cerulean Slate", "hex": "#486F91", "rgba": "rgba(72, 111, 145, 0.88)", "borde": "#365773" },
+      { "orden": 5, "nombre": "Blue-Gray Pewter", "hex": "#527A9A", "rgba": "rgba(82, 122, 154, 0.88)", "borde": "#3E617D" },
+      { "orden": 6, "nombre": "Dark Slate Plomo", "hex": "#34495E", "rgba": "rgba(52, 73, 94, 0.90)", "borde": "#253544" },
+      { "orden": 7, "nombre": "Cool Steel Slate", "hex": "#5B7F95", "rgba": "rgba(91, 127, 149, 0.88)", "borde": "#456376" },
+      { "orden": 8, "nombre": "Medium Slate Blue-Gray", "hex": "#4A6074", "rgba": "rgba(74, 96, 116, 0.88)", "borde": "#374857" },
+      { "orden": 9, "nombre": "Muted Air Force Slate", "hex": "#63829A", "rgba": "rgba(99, 130, 154, 0.86)", "borde": "#4B6578" },
+      { "orden": 10, "nombre": "Cool Slate Plomo", "hex": "#5D6D7E", "rgba": "rgba(93, 109, 126, 0.88)", "borde": "#465360" },
+      { "orden": 11, "nombre": "Dusty Blue-Slate", "hex": "#6E8A9F", "rgba": "rgba(110, 138, 159, 0.86)", "borde": "#546C7E" },
+      { "orden": 12, "nombre": "Balanced Pewter Plomo", "hex": "#6C7A89", "rgba": "rgba(108, 122, 137, 0.86)", "borde": "#525D69" },
+      { "orden": 13, "nombre": "Mist Blue-Gray", "hex": "#7C95A8", "rgba": "rgba(124, 149, 168, 0.85)", "borde": "#5F7485" },
+      { "orden": 14, "nombre": "Silver Slate Plomo", "hex": "#85929E", "rgba": "rgba(133, 146, 158, 0.85)", "borde": "#68737D" },
+      { "orden": 15, "nombre": "Pale Metallic Slate", "hex": "#95A5B2", "rgba": "rgba(149, 165, 178, 0.85)", "borde": "#758591" }
+    ]
+  },
+  "chartJsConfig": {
+    "comparativoDobleBarra": {
+      "serieBasePlomo": {
+        "label": "Origen / Programa / Presupuesto / Pedidos",
+        "backgroundColor": "rgba(115, 128, 142, 0.85)",
+        "hex": "#73808E",
+        "borderColor": "#5D6D7E",
+        "hoverBackgroundColor": "#475569"
+      },
+      "seriePrincipalAzulPlomizo": {
+        "label": "Resultado / Producción Real / ForeCast / Atendido",
+        "backgroundColor": "rgba(58, 91, 120, 0.90)",
+        "hex": "#3A5B78",
+        "borderColor": "#2C4760",
+        "hoverBackgroundColor": "#243B50"
+      },
+      "lineaTendenciaDestacada": {
+        "label": "Rendimiento % / Cumplimiento % / Índice Rotación",
+        "borderColor": "#F4D03F",
+        "backgroundColor": "rgba(58, 91, 120, 0.12)",
+        "pointBackgroundColor": "#1C2833",
+        "pointBorderColor": "#F4D03F",
+        "pointHoverBackgroundColor": "#D4AC0D"
+      }
+    },
+    "comparativoCuatroSeries": [
+      { "serie": 1, "nombre": "Serie 1 (Azul Pizarra Profundo)", "backgroundColor": "rgba(44, 66, 87, 0.92)", "borderColor": "#1E2F3F" },
+      { "serie": 2, "nombre": "Serie 2 (Azul Acero Plomizo)", "backgroundColor": "rgba(72, 111, 145, 0.88)", "borderColor": "#365773" },
+      { "serie": 3, "nombre": "Serie 3 (Plomo Pizarra Medio)", "backgroundColor": "rgba(93, 109, 126, 0.88)", "borderColor": "#465360" },
+      { "serie": 4, "nombre": "Serie 4 (Plomo Plata)", "backgroundColor": "rgba(133, 146, 158, 0.85)", "borderColor": "#68737D" }
+    ],
+    "tooltip": {
+      "backgroundColor": "#1C2833",
+      "titleColor": "#F4D03F",
+      "bodyColor": "#FFFFFF",
+      "borderColor": "#34495E"
+    },
+    "ejes": {
+      "gridColor": "#E2E8F0",
+      "ticksColor": "#5D6D7E",
+      "titleColor": "#2E2A2F"
+    }
+  },
+  "uiTokens": {
+    "lightTheme": {
+      "bgCanvas": "#F2F4F8",
+      "bgCard": "#FFFFFF",
+      "bgCardAlt": "#F8FAFC",
+      "textDark": "#2E2A2F",
+      "textMuted": "#5D6D7E",
+      "borderUi": "#E2E8F0",
+      "borderSubtle": "#EDF2F7",
+      "headerGradientStart": "#2C3E50",
+      "headerGradientEnd": "#1C2833",
+      "headerAccentBorder": "#F4D03F"
+    },
+    "darkTheme": {
+      "bgCanvas": "#1E1C1F",
+      "bgCard": "#2E2A2F",
+      "bgCardAlt": "#252226",
+      "textPrimary": "#FFFFFF",
+      "textSecondary": "#CDCAC0",
+      "textMuted": "#878994",
+      "borderUi": "#3D393E",
+      "accentPrimary": "#F4D03F",
+      "accentSecondary": "#BAA063"
+    },
+    "matrixHierarchy": {
+      "level1PeriodoBg": "linear-gradient(90deg, #1C2833 0%, #2C3E50 100%)",
+      "level1PeriodoText": "#F4D03F",
+      "level2GrupoBg": "#F8F9FA",
+      "level3SubgrupoBg": "#FFFFFF",
+      "level4DetalleEvenBg": "#FAFAFA",
+      "grandTotalFooterBg": "#1C2833",
+      "grandTotalBorderTop": "#F4D03F"
+    },
+    "semanticStatus": {
+      "success": { "hex": "#10B981", "bg": "#DCFCE7", "text": "#166534", "border": "#86EFAC" },
+      "warning": { "hex": "#F59E0B", "bg": "rgba(244, 208, 63, 0.16)", "text": "#854D0E", "border": "rgba(244, 208, 63, 0.45)" },
+      "danger": { "hex": "#EF4444", "bg": "#FEE2E2", "text": "#991B1B", "border": "#FCA5A5" }
+    }
+  },
+  "cssVariables": {
+    "--isg-gold-bright": "#F4D03F",
+    "--isg-slate-dark": "#34495E",
+    "--isg-slate-med": "#5D6D7E",
+    "--isg-slate-cool": "#85929E",
+    "--isg-slate-deep": "#2C3E50",
+    "--isg-gold-rich": "#D4AC0D",
+    "--isg-slate-charcoal": "#1C2833",
+    "--isg-slate-silver": "#AEB6BF",
+    "--isg-slate-stone": "#7F8C8D",
+    "--isg-gold-bronze": "#B7950B",
+    "--chart-slate-navy": "#2C4257",
+    "--chart-steel-blue": "#3A5B78",
+    "--chart-cerulean-slate": "#486F91",
+    "--chart-pewter-blue": "#527A9A",
+    "--chart-plomo-neutro": "#73808E",
+    "--chart-plomo-pizarra": "#6C7A89",
+    "--bg-canvas": "#F2F4F8",
+    "--bg-card": "#FFFFFF",
+    "--text-dark": "#2E2A2F",
+    "--text-muted": "#5D6D7E",
+    "--border-ui": "#E2E8F0"
+  }
+}
+
