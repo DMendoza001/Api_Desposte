@@ -394,18 +394,184 @@
             font-weight: 700;
         }
 
-        .week-pill:hover {
-            border-color: var(--pantone-yellow);
-            background: var(--pantone-yellow-soft);
+        /* COMBOBOX MULTI-SELECCIÓN DE SEMANAS */
+        .week-filter-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .week-combobox-wrapper {
+            position: relative;
+            min-width: 360px;
+            max-width: 480px;
+            flex: 1;
+        }
+
+        .week-combobox-trigger {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 9px 14px;
+            background: #FFFFFF;
+            border: 1px solid #CBD5E1;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.84rem;
+            font-weight: 600;
+            color: var(--pantone-dark);
+            transition: all 0.18s ease;
+            user-select: none;
+            box-shadow: 0 1px 2px rgba(28, 40, 51, 0.04);
+        }
+
+        .week-combobox-trigger:hover,
+        .week-combobox-wrapper.open .week-combobox-trigger {
+            border-color: var(--pantone-gold);
+            box-shadow: 0 0 0 3px var(--pantone-yellow-soft);
+        }
+
+        .week-combobox-trigger-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .week-combobox-chevron {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            transition: transform 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .week-combobox-wrapper.open .week-combobox-chevron {
+            transform: rotate(180deg);
             color: var(--pantone-dark);
         }
 
-        .week-pill.selected {
-            background: var(--pantone-dark) !important;
-            border-color: var(--pantone-yellow) !important;
-            color: #FFFFFF !important;
-            font-weight: 700;
-            box-shadow: 0 2px 6px rgba(46, 42, 47, 0.35);
+        .week-combobox-dropdown {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            right: 0;
+            background: #FFFFFF;
+            border: 1px solid #CBD5E1;
+            border-radius: 10px;
+            box-shadow: 0 12px 24px -4px rgba(28, 40, 51, 0.14), 0 4px 8px -2px rgba(28, 40, 51, 0.08);
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .week-combobox-wrapper.open .week-combobox-dropdown {
+            display: flex;
+        }
+
+        .week-combobox-search-bar {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border-ui);
+            background: #F8FAFC;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .week-combobox-search-input {
+            width: 100%;
+            padding: 7px 11px;
+            border: 1px solid #CBD5E1;
+            border-radius: 6px;
+            font-size: 0.82rem;
+            outline: none;
+            color: var(--text-dark);
+            background: #FFFFFF;
+        }
+
+        .week-combobox-search-input:focus {
+            border-color: var(--pantone-gold);
+            box-shadow: 0 0 0 2px var(--pantone-yellow-soft);
+        }
+
+        .week-combobox-actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .week-combo-action-btn {
+            font-size: 0.73rem;
+            font-weight: 600;
+            padding: 4px 9px;
+            border-radius: 5px;
+            border: 1px solid #CBD5E1;
+            background: #FFFFFF;
+            color: var(--pantone-dark);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .week-combo-action-btn:hover {
+            background: var(--pantone-yellow-soft);
+            border-color: var(--pantone-gold);
+        }
+
+        .week-combobox-list {
+            max-height: 260px;
+            overflow-y: auto;
+            padding: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .week-combobox-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 7px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.82rem;
+            color: var(--text-dark);
+            transition: background 0.12s ease;
+            user-select: none;
+        }
+
+        .week-combobox-item:hover {
+            background: #F1F5F9;
+        }
+
+        .week-combobox-item.checked {
+            background: var(--pantone-yellow-soft);
+            font-weight: 600;
+            color: var(--pantone-dark);
+        }
+
+        .week-combobox-item-left {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+        }
+
+        .week-combobox-item input[type="checkbox"] {
+            width: 15px;
+            height: 15px;
+            accent-color: var(--pantone-dark);
+            cursor: pointer;
+        }
+
+        .week-combobox-range {
+            font-size: 0.74rem;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
         }
 
         .pill-badge-count {
@@ -835,18 +1001,55 @@
 
             <div style="border-top: 1px solid var(--border-ui); margin: 14px 0 12px 0;"></div>
 
-            <!-- 3. FILTRO SEMANAS -->
+            <!-- 3. FILTRO SEMANAS (COMBOBOX MULTI-SELECCIÓN) -->
             <div class="filter-section-header">
-                <div class="filter-title" style="color: var(--pantone-dark);">3. Filtro por Semana (Multi-Selección
-                    Dinámica)</div>
+                <div class="filter-title" style="color: var(--pantone-dark);">3. Filtro por Semana ISO-8601 (Lunes a
+                    Domingo)</div>
                 <div class="filter-quick-actions">
                     <button class="filter-quick-btn" id="btnQuickLatest"
                         onclick="seleccionarFiltroRapidoSemana('latest')">Última Semana</button>
-                    <button class="filter-quick-btn active active-semana" id="btnQuickAll"
+                    <button class="filter-quick-btn" id="btnQuickLast4"
+                        onclick="seleccionarFiltroRapidoSemana('last4')">Últimas 4 Semanas</button>
+                    <button class="filter-quick-btn active active-semana" id="btnQuickLast8"
+                        onclick="seleccionarFiltroRapidoSemana('last8')">Últimas 8 Semanas</button>
+                    <button class="filter-quick-btn" id="btnQuickAll"
                         onclick="seleccionarFiltroRapidoSemana('all')">Todas las Semanas</button>
                 </div>
             </div>
-            <div class="weeks-pills-container" id="weeksPillsContainer"></div>
+
+            <div class="week-filter-row">
+                <div class="week-combobox-wrapper" id="weekComboboxWrapper">
+                    <div class="week-combobox-trigger" onclick="toggleWeekDropdown(event)">
+                        <div class="week-combobox-trigger-left">
+                            <span>📅</span>
+                            <span id="weekComboboxLabel">Últimas 8 semanas...</span>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span class="pill-badge-count" id="weekComboboxCount">0</span>
+                            <span class="week-combobox-chevron">▼</span>
+                        </div>
+                    </div>
+
+                    <div class="week-combobox-dropdown" id="weekComboboxDropdown" onclick="event.stopPropagation()">
+                        <div class="week-combobox-search-bar">
+                            <input type="text" id="weekSearchInput" class="week-combobox-search-input"
+                                placeholder="Buscar semana o fecha (ej. 202644 o 26/10)..."
+                                oninput="filtrarOpcionesSemanaCombobox()">
+                            <div class="week-combobox-actions">
+                                <button type="button" class="week-combo-action-btn"
+                                    onclick="seleccionarFiltroRapidoSemana('last8')">Últimas 8</button>
+                                <button type="button" class="week-combo-action-btn"
+                                    onclick="seleccionarFiltroRapidoSemana('last4')">Últimas 4</button>
+                                <button type="button" class="week-combo-action-btn"
+                                    onclick="seleccionarFiltroRapidoSemana('latest')">Última</button>
+                                <button type="button" class="week-combo-action-btn"
+                                    onclick="seleccionarFiltroRapidoSemana('all')">✓ Todas</button>
+                            </div>
+                        </div>
+                        <div class="week-combobox-list" id="weekComboboxList"></div>
+                    </div>
+                </div>
+            </div>
 
             <div class="selection-summary-bar">
                 <span id="selectedWeeksSummary">Cargando filtros...</span>
@@ -999,8 +1202,37 @@
         let unidadGrafico = 'Tn';
         let expandedNodes = new Set();
 
+        // =========================================================================
+        // 📅 CÁLCULO ISO-8601 DE SEMANAS (Lunes a Domingo - Regla Obligatoria)
+        // =========================================================================
+        function obtenerRangoSemanaISO(semanaNum) {
+            const sStr = String(semanaNum);
+            if (sStr.length < 5) return `Sem. ${semanaNum}`;
+            const anio = parseInt(sStr.substring(0, 4), 10);
+            const sem = parseInt(sStr.substring(4), 10);
+            if (!anio || !sem || sem < 1 || sem > 53) return `Sem. ${semanaNum}`;
+
+            // El 4 de enero siempre pertenece a la semana ISO 1
+            const simple = new Date(Date.UTC(anio, 0, 4));
+            const dayOfWeek = (simple.getUTCDay() + 6) % 7; // 0 = Lunes, 6 = Domingo
+            const isoWeek1Monday = new Date(simple);
+            isoWeek1Monday.setUTCDate(simple.getUTCDate() - dayOfWeek + (sem - 1) * 7);
+
+            const sunday = new Date(isoWeek1Monday);
+            sunday.setUTCDate(isoWeek1Monday.getUTCDate() + 6);
+
+            const fmt = (d) => `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
+            return `Sem. ${String(sem).padStart(2, '0')} (${fmt(isoWeek1Monday)} al ${fmt(sunday)})`;
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
             initChartDefaults();
+            document.addEventListener('click', (e) => {
+                const wrapper = document.getElementById('weekComboboxWrapper');
+                if (wrapper && !wrapper.contains(e.target)) {
+                    wrapper.classList.remove('open');
+                }
+            });
             await inicializarDashboard();
         });
 
@@ -1092,7 +1324,9 @@
 
                 if (selectedYears.size === 0) aniosDisponibles.forEach(y => selectedYears.add(y));
                 if (selectedGroups.size === 0) gruposDisponibles.forEach(g => selectedGroups.add(g));
-                if (selectedWeeks.size === 0) semanasDisponibles.forEach(s => selectedWeeks.add(s));
+                if (selectedWeeks.size === 0) {
+                    semanasDisponibles.slice(-8).forEach(s => selectedWeeks.add(s));
+                }
 
                 construirPildorasAnio();
                 construirPildorasGrupo();
@@ -1163,29 +1397,117 @@
             actualizarVista();
         }
 
-        // 3. PÍLDORAS SEMANA (CON COLOR PERSONALIZADO rgb(59,102,128))
+        // 3. COMBOBOX MULTI-SELECCIÓN DE SEMANAS (ISO-8601)
+        function toggleWeekDropdown(e) {
+            if (e) e.stopPropagation();
+            const wrapper = document.getElementById('weekComboboxWrapper');
+            if (!wrapper) return;
+            wrapper.classList.toggle('open');
+            if (wrapper.classList.contains('open')) {
+                const input = document.getElementById('weekSearchInput');
+                if (input) setTimeout(() => input.focus(), 40);
+            }
+        }
+
         function construirPildorasSemana() {
-            const container = document.getElementById('weeksPillsContainer');
-            container.innerHTML = '';
+            const listContainer = document.getElementById('weekComboboxList');
+            if (!listContainer) return;
+            listContainer.innerHTML = '';
 
             const semanasValidas = semanasDisponibles.filter(s => {
                 const anio = parseInt(String(s).substring(0, 4), 10);
                 return selectedYears.has(anio);
             });
 
-            semanasValidas.forEach(s => {
-                const pill = document.createElement('div');
-                pill.className = `week-pill ${selectedWeeks.has(s) ? 'selected' : ''}`;
-                pill.innerHTML = `<span>Sem ${s}</span>`;
-                pill.onclick = () => {
-                    if (selectedWeeks.has(s)) {
-                        if (selectedWeeks.size > 1) selectedWeeks.delete(s);
-                    } else selectedWeeks.add(s);
+            // Si al cambiar de año ninguna semana coincide con el año actual, preseleccionar las últimas 8
+            if (semanasValidas.length > 0 && !semanasValidas.some(s => selectedWeeks.has(s))) {
+                semanasValidas.slice(-8).forEach(s => selectedWeeks.add(s));
+            }
+
+            const filtroTexto = (document.getElementById('weekSearchInput')?.value || '').trim().toLowerCase();
+
+            // Mostrar de más reciente a más antigua en el desplegable para fácil selección
+            const semanasOrdenadasDesc = [...semanasValidas].sort((a, b) => b - a);
+
+            semanasOrdenadasDesc.forEach(s => {
+                const rangoStr = obtenerRangoSemanaISO(s);
+                const textoBusqueda = `sem ${s} ${rangoStr}`.toLowerCase();
+                if (filtroTexto && !textoBusqueda.includes(filtroTexto)) return;
+
+                const isSelected = selectedWeeks.has(s);
+                const item = document.createElement('label');
+                item.className = `week-combobox-item ${isSelected ? 'checked' : ''}`;
+                item.innerHTML = `
+                    <div class="week-combobox-item-left">
+                        <input type="checkbox" ${isSelected ? 'checked' : ''}>
+                        <span>Sem ${s}</span>
+                    </div>
+                    <span class="week-combobox-range">${rangoStr}</span>
+                `;
+                const checkbox = item.querySelector('input[type="checkbox"]');
+                checkbox.addEventListener('change', () => {
+                    if (checkbox.checked) {
+                        selectedWeeks.add(s);
+                    } else {
+                        if (selectedWeeks.size > 1) {
+                            selectedWeeks.delete(s);
+                        } else {
+                            checkbox.checked = true;
+                            return;
+                        }
+                    }
                     construirPildorasSemana();
                     actualizarVista();
-                };
-                container.appendChild(pill);
+                });
+                listContainer.appendChild(item);
             });
+
+            // Actualizar texto resumen del combobox
+            const seleccionadasEnAnio = semanasValidas.filter(s => selectedWeeks.has(s));
+            const labelEl = document.getElementById('weekComboboxLabel');
+            const countEl = document.getElementById('weekComboboxCount');
+
+            if (countEl) countEl.textContent = `${seleccionadasEnAnio.length} / ${semanasValidas.length}`;
+
+            const ultimas8 = semanasValidas.slice(-8);
+            const esUltimas8 = semanasValidas.length > 0
+                && seleccionadasEnAnio.length === ultimas8.length
+                && ultimas8.every(s => selectedWeeks.has(s));
+
+            const ultimas4 = semanasValidas.slice(-4);
+            const esUltimas4 = semanasValidas.length >= 4
+                && seleccionadasEnAnio.length === ultimas4.length
+                && ultimas4.every(s => selectedWeeks.has(s));
+
+            if (labelEl) {
+                if (seleccionadasEnAnio.length === 0) {
+                    labelEl.textContent = 'Ninguna semana seleccionada';
+                } else if (esUltimas8 && semanasValidas.length > 1) {
+                    labelEl.textContent = `Últimas ${ultimas8.length} semanas (${ultimas8[0]} - ${ultimas8[ultimas8.length - 1]})`;
+                } else if (seleccionadasEnAnio.length === semanasValidas.length) {
+                    labelEl.textContent = `Todas las semanas (${semanasValidas.length})`;
+                } else if (seleccionadasEnAnio.length === 1) {
+                    const u = seleccionadasEnAnio[0];
+                    labelEl.textContent = `Sem ${u} — ${obtenerRangoSemanaISO(u)}`;
+                } else if (seleccionadasEnAnio.length <= 3) {
+                    labelEl.textContent = seleccionadasEnAnio.map(s => `Sem ${s}`).join(', ');
+                } else {
+                    const ultimas = seleccionadasEnAnio.slice(-2).map(s => `Sem ${s}`).join(', ');
+                    labelEl.textContent = `${seleccionadasEnAnio.length} semanas seleccionadas (...${ultimas})`;
+                }
+            }
+
+            document.getElementById('btnQuickAll')?.classList.toggle('active-semana', seleccionadasEnAnio.length === semanasValidas.length);
+            document.getElementById('btnQuickLast8')?.classList.toggle('active-semana', esUltimas8);
+            document.getElementById('btnQuickLast4')?.classList.toggle('active-semana', esUltimas4);
+            document.getElementById('btnQuickLatest')?.classList.toggle(
+                'active-semana',
+                seleccionadasEnAnio.length === 1 && semanasValidas.length > 0 && selectedWeeks.has(semanasValidas[semanasValidas.length - 1])
+            );
+        }
+
+        function filtrarOpcionesSemanaCombobox() {
+            construirPildorasSemana();
         }
 
         function seleccionarFiltroRapidoSemana(modo) {
@@ -1197,6 +1519,10 @@
 
             if (modo === 'all') {
                 semanasValidas.forEach(s => selectedWeeks.add(s));
+            } else if (modo === 'last8') {
+                semanasValidas.slice(-8).forEach(s => selectedWeeks.add(s));
+            } else if (modo === 'last4') {
+                semanasValidas.slice(-4).forEach(s => selectedWeeks.add(s));
             } else if (modo === 'latest') {
                 if (semanasValidas.length > 0) selectedWeeks.add(semanasValidas[semanasValidas.length - 1]);
             }
@@ -1451,8 +1777,7 @@
                 trSem.innerHTML = `
                     <td>
                         <span class="toggle-icon" onclick="toggleNode('${sId}')">${isExpanded ? '−' : '+'}</span>
-                        <b style="color:var(--pantone-dark);">Semana ${sKey}</b> 
-                        <span style="font-size:0.75rem; color:var(--text-muted); font-weight:normal; margin-left:6px;">(${sNode.grupos.length} grupos)</span>
+                        <b style="color:var(--pantone-dark);">Semana ${sKey}</b>
                     </td>
                     <td class="num-cell" style="color:var(--pantone-dark);"><b>${formatKgMatriz(sNode.real)}</b></td>
                     <td class="num-cell col-com col-group-com-start"><b>${formatKgMatriz(sNode.com)}</b></td>

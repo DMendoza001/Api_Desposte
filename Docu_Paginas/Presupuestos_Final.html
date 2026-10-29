@@ -5,123 +5,222 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Analítico Presupuesto 2027</title>
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Configuración compartida de conexión a la API -->
+    <script src="config.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
         /* =========================================================================
-           🎨 PALETA PANTONE INDUSTRIAL
+           🎨 PALETA: INDUSTRIAL SLATE & GOLD (Idéntico a RendimientosChuletas002.html)
            ========================================================================= */
         :root {
-            --pantone-yellow: #F4D03F;
-            --pantone-yellow-light: #F8CC5A;
-            --pantone-gold: #BAA063;
-            --pantone-dark: #2E2A2F;
-            --pantone-darker: #252C37;
-            --pantone-gray-dark: #605C5E;
-            --pantone-gray-med: #878994;
-            --pantone-gray-light: #CDCAC0;
-            --pantone-bg: #F2F4F8;
-            --pantone-card: #FFFFFF;
-            --pantone-border: #E2E8F0;
+            /* Tokens Oficiales: Industrial Slate & Gold */
+            --isg-gold-bright: #F4D03F;
+            /* 01. Vivid Gold / Yellow */
+            --isg-slate-dark: #34495E;
+            /* 02. Dark Slate Plomo */
+            --isg-slate-med: #5D6D7E;
+            /* 03. Medium Slate Plomo */
+            --isg-slate-cool: #85929E;
+            /* 04. Cool Slate Plomo */
+            --isg-slate-deep: #2C3E50;
+            /* 05. Midnight Slate Plomo */
+            --isg-gold-rich: #D4AC0D;
+            /* 06. Rich Industrial Gold */
+            --isg-slate-charcoal: #1C2833;
+            /* 07. Charcoal Slate Antracita */
+            --isg-slate-silver: #AEB6BF;
+            /* 08. Silver Slate Plomo */
+            --isg-slate-stone: #7F8C8D;
+            /* 09. Stone Gray Plomo */
+            --isg-gold-bronze: #B7950B;
+            /* 10. Dark Bronze Gold */
+
+            /* Roles Estructurales */
+            --bg-canvas: #F2F4F8;
+            --text-dark: #2E2A2F;
             --table-accent: #F4D03F;
 
-            /* Paleta de colores corporativa */
-            --primary: #2E2A2F;
-            --primary-dark: #252C37;
-            --secondary-blue: #605C5E;
-            --green: #F4D03F;
-            --orange: #BAA063;
-            --red: #EF4444;
-            --purple: #878994;
-            --cyan: #CDCAC0;
-            --bg: #F2F4F8;
-            --card-bg: #FFFFFF;
-            --text: #2E2A2F;
-            --border: #E2E8F0;
+            /* Mapeos funcionales */
+            --pantone-yellow: #F4D03F;
+            --pantone-yellow-light: #F8CC5A;
+            --pantone-yellow-soft: rgba(244, 208, 63, 0.16);
+            --pantone-yellow-border: rgba(244, 208, 63, 0.45);
+            --pantone-gold: #D4AC0D;
+            --pantone-gold-soft: rgba(212, 172, 13, 0.16);
+            --pantone-gold-border: rgba(212, 172, 13, 0.4);
+            --pantone-dark: #2C3E50;
+            --pantone-darker: #1C2833;
+            --pantone-gray-dark: #34495E;
+            --pantone-gray-med: #5D6D7E;
+            --pantone-gray-light: #AEB6BF;
+            --pantone-bg: #F2F4F8;
+            --pantone-card: #FFFFFF;
+            --pantone-card-alt: #F8FAFC;
+            --pantone-border: #E2E8F0;
+            --pantone-border-subtle: #EDF2F7;
+
+            /* Mapeo de compatibilidad */
+            --navy-peony: #2C3E50;
+            --cyan-blue: #F4D03F;
+            --cool-blue: #AEB6BF;
+            --blue-sapphire: #1C2833;
+            --foggy-dew: #AEB6BF;
+            --lagoon: #D4AC0D;
+            --teal-blue: #5D6D7E;
+            --aegean-blue: #34495E;
+
+            --bg-card: #FFFFFF;
+            --bg-card-alt: #F8FAFC;
+            --border-ui: #E2E8F0;
+            --text-muted: #5D6D7E;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --shadow-sm: 0 1px 3px rgba(28, 40, 51, 0.06), 0 1px 2px rgba(28, 40, 51, 0.04);
+            --shadow-md: 0 4px 6px -1px rgba(28, 40, 51, 0.08), 0 2px 4px -1px rgba(28, 40, 51, 0.04);
+            --shadow-lg: 0 10px 15px -3px rgba(28, 40, 51, 0.12), 0 4px 6px -2px rgba(28, 40, 51, 0.06);
+
+            --primary: var(--pantone-dark);
+            --primary-dark: var(--pantone-darker);
+            --border: var(--border-ui);
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            padding: 20px;
+            background-color: var(--bg-canvas);
+            color: var(--text-dark);
+            padding: 15px 20px 40px;
+            min-height: 100vh;
         }
 
+        /* Header Banner (Idéntico a RendimientosChuletas002) */
         .header {
+            background: linear-gradient(135deg, var(--pantone-dark) 0%, var(--pantone-darker) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-left: 6px solid var(--pantone-yellow);
+            color: #FFFFFF;
+            padding: 22px 28px;
+            border-radius: 12px;
+            margin-bottom: 22px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            border-bottom: 2px solid var(--border);
-            padding-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 16px;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--pantone-yellow), var(--pantone-gold), var(--pantone-yellow-light));
         }
 
         .header h1 {
-            color: var(--primary);
-            font-size: 22px;
+            color: #FFFFFF;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 0;
         }
 
-        /* Segmentador / Filtro */
+        /* Segmentador / Filtro en Header */
         .filter-container {
             display: flex;
             align-items: center;
             gap: 10px;
-            background: var(--card-bg);
-            padding: 8px 15px;
-            border-radius: 6px;
-            border: 1px solid var(--border);
+            background: var(--pantone-yellow-soft);
+            padding: 8px 16px;
+            border-radius: 10px;
+            border: 1px solid var(--pantone-yellow-border);
+            backdrop-filter: blur(8px);
         }
 
         .filter-container label {
-            font-size: 13px;
+            font-size: 0.78rem;
             font-weight: 700;
-            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            color: var(--pantone-yellow);
         }
 
         .filter-container select {
-            padding: 6px 12px;
-            font-size: 13px;
-            border-radius: 4px;
-            border: 1px solid var(--border);
+            padding: 8px 13px;
+            font-size: 0.85rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-ui);
             outline: none;
-            background-color: #fff;
+            background-color: #FFFFFF;
+            color: var(--text-dark);
+            font-weight: 600;
             cursor: pointer;
+            transition: all 0.2s ease;
         }
 
-        /* Tarjetas KPI */
+        .filter-container select:focus {
+            border-color: var(--pantone-gold);
+            box-shadow: 0 0 0 3px var(--pantone-yellow-soft);
+        }
+
+        /* Tarjetas KPI (Borde superior de 4px idéntico a RendimientosChuletas002) */
         .kpi-container {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 16px;
+            margin-bottom: 22px;
         }
 
         .kpi-card {
-            background: var(--card-bg);
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            border-left: 5px solid var(--primary);
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-ui);
+            border-top: 4px solid var(--pantone-yellow);
+            padding: 18px 22px;
+            border-radius: 10px;
+            box-shadow: var(--shadow-sm);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--pantone-gold);
+            box-shadow: var(--shadow-md);
         }
 
         .kpi-title {
-            font-size: 11px;
-            color: #64748b;
-            font-weight: 700;
+            font-size: 0.75rem;
             text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            color: var(--text-muted);
+            margin-bottom: 6px;
         }
 
         .kpi-value {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--primary);
-            margin-top: 5px;
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--pantone-dark);
+            letter-spacing: -0.02em;
         }
 
         /* Grid del Dashboard */
@@ -136,18 +235,21 @@
         }
 
         .card {
-            background-color: var(--card-bg);
-            border-radius: 8px;
-            padding: 18px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-            border: 1px solid var(--border);
+            background-color: var(--bg-card);
+            border-radius: 12px;
+            padding: 22px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-ui);
         }
 
         .card h3 {
-            font-size: 15px;
-            margin-bottom: 15px;
-            color: var(--primary);
-            text-align: center;
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-ui);
+            color: var(--pantone-dark);
+            text-align: left;
         }
 
         .chart-container {
@@ -160,129 +262,197 @@
             height: 380px;
         }
 
-        /* Matriz / Tabla Dinámica */
+        /* Matriz / Tabla Dinámica (Estilo RendimientosChuletas002) */
         .table-wrapper {
-            max-height: 420px;
+            max-height: 460px;
             overflow-y: auto;
             overflow-x: auto;
-            border: 1px solid var(--border);
-            border-radius: 6px;
+            border: 1px solid var(--border-ui);
+            border-radius: 8px;
         }
 
         table.matrix-table {
             width: 100%;
-            border-collapse: collapse;
-            font-size: 12px;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 0.85rem;
             text-align: left;
         }
 
         table.matrix-table th {
             position: sticky;
             top: 0;
-            background-color: var(--primary);
-            color: #fff;
-            padding: 10px;
-            font-weight: 600;
+            z-index: 10;
+            background-color: var(--pantone-dark);
+            color: #FFFFFF;
+            padding: 12px 14px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            letter-spacing: 0.02em;
+            border-bottom: 3px solid var(--pantone-yellow);
         }
 
         table.matrix-table td {
-            padding: 8px 10px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        table.matrix-table tr:nth-child(even) {
-            background-color: #f1f5f9;
-        }
-
-        table.matrix-table tr:hover {
-            background-color: #e2e8f0;
+            padding: 9px 14px;
+            border-bottom: 1px solid var(--border-ui);
         }
 
         .num-col {
             text-align: right;
             font-weight: 600;
+            font-variant-numeric: tabular-nums;
+            font-family: 'Inter', -apple-system, monospace;
         }
 
-        /* Estilos de Tabla Dinámica Expandible / Contraíble */
+        /* Fila Nivel 1: GRUPO (Idéntico a .row-periodo en RendimientosChuletas002) */
         .row-grupo {
-            background-color: #e2e8f0 !important;
-            color: #1e3a8a;
+            background: linear-gradient(90deg, #1C2833 0%, #2C3E50 100%) !important;
+            color: #FFFFFF !important;
             font-weight: 700;
             cursor: pointer;
             user-select: none;
-            border-top: 2px solid #cbd5e1;
+            transition: background 0.15s;
         }
 
         .row-grupo:hover {
-            background-color: #cbd5e1 !important;
+            background: linear-gradient(90deg, #151E27 0%, #1C2833 100%) !important;
         }
 
+        .row-grupo td {
+            border-bottom: 1px solid #34495E;
+            padding: 10px 14px;
+        }
+
+        .grupo-title {
+            color: var(--pantone-yellow);
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        /* Fila Nivel 2: CLASE (Idéntico a .row-tipo en RendimientosChuletas002) */
         .row-clase {
-            background-color: #f1f5f9 !important;
-            color: #334155;
+            background-color: #F8F9FA !important;
+            color: var(--pantone-dark) !important;
             font-weight: 600;
             cursor: pointer;
             user-select: none;
-            border-top: 1px solid #e2e8f0;
+            transition: background 0.15s;
         }
 
         .row-clase:hover {
-            background-color: #e2e8f0 !important;
+            background-color: rgba(244, 208, 63, 0.12) !important;
         }
 
+        .row-clase td {
+            border-bottom: 1px solid #CBD5E1;
+            padding: 8px 14px;
+        }
+
+        .clase-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            background: var(--pantone-gold-soft);
+            color: var(--pantone-dark);
+            border: 1px solid var(--pantone-gold-border);
+        }
+
+        /* Fila Nivel 3: ARTÍCULO (Idéntico a .row-plantilla en RendimientosChuletas002) */
         .row-articulo {
-            background-color: #ffffff;
-            font-size: 11.5px;
+            background-color: #FFFFFF !important;
+            color: var(--pantone-dark);
+            font-size: 0.82rem;
+            transition: background 0.12s;
+        }
+
+        .row-articulo:nth-child(even) {
+            background-color: #FAFAFA !important;
         }
 
         .row-articulo:hover {
-            background-color: #f8fafc !important;
+            background-color: rgba(244, 208, 63, 0.06) !important;
         }
 
+        .row-articulo td {
+            border-bottom: 1px solid var(--border-ui);
+            padding: 8px 14px;
+        }
+
+        .art-code-badge {
+            display: inline-block;
+            background: #EBEDEF;
+            color: var(--pantone-dark);
+            border: 1px solid #D5D8DC;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            margin-right: 6px;
+        }
+
+        /* Icono de árbol (+/-) */
         .toggle-btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 17px;
-            height: 17px;
+            width: 18px;
+            height: 18px;
             margin-right: 7px;
-            background: #ffffff;
-            border: 1px solid #94a3b8;
-            border-radius: 3px;
+            border-radius: 4px;
             font-size: 11px;
             line-height: 1;
             font-family: monospace;
             font-weight: bold;
-            color: #1e293b;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+        }
+
+        .row-grupo .toggle-btn {
+            background: var(--pantone-yellow-soft);
+            color: var(--pantone-yellow);
+            border: 1px solid var(--pantone-yellow-border);
+        }
+
+        .row-clase .toggle-btn {
+            background: var(--pantone-gold-soft);
+            color: var(--pantone-dark);
+            border: 1px solid var(--pantone-gold-border);
         }
 
         .btn-matriz-ctrl {
-            padding: 5px 12px;
-            font-size: 12px;
-            font-weight: 600;
-            border: 1px solid var(--border);
-            background: #fff;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.2s;
-            color: var(--primary);
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            gap: 4px;
+            gap: 6px;
+            padding: 7px 13px;
+            border-radius: 7px;
+            border: 1px solid var(--border-ui);
+            background: #FFFFFF;
+            color: var(--pantone-dark);
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
         }
 
         .btn-matriz-ctrl:hover {
-            background: #f1f5f9;
-            border-color: var(--primary);
+            background: #F8FAFC;
+            border-color: var(--pantone-gold);
+            color: var(--pantone-dark);
+            transform: translateY(-1px);
         }
 
         .subtotal-badge {
-            font-size: 10.5px;
-            color: #64748b;
+            font-size: 0.74rem;
+            color: var(--pantone-gray-light);
             margin-left: 8px;
-            font-weight: normal;
-            font-style: italic;
+            font-weight: 500;
+        }
+
+        .row-clase .subtotal-badge {
+            color: var(--pantone-gray-dark);
         }
 
         /* Columna fija para scroll horizontal en Matriz Mensual */
@@ -291,28 +461,40 @@
             left: 0;
             z-index: 2;
             background-color: inherit;
-            box-shadow: 2px 0 4px rgba(0, 0, 0, 0.04);
+            box-shadow: 2px 0 4px rgba(28, 40, 51, 0.06);
         }
 
         table.matrix-table-mes th.sticky-col {
-            z-index: 4;
-            background-color: var(--primary);
+            z-index: 12;
+            background-color: var(--pantone-dark);
         }
 
         .row-grupo .sticky-col {
-            background-color: #e2e8f0 !important;
+            background: #1C2833 !important;
+        }
+
+        .row-grupo:hover .sticky-col {
+            background: #151E27 !important;
         }
 
         .row-clase .sticky-col {
-            background-color: #f1f5f9 !important;
+            background-color: #F8F9FA !important;
+        }
+
+        .row-clase:hover .sticky-col {
+            background-color: #FDF8E1 !important;
         }
 
         .row-articulo .sticky-col {
-            background-color: #ffffff !important;
+            background-color: #FFFFFF !important;
+        }
+
+        .row-articulo:nth-child(even) .sticky-col {
+            background-color: #FAFAFA !important;
         }
 
         .row-articulo:hover .sticky-col {
-            background-color: #f8fafc !important;
+            background-color: #FEFCF0 !important;
         }
     </style>
 </head>
@@ -333,9 +515,9 @@
 
     <!-- Banner de Estado de Carga -->
     <div id="statusBanner"
-        style="background: #e0f2fe; color: #0369a1; padding: 12px 20px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; display: flex; align-items: center; gap: 12px; border: 1px solid #bae6fd;">
+        style="background: var(--pantone-yellow-soft); color: var(--pantone-dark); padding: 12px 20px; border-radius: 10px; margin-bottom: 20px; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 12px; border: 1px solid var(--pantone-yellow-border);">
         <span
-            style="display:inline-block; width:16px; height:16px; border:2px solid #0369a1; border-top-color:transparent; border-radius:50%; animation: spin 1s linear infinite;"></span>
+            style="display:inline-block; width:16px; height:16px; border:2px solid var(--pantone-dark); border-top-color:transparent; border-radius:50%; animation: spin 1s linear infinite;"></span>
         <span id="statusText">Conectando con la API y leyendo datos de Presupuesto 2027 desde Excel...</span>
     </div>
     <style>
@@ -346,21 +528,21 @@
         }
     </style>
 
-    <!-- Tarjetas KPI -->
+    <!-- Tarjetas KPI (Borde superior estilo RendimientosChuletas002) -->
     <div class="kpi-container">
-        <div class="kpi-card" style="border-left-color: var(--primary);">
+        <div class="kpi-card" style="border-top-color: var(--pantone-dark);">
             <div class="kpi-title">Presupuesto Total</div>
             <div class="kpi-value" id="kpiTotal">S/ 0.00</div>
         </div>
-        <div class="kpi-card" style="border-left-color: var(--orange);">
+        <div class="kpi-card" style="border-top-color: var(--pantone-yellow);">
             <div class="kpi-title">Cantidad Total</div>
             <div class="kpi-value" id="kpiCantidad">0</div>
         </div>
-        <div class="kpi-card" style="border-left-color: var(--purple);">
+        <div class="kpi-card" style="border-top-color: var(--pantone-gold);">
             <div class="kpi-title">Top Clase Presupuesto</div>
-            <div class="kpi-value" id="kpiTopClase" style="font-size: 13px;">-</div>
+            <div class="kpi-value" id="kpiTopClase" style="font-size: 1.05rem;">-</div>
         </div>
-        <div class="kpi-card" style="border-left-color: var(--green);">
+        <div class="kpi-card" style="border-top-color: var(--pantone-gray-dark);">
             <div class="kpi-title">Total Registros</div>
             <div class="kpi-value" id="kpiRegistros">0</div>
         </div>
@@ -399,12 +581,11 @@
 
         <div class="card">
             <div
-                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
-                <h3 style="margin-bottom: 0; text-align: left; font-size: 14px;">📊 Matriz de Resumen y Artículos</h3>
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border-ui); flex-wrap: wrap; gap: 10px;">
+                <h3 style="margin-bottom: 0; padding-bottom: 0; border-bottom: none; font-size: 1rem;">📊 Matriz de Resumen y Artículos</h3>
                 <div style="display: flex; gap: 6px;">
                     <button type="button" class="btn-matriz-ctrl" onclick="expandirTodoMatriz(true)">➕ Expandir</button>
-                    <button type="button" class="btn-matriz-ctrl" onclick="expandirTodoMatriz(false)">➖
-                        Contraer</button>
+                    <button type="button" class="btn-matriz-ctrl" onclick="expandirTodoMatriz(false)">➖ Contraer</button>
                 </div>
             </div>
             <div class="table-wrapper">
@@ -426,26 +607,23 @@
         <!-- Fila Inferior: Matriz de Presupuesto Mensual (Ancho Completo con Segmentador de Trimestre) -->
         <div class="card full-width">
             <div
-                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 12px;">
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border-ui); flex-wrap: wrap; gap: 12px;">
                 <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
-                    <h3 style="margin-bottom: 0; text-align: left; font-size: 15px;">📅 Matriz de Presupuesto Mensual
-                    </h3>
+                    <h3 style="margin-bottom: 0; padding-bottom: 0; border-bottom: none; font-size: 1.05rem;">📅 Matriz de Presupuesto Mensual</h3>
                     <!-- Segmentador por Trimestre -->
                     <div
-                        style="display: flex; align-items: center; gap: 8px; background: #f8fafc; padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border);">
+                        style="display: flex; align-items: center; gap: 8px; background: var(--pantone-yellow-soft); padding: 5px 12px; border-radius: 8px; border: 1px solid var(--pantone-yellow-border);">
                         <label for="cboTrimestre"
-                            style="font-size: 12px; font-weight: 700; color: var(--primary);">Trimestre:</label>
+                            style="font-size: 0.76rem; font-weight: 700; text-transform: uppercase; color: var(--pantone-dark);">Trimestre:</label>
                         <select id="cboTrimestre" onchange="filtrarMatrizPorTrimestre()"
-                            style="padding: 4px 10px; font-size: 12px; border-radius: 4px; border: 1px solid var(--border); background: #fff; cursor: pointer; font-weight: 600; color: #1e293b; outline: none;">
+                            style="padding: 5px 10px; font-size: 0.82rem; border-radius: 6px; border: 1px solid var(--border-ui); background: #FFFFFF; cursor: pointer; font-weight: 600; color: var(--text-dark); outline: none;">
                             <option value="TODOS">-- Todos los Meses (Año Completo) --</option>
                         </select>
                     </div>
                 </div>
                 <div style="display: flex; gap: 8px;">
-                    <button type="button" class="btn-matriz-ctrl" onclick="expandirTodoMatrizMes(true)">➕ Expandir
-                        Todo</button>
-                    <button type="button" class="btn-matriz-ctrl" onclick="expandirTodoMatrizMes(false)">➖ Contraer
-                        Todo</button>
+                    <button type="button" class="btn-matriz-ctrl" onclick="expandirTodoMatrizMes(true)">📂 Expandir Todo</button>
+                    <button type="button" class="btn-matriz-ctrl" onclick="expandirTodoMatrizMes(false)">📁 Contraer Todo</button>
                 </div>
             </div>
             <div class="table-wrapper">
@@ -461,23 +639,94 @@
         </div>
     </div>
 
-    <!-- Configuración compartida de conexión a la API -->
-    <script src="config.js"></script>
-
     <script>
         // =========================================================================
-        // ⚙️ CONFIGURACIÓN DE CONEXIÓN A LA API (Híbrida: usa config.js si existe)
+        // 🎨 PALETA OFICIAL DE RENDIMIENTOSCHULETAS002.HTML
         // =========================================================================
-        const APP_CONFIG = {
-            servidor: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.servidor) 
-                      ? GLOBAL_CONFIG.servidor 
-                      : "RAEVSALL001",
-            puertos: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.puertos) 
-                     ? GLOBAL_CONFIG.puertos 
-                     : [8080, 5000]
+        const INDUSTRIAL_SLATE_GOLD = {
+            dataColors: [
+                "#F4D03F",
+                "#34495E",
+                "#5D6D7E",
+                "#85929E",
+                "#2C3E50",
+                "#D4AC0D",
+                "#1C2833",
+                "#AEB6BF",
+                "#7F8C8D",
+                "#B7950B"
+            ],
+            background: "#F2F4F8",
+            foreground: "#2E2A2F",
+            tableAccent: "#F4D03F",
+            card: "#FFFFFF",
+            grid: "#E2E8F0",
+            textMuted: "#5D6D7E",
+            white: "#FFFFFF"
         };
 
-        // Generación de servidores API apuntando al nombre del equipo
+        const GRAFICOS_PALETA = {
+            rankingPlantillas: [
+                "rgba(44, 66, 87, 0.92)",   // 01. Deep Slate Navy (#2C4257)
+                "rgba(53, 83, 110, 0.90)",  // 02. Muted Steel Blue (#35536E)
+                "rgba(62, 98, 130, 0.90)",  // 03. Industrial Slate Blue (#3E6282)
+                "rgba(72, 111, 145, 0.88)", // 04. Smoky Cerulean Slate (#486F91)
+                "rgba(82, 122, 154, 0.88)", // 05. Blue-Gray Pewter (#527A9A)
+                "rgba(52, 73, 94, 0.90)",   // 06. Dark Slate Plomo (#34495E)
+                "rgba(91, 127, 149, 0.88)", // 07. Cool Steel Slate (#5B7F95)
+                "rgba(74, 96, 116, 0.88)",  // 08. Medium Slate Blue-Gray (#4A6074)
+                "rgba(99, 130, 154, 0.86)", // 09. Muted Air Force Slate (#63829A)
+                "rgba(93, 109, 126, 0.88)", // 10. Cool Slate Plomo (#5D6D7E)
+                "rgba(110, 138, 159, 0.86)",// 11. Dusty Blue-Slate (#6E8A9F)
+                "rgba(108, 122, 137, 0.86)",// 12. Balanced Pewter Plomo (#6C7A89)
+                "rgba(124, 149, 168, 0.85)",// 13. Mist Blue-Gray (#7C95A8)
+                "rgba(133, 146, 158, 0.85)",// 14. Silver Slate Plomo (#85929E)
+                "rgba(149, 165, 178, 0.85)" // 15. Pale Metallic Slate (#95A5B2)
+            ],
+            rankingPlantillasBorder: [
+                "#1E2F3F",
+                "#263D52",
+                "#2E4B64",
+                "#365773",
+                "#3E617D",
+                "#253544",
+                "#456376",
+                "#374857",
+                "#4B6578",
+                "#465360",
+                "#546C7E",
+                "#525D69",
+                "#5F7485",
+                "#68737D",
+                "#758591"
+            ],
+            temporal: {
+                rendimientoLine: "#F4D03F",
+                rendimientoFill: "rgba(58, 91, 120, 0.12)",
+                rendimientoPoint: "#1C2833",
+                rendimientoPointBorder: "#F4D03F",
+                rendimientoHoverPoint: "#D4AC0D",
+                kilosOrigenBar: "rgba(115, 128, 142, 0.85)",
+                kilosOrigenBorder: "#5D6D7E",
+                kilosOrigenHover: "#475569",
+                kilosResultadoBar: "rgba(58, 91, 120, 0.90)",
+                kilosResultadoBorder: "#2C4760",
+                kilosResultadoHover: "#243B50"
+            }
+        };
+
+        // =========================================================================
+        // ⚙️ CONFIGURACIÓN DE CONEXIÓN HÍBRIDA A LA API .NET
+        // =========================================================================
+        const APP_CONFIG = {
+            servidor: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.servidor)
+                ? GLOBAL_CONFIG.servidor
+                : "RAEVSALL001",
+            puertos: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.puertos)
+                ? GLOBAL_CONFIG.puertos
+                : [8080, 5000]
+        };
+
         function generarBasesApi() {
             if (typeof generarBasesApiGlobal === 'function') {
                 return generarBasesApiGlobal();
@@ -489,21 +738,28 @@
             return bases;
         }
 
-        const BASE_HOSTS = generarBasesApi();
-        const PALETA = ['#3A4758', '#89A5CC', '#647F93', '#0B6679', '#9EBEC3', '#98C7BB', '#76B1C7', '#CACDC3'];
+        APP_CONFIG.controllerPath = "/api/presupuesto/dashboard-data";
+        APP_CONFIG.timeoutMs = 25000;
+
+        // Estado global de conexión
+        let apiBaseActiva = null;
+        let respuestaInicialCache = null;
 
         let rawData = [];
         let instGraficos = {};
 
         window.addEventListener('DOMContentLoaded', inicializar);
 
-        async function fetchConTimeout(url, timeoutMs = 6000) {
+        // =========================================================================
+        // 🌐 UTILIDADES DE RED Y DETECCIÓN RESILIENTE
+        // =========================================================================
+        async function fetchConTimeout(url, timeoutMs = 10000) {
             const controller = new AbortController();
             const id = setTimeout(() => controller.abort(), timeoutMs);
             try {
-                const response = await fetch(url, { signal: controller.signal });
+                const res = await fetch(url, { signal: controller.signal });
                 clearTimeout(id);
-                return response;
+                return res;
             } catch (err) {
                 clearTimeout(id);
                 throw err;
@@ -511,18 +767,24 @@
         }
 
         async function detectarServidorApi(statusText) {
-            for (const base of BASE_HOSTS) {
+            const bases = generarBasesApi();
+            for (const base of bases) {
                 try {
                     if (statusText) statusText.innerText = `Buscando API en ${base}...`;
-                    const res = await fetchConTimeout(`${base}/`, 1500);
+                    // Intento 1: Consultar el endpoint del controlador con timeout de 3.5s
+                    const res = await fetchConTimeout(`${base}${APP_CONFIG.controllerPath}`, 3500);
                     if (res.ok) {
-                        const txt = await res.text();
-                        if (txt.includes("API Desposte")) {
-                            return base;
-                        }
+                        respuestaInicialCache = res;
+                        return base;
                     }
                 } catch (e) {
-                    // Siguiente servidor
+                    // Intento 2 (Fallback): Ping rápido a la raíz '/' por si el endpoint demora leyendo datos pesados (Excel/BD)
+                    try {
+                        const pingRes = await fetchConTimeout(`${base}/`, 2000);
+                        if (pingRes.ok) return base;
+                    } catch (errPing) {
+                        // Siguiente candidato
+                    }
                 }
             }
             return null;
@@ -533,16 +795,20 @@
             const statusText = document.getElementById('statusText');
             try {
                 // Paso 1: Localizar el servidor activo dando prioridad al puerto 8080
-                const baseActiva = await detectarServidorApi(statusText);
+                apiBaseActiva = await detectarServidorApi(statusText);
 
-                if (!baseActiva) {
-                    throw new Error("No se pudo conectar con la API en el puerto 8080 (ni en 5000). Asegúrate de iniciar la API con 'dotnet run'.");
+                if (!apiBaseActiva) {
+                    throw new Error(`No se pudo conectar a ${APP_CONFIG.servidor} en puertos ${APP_CONFIG.puertos.join('/')}`);
                 }
 
-                if (statusText) statusText.innerText = `Conectado a ${baseActiva}. Leyendo archivo Excel...`;
+                if (statusText) statusText.innerText = `Conectado a ${apiBaseActiva}. Leyendo archivo Excel...`;
 
                 // Paso 2: Descargar datos del presupuesto
-                const res = await fetch(`${baseActiva}/api/presupuesto/dashboard-data`);
+                let res = respuestaInicialCache;
+                respuestaInicialCache = null;
+                if (!res) {
+                    res = await fetchConTimeout(`${apiBaseActiva}${APP_CONFIG.controllerPath}`, APP_CONFIG.timeoutMs);
+                }
                 if (!res.ok) throw new Error(`El servidor respondió con código HTTP ${res.status}`);
 
                 rawData = await res.json();
@@ -644,11 +910,33 @@
             const datosGrupo = agrupar(data, obtenerNombreCampo(data[0], ['Ngrupo', 'Grupo', 'GRUPO']), campoMonto, true);
             const datosClase = agrupar(data, obtenerNombreCampo(data[0], ['Nclase', 'Clase', 'CLASE']), campoMonto, true);
 
-            // 3. Render / Update de Gráficos (Azules Plomizos y Plomos Pizarra)
-            actualizarGrafico('chartMes', 'bar', datosMes.etiquetas, datosMes.valores, 'rgba(58, 91, 120, 0.90)');
-            actualizarGrafico('chartTrimestre', 'doughnut', datosTrim.etiquetas, datosTrim.valores, PALETA);
-            actualizarGrafico('chartGrupo', 'bar-h', datosGrupo.etiquetas, datosGrupo.valores, 'rgba(74, 96, 116, 0.88)');
-            actualizarGrafico('chartClase', 'bar-h', datosClase.etiquetas, datosClase.valores, 'rgba(108, 122, 137, 0.86)');
+            // 3. Render / Update de Gráficos con la paleta exacta de RendimientosChuletas002.html
+            actualizarGrafico(
+                'chartMes',
+                'bar',
+                datosMes.etiquetas,
+                datosMes.valores,
+                GRAFICOS_PALETA.temporal.kilosResultadoBar,
+                GRAFICOS_PALETA.temporal.kilosResultadoBorder,
+                GRAFICOS_PALETA.temporal.kilosResultadoHover
+            );
+
+            actualizarGrafico(
+                'chartTrimestre',
+                'doughnut',
+                datosTrim.etiquetas,
+                datosTrim.valores,
+                INDUSTRIAL_SLATE_GOLD.dataColors,
+                '#FFFFFF'
+            );
+
+            const coloresGrupo = datosGrupo.etiquetas.map((_, i) => GRAFICOS_PALETA.rankingPlantillas[i % GRAFICOS_PALETA.rankingPlantillas.length]);
+            const bordesGrupo = datosGrupo.etiquetas.map((_, i) => GRAFICOS_PALETA.rankingPlantillasBorder[i % GRAFICOS_PALETA.rankingPlantillasBorder.length]);
+            actualizarGrafico('chartGrupo', 'bar-h', datosGrupo.etiquetas, datosGrupo.valores, coloresGrupo, bordesGrupo, '#2C4760');
+
+            const coloresClase = datosClase.etiquetas.map((_, i) => GRAFICOS_PALETA.rankingPlantillas[i % GRAFICOS_PALETA.rankingPlantillas.length]);
+            const bordesClase = datosClase.etiquetas.map((_, i) => GRAFICOS_PALETA.rankingPlantillasBorder[i % GRAFICOS_PALETA.rankingPlantillasBorder.length]);
+            actualizarGrafico('chartClase', 'bar-h', datosClase.etiquetas, datosClase.valores, coloresClase, bordesClase, '#2C4760');
 
             // 4. Matrices Dinámicas (Mensual y Resumen)
             renderizarMatrizMensual(data, campoMonto);
@@ -706,12 +994,12 @@
             mesesAVisualizar.forEach(mIdx => {
                 thHtml += `<th class="num-col" style="min-width: 80px;">${NOMBRES_MESES[mIdx]}</th>`;
             });
-            thHtml += `<th class="num-col" style="min-width: 105px; background-color: #1b365d;">${labelTotal}</th></tr>`;
+            thHtml += `<th class="num-col" style="min-width: 105px; background-color: var(--pantone-darker); color: var(--pantone-yellow);">${labelTotal}</th></tr>`;
             thead.innerHTML = thHtml;
 
             // Si no hay datos tras filtrar
             if (!datosFiltrados || datosFiltrados.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="${mesesAVisualizar.length + 2}" style="text-align: center; padding: 25px; color: #64748b;">No se encontraron registros para el trimestre seleccionado.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="${mesesAVisualizar.length + 2}" style="text-align: center; padding: 25px; color: var(--text-muted);">No se encontraron registros para el trimestre seleccionado.</td></tr>`;
                 return;
             }
 
@@ -757,7 +1045,7 @@
             );
 
             gruposOrdenados.forEach((gObj, gIdx) => {
-                // Fila de Grupo
+                // Fila de Grupo (Estilo .row-periodo de RendimientosChuletas002)
                 const trGrupo = document.createElement('tr');
                 trGrupo.className = 'row-grupo';
                 trGrupo.setAttribute('data-gidx', gIdx);
@@ -774,10 +1062,10 @@
                 trGrupo.innerHTML = `
                     <td class="sticky-col">
                         <span id="icon-gmes-${gIdx}" class="toggle-btn">−</span>
-                        <span><b>${gObj.nombre}</b></span>
+                        <span class="grupo-title">${gObj.nombre}</span>
                     </td>
                     ${htmlMeses}
-                    <td class="num-col" style="background-color: #e2e8f0;"><b>S/ ${Math.round(totalGrupoVis).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</b></td>
+                    <td class="num-col" style="background-color: var(--pantone-darker); color: var(--pantone-yellow);"><b>S/ ${Math.round(totalGrupoVis).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</b></td>
                 `;
                 tbody.appendChild(trGrupo);
 
@@ -789,7 +1077,7 @@
                 clasesOrdenadas.forEach((cObj, cIdx) => {
                     const artsList = Object.values(cObj.articulosMap).sort((a, b) => b.totalMonto - a.totalMonto);
 
-                    // Fila de Clase
+                    // Fila de Clase (Estilo .row-tipo de RendimientosChuletas002)
                     const trClase = document.createElement('tr');
                     trClase.className = `row-clase gmes-child-${gIdx}`;
                     trClase.setAttribute('data-gidx', gIdx);
@@ -807,14 +1095,14 @@
                     trClase.innerHTML = `
                         <td class="sticky-col" style="padding-left: 24px;">
                             <span id="icon-cmes-${gIdx}-${cIdx}" class="toggle-btn">−</span>
-                            <span><b>${cObj.nombre}</b></span>
+                            <span class="clase-badge">${cObj.nombre}</span>
                         </td>
                         ${htmlMesesClase}
-                        <td class="num-col" style="background-color: #f1f5f9;"><b>S/ ${Math.round(totalClaseVis).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</b></td>
+                        <td class="num-col" style="background-color: #EBEDEF; color: var(--pantone-dark);"><b>S/ ${Math.round(totalClaseVis).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</b></td>
                     `;
                     tbody.appendChild(trClase);
 
-                    // Filas de Artículos
+                    // Filas de Artículos (Estilo .row-plantilla de RendimientosChuletas002)
                     artsList.forEach(art => {
                         const trArt = document.createElement('tr');
                         trArt.className = `row-articulo gmes-child-${gIdx} cmes-child-${gIdx}-${cIdx}`;
@@ -828,10 +1116,8 @@
                         });
 
                         trArt.innerHTML = `
-                            <td class="sticky-col" style="padding-left: 48px; color: #334155;">
-                                <span style="display: inline-block; width: 5px; height: 5px; background: #64748b; border-radius: 50%; margin-right: 6px; vertical-align: middle;"></span>
-                                <span style="font-family: monospace; font-weight: bold; color: #1e3a8a; margin-right: 5px;">${art.artId}</span>
-                                <span style="color: #64748b; margin-right: 5px;">-</span>
+                            <td class="sticky-col" style="padding-left: 48px;">
+                                <span class="art-code-badge">${art.artId}</span>
                                 <span title="${art.artNom}">${art.artNom}</span>
                             </td>
                             ${htmlMesesArt}
@@ -856,7 +1142,7 @@
         }
 
         function formatMontoMes(val, esSubtotal = false) {
-            if (!val || Math.round(val) === 0) return `<span style="color: #cbd5e1;">-</span>`;
+            if (!val || Math.round(val) === 0) return `<span style="color: var(--pantone-gray-light);">-</span>`;
             const txt = Math.round(val).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
             return esSubtotal ? `<b>${txt}</b>` : txt;
         }
@@ -961,9 +1247,9 @@
                 a.nombre.localeCompare(b.nombre, 'es', { numeric: true })
             );
 
-            // Generar filas jerárquicas en Diseño Compacto (Orden: Grupo -> Clase -> Código y Artículo)
+            // Generar filas jerárquicas en Diseño RendimientosChuletas002
             gruposOrdenados.forEach((gObj, gIdx) => {
-                // 1. Fila de Grupo (Botón de expansión a nivel de Grupo)
+                // 1. Fila de Grupo
                 const trGrupo = document.createElement('tr');
                 trGrupo.className = 'row-grupo';
                 trGrupo.setAttribute('data-gidx', gIdx);
@@ -971,11 +1257,11 @@
                 trGrupo.innerHTML = `
                     <td>
                         <span id="icon-grp-${gIdx}" class="toggle-btn">−</span>
-                        <span><b>${gObj.nombre}</b></span>
+                        <span class="grupo-title">${gObj.nombre}</span>
                         <span class="subtotal-badge">(${Object.keys(gObj.clases).length} clases)</span>
                     </td>
                     <td class="num-col"><b>${Math.round(gObj.totalCant).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</b></td>
-                    <td class="num-col"><b>S/ ${Math.round(gObj.totalMonto).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</b></td>
+                    <td class="num-col" style="color: var(--pantone-yellow);"><b>S/ ${Math.round(gObj.totalMonto).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</b></td>
                 `;
                 tbody.appendChild(trGrupo);
 
@@ -987,7 +1273,7 @@
                 clasesOrdenadas.forEach((cObj, cIdx) => {
                     const artsList = Object.values(cObj.articulosMap).sort((a, b) => b.monto - a.monto);
 
-                    // 2. Fila de Clase (Botón de expansión a nivel de Clase, sangría 24px)
+                    // 2. Fila de Clase
                     const trClase = document.createElement('tr');
                     trClase.className = `row-clase grp-child-${gIdx}`;
                     trClase.setAttribute('data-gidx', gIdx);
@@ -996,7 +1282,7 @@
                     trClase.innerHTML = `
                         <td style="padding-left: 24px;">
                             <span id="icon-cls-${gIdx}-${cIdx}" class="toggle-btn">−</span>
-                            <span><b>${cObj.nombre}</b></span>
+                            <span class="clase-badge">${cObj.nombre}</span>
                             <span class="subtotal-badge">(${artsList.length} artículos)</span>
                         </td>
                         <td class="num-col">${Math.round(cObj.totalCant).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</td>
@@ -1004,14 +1290,13 @@
                     `;
                     tbody.appendChild(trClase);
 
-                    // 3. Filas de Artículos (Detalle: Código y Artículo, sin botón, sangría 48px)
+                    // 3. Filas de Artículos
                     artsList.forEach(art => {
                         const trArt = document.createElement('tr');
                         trArt.className = `row-articulo grp-child-${gIdx} cls-child-${gIdx}-${cIdx}`;
                         trArt.innerHTML = `
-                            <td style="padding-left: 48px; color: #334155;">
-                                <span style="display: inline-block; width: 5px; height: 5px; background: #64748b; border-radius: 50%; margin-right: 8px; vertical-align: middle;"></span>
-                                <span style="font-family: monospace; font-weight: 700; color: #1e4e78; background: #e2e8f0; padding: 1px 6px; border-radius: 3px; margin-right: 6px;">${art.artId}</span>
+                            <td style="padding-left: 48px;">
+                                <span class="art-code-badge">${art.artId}</span>
                                 <span>${art.artNom}</span>
                             </td>
                             <td class="num-col">${Math.round(art.cant).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</td>
@@ -1036,11 +1321,9 @@
             });
 
             if (isExpanded) {
-                // Al contraer grupo, ocultar todos sus artículos
                 const articulos = document.querySelectorAll(`.row-articulo.grp-child-${gIdx}`);
                 articulos.forEach(rowArt => rowArt.style.display = 'none');
             } else {
-                // Al expandir grupo, mostrar solo artículos de las clases que estén abiertas
                 clases.forEach(rowCls => {
                     const cIdx = rowCls.getAttribute('data-cidx');
                     const clsIcon = document.getElementById(`icon-cls-${gIdx}-${cIdx}`);
@@ -1103,7 +1386,7 @@
 
             document.getElementById('kpiTotal').innerText = 'S/ ' + totalMonto.toLocaleString('es-PE', { minimumFractionDigits: 2 });
             document.getElementById('kpiCantidad').innerText = totalCant.toLocaleString('es-PE', { minimumFractionDigits: 2 });
-            document.getElementById('kpiRegistros').innerText = data.length;
+            document.getElementById('kpiRegistros').innerText = data.length.toLocaleString('es-PE');
 
             const claseCampo = obtenerNombreCampo(data[0], ['Nclase', 'Clase', 'CLASE']);
             document.getElementById('kpiTopClase').innerText = obtenerMayor(agrupar(data, claseCampo, campoMonto));
@@ -1118,24 +1401,69 @@
             return objAgrupado.etiquetas[maxIdx];
         }
 
-        function actualizarGrafico(idCanvas, tipo, etiquetas, valores, colores) {
+        function actualizarGrafico(idCanvas, tipo, etiquetas, valores, colores, colorBorde = '#2C4760', colorHover = '#243B50') {
             if (instGraficos[idCanvas]) instGraficos[idCanvas].destroy();
 
             const ctx = document.getElementById(idCanvas).getContext('2d');
+            const tooltipTheme = {
+                backgroundColor: '#1C2833',
+                titleColor: '#F4D03F',
+                titleFont: { family: 'Inter', weight: '700', size: 12 },
+                bodyFont: { family: 'Inter', size: 11 },
+                bodyColor: '#FFFFFF',
+                borderColor: '#34495E',
+                borderWidth: 1,
+                padding: 10
+            };
+
+            let dataset = {
+                label: 'Presupuesto (S/)',
+                data: valores,
+                backgroundColor: colores,
+                borderColor: colorBorde,
+                borderWidth: 1.5
+            };
+
+            if (tipo !== 'doughnut') {
+                dataset.hoverBackgroundColor = colorHover;
+                dataset.borderRadius = 6;
+            }
+
             let config = {
-                data: { labels: etiquetas, datasets: [{ label: 'Presupuesto (S/)', data: valores, backgroundColor: colores }] },
-                options: { responsive: true, maintainAspectRatio: false }
+                data: { labels: etiquetas, datasets: [dataset] },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: tooltipTheme
+                    }
+                }
             };
 
             if (tipo === 'bar') {
                 config.type = 'bar';
+                config.options.plugins.legend = {
+                    position: 'top',
+                    labels: { boxWidth: 12, color: '#2E2A2F', font: { family: 'Inter', size: 11, weight: '600' } }
+                };
+                config.options.scales = {
+                    x: { grid: { display: false }, ticks: { color: '#5D6D7E', font: { family: 'Inter', size: 10 } } },
+                    y: { grid: { color: '#E2E8F0' }, ticks: { color: '#5D6D7E', font: { family: 'Inter', size: 10 } } }
+                };
             } else if (tipo === 'bar-h') {
                 config.type = 'bar';
                 config.options.indexAxis = 'y';
-                config.options.plugins = { legend: { display: false } };
+                config.options.plugins.legend = { display: false };
+                config.options.scales = {
+                    x: { grid: { color: '#E2E8F0' }, ticks: { color: '#5D6D7E', font: { family: 'Inter', size: 10 } } },
+                    y: { grid: { display: false }, ticks: { color: '#2E2A2F', font: { family: 'Inter', size: 11, weight: '500' } } }
+                };
             } else if (tipo === 'doughnut') {
                 config.type = 'doughnut';
-                config.options.plugins = { legend: { position: 'right' } };
+                config.options.plugins.legend = {
+                    position: 'right',
+                    labels: { color: '#2E2A2F', font: { family: 'Inter', size: 11, weight: '600' } }
+                };
             }
 
             instGraficos[idCanvas] = new Chart(ctx, config);

@@ -748,47 +748,13 @@
             text-transform: uppercase;
         }
 
-        /* TABLA MATRIZ (ESTILO CLARO Y LIMPIO - SLATE BLUE & PEWTER SUAVE) */
+        /* TABLA MATRIZ (IDÉNTICA A ResumenPl_PTC.html) */
         .matrix-card {
             background: var(--bg-card);
             border: 1px solid var(--border-ui);
             border-radius: 12px;
             padding: 20px;
             box-shadow: var(--shadow-sm);
-            overflow: hidden;
-        }
-
-        .matrix-header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 14px;
-            padding-bottom: 14px;
-            margin-bottom: 14px;
-            border-bottom: 1px solid var(--border-ui);
-        }
-
-        .matrix-header-title {
-            font-size: 1rem;
-            font-weight: 700;
-            color: var(--chart-slate-navy);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .matrix-hierarchy-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 5px 12px;
-            border-radius: 999px;
-            background: #EEF3F8;
-            border: 1px solid #CBD5E1;
-            color: var(--chart-slate-navy);
-            font-size: 0.78rem;
-            font-weight: 600;
         }
 
         .matrix-toolbar {
@@ -804,19 +770,17 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            background: #F8FAFC;
-            border: 1px solid #CBD5E1;
+            background: #FFFFFF;
+            border: 1px solid var(--border-ui);
             padding: 8px 14px;
             border-radius: 8px;
-            width: 380px;
-            max-width: 100%;
+            width: 320px;
             transition: all 0.2s ease;
         }
 
         .search-box:focus-within {
-            background: #FFFFFF;
-            border-color: var(--chart-pewter-blue);
-            box-shadow: 0 0 0 3px rgba(82, 122, 154, 0.14);
+            border-color: var(--pantone-gold);
+            box-shadow: 0 0 0 3px var(--pantone-yellow-soft);
         }
 
         .search-box input {
@@ -831,33 +795,31 @@
         .table-responsive {
             width: 100%;
             overflow-x: auto;
-            max-height: 640px;
-            border: 1px solid #CBD5E1;
+            border: 1px solid var(--border-ui);
             border-radius: 8px;
-            background: #FFFFFF;
         }
 
         .matrix-table {
             width: 100%;
             border-collapse: separate;
             border-spacing: 0;
-            font-size: 0.83rem;
+            font-size: 0.85rem;
             text-align: left;
         }
 
         .matrix-table th {
-            background-color: #EEF2F6;
-            color: #2C4257;
+            background-color: var(--pantone-dark);
+            color: #FFFFFF;
             font-weight: 700;
-            font-size: 0.77rem;
+            font-size: 0.82rem;
             text-transform: uppercase;
             letter-spacing: 0.03em;
-            padding: 11px 14px;
+            padding: 12px 14px;
             position: sticky;
             top: 0;
             z-index: 10;
             white-space: nowrap;
-            border-bottom: 2px solid #B8C4D0;
+            border-bottom: 3px solid var(--pantone-yellow);
         }
 
         .matrix-table th.num-col,
@@ -868,88 +830,53 @@
         }
 
         .matrix-table td {
-            padding: 8px 14px;
-            border-bottom: 1px solid #EDF2F7;
-            color: #334155;
+            padding: 9px 14px;
+            border-bottom: 1px solid var(--border-ui);
+            color: var(--text-dark);
         }
 
-        /* NIVEL 1: SEMANA (TONO AZUL-PLOMO CLARO Y SUAVE) */
+        /* NIVEL 1: TOTALES SEMANALES CON ESTILO INDUSTRIAL */
         .level-1 td {
-            background-color: #E3ECF5 !important;
-            color: #1E2F3F !important;
+            background-color: #F8F9FA !important;
+            color: var(--pantone-dark) !important;
             font-weight: 700;
-            border-bottom: 1px solid #C5D3E2 !important;
-            border-top: 1px solid #D5E0EC !important;
+            border-bottom: 2px solid var(--border-ui) !important;
+            border-top: 1px solid var(--border-ui) !important;
         }
 
         .level-1:hover td {
-            background-color: #D8E4F0 !important;
+            background-color: var(--pantone-yellow-soft) !important;
         }
 
-        /* NIVEL 2: SUBPLANTA (TONO GRIS-AZULADO MUY CLARO) */
         .level-2 td {
-            background-color: #F1F5F9 !important;
-            color: #2C4257 !important;
-            font-weight: 700;
-            border-bottom: 1px solid #E2E8F0 !important;
+            background-color: #FFFFFF !important;
+            color: var(--text-dark) !important;
         }
 
         .level-2:hover td {
-            background-color: #E8EFF6 !important;
+            background-color: rgba(244, 208, 63, 0.08) !important;
         }
 
-        /* NIVEL 3: CODIGOCORTO Y NOMBRE (FONDO CLARO Y LIMPIO) */
         .level-3 td {
             background-color: #FFFFFF !important;
-            color: #334155 !important;
-            font-weight: 500;
-        }
-
-        .level-3:nth-child(even) td {
-            background-color: #FAFBFD !important;
+            color: var(--text-dark) !important;
         }
 
         .level-3:hover td {
-            background-color: #F1F5F9 !important;
-        }
-
-        .tag-subplanta {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            padding: 2px 9px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            background: #E2ECF5;
-            color: #2C4257;
-            border: 1px solid #B8C9DA;
-        }
-
-        /* FOOTER TOTAL GENERAL (CLARO Y ELEGANTE) */
-        .row-grand-total td {
-            background: #E2E8F0 !important;
-            color: #1E2F3F !important;
-            font-weight: 800;
-            position: sticky;
-            bottom: 0;
-            z-index: 9;
-            padding: 11px 14px;
-            border-top: 2px solid #94A3B8 !important;
+            background-color: rgba(244, 208, 63, 0.08) !important;
         }
 
         /* DIVISIONES ENTRE GRUPOS DE COLUMNAS EN LA MATRIZ */
         .matrix-table th.col-group-com-start,
         .matrix-table th.col-group-dist-start,
         .matrix-table th.col-group-prog-start {
-            border-left: 1px solid #CBD5E1 !important;
+            border-left: 2px solid rgba(244, 208, 63, 0.35) !important;
         }
 
         .matrix-table td.col-group-com-start,
         .matrix-table td.col-group-dist-start,
         .matrix-table td.col-group-prog-start {
-            border-left: 1px solid #E2E8F0 !important;
+            border-left: 2px solid var(--border-ui) !important;
         }
 
         .toggle-icon {
@@ -959,11 +886,11 @@
             width: 20px;
             height: 20px;
             border-radius: 5px;
-            background: #FFFFFF;
-            color: #2C4257;
-            border: 1px solid #94A3B8;
+            background: var(--pantone-yellow-soft);
+            color: var(--pantone-dark);
+            border: 1px solid var(--pantone-yellow-border);
             font-family: monospace;
-            font-size: 0.82rem;
+            font-size: 0.8rem;
             font-weight: 800;
             cursor: pointer;
             margin-right: 8px;
@@ -972,18 +899,31 @@
         }
 
         .toggle-icon:hover {
-            background: #2C4257;
-            color: #FFFFFF;
-            border-color: #2C4257;
+            background: var(--pantone-yellow);
+            color: var(--pantone-dark);
+        }
+
+        .tag-subplanta {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            background: var(--bg-card-alt);
+            color: var(--pantone-dark);
+            border: 1px solid var(--border-ui);
         }
 
         .sku-code-badge {
             display: inline-block;
-            background: #EEF2F6;
-            color: #2C4257;
-            border: 1px solid #CBD5E1;
+            background: var(--bg-card-alt);
+            color: var(--pantone-dark);
+            border: 1px solid var(--border-ui);
             font-family: 'JetBrains Mono', monospace;
-            font-size: 0.74rem;
+            font-size: 0.75rem;
             font-weight: 700;
             padding: 2px 7px;
             border-radius: 5px;
@@ -992,7 +932,7 @@
 
         .sku-name-text {
             font-weight: 500;
-            color: #334155;
+            color: var(--text-dark);
         }
 
         .toast-notification {
@@ -1110,7 +1050,9 @@
                         onclick="seleccionarFiltroRapidoSemana('latest')">Última Semana</button>
                     <button class="filter-quick-btn" id="btnQuickLast4"
                         onclick="seleccionarFiltroRapidoSemana('last4')">Últimas 4 Semanas</button>
-                    <button class="filter-quick-btn active active-semana" id="btnQuickAll"
+                    <button class="filter-quick-btn active active-semana" id="btnQuickLast8"
+                        onclick="seleccionarFiltroRapidoSemana('last8')">Últimas 8 Semanas</button>
+                    <button class="filter-quick-btn" id="btnQuickAll"
                         onclick="seleccionarFiltroRapidoSemana('all')">Todas las Semanas</button>
                 </div>
             </div>
@@ -1120,7 +1062,7 @@
                     <div class="week-combobox-trigger" onclick="toggleWeekDropdown(event)">
                         <div class="week-combobox-trigger-left">
                             <span>📅</span>
-                            <span id="weekComboboxLabel">Seleccionar semanas...</span>
+                            <span id="weekComboboxLabel">Últimas 8 semanas...</span>
                         </div>
                         <div style="display:flex; align-items:center; gap:8px;">
                             <span class="pill-badge-count" id="weekComboboxCount">0</span>
@@ -1135,11 +1077,13 @@
                                 oninput="filtrarOpcionesSemanaCombobox()">
                             <div class="week-combobox-actions">
                                 <button type="button" class="week-combo-action-btn"
-                                    onclick="seleccionarFiltroRapidoSemana('all')">✓ Todas</button>
+                                    onclick="seleccionarFiltroRapidoSemana('last8')">Últimas 8</button>
                                 <button type="button" class="week-combo-action-btn"
                                     onclick="seleccionarFiltroRapidoSemana('last4')">Últimas 4</button>
                                 <button type="button" class="week-combo-action-btn"
                                     onclick="seleccionarFiltroRapidoSemana('latest')">Última</button>
+                                <button type="button" class="week-combo-action-btn"
+                                    onclick="seleccionarFiltroRapidoSemana('all')">✓ Todas</button>
                             </div>
                         </div>
                         <div class="week-combobox-list" id="weekComboboxList"></div>
@@ -1247,25 +1191,14 @@
             </div>
         </section>
 
-        <!-- MATRIZ DETALLADA JERÁRQUICA POR SEMANA, SUBPLANTA, CODIGOCORTO Y NOMBRE -->
+        <!-- MATRIZ DETALLADA PIVOTADA -->
         <section class="matrix-card">
-            <div class="matrix-header-top">
-                <div class="matrix-header-title" id="matrixHeaderTitle">
-                    📊 Matriz Comparativa por Jerarquía
-                </div>
-                <div class="matrix-hierarchy-pill">
-                    <span>📅</span>
-                    <span>Jerarquía: <b>Semana ➔ SubPlanta ➔ CódigoCorto - Nombre</b></span>
-                </div>
-            </div>
-
             <div class="matrix-toolbar">
                 <div class="search-box">
-                    <span>🔍</span>
-                    <input type="text" id="searchMatriz" placeholder="Buscar Semana, SubPlanta, CódigoCorto o Nombre..."
+                    <input type="text" id="searchMatriz" placeholder="Buscar semana, subplanta, código o nombre..."
                         oninput="filtrarMatriz()">
                 </div>
-                <div style="display:flex; gap:8px;" id="treeActionButtons">
+                <div style="display:flex; gap:8px;">
                     <button class="btn" style="padding:6px 12px; font-size:0.78rem;"
                         onclick="toggleExpandirTodo(true)">⊞ Expandir Todo</button>
                     <button class="btn" style="padding:6px 12px; font-size:0.78rem;"
@@ -1275,15 +1208,25 @@
 
             <div class="table-responsive">
                 <table class="matrix-table" id="tbMatriz">
-                    <thead id="theadMatriz"></thead>
+                    <thead id="theadMatriz">
+                        <tr>
+                            <th style="min-width:240px;">Semana / SubPlanta / CódigoCorto - Nombre</th>
+                            <th class="num-col" style="color:var(--pantone-yellow);">Prod. Real (kg)</th>
+                            <th class="num-col th-com col-group-com-start">Proy. Comercial (kg)</th>
+                            <th class="num-col th-com">% Cumpl. Com.</th>
+                            <th class="num-col th-dist col-group-dist-start">Ped. Distribución (kg)</th>
+                            <th class="num-col th-dist">% Cumpl. Dist.</th>
+                            <th class="num-col th-prog col-group-prog-start">Prog. Producción (kg)</th>
+                            <th class="num-col th-prog">% Cumpl. Prog.</th>
+                        </tr>
+                    </thead>
                     <tbody id="tbodyMatriz">
                         <tr>
                             <td colspan="8" style="text-align:center; padding:30px; color:var(--text-muted);">
-                                Cargando información de las 4 tablas...
+                                Cargando información...
                             </td>
                         </tr>
                     </tbody>
-                    <tfoot id="tfootMatriz"></tfoot>
                 </table>
             </div>
         </section>
@@ -1526,7 +1469,9 @@
 
                 if (selectedYears.size === 0) aniosDisponibles.forEach(y => selectedYears.add(y));
                 if (selectedSubPlantas.size === 0) subPlantasDisponibles.forEach(sp => selectedSubPlantas.add(sp));
-                if (selectedWeeks.size === 0) semanasDisponibles.forEach(s => selectedWeeks.add(s));
+                if (selectedWeeks.size === 0) {
+                    semanasDisponibles.slice(-8).forEach(s => selectedWeeks.add(s));
+                }
                 if (selectedChartWeeks.size === 0) {
                     semanasDisponibles.slice(-8).forEach(s => selectedChartWeeks.add(s));
                 }
@@ -1763,6 +1708,11 @@
                 return selectedYears.has(anio);
             });
 
+            // Si al cambiar de año ninguna semana coincide con el año actual, preseleccionar las últimas 8
+            if (semanasValidas.length > 0 && !semanasValidas.some(s => selectedWeeks.has(s))) {
+                semanasValidas.slice(-8).forEach(s => selectedWeeks.add(s));
+            }
+
             const filtroTexto = (document.getElementById('weekSearchInput')?.value || '').trim().toLowerCase();
 
             // Mostrar de más reciente a más antigua en el desplegable para fácil selección
@@ -1808,9 +1758,21 @@
 
             if (countEl) countEl.textContent = `${seleccionadasEnAnio.length} / ${semanasValidas.length}`;
 
+            const ultimas8 = semanasValidas.slice(-8);
+            const esUltimas8 = semanasValidas.length > 0
+                && seleccionadasEnAnio.length === ultimas8.length
+                && ultimas8.every(s => selectedWeeks.has(s));
+
+            const ultimas4 = semanasValidas.slice(-4);
+            const esUltimas4 = semanasValidas.length >= 4
+                && seleccionadasEnAnio.length === ultimas4.length
+                && ultimas4.every(s => selectedWeeks.has(s));
+
             if (labelEl) {
                 if (seleccionadasEnAnio.length === 0) {
                     labelEl.textContent = 'Ninguna semana seleccionada';
+                } else if (esUltimas8 && semanasValidas.length > 1) {
+                    labelEl.textContent = `Últimas ${ultimas8.length} semanas (${ultimas8[0]} - ${ultimas8[ultimas8.length - 1]})`;
                 } else if (seleccionadasEnAnio.length === semanasValidas.length) {
                     labelEl.textContent = `Todas las semanas (${semanasValidas.length})`;
                 } else if (seleccionadasEnAnio.length === 1) {
@@ -1824,12 +1786,8 @@
                 }
             }
 
-            const ultimas4 = semanasValidas.slice(-4);
-            const esUltimas4 = semanasValidas.length >= 4
-                && seleccionadasEnAnio.length === ultimas4.length
-                && ultimas4.every(s => selectedWeeks.has(s));
-
             document.getElementById('btnQuickAll')?.classList.toggle('active-semana', seleccionadasEnAnio.length === semanasValidas.length);
+            document.getElementById('btnQuickLast8')?.classList.toggle('active-semana', esUltimas8);
             document.getElementById('btnQuickLast4')?.classList.toggle('active-semana', esUltimas4);
             document.getElementById('btnQuickLatest')?.classList.toggle(
                 'active-semana',
@@ -1850,6 +1808,8 @@
 
             if (modo === 'all') {
                 semanasValidas.forEach(s => selectedWeeks.add(s));
+            } else if (modo === 'last8') {
+                semanasValidas.slice(-8).forEach(s => selectedWeeks.add(s));
             } else if (modo === 'last4') {
                 semanasValidas.slice(-4).forEach(s => selectedWeeks.add(s));
             } else if (modo === 'latest') {
@@ -2098,7 +2058,10 @@
             chartInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: semanas.map(s => obtenerRangoSemanaISO(s)),
+                    labels: semanas.map(s => {
+                        const sStr = String(s);
+                        return sStr.length >= 5 ? `Sem ${parseInt(sStr.substring(4), 10)}` : `Sem ${s}`;
+                    }),
                     datasets: [
                         {
                             label: 'Producción Real (T_Produccion)',
@@ -2161,6 +2124,12 @@
                             borderWidth: 1,
                             padding: 10,
                             callbacks: {
+                                title: items => {
+                                    if (!items || !items.length) return '';
+                                    const idx = items[0].dataIndex;
+                                    const semNum = semanas[idx];
+                                    return semNum ? `${items[0].label} — ${obtenerRangoSemanaISO(semNum)}` : items[0].label;
+                                },
                                 label: ctx => ` ${ctx.dataset.label}: ${ctx.raw.toLocaleString('es-PE')} ${unidadGrafico}`
                             }
                         },
@@ -2200,14 +2169,11 @@
         }
 
         // =========================================================================
-        // 📋 MATRIZ JERÁRQUICA: SEMANA ➔ SUBPLANTA ➔ CODIGOCORTO Y NOMBRE (TONOS CLAROS)
+        // 📋 RENDERIZADO DE MATRIZ (IDÉNTICO A ResumenPl_PTC.html)
         // =========================================================================
         function renderizarMatriz(data) {
-            const thead = document.getElementById('theadMatriz');
             const tbody = document.getElementById('tbodyMatriz');
-            const tfoot = document.getElementById('tfootMatriz');
             tbody.innerHTML = '';
-            tfoot.innerHTML = '';
 
             const term = (document.getElementById('searchMatriz').value || '').trim().toUpperCase();
 
@@ -2219,35 +2185,12 @@
                 d.Nombre.toUpperCase().includes(term)
             );
 
-            thead.innerHTML = `
-                <tr>
-                    <th style="min-width:410px;">Semana / SubPlanta / CódigoCorto - Nombre</th>
-                    <th class="num-col" style="color:#1E2F3F;">Prod. Real (kg)</th>
-                    <th class="num-col col-group-com-start">Proy. Comercial (kg)</th>
-                    <th class="num-col">% Cumpl. Com.</th>
-                    <th class="num-col col-group-dist-start">Ped. Distribución (kg)</th>
-                    <th class="num-col">% Cumpl. Dist.</th>
-                    <th class="num-col col-group-prog-start">Prog. Producción (kg)</th>
-                    <th class="num-col">% Cumpl. Prog.</th>
-                </tr>
-            `;
-
             if (dataBuscada.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:30px; color:var(--text-muted);">No hay datos que coincidan con los filtros seleccionados.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:30px; color:var(--text-muted);">No hay datos que coincidan con la selección.</td></tr>';
                 return;
             }
 
-            // Totales Globales para el Footer
-            let totalReal = 0, totalCom = 0, totalDist = 0, totalProg = 0;
-            dataBuscada.forEach(d => {
-                totalReal += d.PRODUCCION_REAL;
-                totalCom += d.PROYECCION_COMERCIAL;
-                totalDist += d.PEDIDO_DISTRIBUCION;
-                totalProg += d.PROG_PRODUCCION;
-            });
-
             renderizarJerarquiaSemanaSubPlantaSku(dataBuscada, tbody, term.length > 0);
-            renderizarFooterTotal(tfoot, totalReal, totalCom, totalDist, totalProg);
         }
 
         // Jerarquía de 3 niveles: Semana ➔ SubPlanta ➔ (CodigoCorto + Nombre)
@@ -2306,21 +2249,20 @@
                 trSem.innerHTML = `
                     <td>
                         <span class="toggle-icon" onclick="toggleNode('${sId}')">${isSemExpanded ? '−' : '+'}</span>
-                        <b style="color:#1E2F3F;">📅 Semana ${sNode.Semana}</b>
-                        <span style="font-size:0.75rem; color:#5D6D7E; font-weight:600; margin-left:8px;">${obtenerRangoSemanaISO(sNode.Semana)} • ${sNode.subPlantas.size} SubPlantas</span>
+                        <b style="color:var(--pantone-dark);">Semana ${sNode.Semana}</b>
                     </td>
-                    <td class="num-cell" style="color:#1E2F3F;"><b>${formatKgMatriz(sNode.real)}</b></td>
-                    <td class="num-cell col-group-com-start"><b>${formatKgMatriz(sNode.com)}</b></td>
-                    <td class="num-cell">${badgeHtml(calcPct(sNode.real, sNode.com))}</td>
-                    <td class="num-cell col-group-dist-start"><b>${formatKgMatriz(sNode.dist)}</b></td>
-                    <td class="num-cell">${badgeHtml(calcPct(sNode.real, sNode.dist))}</td>
-                    <td class="num-cell col-group-prog-start"><b>${formatKgMatriz(sNode.prog)}</b></td>
-                    <td class="num-cell">${badgeHtml(calcPct(sNode.real, sNode.prog))}</td>
+                    <td class="num-cell" style="color:var(--pantone-dark);"><b>${formatKgMatriz(sNode.real)}</b></td>
+                    <td class="num-cell col-com col-group-com-start"><b>${formatKgMatriz(sNode.com)}</b></td>
+                    <td class="num-cell col-com">${badgeHtml(calcPct(sNode.real, sNode.com))}</td>
+                    <td class="num-cell col-dist col-group-dist-start"><b>${formatKgMatriz(sNode.dist)}</b></td>
+                    <td class="num-cell col-dist">${badgeHtml(calcPct(sNode.real, sNode.dist))}</td>
+                    <td class="num-cell col-prog col-group-prog-start"><b>${formatKgMatriz(sNode.prog)}</b></td>
+                    <td class="num-cell col-prog">${badgeHtml(calcPct(sNode.real, sNode.prog))}</td>
                 `;
                 tbody.appendChild(trSem);
 
                 if (isSemExpanded) {
-                    const spList = Array.from(sNode.subPlantas.values()).sort((a, b) => b.real - a.real || a.SubPlanta.localeCompare(b.SubPlanta));
+                    const spList = Array.from(sNode.subPlantas.values()).sort((a, b) => a.SubPlanta.localeCompare(b.SubPlanta));
                     spList.forEach(spNode => {
                         const spId = `sem_${sNode.Semana}_sp_${spNode.SubPlanta}`;
                         const isSpExpanded = expandedNodes.has(spId) || forceExpand;
@@ -2328,18 +2270,17 @@
                         const trSp = document.createElement('tr');
                         trSp.className = 'level-2';
                         trSp.innerHTML = `
-                            <td style="padding-left: 34px;">
+                            <td style="padding-left: 36px;">
                                 <span class="toggle-icon" onclick="toggleNode('${spId}')">${isSpExpanded ? '−' : '+'}</span>
-                                <span class="tag-subplanta">🏭 ${spNode.SubPlanta}</span>
-                                <span style="font-size:0.74rem; color:#5D6D7E; font-weight:600; margin-left:6px;">(${spNode.skus.size} SKUs)</span>
+                                <span class="tag-subplanta">${spNode.SubPlanta}</span>
                             </td>
-                            <td class="num-cell" style="color:#1E2F3F;"><b>${formatKgMatriz(spNode.real)}</b></td>
-                            <td class="num-cell col-group-com-start"><b>${formatKgMatriz(spNode.com)}</b></td>
-                            <td class="num-cell">${badgeHtml(calcPct(spNode.real, spNode.com))}</td>
-                            <td class="num-cell col-group-dist-start"><b>${formatKgMatriz(spNode.dist)}</b></td>
-                            <td class="num-cell">${badgeHtml(calcPct(spNode.real, spNode.dist))}</td>
-                            <td class="num-cell col-group-prog-start"><b>${formatKgMatriz(spNode.prog)}</b></td>
-                            <td class="num-cell">${badgeHtml(calcPct(spNode.real, spNode.prog))}</td>
+                            <td class="num-cell" style="color:var(--pantone-dark); font-weight:600;">${formatKgMatriz(spNode.real)}</td>
+                            <td class="num-cell col-com col-group-com-start">${formatKgMatriz(spNode.com)}</td>
+                            <td class="num-cell col-com">${badgeHtml(calcPct(spNode.real, spNode.com))}</td>
+                            <td class="num-cell col-dist col-group-dist-start">${formatKgMatriz(spNode.dist)}</td>
+                            <td class="num-cell col-dist">${badgeHtml(calcPct(spNode.real, spNode.dist))}</td>
+                            <td class="num-cell col-prog col-group-prog-start">${formatKgMatriz(spNode.prog)}</td>
+                            <td class="num-cell col-prog">${badgeHtml(calcPct(spNode.real, spNode.prog))}</td>
                         `;
                         tbody.appendChild(trSp);
 
@@ -2352,17 +2293,17 @@
                                 const trSku = document.createElement('tr');
                                 trSku.className = 'level-3';
                                 trSku.innerHTML = `
-                                    <td style="padding-left: 64px;">
+                                    <td style="padding-left: 68px;">
                                         <span class="sku-code-badge">${sku.CodigoCorto}</span>
                                         <span class="sku-name-text">${sku.Nombre}</span>
                                     </td>
-                                    <td class="num-cell" style="font-weight:700; color:#2C4257;">${formatKgMatriz(sku.real)}</td>
-                                    <td class="num-cell col-group-com-start">${formatKgMatriz(sku.com)}</td>
-                                    <td class="num-cell">${badgeHtml(calcPct(sku.real, sku.com))}</td>
-                                    <td class="num-cell col-group-dist-start">${formatKgMatriz(sku.dist)}</td>
-                                    <td class="num-cell">${badgeHtml(calcPct(sku.real, sku.dist))}</td>
-                                    <td class="num-cell col-group-prog-start">${formatKgMatriz(sku.prog)}</td>
-                                    <td class="num-cell">${badgeHtml(calcPct(sku.real, sku.prog))}</td>
+                                    <td class="num-cell" style="color:var(--pantone-dark); font-weight:600;">${formatKgMatriz(sku.real)}</td>
+                                    <td class="num-cell col-com col-group-com-start">${formatKgMatriz(sku.com)}</td>
+                                    <td class="num-cell col-com">${badgeHtml(calcPct(sku.real, sku.com))}</td>
+                                    <td class="num-cell col-dist col-group-dist-start">${formatKgMatriz(sku.dist)}</td>
+                                    <td class="num-cell col-dist">${badgeHtml(calcPct(sku.real, sku.dist))}</td>
+                                    <td class="num-cell col-prog col-group-prog-start">${formatKgMatriz(sku.prog)}</td>
+                                    <td class="num-cell col-prog">${badgeHtml(calcPct(sku.real, sku.prog))}</td>
                                 `;
                                 tbody.appendChild(trSku);
                             });
@@ -2370,21 +2311,6 @@
                     });
                 }
             });
-        }
-
-        function renderizarFooterTotal(tfoot, totalReal, totalCom, totalDist, totalProg) {
-            tfoot.innerHTML = `
-                <tr class="row-grand-total">
-                    <td>🏆 TOTAL GENERAL CONSOLIDADO</td>
-                    <td class="num-cell" style="color:#1E2F3F;">${formatKgMatriz(totalReal)}</td>
-                    <td class="num-cell col-group-com-start">${formatKgMatriz(totalCom)}</td>
-                    <td class="num-cell">${badgeHtml(calcPct(totalReal, totalCom))}</td>
-                    <td class="num-cell col-group-dist-start">${formatKgMatriz(totalDist)}</td>
-                    <td class="num-cell">${badgeHtml(calcPct(totalReal, totalDist))}</td>
-                    <td class="num-cell col-group-prog-start">${formatKgMatriz(totalProg)}</td>
-                    <td class="num-cell">${badgeHtml(calcPct(totalReal, totalProg))}</td>
-                </tr>
-            `;
         }
 
         function toggleNode(id) {

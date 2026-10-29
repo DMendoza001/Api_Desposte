@@ -8,6 +8,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Configuración compartida de conexión a la API -->
+    <script src="config.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         /* =========================================================================
@@ -817,23 +819,19 @@
 
     </div>
 
-    <!-- Configuración compartida de conexión a la API -->
-    <script src="config.js"></script>
-
     <script>
         // =========================================================================
-        // ⚙️ CONFIGURACIÓN DE CONEXIÓN A LA API (Híbrida: usa config.js si existe)
+        // ⚙️ CONFIGURACIÓN DE CONEXIÓN HÍBRIDA A LA API .NET
         // =========================================================================
         const APP_CONFIG = {
-            servidor: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.servidor) 
-                      ? GLOBAL_CONFIG.servidor 
-                      : "RAEVSALL001",
-            puertos: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.puertos) 
-                     ? GLOBAL_CONFIG.puertos 
-                     : [8080, 5000]
+            servidor: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.servidor)
+                ? GLOBAL_CONFIG.servidor
+                : "RAEVSALL001",
+            puertos: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.puertos)
+                ? GLOBAL_CONFIG.puertos
+                : [8080, 5000]
         };
 
-        // Generación de servidores API apuntando al nombre del equipo
         function generarBasesApi() {
             if (typeof generarBasesApiGlobal === 'function') {
                 return generarBasesApiGlobal();
@@ -845,7 +843,12 @@
             return bases;
         }
 
-        const BASE_HOSTS = generarBasesApi();
+        APP_CONFIG.controllerPath = "/api/comparativopresupuesto/datos-comparativo";
+        APP_CONFIG.timeoutMs = 25000;
+
+        // Estado global de conexión
+        let apiBaseActiva = null;
+        let respuestaInicialCache = null;
 
         let rawData = [];
         let datosFiltradosActuales = [];
@@ -853,13 +856,16 @@
 
         window.addEventListener('DOMContentLoaded', inicializar);
 
-        async function fetchConTimeout(url, timeoutMs = 6000) {
+        // =========================================================================
+        // 🌐 UTILIDADES DE RED Y DETECCIÓN RESILIENTE
+        // =========================================================================
+        async function fetchConTimeout(url, timeoutMs = 10000) {
             const controller = new AbortController();
             const id = setTimeout(() => controller.abort(), timeoutMs);
             try {
-                const response = await fetch(url, { signal: controller.signal });
+                const res = await fetch(url, { signal: controller.signal });
                 clearTimeout(id);
-                return response;
+                return res;
             } catch (err) {
                 clearTimeout(id);
                 throw err;
@@ -867,16 +873,24 @@
         }
 
         async function detectarServidorApi() {
-            for (const base of BASE_HOSTS) {
+            const bases = generarBasesApi();
+            for (const base of bases) {
                 try {
-                    const res = await fetchConTimeout(`${base}/`, 1500);
+                    // Intento 1: Consultar el endpoint del controlador con timeout de 3.5s
+                    const res = await fetchConTimeout(`${base}${APP_CONFIG.controllerPath}`, 3500);
                     if (res.ok) {
-                        const txt = await res.text();
-                        if (txt.includes("API Desposte")) {
-                            return base;
-                        }
+                        respuestaInicialCache = res;
+                        return base;
                     }
-                } catch (e) { }
+                } catch (e) {
+                    // Intento 2 (Fallback): Ping rápido a la raíz '/' por si el endpoint demora leyendo datos pesados (Excel/BD)
+                    try {
+                        const pingRes = await fetchConTimeout(`${base}/`, 2000);
+                        if (pingRes.ok) return base;
+                    } catch (errPing) {
+                        // Siguiente candidato
+                    }
+                }
             }
             return null;
         }
@@ -887,15 +901,19 @@
 
             try {
                 statusText.innerText = "Buscando servidor API activo (Prioridad Puerto 8080)...";
-                const baseActiva = await detectarServidorApi();
+                apiBaseActiva = await detectarServidorApi();
 
-                if (!baseActiva) {
-                    throw new Error("No se pudo conectar con la API en el puerto 8080 ni 5000. Verifica que el servicio esté corriendo.");
+                if (!apiBaseActiva) {
+                    throw new Error(`No se pudo conectar a ${APP_CONFIG.servidor} en puertos ${APP_CONFIG.puertos.join('/')}`);
                 }
 
-                statusText.innerText = `Conectado a ${baseActiva}. Leyendo datos de Presupuesto 2027 y ForeCast desde Excel...`;
+                statusText.innerText = `Conectado a ${apiBaseActiva}. Leyendo datos de Presupuesto 2027 y ForeCast desde Excel...`;
 
-                const res = await fetch(`${baseActiva}/api/comparativopresupuesto/datos-comparativo`);
+                let res = respuestaInicialCache;
+                respuestaInicialCache = null;
+                if (!res) {
+                    res = await fetchConTimeout(`${apiBaseActiva}${APP_CONFIG.controllerPath}`, APP_CONFIG.timeoutMs);
+                }
                 if (!res.ok) throw new Error(`El servidor respondió con código HTTP ${res.status}`);
 
                 rawData = await res.json();
