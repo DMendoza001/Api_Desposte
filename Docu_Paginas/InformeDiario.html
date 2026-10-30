@@ -1915,33 +1915,36 @@
             const rowsDesposte = produccion.filter(r => normalizarTexto(r.AREA).includes('DESPOSTE'));
             const progDesposte = rowsDesposte.reduce((acc, r) => acc + (Number(r.PROGRAMA) || 0), 0);
             const prodDesposte = rowsDesposte.reduce((acc, r) => acc + (Number(r.PRODUCCIÓN) || 0), 0);
-            const cumplDesposte = progDesposte > 0 ? Math.round((prodDesposte / progDesposte) * 100) : 0;
+            const cumplDesposteNum = progDesposte > 0 ? (prodDesposte / progDesposte) * 100 : 0;
+            const cumplDesposte = cumplDesposteNum.toFixed(2);
             const prodDesposteHH = hhDesposte > 0 ? (prodDesposte / hhDesposte).toFixed(2) : "0.00";
 
             document.getElementById('kpiProdDesposte').innerText = formatearNumero(prodDesposte);
             document.getElementById('kpiProgDesposte').innerText = `/ ${formatearNumero(progDesposte)} Meta`;
             document.getElementById('kpiCumplDesposte').innerText = `${cumplDesposte}%`;
-            document.getElementById('kpiProgressDesposte').style.width = `${Math.min(cumplDesposte, 100)}%`;
+            document.getElementById('kpiProgressDesposte').style.width = `${Math.min(cumplDesposteNum, 100)}%`;
             document.getElementById('kpiProdDesposteHH').innerText = `${prodDesposteHH} Un/HH`;
 
             // Producción Chuletas
             const rowsChuletas = produccion.filter(r => normalizarTexto(r.AREA).includes('CHULETAS'));
             const progChuletas = rowsChuletas.reduce((acc, r) => acc + (Number(r.PROGRAMA) || 0), 0);
             const prodChuletas = rowsChuletas.reduce((acc, r) => acc + (Number(r.PRODUCCIÓN) || 0), 0);
-            const cumplChuletas = progChuletas > 0 ? Math.round((prodChuletas / progChuletas) * 100) : 0;
+            const cumplChuletasNum = progChuletas > 0 ? (prodChuletas / progChuletas) * 100 : 0;
+            const cumplChuletas = cumplChuletasNum.toFixed(2);
             const prodChuletasHH = hhChuletas > 0 ? (prodChuletas / hhChuletas).toFixed(2) : "0.00";
 
             document.getElementById('kpiProdChuletas').innerText = formatearNumero(prodChuletas);
             document.getElementById('kpiProgChuletas').innerText = `/ ${formatearNumero(progChuletas)} Meta`;
             document.getElementById('kpiCumplChuletas').innerText = `${cumplChuletas}%`;
-            document.getElementById('kpiProgressChuletas').style.width = `${Math.min(cumplChuletas, 100)}%`;
+            document.getElementById('kpiProgressChuletas').style.width = `${Math.min(cumplChuletasNum, 100)}%`;
             document.getElementById('kpiProdChuletasHH').innerText = `${prodChuletasHH} Kg/HH`;
 
             // Producción Congelado
             const rowsCongelado = produccion.filter(r => normalizarTexto(r.AREA).includes('CONGELADO'));
             const progCongelado = rowsCongelado.reduce((acc, r) => acc + (Number(r.PROGRAMA) || 0), 0);
             const prodCongelado = rowsCongelado.reduce((acc, r) => acc + (Number(r.PRODUCCIÓN) || 0), 0);
-            const cumplCongelado = progCongelado > 0 ? Math.round((prodCongelado / progCongelado) * 100) : 0;
+            const cumplCongeladoNum = progCongelado > 0 ? (prodCongelado / progCongelado) * 100 : 0;
+            const cumplCongelado = cumplCongeladoNum.toFixed(2);
             const prodCongHH = hhCongelado > 0 ? (prodCongelado / hhCongelado).toFixed(2) : "0.00";
 
             // Inyección row
@@ -1953,7 +1956,7 @@
             document.getElementById('kpiProdCongelado').innerText = formatearNumero(prodCongelado);
             document.getElementById('kpiProgCongelado').innerText = `/ ${formatearNumero(progCongelado)} Meta`;
             document.getElementById('kpiCumplCongelado').innerText = `${cumplCongelado}%`;
-            document.getElementById('kpiProgressCongelado').style.width = `${Math.min(cumplCongelado, 100)}%`;
+            document.getElementById('kpiProgressCongelado').style.width = `${Math.min(cumplCongeladoNum, 100)}%`;
             document.getElementById('kpiInyeccionVal').innerText = inyeccionVal;
             document.getElementById('kpiProdCongHH').innerText = `${prodCongHH} Kg/HH`;
         }
@@ -1990,7 +1993,7 @@
                 const rowsDesposte = (produccion || []).filter(r => normalizarTexto(r.AREA).includes('DESPOSTE'));
                 const progTotal = rowsDesposte.reduce((acc, r) => acc + (Number(r.PROGRAMA) || 0), 0);
                 const prodTotal = rowsDesposte.reduce((acc, r) => acc + (Number(r.PRODUCCIÓN) || 0), 0);
-                const cumpl = progTotal > 0 ? ((prodTotal / progTotal) * 100).toFixed(1) + '%' : '--%';
+                const cumpl = progTotal > 0 ? ((prodTotal / progTotal) * 100).toFixed(2) + '%' : '--%';
 
                 badgeTexto = `Desposte: ${formatearNumero(prodTotal)} / ${formatearNumero(progTotal)} Un (${cumpl})`;
 
@@ -2018,7 +2021,7 @@
 
                 const progTotalKg = progChuletas + progCongelado;
                 const prodTotalKg = prodChuletas + prodCongelado;
-                const cumplTotal = progTotalKg > 0 ? ((prodTotalKg / progTotalKg) * 100).toFixed(1) + '%' : '--%';
+                const cumplTotal = progTotalKg > 0 ? ((prodTotalKg / progTotalKg) * 100).toFixed(2) + '%' : '--%';
 
                 badgeTexto = `Total Kilos: ${formatearNumero(prodTotalKg)} / ${formatearNumero(progTotalKg)} Kg (${cumplTotal})`;
 
@@ -2141,9 +2144,11 @@
                 const tr = document.createElement('tr');
                 const prog = Number(r.PROGRAMA) || 0;
                 const prod = Number(r.PRODUCCIÓN) || 0;
-                const cumpl = r['% CUMPLIMIENTO'] !== null && r['% CUMPLIMIENTO'] !== undefined
-                    ? (Number(r['% CUMPLIMIENTO']) * 100).toFixed(1) + "%"
-                    : (prog > 0 ? ((prod / prog) * 100).toFixed(1) + "%" : "--");
+                const cumpl = prog > 0
+                    ? ((prod / prog) * 100).toFixed(2) + "%"
+                    : (r['% CUMPLIMIENTO'] !== null && r['% CUMPLIMIENTO'] !== undefined
+                        ? (Number(r['% CUMPLIMIENTO']) * 100).toFixed(2) + "%"
+                        : "--");
 
                 const rend = r.RENDIMIENTO !== null && r.RENDIMIENTO !== undefined ? r.RENDIMIENTO : "--";
                 const extra = r['% EXTRA / INYECCIÓN'] !== null && r['% EXTRA / INYECCIÓN'] !== undefined
@@ -2351,7 +2356,7 @@
             const prodDesposte = rowsDesposte.reduce((acc, r) => acc + (Number(r.PRODUCCIÓN) || 0), 0);
             const hhDesposte = horarios.filter(r => normalizarTexto(r.AREA).includes('DESPOSTE'))
                 .reduce((acc, r) => acc + (Number(r['HORAS HOMBRE (HH)']) || 0), 0);
-            const cumplDesposte = progDesposte > 0 ? Math.round((prodDesposte / progDesposte) * 100) : 0;
+            const cumplDesposte = progDesposte > 0 ? ((prodDesposte / progDesposte) * 100).toFixed(2) : "0.00";
             const prodDesposteHH = hhDesposte > 0 ? (prodDesposte / hhDesposte).toFixed(2) : "0.00";
 
             document.getElementById('detProgDesposte').innerText = formatearNumero(progDesposte);
@@ -2367,7 +2372,7 @@
             const prodChuletas = rowsChuletas.reduce((acc, r) => acc + (Number(r.PRODUCCIÓN) || 0), 0);
             const hhChuletas = horarios.filter(r => normalizarTexto(r.AREA).includes('CHULETAS'))
                 .reduce((acc, r) => acc + (Number(r['HORAS HOMBRE (HH)']) || 0), 0);
-            const cumplChuletas = progChuletas > 0 ? Math.round((prodChuletas / progChuletas) * 100) : 0;
+            const cumplChuletas = progChuletas > 0 ? ((prodChuletas / progChuletas) * 100).toFixed(2) : "0.00";
             const prodChuletasHH = hhChuletas > 0 ? (prodChuletas / hhChuletas).toFixed(2) : "0.00";
 
             document.getElementById('detProgChuletas').innerText = formatearNumero(progChuletas);
@@ -2383,7 +2388,7 @@
             const prodCongelado = rowsCongelado.reduce((acc, r) => acc + (Number(r.PRODUCCIÓN) || 0), 0);
             const hhCongelado = horarios.filter(r => normalizarTexto(r.AREA).includes('CONGELADO'))
                 .reduce((acc, r) => acc + (Number(r['HORAS HOMBRE (HH)']) || 0), 0);
-            const cumplCongelado = progCongelado > 0 ? Math.round((prodCongelado / progCongelado) * 100) : 0;
+            const cumplCongelado = progCongelado > 0 ? ((prodCongelado / progCongelado) * 100).toFixed(2) : "0.00";
             const prodCongHH = hhCongelado > 0 ? (prodCongelado / hhCongelado).toFixed(2) : "0.00";
 
             const rowMarinado = rowsCongelado.find(r => normalizarTexto(r.CONCEPTO).includes('MARINADO'));
@@ -2637,7 +2642,7 @@
             const rowsDesposte = produccion.filter(r => normalizarTexto(r.AREA).includes('DESPOSTE'));
             const progDesposte = rowsDesposte.reduce((acc, r) => acc + (Number(r.PROGRAMA) || 0), 0);
             const prodDesposte = rowsDesposte.reduce((acc, r) => acc + (Number(r.PRODUCCIÓN) || 0), 0);
-            const cumplDesposte = progDesposte > 0 ? Math.round((prodDesposte / progDesposte) * 100) : 0;
+            const cumplDesposte = progDesposte > 0 ? ((prodDesposte / progDesposte) * 100).toFixed(2) : "0.00";
             const prodDesposteHH = hhDesposte > 0 ? (prodDesposte / hhDesposte).toFixed(2) : "0.00";
 
             txt += `🐖 _Desposte (Un):_\n`;
@@ -2650,7 +2655,7 @@
             const rowsChuletas = produccion.filter(r => normalizarTexto(r.AREA).includes('CHULETAS'));
             const progChuletas = rowsChuletas.reduce((acc, r) => acc + (Number(r.PROGRAMA) || 0), 0);
             const prodChuletas = rowsChuletas.reduce((acc, r) => acc + (Number(r.PRODUCCIÓN) || 0), 0);
-            const cumplChuletas = progChuletas > 0 ? Math.round((prodChuletas / progChuletas) * 100) : 0;
+            const cumplChuletas = progChuletas > 0 ? ((prodChuletas / progChuletas) * 100).toFixed(2) : "0.00";
             const prodChuletasHH = hhChuletas > 0 ? (prodChuletas / hhChuletas).toFixed(2) : "0.00";
 
             txt += `🥩 _Chuletas (Kg):_\n`;
@@ -2663,7 +2668,7 @@
             const rowsCongelado = produccion.filter(r => normalizarTexto(r.AREA).includes('CONGELADO'));
             const progCongelado = rowsCongelado.reduce((acc, r) => acc + (Number(r.PROGRAMA) || 0), 0);
             const prodCongelado = rowsCongelado.reduce((acc, r) => acc + (Number(r.PRODUCCIÓN) || 0), 0);
-            const cumplCongelado = progCongelado > 0 ? Math.round((prodCongelado / progCongelado) * 100) : 0;
+            const cumplCongelado = progCongelado > 0 ? ((prodCongelado / progCongelado) * 100).toFixed(2) : "0.00";
             const prodCongHH = hhCongelado > 0 ? (prodCongelado / hhCongelado).toFixed(2) : "0.00";
 
             const rowMarinado = rowsCongelado.find(r => normalizarTexto(r.CONCEPTO).includes('MARINADO'));

@@ -1,4 +1,4 @@
-using ClosedXML.Excel;
+﻿using ClosedXML.Excel;
 using Microsoft.AspNetCore.Mvc;
 using System.IO;
 
@@ -168,7 +168,7 @@ namespace ApiDesposte.Controllers.Excel
                         double num = celda.GetDouble();
                         if (Math.Abs(num % 1) < double.Epsilon && num >= long.MinValue && num <= long.MaxValue)
                             return (long)num;
-                        return Math.Round(num, 4);
+                        return Math.Round(num, 6);
 
                     case XLDataType.DateTime:
                         var dt = celda.GetDateTime();
