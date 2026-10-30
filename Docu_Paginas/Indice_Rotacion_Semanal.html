@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -945,6 +945,7 @@
       line-height: 1.5;
     }
   </style>
+  <link rel="stylesheet" href="responsive.css?v=2">
 </head>
 
 <body>
@@ -1279,7 +1280,7 @@
           try {
             const pingRes = await fetchConTimeout(`${base}/`, 2000);
             if (pingRes.ok) return base;
-          } catch (errPing) {}
+          } catch (errPing) { }
         }
       }
       return null;

@@ -9,7 +9,8 @@
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
 
     <!-- Configuración compartida de conexión a la API -->
     <script src="config.js"></script>
@@ -496,7 +497,120 @@
         .row-articulo:hover .sticky-col {
             background-color: #FEFCF0 !important;
         }
+
+        .kpi-card,
+        .card {
+            min-width: 0;
+        }
+
+        /* =========================================================================
+           📱💻 DISEÑO RESPONSIVE AUTÓNOMO (Laptops, Tablets y Celulares)
+           ========================================================================= */
+        @media screen and (max-width: 1440px) {
+            body {
+                padding: 14px 18px;
+            }
+
+            .header {
+                margin-bottom: 14px;
+                padding: 14px 18px;
+            }
+
+            .header h1 {
+                font-size: 1.15rem;
+            }
+
+            .kpi-container {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 12px;
+                margin-bottom: 16px;
+            }
+
+            .kpi-card {
+                padding: 12px 16px;
+            }
+
+            .kpi-value {
+                font-size: 1.35rem;
+            }
+
+            .dashboard-grid {
+                gap: 16px;
+            }
+
+            .card {
+                padding: 14px 16px;
+            }
+
+            .chart-container {
+                height: 280px;
+            }
+
+            .table-wrapper {
+                max-height: 400px;
+            }
+        }
+
+        @media screen and (max-width: 1150px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .full-width {
+                grid-column: 1 / -1;
+            }
+
+            .kpi-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media screen and (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+
+            .filter-container {
+                width: 100%;
+            }
+
+            .filter-container select {
+                width: 100%;
+                min-width: 0;
+            }
+
+            .kpi-container {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .kpi-value {
+                font-size: 1.35rem;
+            }
+
+            .chart-container {
+                height: 250px;
+            }
+
+            .sticky-col,
+            table.matrix-table th:first-child,
+            table.matrix-table td:first-child {
+                position: static !important;
+                min-width: 130px !important;
+                max-width: 200px !important;
+                white-space: normal !important;
+                word-break: break-word;
+                box-shadow: none !important;
+            }
+        }
     </style>
+    <link rel="stylesheet" href="responsive.css?v=2">
 </head>
 
 <body>
@@ -582,10 +696,12 @@
         <div class="card">
             <div
                 style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border-ui); flex-wrap: wrap; gap: 10px;">
-                <h3 style="margin-bottom: 0; padding-bottom: 0; border-bottom: none; font-size: 1rem;">📊 Matriz de Resumen y Artículos</h3>
+                <h3 style="margin-bottom: 0; padding-bottom: 0; border-bottom: none; font-size: 1rem;">📊 Matriz de
+                    Resumen y Artículos</h3>
                 <div style="display: flex; gap: 6px;">
                     <button type="button" class="btn-matriz-ctrl" onclick="expandirTodoMatriz(true)">➕ Expandir</button>
-                    <button type="button" class="btn-matriz-ctrl" onclick="expandirTodoMatriz(false)">➖ Contraer</button>
+                    <button type="button" class="btn-matriz-ctrl" onclick="expandirTodoMatriz(false)">➖
+                        Contraer</button>
                 </div>
             </div>
             <div class="table-wrapper">
@@ -609,7 +725,8 @@
             <div
                 style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border-ui); flex-wrap: wrap; gap: 12px;">
                 <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
-                    <h3 style="margin-bottom: 0; padding-bottom: 0; border-bottom: none; font-size: 1.05rem;">📅 Matriz de Presupuesto Mensual</h3>
+                    <h3 style="margin-bottom: 0; padding-bottom: 0; border-bottom: none; font-size: 1.05rem;">📅 Matriz
+                        de Presupuesto Mensual</h3>
                     <!-- Segmentador por Trimestre -->
                     <div
                         style="display: flex; align-items: center; gap: 8px; background: var(--pantone-yellow-soft); padding: 5px 12px; border-radius: 8px; border: 1px solid var(--pantone-yellow-border);">
@@ -622,8 +739,10 @@
                     </div>
                 </div>
                 <div style="display: flex; gap: 8px;">
-                    <button type="button" class="btn-matriz-ctrl" onclick="expandirTodoMatrizMes(true)">📂 Expandir Todo</button>
-                    <button type="button" class="btn-matriz-ctrl" onclick="expandirTodoMatrizMes(false)">📁 Contraer Todo</button>
+                    <button type="button" class="btn-matriz-ctrl" onclick="expandirTodoMatrizMes(true)">📂 Expandir
+                        Todo</button>
+                    <button type="button" class="btn-matriz-ctrl" onclick="expandirTodoMatrizMes(false)">📁 Contraer
+                        Todo</button>
                 </div>
             </div>
             <div class="table-wrapper">

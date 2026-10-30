@@ -231,12 +231,13 @@
         /* Tarjetas KPI */
         .kpi-container {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
             gap: 18px;
             margin-bottom: 24px;
         }
 
         .kpi-card {
+            min-width: 0;
             background: var(--bg-card);
             padding: 16px 20px;
             border-radius: 10px;
@@ -298,6 +299,7 @@
         }
 
         .card {
+            min-width: 0;
             background-color: var(--bg-card);
             border-radius: 10px;
             padding: 20px 22px;
@@ -612,7 +614,50 @@
         .control-pill select:focus {
             border-color: var(--accent-cyan);
         }
+
+        /* =========================================================================
+           📱💻 DISEÑO RESPONSIVE AUTÓNOMO (Laptops, Tablets y Celulares)
+           ========================================================================= */
+        @media screen and (max-width: 1440px) {
+            body { padding: 14px 18px; }
+            .header { margin-bottom: 14px; padding-bottom: 12px; }
+            .header h1 { font-size: 18px; }
+            .filter-bar { padding: 12px 16px; gap: 10px; margin-bottom: 16px; }
+            .kpi-container { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px; }
+            .kpi-card { padding: 12px 16px; }
+            .kpi-value { font-size: 19px; }
+            .dashboard-grid { gap: 16px; }
+            .card { padding: 14px 16px; }
+            .chart-container { height: 270px; }
+            .chart-container.large { height: 300px; }
+            .table-wrapper { max-height: 400px; }
+        }
+
+        @media screen and (max-width: 1150px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .full-width { grid-column: 1 / -1; }
+            .kpi-container { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media screen and (max-width: 768px) {
+            body { padding: 10px; }
+            .header { flex-direction: column; align-items: stretch; gap: 8px; }
+            .filter-bar { flex-direction: column; align-items: stretch; padding: 12px; }
+            .filter-group, .filter-group select, .filter-group input, .btn-reset { width: 100%; min-width: 0; }
+            .kpi-container { grid-template-columns: 1fr; gap: 10px; }
+            .kpi-value { font-size: 1.35rem; }
+            .chart-container, .chart-container.large { height: 250px; }
+            .sticky-col, table.matrix-table th:first-child, table.matrix-table td:first-child {
+                position: static !important;
+                min-width: 130px !important;
+                max-width: 200px !important;
+                white-space: normal !important;
+                word-break: break-word;
+                box-shadow: none !important;
+            }
+        }
     </style>
+    <link rel="stylesheet" href="responsive.css?v=2">
 </head>
 
 <body>

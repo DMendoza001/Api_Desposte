@@ -23,3 +23,9 @@ Todo controlador en C# .NET (`ApiDesposte/Controllers/Excel/`) que consuma archi
 - **Nunca hardcodear el usuario en la ruta física** (ej. `C:\Users\dennis.mendoza\...`).
 - Utilizar obligatoriamente `ObtenerRutaExcel()` resolviendo el perfil dinámicamente con `Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)` y `Path.Combine(userProfile, @"OneDrive - Corporación Rico SAC\...")`.
 - Abrir siempre el archivo en modo compartido (`FileShare.ReadWrite | FileShare.Delete`) cargándolo en memoria (`MemoryStream`).
+
+### 4. Diseño Responsive Híbrido para Laptops, Tablets y Celulares (Regla Obligatoria)
+Todos los archivos `.html` en `Docu_Paginas/` deben seguir el estándar de diseño responsive definido en [.agents/rules/responsive-design.md](file:///.agents/rules/responsive-design.md):
+- Enlazar `<link rel="stylesheet" href="responsive.css">` en el `<head>` junto con un bloque `@media` autónomo en `<style>`.
+- Usar `min-width: 0` en hijos de CSS Grid y grillas fluidas (`auto-fit` / `minmax`) para evitar desbordes horizontales.
+- Compactar espacios y alturas en pantallas tipo laptop (`<= 1440px`) y adaptar filtros, gráficos y columnas fijas (`.sticky-col`) en tablets y celulares (`<= 768px`).
