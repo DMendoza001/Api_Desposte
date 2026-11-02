@@ -20,27 +20,41 @@ function generarBasesApiGlobal() {
     var puertos = (GLOBAL_CONFIG && GLOBAL_CONFIG.puertos) ? GLOBAL_CONFIG.puertos : [8080, 5000];
     var bases = [];
 
-    // Si la página se sirve por HTTP/HTTPS (ej. http://localhost:8080 o http://RAEVFINL016:8080), ese origen tiene máxima prioridad
+    // 1. Si se abre desde el propio servidor web de la API (excluyendo puertos de Live Server como 5500)
     if (typeof window !== 'undefined' && window.location && window.location.origin && window.location.protocol.startsWith('http')) {
-        bases.push(window.location.origin);
+        var portActual = String(window.location.port || "");
+        if (portActual.indexOf("550") !== 0) {
+            bases.push(window.location.origin);
+        }
     }
 
+    // 2. Si se abre en la misma máquina (localhost / 127.0.0.1 / archivo local), probar localhost primero para autodetección inmediata en cualquier PC
+    var hostNavegador = (typeof window !== 'undefined' && window.location && window.location.hostname) ? window.location.hostname.toLowerCase() : "";
+    var esNavegacionLocal = (!hostNavegador || hostNavegador === "localhost" || hostNavegador === "127.0.0.1");
+
+    if (esNavegacionLocal) {
+        for (var l = 0; l < puertos.length; l++) {
+            var localCand = "http://localhost:" + puertos[l];
+            if (bases.indexOf(localCand) === -1) bases.push(localCand);
+        }
+    }
+
+    // 3. Probar con el nombre de servidor configurado en GLOBAL_CONFIG (para accesos desde celulares u otras PCs en red)
     for (var i = 0; i < puertos.length; i++) {
         var baseServidor = "http://" + s + ":" + puertos[i];
         if (bases.indexOf(baseServidor) === -1) bases.push(baseServidor);
     }
 
-    // Fallbacks si el servidor principal no es localhost
-    if (s && s.toLowerCase() !== "localhost" && s !== "127.0.0.1") {
-        for (var j = 0; j < puertos.length; j++) {
-            var fallback = "http://localhost:" + puertos[j];
-            if (bases.indexOf(fallback) === -1) bases.push(fallback);
-        }
-        for (var k = 0; k < puertos.length; k++) {
-            var fallbackIp = "http://127.0.0.1:" + puertos[k];
-            if (bases.indexOf(fallbackIp) === -1) bases.push(fallbackIp);
-        }
+    // 4. Fallbacks adicionales a localhost y 127.0.0.1
+    for (var j = 0; j < puertos.length; j++) {
+        var fallback = "http://localhost:" + puertos[j];
+        if (bases.indexOf(fallback) === -1) bases.push(fallback);
     }
+    for (var k = 0; k < puertos.length; k++) {
+        var fallbackIp = "http://127.0.0.1:" + puertos[k];
+        if (bases.indexOf(fallbackIp) === -1) bases.push(fallbackIp);
+    }
+
     return bases;
 }
 

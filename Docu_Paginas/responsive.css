@@ -43,19 +43,20 @@ html, body {
 }
 
 /* =========================================================================
-   💻 NIVEL 1: LAPTOPS (Pantallas <= 1440px o Escala Windows 125% / 150%)
+   💻 NIVEL 1: LAPTOPS (Pantallas <= 1600px, incluyendo FHD 1920px al 125%/150%)
    Compacta espacios, fuentes y alturas para visualizar más contenido sin corte
    ========================================================================= */
-@media screen and (max-width: 1440px) {
+@media screen and (max-width: 1600px) {
     body {
-        padding: 14px 18px !important;
+        padding: 10px 14px !important;
     }
 
     .container,
     .main-container,
     .dashboard-container,
     .app-container {
-        padding: 14px 16px !important;
+        padding: 10px 12px !important;
+        gap: 12px !important;
         max-width: 100% !important;
     }
 
@@ -66,8 +67,8 @@ html, body {
     .header-card,
     .header-container,
     .top-bar {
-        margin-bottom: 14px !important;
-        padding: 14px 18px !important;
+        margin-bottom: 10px !important;
+        padding: 12px 18px !important;
         gap: 10px !important;
     }
 
@@ -76,7 +77,7 @@ html, body {
     .header-title,
     .header-title h1,
     .brand-text h1 {
-        font-size: 1.15rem !important;
+        font-size: 1.12rem !important;
     }
 
     /* Barra de filtros compacta */
@@ -86,39 +87,39 @@ html, body {
     .filter-section,
     .filters-panel,
     .controls-card {
-        padding: 12px 16px !important;
-        gap: 10px !important;
-        margin-bottom: 16px !important;
+        padding: 10px 14px !important;
+        gap: 8px !important;
+        margin-bottom: 12px !important;
     }
 
     .filter-group select,
     .filter-group input {
-        min-width: 135px;
-        padding: 6px 10px !important;
+        min-width: 130px;
+        padding: 5px 9px !important;
         font-size: 12px !important;
     }
 
-    /* Tarjetas KPI adaptables y compactas */
+    /* Tarjetas KPI adaptables y compactas en 1 sola fila en laptop */
     .kpi-container,
     .kpi-grid {
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
-        gap: 12px !important;
-        margin-bottom: 16px !important;
+        grid-template-columns: repeat(auto-fit, minmax(185px, 1fr)) !important;
+        gap: 10px !important;
+        margin-bottom: 12px !important;
     }
 
     .kpi-card {
-        padding: 12px 16px !important;
+        padding: 10px 14px !important;
     }
 
     .kpi-value {
-        font-size: 1.35rem !important;
+        font-size: 1.3rem !important;
     }
 
     /* Grillas de gráficos y tarjetas */
     .dashboard-grid,
     .charts-grid,
     .charts-grid-2 {
-        gap: 16px !important;
+        gap: 12px !important;
     }
 
     .card,
@@ -126,24 +127,26 @@ html, body {
     .matrix-card,
     .content-card,
     .dashboard-section {
-        padding: 14px 16px !important;
-        margin-bottom: 16px !important;
+        padding: 12px 16px !important;
+        margin-bottom: 12px !important;
     }
 
     .chart-container,
     .chart-wrapper,
     .chart-canvas-container {
-        height: 280px !important;
+        height: 260px !important;
     }
 
     .chart-container.large,
-    .chart-box {
-        height: 320px !important;
+    .chart-box,
+    .chart-container-box {
+        height: 290px !important;
     }
 
     /* Tablas y matrices en laptop */
-    .table-wrapper {
-        max-height: 400px !important;
+    .table-wrapper,
+    .table-responsive {
+        max-height: 450px !important;
     }
 
     table.matrix-table th,
@@ -154,10 +157,10 @@ html, body {
 }
 
 /* =========================================================================
-   💻 NIVEL 2: LAPTOPS PEQUEÑAS / TABLETS HORIZONTALES (<= 1150px)
+   💻 NIVEL 2: TABLETS HORIZONTALES (<= 980px)
    Apila gráficos complejos en 1 columna para evitar que se aplasten
    ========================================================================= */
-@media screen and (max-width: 1150px) {
+@media screen and (max-width: 980px) {
     .dashboard-grid,
     .charts-grid,
     .charts-grid-2,
@@ -176,7 +179,7 @@ html, body {
     }
 
     .week-combobox-wrapper {
-        min-width: 260px !important;
+        min-width: 240px !important;
     }
 }
 

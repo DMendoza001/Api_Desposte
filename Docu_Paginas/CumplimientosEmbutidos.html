@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -1285,7 +1285,14 @@
                 if (d.semana) semanasSet.add(d.semana);
             });
 
-            const semanasArr = Array.from(semanasSet).sort().reverse();
+            // Orden estricto de mayor a menor por Año y Número de Semana real
+            const semanasArr = Array.from(semanasSet).sort((a, b) => {
+                const infA = parsearSemanaYRango(a);
+                const infB = parsearSemanaYRango(b);
+                const numA = (infA.ano || 2026) * 100 + (infA.numSemana || 0);
+                const numB = (infB.ano || 2026) * 100 + (infB.numSemana || 0);
+                return numB - numA;
+            });
 
             select.innerHTML = '<option value="">Todas las semanas</option>';
             semanasArr.forEach(sem => {
@@ -1913,6 +1920,14 @@
             const dir = ordenActual.direccion === 'asc' ? 1 : -1;
 
             datosFiltrados.sort((a, b) => {
+                if (col === 'semana') {
+                    const infA = a.infoSemana || parsearSemanaYRango(a.semana);
+                    const infB = b.infoSemana || parsearSemanaYRango(b.semana);
+                    const numA = (infA.ano || 2026) * 100 + (infA.numSemana || 0);
+                    const numB = (infB.ano || 2026) * 100 + (infB.numSemana || 0);
+                    return (numA - numB) * dir;
+                }
+
                 let vA = a[col];
                 let vB = b[col];
 

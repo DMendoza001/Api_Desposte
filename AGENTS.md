@@ -26,6 +26,8 @@ Todo controlador en C# .NET (`ApiDesposte/Controllers/Excel/`) que consuma archi
 
 ### 4. Diseño Responsive Híbrido para Laptops, Tablets y Celulares (Regla Obligatoria)
 Todos los archivos `.html` en `Docu_Paginas/` deben seguir el estándar de diseño responsive definido en [.agents/rules/responsive-design.md](file:///.agents/rules/responsive-design.md):
-- Enlazar `<link rel="stylesheet" href="responsive.css">` en el `<head>` junto con un bloque `@media` autónomo en `<style>`.
-- Usar `min-width: 0` en hijos de CSS Grid y grillas fluidas (`auto-fit` / `minmax`) para evitar desbordes horizontales.
-- Compactar espacios y alturas en pantallas tipo laptop (`<= 1440px`) y adaptar filtros, gráficos y columnas fijas (`.sticky-col`) en tablets y celulares (`<= 768px`).
+- Enlazar `<link rel="stylesheet" href="responsive.css?v=3">` en el `<head>` junto con un bloque `@media` autónomo en `<style>`.
+- **Prohibido usar alturas fijas inline sin clase en contenedores de gráficos** (ej. `<div style="height:430px;">`); usar siempre clases estándar (`.chart-box`, `.chart-container`) con `position: relative; width: 100%; min-width: 0;`.
+- Aplicar `min-width: 0` tanto en hijos de **CSS Grid** como de **Flexbox** (`.dashboard-container > *`, `.kpi-card`, `.chart-card`, `.matrix-card`) para evitar que tablas anchas o gráficos desborden la pantalla.
+- Mantener las 4 tarjetas KPI en una sola fila en laptops (`repeat(4, minmax(0, 1fr))` o `minmax(185px, 1fr)`, nunca `minmax(260px, 1fr)`).
+- Activar la densidad compacta de laptop desde **`@media screen and (max-width: 1600px)`** (para cubrir laptops Full HD 1920x1080 con escala de Windows al 125% = `1536px`, además de 150% y 1366x768) y adaptar filtros, gráficos y columnas fijas en tablets (`<= 980px`) y celulares (`<= 768px`).
