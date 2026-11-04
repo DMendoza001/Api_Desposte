@@ -382,14 +382,16 @@ html, body {
     }
 
     .years-pills-container,
-    .subplanta-pills-container {
+    .subplanta-pills-container,
+    .escenario-pills-container {
         display: flex !important;
         flex-wrap: wrap !important;
         gap: 6px !important;
     }
 
     .year-pill,
-    .subplanta-pill {
+    .subplanta-pill,
+    .escenario-pill {
         flex: 1 1 calc(50% - 6px) !important;
         justify-content: space-between !important;
         padding: 7px 10px !important;

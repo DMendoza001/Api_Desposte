@@ -190,8 +190,15 @@
         }
 
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.35; }
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.35;
+            }
         }
 
         .btn {
@@ -301,6 +308,12 @@
             border-color: var(--chart-cerulean-slate);
         }
 
+        .filter-quick-btn.active-escenario {
+            background: #2E5A4C;
+            color: #FFFFFF;
+            border-color: #2E5A4C;
+        }
+
         .filter-quick-btn.active-semana {
             background: var(--pantone-dark);
             color: var(--pantone-yellow);
@@ -308,7 +321,8 @@
         }
 
         .years-pills-container,
-        .subplanta-pills-container {
+        .subplanta-pills-container,
+        .escenario-pills-container {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
@@ -509,7 +523,8 @@
         }
 
         .year-pill,
-        .subplanta-pill {
+        .subplanta-pill,
+        .escenario-pill {
             display: inline-flex;
             align-items: center;
             gap: 7px;
@@ -526,7 +541,8 @@
         }
 
         .year-pill:hover,
-        .subplanta-pill:hover {
+        .subplanta-pill:hover,
+        .escenario-pill:hover {
             border-color: var(--chart-cerulean-slate);
             background: var(--bg-hover);
             color: var(--text-primary);
@@ -544,6 +560,13 @@
             color: #FFFFFF;
             border-color: var(--chart-cerulean-slate);
             box-shadow: 0 2px 6px rgba(72, 111, 145, 0.25);
+        }
+
+        .escenario-pill.selected {
+            background: #2E5A4C;
+            color: #FFFFFF;
+            border-color: #2E5A4C;
+            box-shadow: 0 2px 6px rgba(46, 90, 76, 0.25);
         }
 
         .pill-badge-count {
@@ -971,8 +994,8 @@
             margin-top: 12px;
         }
 
-        .kpi-grid > *,
-        .dashboard-container > *,
+        .kpi-grid>*,
+        .dashboard-container>*,
         .card,
         .kpi-card,
         .chart-card,
@@ -984,17 +1007,21 @@
             body {
                 padding: 10px 14px;
             }
+
             .dashboard-container {
                 gap: 12px;
                 max-width: 100%;
             }
+
             .kpi-grid {
                 grid-template-columns: repeat(4, minmax(0, 1fr));
                 gap: 10px;
             }
+
             .kpi-value {
                 font-size: 1.3rem;
             }
+
             .chart-box,
             .chart-container-box {
                 height: 290px !important;
@@ -1005,14 +1032,17 @@
             .kpi-grid {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
             }
+
             .dashboard-header {
                 flex-direction: column;
                 align-items: flex-start;
             }
+
             .header-actions {
                 width: 100%;
                 justify-content: flex-start;
             }
+
             .week-combobox-wrapper {
                 min-width: 100% !important;
                 max-width: 100% !important;
@@ -1023,30 +1053,41 @@
             body {
                 padding: 8px;
             }
-            .card, .chart-card, .matrix-card, .dashboard-header {
+
+            .card,
+            .chart-card,
+            .matrix-card,
+            .dashboard-header {
                 padding: 12px;
             }
+
             .header-title {
                 font-size: 1.05rem;
             }
+
             .btn {
                 flex: 1 1 auto;
                 justify-content: center;
             }
+
             .search-box {
                 min-width: 100%;
                 max-width: 100%;
             }
+
             .filter-quick-actions {
                 width: 100%;
             }
+
             .filter-quick-btn {
                 flex: 1 1 auto;
                 text-align: center;
             }
+
             .kpi-grid {
                 grid-template-columns: 1fr;
             }
+
             .chart-box,
             .chart-container-box {
                 height: 240px !important;
@@ -1075,7 +1116,8 @@
                         <span class="badge-tag">SubPlanta • CódigoCorto • Nombre</span>
                     </div>
                     <div class="header-subtitle">
-                        Maestro: <b>T_CodigoRelacion</b> (Auxiliares) • Comparativo: <b>T_ResProd_Py_DB</b> (ResProd_Py_DB) vs <b>T_DemandaPy</b> (DemandaPy)
+                        Maestro: <b>T_CodigoRelacion</b> (Auxiliares) • Comparativo: <b>T_ResProd_Py_DB</b>
+                        (ResProd_Py_DB) vs <b>T_DemandaPy</b> (DemandaPy)
                     </div>
                 </div>
             </div>
@@ -1106,7 +1148,7 @@
             </div>
         </header>
 
-        <!-- FILTROS (AÑO, SUBPLANTA Y SEMANAS) -->
+        <!-- FILTROS (AÑO, ESCENARIO, SUBPLANTA Y SEMANAS) -->
         <section class="card">
             <!-- 1. FILTRO AÑO -->
             <div class="filter-section-header">
@@ -1120,9 +1162,22 @@
 
             <div style="border-top: 1px solid var(--border-ui); margin: 14px 0 12px 0;"></div>
 
-            <!-- 2. FILTRO SUBPLANTA -->
+            <!-- 2. FILTRO ESCENARIO -->
             <div class="filter-section-header">
-                <div class="filter-title" style="color: var(--chart-steel-blue);">2. Filtro por SubPlanta
+                <div class="filter-title" style="color: #2E5A4C;">2. Filtro por Escenario (T_ResProd_Py_DB /
+                    T_DemandaPy)</div>
+                <div class="filter-quick-actions">
+                    <button class="filter-quick-btn active-escenario" id="btnQuickEscAll"
+                        onclick="seleccionarFiltroRapidoEscenario('all')">Todos los Escenarios</button>
+                </div>
+            </div>
+            <div class="escenario-pills-container" id="escenarioPillsContainer"></div>
+
+            <div style="border-top: 1px solid var(--border-ui); margin: 14px 0 12px 0;"></div>
+
+            <!-- 3. FILTRO SUBPLANTA -->
+            <div class="filter-section-header">
+                <div class="filter-title" style="color: var(--chart-steel-blue);">3. Filtro por SubPlanta
                     (Multi-Selección)</div>
                 <div class="filter-quick-actions">
                     <button class="filter-quick-btn active-subplanta" id="btnQuickSpAll"
@@ -1133,9 +1188,9 @@
 
             <div style="border-top: 1px solid var(--border-ui); margin: 14px 0 12px 0;"></div>
 
-            <!-- 3. FILTRO SEMANAS (COMBOBOX MULTI-SELECCIÓN) -->
+            <!-- 4. FILTRO SEMANAS (COMBOBOX MULTI-SELECCIÓN) -->
             <div class="filter-section-header">
-                <div class="filter-title" style="color: var(--pantone-dark);">3. Filtro por Semana ISO-8601 (Lunes a
+                <div class="filter-title" style="color: var(--pantone-dark);">4. Filtro por Semana ISO-8601 (Lunes a
                     Domingo)</div>
                 <div class="filter-quick-actions">
                     <button class="filter-quick-btn" id="btnQuickLatest"
@@ -1230,7 +1285,8 @@
         <!-- GRÁFICO COMPARATIVO POR SEMANA (BARRAS CON ETIQUETAS) -->
         <section class="chart-card">
             <div class="chart-top-bar">
-                <div class="chart-title">Comparativo Semanal: Programa Producción (T_ResProd_Py_DB) vs Proyección Comercial (T_DemandaPy)</div>
+                <div class="chart-title">Comparativo Semanal: Programa Producción (T_ResProd_Py_DB) vs Proyección
+                    Comercial (T_DemandaPy)</div>
 
                 <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
                     <!-- Filtro de Semanas exclusivo del Gráfico (Preselección: Últimas 9 semanas) -->
@@ -1271,8 +1327,8 @@
 
                     <div
                         style="display:flex; gap:4px; align-items:center; background:#E5E9F0; padding:3px 4px; border-radius:8px; border: 1px solid var(--border-ui);">
-                        <button class="filter-quick-btn active" id="btnUnitTn" style="padding:3px 8px; font-size:0.75rem;"
-                            onclick="cambiarUnidadGrafico('Tn')">Tn</button>
+                        <button class="filter-quick-btn active" id="btnUnitTn"
+                            style="padding:3px 8px; font-size:0.75rem;" onclick="cambiarUnidadGrafico('Tn')">Tn</button>
                         <button class="filter-quick-btn" id="btnUnitKg" style="padding:3px 8px; font-size:0.75rem;"
                             onclick="cambiarUnidadGrafico('Kg')">Kg</button>
                     </div>
@@ -1287,8 +1343,8 @@
         <section class="matrix-card">
             <div class="matrix-toolbar">
                 <div class="search-box">
-                    <input type="text" id="searchMatriz" placeholder="Buscar semana, subplanta, código corto o nombre..."
-                        oninput="filtrarMatriz()">
+                    <input type="text" id="searchMatriz"
+                        placeholder="Buscar semana, subplanta, código corto o nombre..." oninput="filtrarMatriz()">
                 </div>
                 <div style="display:flex; gap:8px; flex-wrap:wrap;">
                     <button class="btn" style="padding:6px 12px; font-size:0.78rem;"
@@ -1303,8 +1359,8 @@
                     <thead id="theadMatriz">
                         <tr>
                             <th style="min-width:260px;">Semana / SubPlanta / CódigoCorto - Nombre</th>
-                            <th class="num-col th-prog col-group-prog-start">Prog. Producción (kg) [T_ResProd_Py_DB]</th>
-                            <th class="num-col th-com col-group-com-start">Proy. Comercial (kg) [T_DemandaPy]</th>
+                            <th class="num-col th-prog col-group-prog-start">Prog. Producción (kg)</th>
+                            <th class="num-col th-com col-group-com-start">Proy. Comercial + Emb. (kg)</th>
                             <th class="num-col th-dif col-group-dif-start">Diferencia (kg)</th>
                             <th class="num-col th-com">% Cumpl.</th>
                         </tr>
@@ -1426,13 +1482,15 @@
         // =========================================================================
         // 🗂️ ESTADO GLOBAL DEL DASHBOARD
         // =========================================================================
-        let consolidatedRows = []; // Registros unificados por (Semana, SubPlanta, CodigoCorto)
+        let consolidatedRows = []; // Registros unificados por (Escenario, Semana, SubPlanta, CodigoCorto)
         let totalSkusMaestro = 0;
         let selectedYears = new Set();
+        let selectedEscenarios = new Set();
         let selectedSubPlantas = new Set();
         let selectedWeeks = new Set();
         let selectedChartWeeks = new Set();
         let aniosDisponibles = [];
+        let escenariosDisponibles = [];
         let subPlantasDisponibles = [];
         let semanasDisponibles = [];
 
@@ -1549,10 +1607,16 @@
                 procesarYConsolidarTablas(tResProdPyDb, tDemandaPy, tCodigoRelacion);
 
                 aniosDisponibles = [...new Set(consolidatedRows.map(d => d.Anio))].filter(Boolean).sort((a, b) => a - b);
+                escenariosDisponibles = [...new Set(consolidatedRows.map(d => d.Escenario))].filter(Boolean).sort((a, b) => {
+                    const na = Number(a), nb = Number(b);
+                    if (!isNaN(na) && !isNaN(nb)) return na - nb;
+                    return String(a).localeCompare(String(b), undefined, { numeric: true });
+                });
                 subPlantasDisponibles = [...new Set(consolidatedRows.map(d => d.SubPlanta))].filter(Boolean).sort();
                 semanasDisponibles = [...new Set(consolidatedRows.map(d => d.Semana))].filter(Boolean).sort((a, b) => a - b);
 
                 if (selectedYears.size === 0) aniosDisponibles.forEach(y => selectedYears.add(y));
+                if (selectedEscenarios.size === 0) escenariosDisponibles.forEach(esc => selectedEscenarios.add(esc));
                 if (selectedSubPlantas.size === 0) subPlantasDisponibles.forEach(sp => selectedSubPlantas.add(sp));
                 if (selectedWeeks.size === 0) {
                     semanasDisponibles.slice(-9).forEach(s => selectedWeeks.add(s));
@@ -1572,6 +1636,7 @@
                 }
 
                 construirPildorasAnio();
+                construirPildorasEscenario();
                 construirPildorasSubPlanta();
                 construirPildorasSemana();
                 construirComboboxSemanaGrafico();
@@ -1666,14 +1731,19 @@
                     if (!nom) nom = 'SIN NOMBRE';
 
                     const kilos = Number(extraerCampo(row, 'Kilos', 'kilos') ?? 0) || 0;
+                    const escRaw = extraerCampo(row, 'Escenario', 'escenario');
+                    const esc = (escRaw !== null && escRaw !== undefined && String(escRaw).trim() !== '')
+                        ? String(escRaw).trim()
+                        : 'SIN ESCENARIO';
 
                     const sStr = String(sem);
                     const anio = sStr.length >= 4 ? parseInt(sStr.substring(0, 4), 10) : 0;
                     const nSem = sStr.length >= 5 ? parseInt(sStr.substring(4), 10) : 0;
 
-                    const key = `${sem}|${sp}|${cod}`;
+                    const key = `${esc}|${sem}|${sp}|${cod}`;
                     if (!mapaConsolidado.has(key)) {
                         mapaConsolidado.set(key, {
+                            Escenario: esc,
                             Semana: sem,
                             Anio: anio,
                             NSemana: nSem,
@@ -1695,6 +1765,7 @@
 
             consolidatedRows = Array.from(mapaConsolidado.values()).sort((a, b) =>
                 a.Semana - b.Semana ||
+                a.Escenario.localeCompare(b.Escenario, undefined, { numeric: true }) ||
                 a.SubPlanta.localeCompare(b.SubPlanta) ||
                 a.CodigoCorto.localeCompare(b.CodigoCorto, undefined, { numeric: true })
             );
@@ -1731,6 +1802,37 @@
             construirPildorasAnio();
             construirPildorasSemana();
             construirComboboxSemanaGrafico();
+            actualizarVista();
+        }
+
+        function construirPildorasEscenario() {
+            const container = document.getElementById('escenarioPillsContainer');
+            if (!container) return;
+            container.innerHTML = '';
+            escenariosDisponibles.forEach(esc => {
+                const filasEsc = consolidatedRows.filter(d => d.Escenario === esc);
+                const skusUnicos = new Set(filasEsc.map(d => d.CodigoCorto)).size;
+                const pill = document.createElement('div');
+                pill.className = `escenario-pill ${selectedEscenarios.has(esc) ? 'selected' : ''}`;
+                pill.innerHTML = `<span>Escenario ${esc}</span><span class="pill-badge-count">${skusUnicos} SKUs • ${filasEsc.length} reg</span>`;
+                pill.onclick = () => {
+                    if (selectedEscenarios.has(esc)) {
+                        if (selectedEscenarios.size > 1) selectedEscenarios.delete(esc);
+                    } else {
+                        selectedEscenarios.add(esc);
+                    }
+                    construirPildorasEscenario();
+                    actualizarVista();
+                };
+                container.appendChild(pill);
+            });
+            document.getElementById('btnQuickEscAll')?.classList.toggle('active-escenario', selectedEscenarios.size === escenariosDisponibles.length);
+        }
+
+        function seleccionarFiltroRapidoEscenario() {
+            selectedEscenarios.clear();
+            escenariosDisponibles.forEach(esc => selectedEscenarios.add(esc));
+            construirPildorasEscenario();
             actualizarVista();
         }
 
@@ -2010,6 +2112,7 @@
         function obtenerFilasFiltradasGrafico() {
             return consolidatedRows.filter(d =>
                 selectedYears.has(d.Anio) &&
+                selectedEscenarios.has(d.Escenario) &&
                 selectedSubPlantas.has(d.SubPlanta) &&
                 selectedChartWeeks.has(d.Semana)
             );
@@ -2018,6 +2121,7 @@
         function obtenerFilasFiltradas() {
             return consolidatedRows.filter(d =>
                 selectedYears.has(d.Anio) &&
+                selectedEscenarios.has(d.Escenario) &&
                 selectedSubPlantas.has(d.SubPlanta) &&
                 selectedWeeks.has(d.Semana)
             );
@@ -2055,7 +2159,7 @@
             const skusDistintos = new Set(filtrados.map(d => d.CodigoCorto)).size;
 
             const summary = document.getElementById('selectedWeeksSummary');
-            summary.innerHTML = `Mostrando: Años <b>[${Array.from(selectedYears).join(', ')}]</b> • SubPlantas <b>[${selectedSubPlantas.size} seleccionadas]</b> • Semanas <b>[${selectedWeeks.size} seleccionadas]</b> • SKUs Únicos: <b>${skusDistintos}</b>`;
+            summary.innerHTML = `Mostrando: Años <b>[${Array.from(selectedYears).join(', ')}]</b> • Escenarios <b>[${Array.from(selectedEscenarios).join(', ')}]</b> • SubPlantas <b>[${selectedSubPlantas.size} seleccionadas]</b> • Semanas <b>[${selectedWeeks.size} seleccionadas]</b> • SKUs Únicos: <b>${skusDistintos}</b>`;
 
             actualizarKPIs(filtrados, skusDistintos);
             renderizarGrafico(obtenerFilasFiltradasGrafico());
@@ -2448,12 +2552,13 @@
                 return;
             }
 
-            // Hoja 1: Agrupado por SubPlanta, CodigoCorto y Nombre
+            // Hoja 1: Agrupado por Escenario, SubPlanta, CodigoCorto y Nombre
             const mapAgrupado = new Map();
             data.forEach(d => {
-                const key = `${d.SubPlanta}|${d.CodigoCorto}`;
+                const key = `${d.Escenario}|${d.SubPlanta}|${d.CodigoCorto}`;
                 if (!mapAgrupado.has(key)) {
                     mapAgrupado.set(key, {
+                        Escenario: d.Escenario,
                         SubPlanta: d.SubPlanta,
                         CodigoCorto: d.CodigoCorto,
                         Nombre: d.Nombre,
@@ -2467,6 +2572,7 @@
             });
 
             const filasAgrupadas = Array.from(mapAgrupado.values()).map(d => ({
+                "Escenario": d.Escenario,
                 "SubPlanta": d.SubPlanta,
                 "CodigoCorto": d.CodigoCorto,
                 "Nombre": d.Nombre,
@@ -2476,8 +2582,9 @@
                 "% Cumplimiento": Number(calcPct(d.PROG_PRODUCCION, d.PROYECCION_COMERCIAL).toFixed(2))
             }));
 
-            // Hoja 2: Detalle por Semana, SubPlanta, CodigoCorto y Nombre
+            // Hoja 2: Detalle por Escenario, Semana, SubPlanta, CodigoCorto y Nombre
             const filasSemanal = data.map(d => ({
+                "Escenario": d.Escenario,
                 "Año": d.Anio,
                 "Semana": d.Semana,
                 "Rango Semana ISO": obtenerRangoSemanaISO(d.Semana),
@@ -2510,4 +2617,3 @@
 </body>
 
 </html>
-
