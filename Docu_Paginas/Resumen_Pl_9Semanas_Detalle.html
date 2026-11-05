@@ -1,0 +1,2949 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resumen por Escenario: Análisis de Sobrantes y Faltantes por SKU - 9 Semanas PL</title>
+
+    <!-- Fuentes Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- SheetJS para exportar a Excel -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <!-- Configuración global de conexión a la API (Regla Obligatoria) -->
+    <script src="config.js"></script>
+
+    <style>
+        /* =========================================================================
+           🎨 TEMA: INDUSTRIAL SLATE, STEEL BLUE & GOLD
+           ========================================================================= */
+        :root {
+            --isg-gold-bright: #C9A968;
+            --isg-slate-dark: #34495E;
+            --isg-slate-med: #5D6D7E;
+            --isg-slate-cool: #85929E;
+            --isg-slate-deep: #2C3E50;
+            --isg-gold-rich: #B39252;
+            --isg-slate-charcoal: #1C2833;
+            --isg-slate-silver: #AEB6BF;
+            --isg-slate-stone: #7F8C8D;
+            --isg-gold-bronze: #9C7D41;
+
+            --chart-slate-navy: #2C4257;
+            --chart-steel-blue: #3A5B78;
+            --chart-cerulean-slate: #486F91;
+            --chart-pewter-blue: #527A9A;
+            --chart-plomo-neutro: #73808E;
+            --chart-plomo-pizarra: #6C7A89;
+
+            --pantone-yellow: #C9A968;
+            --pantone-yellow-light: #DEC690;
+            --pantone-gold: #B39252;
+            --pantone-dark: #2E2A2F;
+            --pantone-gray-dark: #605C5E;
+            --pantone-gray-med: #878994;
+            --pantone-gray-light: #CDCAC0;
+
+            --bg-main: #F4F6F9;
+            --bg-surface: #FFFFFF;
+            --bg-elevated: #EDF1F5;
+            --bg-hover: #E2E8F0;
+
+            --text-primary: #2E2A2F;
+            --text-secondary: #5D6D7E;
+            --text-muted: #7F8C8D;
+
+            --border-ui: #D5DCE4;
+            --border-strong: #AEB6BF;
+
+            --success: #558B76;
+            --warning: #C9A968;
+            --danger: #B84A4A;
+
+            --falta-dark: #7A2828;
+            --falta-accent: #B84A4A;
+            --falta-soft: rgba(184, 74, 74, 0.08);
+
+            --sobra-dark: #245041;
+            --sobra-accent: #2E5A4C;
+            --sobra-soft: rgba(46, 90, 76, 0.08);
+
+            --shadow-card: 0 4px 14px rgba(28, 40, 51, 0.06);
+            --radius-md: 12px;
+            --radius-sm: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 18px 24px;
+        }
+
+        .dashboard-container {
+            max-width: 1920px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        /* =========================================================================
+           HEADER
+           ========================================================================= */
+        .dashboard-header {
+            background: linear-gradient(135deg, var(--pantone-dark) 0%, var(--isg-slate-deep) 100%);
+            border: 1px solid var(--isg-slate-dark);
+            border-bottom: 3px solid var(--pantone-yellow);
+            border-radius: var(--radius-md);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+            box-shadow: 0 6px 18px rgba(28, 40, 51, 0.15);
+            color: #FFFFFF;
+        }
+
+        .header-title-group {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .header-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 10px;
+            background: rgba(201, 169, 104, 0.16);
+            border: 1px solid rgba(201, 169, 104, 0.45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--pantone-yellow);
+            flex-shrink: 0;
+        }
+
+        .header-title {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #FFFFFF;
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .badge-tag {
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 999px;
+            background: var(--pantone-yellow);
+            color: var(--pantone-dark);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .header-subtitle {
+            font-size: 0.82rem;
+            color: var(--pantone-gray-light);
+            margin-top: 3px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 13px;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            color: #E2E8F0;
+        }
+
+        .status-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: var(--warning);
+        }
+
+        .status-dot.online {
+            background: #2ECC71;
+            box-shadow: 0 0 8px rgba(46, 204, 113, 0.7);
+        }
+
+        .status-dot.error {
+            background: #EF4444;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 8px 15px;
+            border-radius: var(--radius-sm);
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid var(--border-ui);
+            background: var(--bg-surface);
+            color: var(--text-primary);
+            transition: all 0.18s ease;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background: var(--bg-hover);
+            border-color: var(--isg-slate-cool);
+        }
+
+        .btn-primary {
+            background: var(--chart-slate-navy);
+            color: #FFFFFF;
+            border-color: var(--chart-slate-navy);
+        }
+
+        .btn-primary:hover {
+            background: var(--chart-steel-blue);
+            border-color: var(--chart-steel-blue);
+        }
+
+        .btn-excel {
+            background: var(--success);
+            color: #FFFFFF;
+            border-color: #467360;
+        }
+
+        .btn-excel:hover {
+            background: #467360;
+        }
+
+        /* =========================================================================
+           PANEL DE FILTROS (AÑO, ESCENARIO, SUBPLANTA Y SEMANA)
+           ========================================================================= */
+        .card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-ui);
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            box-shadow: var(--shadow-card);
+        }
+
+        .filter-section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .filter-title {
+            font-size: 0.82rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--isg-slate-dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-quick-actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .filter-quick-btn {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px 11px;
+            border-radius: 6px;
+            border: 1px solid var(--border-ui);
+            background: var(--bg-elevated);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .filter-quick-btn:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .filter-quick-btn.active {
+            background: var(--chart-slate-navy);
+            color: #FFFFFF;
+            border-color: var(--chart-slate-navy);
+        }
+
+        .filter-quick-btn.active-subplanta {
+            background: var(--chart-cerulean-slate);
+            color: #FFFFFF;
+            border-color: var(--chart-cerulean-slate);
+        }
+
+        .filter-quick-btn.active-escenario {
+            background: #2E5A4C;
+            color: #FFFFFF;
+            border-color: #2E5A4C;
+        }
+
+        .filter-quick-btn.active-semana {
+            background: var(--pantone-dark);
+            color: var(--pantone-yellow);
+            border-color: var(--pantone-dark);
+        }
+
+        .years-pills-container,
+        .subplanta-pills-container,
+        .escenario-pills-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        /* =========================================================================
+           COMBOBOX MULTI-SELECCIÓN DE SEMANAS (CON RANGO DE FECHAS ISO)
+           ========================================================================= */
+        .week-filter-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .week-combobox-wrapper {
+            position: relative;
+            min-width: 360px;
+            max-width: 520px;
+            flex: 1;
+        }
+
+        .week-combobox-trigger {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 9px 14px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-strong);
+            background: var(--bg-surface);
+            color: var(--text-primary);
+            font-size: 0.84rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.16s ease;
+            user-select: none;
+        }
+
+        .week-combobox-trigger:hover {
+            border-color: var(--chart-slate-navy);
+            background: var(--bg-elevated);
+        }
+
+        .week-combobox-trigger-left {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .week-combobox-chevron {
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            transition: transform 0.2s ease;
+        }
+
+        .week-combobox-wrapper.open .week-combobox-chevron {
+            transform: rotate(180deg);
+        }
+
+        .week-combobox-dropdown {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            right: 0;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-strong);
+            border-radius: var(--radius-sm);
+            box-shadow: 0 12px 28px rgba(28, 40, 51, 0.18);
+            z-index: 200;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .week-combobox-wrapper.open .week-combobox-dropdown {
+            display: flex;
+        }
+
+        .week-combobox-search-bar {
+            padding: 9px 11px;
+            border-bottom: 1px solid var(--border-ui);
+            background: var(--bg-elevated);
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .week-combobox-search-input {
+            width: 100%;
+            padding: 7px 11px;
+            border-radius: 6px;
+            border: 1px solid var(--border-ui);
+            font-size: 0.8rem;
+            outline: none;
+            background: #FFFFFF;
+            color: var(--text-primary);
+        }
+
+        .week-combobox-search-input:focus {
+            border-color: var(--chart-cerulean-slate);
+        }
+
+        .week-combobox-actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .week-combo-action-btn {
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 3px 9px;
+            border-radius: 5px;
+            border: 1px solid var(--border-ui);
+            background: #FFFFFF;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.14s ease;
+        }
+
+        .week-combo-action-btn:hover {
+            background: var(--chart-slate-navy);
+            color: #FFFFFF;
+            border-color: var(--chart-slate-navy);
+        }
+
+        .week-combobox-list {
+            max-height: 280px;
+            overflow-y: auto;
+            padding: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .week-combobox-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 7px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.81rem;
+            transition: background 0.12s ease;
+            user-select: none;
+        }
+
+        .week-combobox-item:hover {
+            background: var(--bg-hover);
+        }
+
+        .week-combobox-item.checked {
+            background: rgba(72, 111, 145, 0.1);
+            font-weight: 600;
+        }
+
+        .week-combobox-item-left {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            color: var(--pantone-dark);
+        }
+
+        .week-combobox-item input[type="checkbox"] {
+            width: 15px;
+            height: 15px;
+            accent-color: var(--chart-slate-navy);
+            cursor: pointer;
+        }
+
+        .week-combobox-range {
+            font-size: 0.74rem;
+            color: var(--text-secondary);
+            background: var(--bg-elevated);
+            padding: 2px 8px;
+            border-radius: 999px;
+            border: 1px solid var(--border-ui);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .week-combobox-item.checked .week-combobox-range {
+            background: var(--chart-slate-navy);
+            color: var(--pantone-yellow);
+            border-color: var(--chart-slate-navy);
+            font-weight: 600;
+        }
+
+        .year-pill,
+        .subplanta-pill,
+        .escenario-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 7px 14px;
+            border-radius: 8px;
+            font-size: 0.83rem;
+            font-weight: 700;
+            cursor: pointer;
+            border: 1px solid var(--border-ui);
+            background: var(--bg-elevated);
+            color: var(--text-secondary);
+            user-select: none;
+            transition: all 0.16s ease;
+        }
+
+        .year-pill:hover,
+        .subplanta-pill:hover,
+        .escenario-pill:hover {
+            border-color: var(--chart-cerulean-slate);
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .year-pill.selected {
+            background: var(--chart-slate-navy);
+            color: #FFFFFF;
+            border-color: var(--chart-slate-navy);
+            box-shadow: 0 2px 6px rgba(44, 66, 87, 0.25);
+        }
+
+        .subplanta-pill.selected {
+            background: var(--chart-cerulean-slate);
+            color: #FFFFFF;
+            border-color: var(--chart-cerulean-slate);
+            box-shadow: 0 2px 6px rgba(72, 111, 145, 0.25);
+        }
+
+        .escenario-pill.selected {
+            background: #2E5A4C;
+            color: #FFFFFF;
+            border-color: #2E5A4C;
+            box-shadow: 0 2px 6px rgba(46, 90, 76, 0.25);
+        }
+
+        .pill-badge-count {
+            font-size: 0.7rem;
+            padding: 1px 6px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.22);
+            color: inherit;
+        }
+
+        .selection-summary-bar {
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px dashed var(--border-ui);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.79rem;
+            color: var(--text-secondary);
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        /* =========================================================================
+           TARJETAS KPI
+           ========================================================================= */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .kpi-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-ui);
+            border-radius: var(--radius-md);
+            padding: 16px 18px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-card);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 0;
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: var(--kpi-accent, var(--chart-slate-navy));
+        }
+
+        .kpi-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--text-secondary);
+        }
+
+        .kpi-value {
+            font-size: 1.55rem;
+            font-weight: 800;
+            color: var(--pantone-dark);
+            letter-spacing: -0.02em;
+            line-height: 1.15;
+        }
+
+        .kpi-unit {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-left: 4px;
+        }
+
+        .kpi-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 4px;
+            padding-top: 8px;
+            border-top: 1px solid var(--bg-elevated);
+            font-size: 0.76rem;
+            color: var(--text-secondary);
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .badge-kpi {
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 0.72rem;
+            background: var(--bg-elevated);
+            color: var(--chart-slate-navy);
+        }
+
+        .badge-good {
+            background: rgba(85, 139, 118, 0.16);
+            color: #356350;
+        }
+
+        .badge-mid {
+            background: rgba(201, 169, 104, 0.22);
+            color: #7D6027;
+        }
+
+        .badge-low {
+            background: rgba(184, 74, 74, 0.16);
+            color: #8F3232;
+        }
+
+        .val-positive {
+            color: var(--sobra-dark);
+            font-weight: 700;
+        }
+
+        .val-negative {
+            color: var(--danger);
+            font-weight: 700;
+        }
+
+        /* =========================================================================
+           GRILLA DE DOS MATRICES SEPARADAS (FALTANTES Y SOBRANTES)
+           ========================================================================= */
+        .matrices-dual-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+            align-items: start;
+        }
+
+        .matrix-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-ui);
+            border-radius: var(--radius-md);
+            padding: 18px 20px;
+            box-shadow: var(--shadow-card);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            min-width: 0;
+        }
+
+        .matrix-card.card-faltantes {
+            border-top: 4px solid var(--falta-accent);
+        }
+
+        .matrix-card.card-sobrantes {
+            border-top: 4px solid var(--sobra-accent);
+        }
+
+        .matrix-card.card-escenarios {
+            border-top: 4px solid var(--chart-slate-navy);
+        }
+
+        .matrix-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .matrix-header-title {
+            font-size: 0.95rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            position: relative;
+            min-width: 240px;
+            flex: 1;
+            max-width: 380px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 7px 12px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-ui);
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+            font-size: 0.81rem;
+            outline: none;
+        }
+
+        .search-box input:focus {
+            border-color: var(--chart-cerulean-slate);
+            background: #FFFFFF;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            max-height: 640px;
+            border: 1px solid var(--border-ui);
+            border-radius: var(--radius-sm);
+        }
+
+        table.matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+
+        table.matrix-table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: var(--chart-slate-navy);
+            color: #FFFFFF;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.71rem;
+            letter-spacing: 0.04em;
+            padding: 10px 11px;
+            text-align: left;
+            border-bottom: 2px solid #1C2833;
+            white-space: nowrap;
+        }
+
+        table.matrix-table thead th.num-col {
+            text-align: right;
+        }
+
+        table.matrix-table thead th.th-prog {
+            background: #2C4257;
+            color: #F5E6C4;
+        }
+
+        table.matrix-table thead th.th-com {
+            background: #365571;
+            color: #EBF5FB;
+        }
+
+        table.matrix-table thead th.th-dif {
+            background: #3E4C59;
+            color: #EAEDED;
+        }
+
+        table.matrix-table thead th.th-falta {
+            background: var(--falta-dark);
+            color: #FDEDEC;
+        }
+
+        table.matrix-table thead th.th-sobra {
+            background: var(--sobra-dark);
+            color: #E8F8F5;
+        }
+
+        table.matrix-table tbody td.col-prog {
+            background-color: rgba(44, 66, 87, 0.05);
+        }
+
+        table.matrix-table tbody td.col-com {
+            background-color: rgba(72, 111, 145, 0.07);
+        }
+
+        table.matrix-table tbody td.col-dif {
+            background-color: rgba(93, 109, 126, 0.06);
+        }
+
+        table.matrix-table tbody td.col-falta {
+            background-color: var(--falta-soft);
+        }
+
+        table.matrix-table tbody td.col-sobra {
+            background-color: var(--sobra-soft);
+        }
+
+        table.matrix-table tbody tr.level-1 td.col-prog {
+            background-color: rgba(44, 66, 87, 0.12);
+        }
+
+        table.matrix-table tbody tr.level-1 td.col-com {
+            background-color: rgba(72, 111, 145, 0.15);
+        }
+
+        table.matrix-table tbody tr.level-1 td.col-falta {
+            background-color: rgba(184, 74, 74, 0.14);
+        }
+
+        table.matrix-table tbody tr.level-1 td.col-sobra {
+            background-color: rgba(46, 90, 76, 0.14);
+        }
+
+        table.matrix-table th.col-group-prog-start,
+        table.matrix-table td.col-group-prog-start {
+            border-left: 2px solid rgba(44, 66, 87, 0.35);
+        }
+
+        table.matrix-table th.col-group-com-start,
+        table.matrix-table td.col-group-com-start {
+            border-left: 2px solid rgba(72, 111, 145, 0.35);
+        }
+
+        table.matrix-table th.col-group-falta-start,
+        table.matrix-table td.col-group-falta-start {
+            border-left: 2px solid rgba(184, 74, 74, 0.35);
+        }
+
+        table.matrix-table th.col-group-sobra-start,
+        table.matrix-table td.col-group-sobra-start {
+            border-left: 2px solid rgba(46, 90, 76, 0.35);
+        }
+
+        table.matrix-table th.col-group-dif-start,
+        table.matrix-table td.col-group-dif-start {
+            border-left: 2px solid rgba(93, 109, 126, 0.35);
+        }
+
+        table.matrix-table tbody td {
+            padding: 8px 11px;
+            border-bottom: 1px solid var(--border-ui);
+            color: var(--text-primary);
+            white-space: nowrap;
+        }
+
+        table.matrix-table tbody td.num-cell {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Nivel 1: Semana */
+        tr.level-1 {
+            background: #E6ECF2;
+            font-weight: 700;
+        }
+
+        tr.level-1:hover {
+            background: #DCE4EC;
+        }
+
+        /* Nivel 2: SubPlanta */
+        tr.level-2 {
+            background: #F0F4F8;
+            font-weight: 600;
+        }
+
+        tr.level-2:hover {
+            background: #E6EDF4;
+        }
+
+        /* Nivel 3: MP Para Chuletas (TipoMP) */
+        tr.level-3 {
+            background: #F8FAFC;
+            font-weight: 600;
+            font-size: 0.79rem;
+        }
+
+        tr.level-3:hover {
+            background: #EFF4F9;
+        }
+
+        /* Nivel 4: SKU (CodigoCorto + Nombre) */
+        tr.level-4 {
+            background: #FFFFFF;
+            font-size: 0.78rem;
+        }
+
+        tr.level-4:hover {
+            background: #F8FAFC;
+        }
+
+        tr.total-row td {
+            background: #2C4257 !important;
+            color: #FFFFFF !important;
+            font-weight: 800 !important;
+            border-top: 2px solid #1C2833;
+        }
+
+        .toggle-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            background: rgba(44, 66, 87, 0.12);
+            color: var(--chart-slate-navy);
+            font-weight: 800;
+            font-size: 0.78rem;
+            margin-right: 7px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .toggle-icon:hover {
+            background: var(--chart-slate-navy);
+            color: #FFFFFF;
+        }
+
+        .sku-code-badge {
+            display: inline-block;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-weight: 700;
+            font-size: 0.74rem;
+            background: #E8EEF5;
+            color: var(--chart-slate-navy);
+            border: 1px solid #C5D3E2;
+            padding: 1px 6px;
+            border-radius: 5px;
+            margin-right: 6px;
+        }
+
+        .sku-name-text {
+            color: var(--pantone-dark);
+            font-weight: 500;
+        }
+
+        .tag-subplanta {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 5px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            background: rgba(44, 66, 87, 0.1);
+            color: var(--chart-slate-navy);
+        }
+
+        .tag-tipomp {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 2px 9px;
+            border-radius: 5px;
+            font-size: 0.73rem;
+            font-weight: 800;
+            background: rgba(201, 169, 104, 0.24);
+            color: #6E521D;
+            border: 1px solid rgba(201, 169, 104, 0.55);
+        }
+
+        .tag-tipomp.mp-no {
+            background: rgba(93, 109, 126, 0.12);
+            color: #3E4C59;
+            border-color: rgba(93, 109, 126, 0.3);
+        }
+
+        .tag-tipomp-prefix {
+            font-weight: 700;
+            color: inherit;
+            opacity: 0.85;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+
+        .badge-mp-total {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            background: rgba(201, 169, 104, 0.22);
+            color: #6E521D;
+            border: 1px solid rgba(201, 169, 104, 0.5);
+            margin-left: 6px;
+        }
+
+        .badge-mp-no-total {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            background: rgba(93, 109, 126, 0.12);
+            color: #3E4C59;
+            border: 1px solid rgba(93, 109, 126, 0.28);
+            margin-left: 4px;
+        }
+
+        .kpi-mp-badges {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 2px;
+        }
+
+        .tag-escenario {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 0.76rem;
+            font-weight: 800;
+            background: #2E5A4C;
+            color: #FFFFFF;
+        }
+
+        .sub-sku-count {
+            display: inline-block;
+            font-size: 0.68rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-left: 5px;
+            padding: 1px 6px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.75);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        /* =========================================================================
+           TOAST DE NOTIFICACIÓN
+           ========================================================================= */
+        .toast-notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--pantone-dark);
+            color: #FFFFFF;
+            padding: 11px 18px;
+            border-radius: var(--radius-sm);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            z-index: 9999;
+            opacity: 0;
+            transform: translateY(15px);
+            pointer-events: none;
+            transition: all 0.25s ease;
+            border-left: 4px solid var(--pantone-yellow);
+        }
+
+        .toast-notification.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* =========================================================================
+           📱 DISEÑO RESPONSIVE PARA LAPTOPS, TABLETS Y CELULARES (Regla Obligatoria)
+           ========================================================================= */
+        .kpi-grid > *,
+        .matrices-dual-grid > *,
+        .dashboard-container > *,
+        .card,
+        .kpi-card,
+        .matrix-card {
+            min-width: 0;
+        }
+
+        @media screen and (max-width: 1600px) {
+            body {
+                padding: 10px 14px;
+            }
+            .dashboard-container {
+                gap: 12px;
+                max-width: 100%;
+            }
+            .kpi-grid {
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+                gap: 10px;
+            }
+            .kpi-value {
+                font-size: 1.3rem;
+            }
+            .matrices-dual-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media screen and (max-width: 980px) {
+            .kpi-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            .matrices-dual-grid {
+                grid-template-columns: 1fr;
+            }
+            .dashboard-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .header-actions {
+                width: 100%;
+                justify-content: flex-start;
+            }
+            .week-combobox-wrapper {
+                min-width: 100% !important;
+                max-width: 100% !important;
+            }
+        }
+
+        @media screen and (max-width: 768px) {
+            body {
+                padding: 8px;
+            }
+            .card, .matrix-card, .dashboard-header {
+                padding: 12px;
+            }
+            .header-title {
+                font-size: 1.05rem;
+            }
+            .btn {
+                flex: 1 1 auto;
+                justify-content: center;
+            }
+            .search-box {
+                min-width: 100%;
+                max-width: 100%;
+            }
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="responsive.css?v=3">
+</head>
+
+<body>
+    <div class="dashboard-container">
+
+        <!-- HEADER -->
+        <header class="dashboard-header">
+            <div class="header-title-group">
+                <div class="header-icon">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 3v18h18"></path>
+                        <path d="m19 9-5 5-4-4-3 3"></path>
+                    </svg>
+                </div>
+                <div>
+                    <div class="header-title">
+                        Análisis por Escenario: SKUs Faltantes y Sobrantes (9 Semanas PL)
+                        <span class="badge-tag">Matrices Separadas: Falta vs Sobra</span>
+                    </div>
+                    <div class="header-subtitle">
+                        Resumen por Escenario y Matrices Jerárquicas Independientes de <b>SKUs Faltantes</b> (Prog. &lt; Demanda) y <b>SKUs Sobrantes</b> (Prog. &gt; Demanda)
+                    </div>
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <div class="status-badge" id="apiStatusBadge">
+                    <span class="status-dot"></span>
+                    <span id="apiStatusText">Buscando servidor...</span>
+                </div>
+
+                <a href="Resumen_Pl_9Semanas.html" class="btn" style="background:rgba(255,255,255,0.1); color:#FFFFFF; border-color:rgba(255,255,255,0.25);">
+                    ← Volver a Resumen General
+                </a>
+
+                <button class="btn btn-excel" onclick="exportarExcelDetalle()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Exportar Excel (Faltantes / Sobrantes)
+                </button>
+
+                <button class="btn btn-primary" onclick="recargarDatosAPI(true)">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+                    </svg>
+                    Actualizar
+                </button>
+            </div>
+        </header>
+
+        <!-- FILTROS (AÑO, ESCENARIO, SUBPLANTA Y SEMANAS) -->
+        <section class="card">
+            <!-- 1. FILTRO AÑO -->
+            <div class="filter-section-header">
+                <div class="filter-title">1. Filtro General por Año (Multi-Selección)</div>
+                <div class="filter-quick-actions">
+                    <button class="filter-quick-btn active" id="btnQuickYearAll"
+                        onclick="seleccionarFiltroRapidoAnio('all')">Todos los Años</button>
+                </div>
+            </div>
+            <div class="years-pills-container" id="yearsPillsContainer"></div>
+
+            <div style="border-top: 1px solid var(--border-ui); margin: 14px 0 12px 0;"></div>
+
+            <!-- 2. FILTRO ESCENARIO -->
+            <div class="filter-section-header">
+                <div class="filter-title" style="color: #2E5A4C;">2. Filtro por Escenario (T_ResProd_Py_DB / T_DemandaPy)</div>
+                <div class="filter-quick-actions">
+                    <button class="filter-quick-btn active-escenario" id="btnQuickEscAll"
+                        onclick="seleccionarFiltroRapidoEscenario('all')">Todos los Escenarios</button>
+                </div>
+            </div>
+            <div class="escenario-pills-container" id="escenarioPillsContainer"></div>
+
+            <div style="border-top: 1px solid var(--border-ui); margin: 14px 0 12px 0;"></div>
+
+            <!-- 3. FILTRO SUBPLANTA -->
+            <div class="filter-section-header">
+                <div class="filter-title" style="color: var(--chart-steel-blue);">3. Filtro por SubPlanta (Multi-Selección)</div>
+                <div class="filter-quick-actions">
+                    <button class="filter-quick-btn active-subplanta" id="btnQuickSpAll"
+                        onclick="seleccionarFiltroRapidoSubPlanta('all')">Todas las SubPlantas</button>
+                </div>
+            </div>
+            <div class="subplanta-pills-container" id="subplantaPillsContainer"></div>
+
+            <div style="border-top: 1px solid var(--border-ui); margin: 14px 0 12px 0;"></div>
+
+            <!-- 4. FILTRO SEMANAS (COMBOBOX MULTI-SELECCIÓN) -->
+            <div class="filter-section-header">
+                <div class="filter-title" style="color: var(--pantone-dark);">4. Filtro por Semana ISO-8601 (Lunes a Domingo)</div>
+                <div class="filter-quick-actions">
+                    <button class="filter-quick-btn" id="btnQuickLatest"
+                        onclick="seleccionarFiltroRapidoSemana('latest')">Última Semana</button>
+                    <button class="filter-quick-btn" id="btnQuickLast4"
+                        onclick="seleccionarFiltroRapidoSemana('last4')">Últimas 4 Semanas</button>
+                    <button class="filter-quick-btn active active-semana" id="btnQuickLast9"
+                        onclick="seleccionarFiltroRapidoSemana('last9')">Últimas 9 Semanas</button>
+                    <button class="filter-quick-btn" id="btnQuickAll"
+                        onclick="seleccionarFiltroRapidoSemana('all')">Todas las Semanas</button>
+                </div>
+            </div>
+
+            <div class="week-filter-row">
+                <div class="week-combobox-wrapper" id="weekComboboxWrapper">
+                    <div class="week-combobox-trigger" onclick="toggleWeekDropdown(event)">
+                        <div class="week-combobox-trigger-left">
+                            <span>📅</span>
+                            <span id="weekComboboxLabel">Últimas 9 semanas...</span>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span class="pill-badge-count" id="weekComboboxCount">0</span>
+                            <span class="week-combobox-chevron">▼</span>
+                        </div>
+                    </div>
+
+                    <div class="week-combobox-dropdown" id="weekComboboxDropdown" onclick="event.stopPropagation()">
+                        <div class="week-combobox-search-bar">
+                            <input type="text" id="weekSearchInput" class="week-combobox-search-input"
+                                placeholder="Buscar semana o fecha (ej. 202644 o 26/10)..."
+                                oninput="filtrarOpcionesSemanaCombobox()">
+                            <div class="week-combobox-actions">
+                                <button type="button" class="week-combo-action-btn"
+                                    onclick="seleccionarFiltroRapidoSemana('last9')">Últimas 9</button>
+                                <button type="button" class="week-combo-action-btn"
+                                    onclick="seleccionarFiltroRapidoSemana('last4')">Últimas 4</button>
+                                <button type="button" class="week-combo-action-btn"
+                                    onclick="seleccionarFiltroRapidoSemana('latest')">Última</button>
+                                <button type="button" class="week-combo-action-btn"
+                                    onclick="seleccionarFiltroRapidoSemana('all')">✓ Todas</button>
+                            </div>
+                        </div>
+                        <div class="week-combobox-list" id="weekComboboxList"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="selection-summary-bar">
+                <span id="selectedWeeksSummary">Cargando filtros...</span>
+            </div>
+        </section>
+
+        <!-- KPIS DE SOBRANTES Y FALTANTES CON ETIQUETAS DE TOTALES MP -->
+        <section class="kpi-grid">
+            <div class="kpi-card" style="--kpi-accent: var(--falta-accent);">
+                <span class="kpi-label">Total Kilos Faltantes (Prog. &lt; Demanda)</span>
+                <div class="kpi-value val-negative" id="kpiFaltaVal">0<span class="kpi-unit">kg</span></div>
+                <div class="kpi-mp-badges">
+                    <span class="badge-mp-total" id="kpiFaltaMpSiBadge" style="margin-left:0;">MP Sí: 0 kg</span>
+                    <span class="badge-mp-no-total" id="kpiFaltaMpNoBadge" style="margin-left:0;">MP No: 0 kg</span>
+                </div>
+                <div class="kpi-footer">
+                    <span id="kpiFaltaSkusCount">0 SKUs con faltante</span>
+                    <span class="badge-kpi badge-low" id="kpiFaltaTn">0.00 Tn</span>
+                </div>
+            </div>
+
+            <div class="kpi-card" style="--kpi-accent: var(--sobra-accent);">
+                <span class="kpi-label">Total Kilos Sobrantes (Prog. &gt; Demanda)</span>
+                <div class="kpi-value val-positive" id="kpiSobraVal">0<span class="kpi-unit">kg</span></div>
+                <div class="kpi-mp-badges">
+                    <span class="badge-mp-total" id="kpiSobraMpSiBadge" style="margin-left:0;">MP Sí: 0 kg</span>
+                    <span class="badge-mp-no-total" id="kpiSobraMpNoBadge" style="margin-left:0;">MP No: 0 kg</span>
+                </div>
+                <div class="kpi-footer">
+                    <span id="kpiSobraSkusCount">0 SKUs con sobrante</span>
+                    <span class="badge-kpi badge-good" id="kpiSobraTn">0.00 Tn</span>
+                </div>
+            </div>
+
+            <div class="kpi-card" style="--kpi-accent: var(--chart-slate-navy);">
+                <span class="kpi-label">Diferencia Neta (Sobrante - Faltante)</span>
+                <div class="kpi-value" id="kpiDifVal">0<span class="kpi-unit">kg</span></div>
+                <div class="kpi-mp-badges">
+                    <span class="badge-mp-total" id="kpiDifMpSiBadge" style="margin-left:0;">Dif. MP Sí: 0 kg</span>
+                    <span class="badge-mp-no-total" id="kpiDifMpNoBadge" style="margin-left:0;">Dif. MP No: 0 kg</span>
+                </div>
+                <div class="kpi-footer">
+                    <span id="kpiProgVsComLabel">Prog: 0 kg vs Proy: 0 kg</span>
+                    <span class="badge-kpi" id="kpiDifTn">0.00 Tn</span>
+                </div>
+            </div>
+
+            <div class="kpi-card" style="--kpi-accent: var(--isg-gold-bright);">
+                <span class="kpi-label">% Cumplimiento Global</span>
+                <div class="kpi-value" id="kpiPctVal">0.00<span class="kpi-unit">%</span></div>
+                <div class="kpi-mp-badges">
+                    <span class="badge-mp-total" id="kpiPctMpSiBadge" style="margin-left:0;">Cumpl. MP Sí: 0.00%</span>
+                    <span class="badge-mp-no-total" id="kpiPctMpNoBadge" style="margin-left:0;">Cumpl. MP No: 0.00%</span>
+                </div>
+                <div class="kpi-footer">
+                    <span id="kpiEscenariosCount">0 escenarios activos</span>
+                    <span class="badge-kpi badge-good" id="kpiBadgeEstado">Óptimo</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 1. RESUMEN POR ESCENARIO Y MP (SÍ / NO) -->
+        <section class="matrix-card card-escenarios">
+            <div class="matrix-toolbar">
+                <div class="matrix-header-title" style="color: var(--chart-slate-navy);">
+                    <span>📊 1. Resumen General por Escenario y MP (Sí / No)</span>
+                    <span class="badge-tag" style="background: var(--chart-slate-navy); color: #FFFFFF;">Discriminación MP: Sí / No</span>
+                </div>
+            </div>
+
+            <div class="table-responsive" style="max-height: 380px;">
+                <table class="matrix-table" id="tbResumenEscenario">
+                    <thead>
+                        <tr>
+                            <th style="min-width:190px;">Escenario / MP (Sí / No)</th>
+                            <th class="num-col th-prog col-group-prog-start">Prog. Producción (kg)</th>
+                            <th class="num-col th-com col-group-com-start">Proy. Comercial + Emb. (kg)</th>
+                            <th class="num-col th-falta col-group-falta-start">Falta MP: Sí (kg)</th>
+                            <th class="num-col th-falta">Falta MP: No (kg)</th>
+                            <th class="num-col th-falta">Total Faltante (kg)</th>
+                            <th class="num-col th-sobra col-group-sobra-start">Sobra MP: Sí (kg)</th>
+                            <th class="num-col th-sobra">Sobra MP: No (kg)</th>
+                            <th class="num-col th-sobra">Total Sobrante (kg)</th>
+                            <th class="num-col th-dif col-group-dif-start">Diferencia Neta (kg)</th>
+                            <th class="num-col th-com">% Cumpl.</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyResumenEscenario">
+                        <tr>
+                            <td colspan="11" style="text-align:center; padding:24px; color:var(--text-muted);">
+                                Cargando resumen por escenario y MP...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 2. DOS MATRICES DIFERENTES: MATRIZ DE FALTANTES Y MATRIZ DE SOBRANTES -->
+        <div class="matrices-dual-grid">
+
+            <!-- MATRIZ A: EXCLUSIVA DE SKUS FALTANTES (PROG < DEMANDA) -->
+            <section class="matrix-card card-faltantes">
+                <div class="matrix-toolbar">
+                    <div class="matrix-header-title" style="color: var(--falta-dark);">
+                        <span>🔴 Matriz de SKUs Faltantes (Falta)</span>
+                        <span class="badge-kpi badge-low" id="badgeCountMatrizFalta">0 SKUs-Sem</span>
+                        <span class="badge-mp-total" id="badgeTotalFaltaMpSi">MP Sí: 0 kg</span>
+                        <span class="badge-mp-no-total" id="badgeTotalFaltaMpNo">MP No: 0 kg</span>
+                    </div>
+                </div>
+
+                <div class="matrix-toolbar">
+                    <div class="search-box">
+                        <input type="text" id="searchFaltantes"
+                            placeholder="Buscar semana, subplanta, MP (Sí/No) o SKU faltante..." oninput="filtrarMatrizFaltantes()">
+                    </div>
+                    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                        <button class="btn" style="padding:5px 10px; font-size:0.76rem;"
+                            onclick="toggleExpandirTodoFaltantes(true)">⊞ Expandir</button>
+                        <button class="btn" style="padding:5px 10px; font-size:0.76rem;"
+                            onclick="toggleExpandirTodoFaltantes(false)">⊟ Contraer</button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="matrix-table" id="tbMatrizFaltantes">
+                        <thead>
+                            <tr>
+                                <th style="min-width:270px;">Semana / SubPlanta / MP (Sí / No) / CódigoCorto - Nombre</th>
+                                <th class="num-col th-prog col-group-prog-start">Prog. Prod. (kg)</th>
+                                <th class="num-col th-com col-group-com-start">Proy. Com. (kg)</th>
+                                <th class="num-col th-falta col-group-falta-start">Falta / Faltante (kg)</th>
+                                <th class="num-col th-com">% Cumpl.</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyFaltantes">
+                            <tr>
+                                <td colspan="5" style="text-align:center; padding:30px; color:var(--text-muted);">
+                                    Cargando matriz de faltantes...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- MATRIZ B: EXCLUSIVA DE SKUS SOBRANTES (PROG > DEMANDA) -->
+            <section class="matrix-card card-sobrantes">
+                <div class="matrix-toolbar">
+                    <div class="matrix-header-title" style="color: var(--sobra-dark);">
+                        <span>🟢 Matriz de SKUs Sobrantes (Sobra)</span>
+                        <span class="badge-kpi badge-good" id="badgeCountMatrizSobra">0 SKUs-Sem</span>
+                        <span class="badge-mp-total" id="badgeTotalSobraMpSi">MP Sí: 0 kg</span>
+                        <span class="badge-mp-no-total" id="badgeTotalSobraMpNo">MP No: 0 kg</span>
+                    </div>
+                </div>
+
+                <div class="matrix-toolbar">
+                    <div class="search-box">
+                        <input type="text" id="searchSobrantes"
+                            placeholder="Buscar semana, subplanta, MP (Sí/No) o SKU sobrante..." oninput="filtrarMatrizSobrantes()">
+                    </div>
+                    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                        <button class="btn" style="padding:5px 10px; font-size:0.76rem;"
+                            onclick="toggleExpandirTodoSobrantes(true)">⊞ Expandir</button>
+                        <button class="btn" style="padding:5px 10px; font-size:0.76rem;"
+                            onclick="toggleExpandirTodoSobrantes(false)">⊟ Contraer</button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="matrix-table" id="tbMatrizSobrantes">
+                        <thead>
+                            <tr>
+                                <th style="min-width:270px;">Semana / SubPlanta / MP (Sí / No) / CódigoCorto - Nombre</th>
+                                <th class="num-col th-prog col-group-prog-start">Prog. Prod. (kg)</th>
+                                <th class="num-col th-com col-group-com-start">Proy. Com. (kg)</th>
+                                <th class="num-col th-sobra col-group-sobra-start">Sobra / Sobrante (kg)</th>
+                                <th class="num-col th-com">% Cumpl.</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodySobrantes">
+                            <tr>
+                                <td colspan="5" style="text-align:center; padding:30px; color:var(--text-muted);">
+                                    Cargando matriz de sobrantes...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div id="toastNotification" class="toast-notification">
+        <span id="toastIcon">ℹ️</span>
+        <span id="toastMsg">Mensaje</span>
+    </div>
+
+    <script>
+        // =========================================================================
+        // ⚙️ CONFIGURACIÓN DE CONEXIÓN HÍBRIDA A LA API .NET (Regla Obligatoria)
+        // =========================================================================
+        const APP_CONFIG = {
+            servidor: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.servidor)
+                ? GLOBAL_CONFIG.servidor
+                : "RAEVSALL001",
+            puertos: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.puertos)
+                ? GLOBAL_CONFIG.puertos
+                : [8080, 5000],
+            controllerPath: "/api/CumplimientosJorge",
+            timeoutMs: 30000
+        };
+
+        function generarBasesApi() {
+            if (typeof generarBasesApiGlobal === 'function') {
+                return generarBasesApiGlobal();
+            }
+            const bases = [];
+            for (const puerto of APP_CONFIG.puertos) {
+                bases.push(`http://${APP_CONFIG.servidor}:${puerto}`);
+            }
+            return bases;
+        }
+
+        let apiBaseActiva = null;
+        let cachedInitialPayload = null;
+
+        async function fetchConTimeout(url, timeoutMs = 10000) {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+                const res = await fetch(url, { signal: controller.signal });
+                clearTimeout(id);
+                return res;
+            } catch (err) {
+                clearTimeout(id);
+                throw err;
+            }
+        }
+
+        async function detectarServidorApi() {
+            const bases = generarBasesApi();
+            for (const base of bases) {
+                try {
+                    const res = await fetchConTimeout(`${base}${APP_CONFIG.controllerPath}`, 3500);
+                    if (res.ok) {
+                        try { cachedInitialPayload = await res.json(); } catch (_) { }
+                        return base;
+                    }
+                } catch (e) {
+                    try {
+                        const pingRes = await fetchConTimeout(`${base}/`, 2500);
+                        if (pingRes.ok) return base;
+                    } catch (errPing) { }
+                }
+            }
+            return null;
+        }
+
+        // =========================================================================
+        // 📅 CÁLCULO ISO-8601 DE SEMANAS (Lunes a Domingo - Regla Obligatoria)
+        // =========================================================================
+        function obtenerRangoSemanaISO(semanaNum) {
+            const sStr = String(semanaNum);
+            if (sStr.length < 5) return `Sem. ${semanaNum}`;
+            const anio = parseInt(sStr.substring(0, 4), 10);
+            const sem = parseInt(sStr.substring(4), 10);
+            if (!anio || !sem || sem < 1 || sem > 53) return `Sem. ${semanaNum}`;
+
+            const simple = new Date(Date.UTC(anio, 0, 4));
+            const dayOfWeek = (simple.getUTCDay() + 6) % 7; // 0 = Lunes, 6 = Domingo
+            const isoWeek1Monday = new Date(simple);
+            isoWeek1Monday.setUTCDate(simple.getUTCDate() - dayOfWeek + (sem - 1) * 7);
+
+            const sunday = new Date(isoWeek1Monday);
+            sunday.setUTCDate(isoWeek1Monday.getUTCDate() + 6);
+
+            const fmt = (d) => `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
+            return `Sem. ${String(sem).padStart(2, '0')} (${fmt(isoWeek1Monday)} al ${fmt(sunday)})`;
+        }
+
+        // =========================================================================
+        // 🗂️ ESTADO GLOBAL DEL DASHBOARD
+        // =========================================================================
+        let consolidatedRows = [];
+        let selectedYears = new Set();
+        let selectedEscenarios = new Set();
+        let selectedSubPlantas = new Set();
+        let selectedWeeks = new Set();
+        let aniosDisponibles = [];
+        let escenariosDisponibles = [];
+        let subPlantasDisponibles = [];
+        let semanasDisponibles = [];
+
+        let expandedFaltantes = new Set();
+        let expandedSobrantes = new Set();
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            document.addEventListener('click', (e) => {
+                const wrapper = document.getElementById('weekComboboxWrapper');
+                if (wrapper && !wrapper.contains(e.target)) {
+                    wrapper.classList.remove('open');
+                }
+            });
+            await inicializarDashboard();
+        });
+
+        async function inicializarDashboard() {
+            const statusBadge = document.getElementById('apiStatusBadge');
+            const statusText = document.getElementById('apiStatusText');
+            statusText.textContent = `Buscando ${APP_CONFIG.servidor}...`;
+
+            try {
+                apiBaseActiva = await detectarServidorApi();
+
+                if (!apiBaseActiva) {
+                    throw new Error(`No se pudo conectar a ${APP_CONFIG.servidor} en puertos ${APP_CONFIG.puertos.join('/')}`);
+                }
+
+                const urlObj = new URL(apiBaseActiva);
+                statusBadge.innerHTML = `<span class="status-dot online"></span><span>En Línea (${urlObj.host})</span>`;
+                await recargarDatosAPI(false);
+            } catch (err) {
+                console.error("Error al inicializar:", err);
+                statusBadge.innerHTML = `<span class="status-dot error"></span><span style="color:#EF4444">Sin Conexión</span>`;
+                mostrarToast(`Error de conexión: ${err.message}`, '⚠️');
+            }
+        }
+
+        // =========================================================================
+        // 🔄 LECTURA Y CONSOLIDACIÓN DE LAS 3 TABLAS DEL EXCEL
+        // =========================================================================
+        function extraerCampo(obj, ...claves) {
+            if (!obj) return null;
+            for (const k of claves) {
+                if (obj[k] !== undefined && obj[k] !== null) return obj[k];
+            }
+            const objKeys = Object.keys(obj);
+            for (const k of claves) {
+                const kLower = String(k).toLowerCase();
+                const foundKey = objKeys.find(ok => ok.toLowerCase() === kLower);
+                if (foundKey !== undefined && obj[foundKey] !== undefined && obj[foundKey] !== null) {
+                    return obj[foundKey];
+                }
+            }
+            return null;
+        }
+
+        function normalizarCodigoCorto(valor) {
+            if (valor === null || valor === undefined) return '';
+            const raw = String(valor).trim();
+            if (!raw) return '';
+            if (/^\d+$/.test(raw) && raw.length < 5) {
+                return raw.padStart(5, '0');
+            }
+            return raw;
+        }
+
+        function normalizarMP(valor) {
+            if (valor === null || valor === undefined) return 'No';
+            const raw = String(valor).trim().toUpperCase();
+            if (raw === 'MP' || raw === 'SI' || raw === 'SÍ' || raw === 'S' || raw === '1' || raw === 'TRUE') {
+                return 'Sí';
+            }
+            return 'No';
+        }
+
+        async function recargarDatosAPI(forzar = false) {
+            mostrarToast("Actualizando datos por escenario...", "⏳");
+            try {
+                let payload = null;
+                if (!forzar && cachedInitialPayload) {
+                    payload = cachedInitialPayload;
+                    cachedInitialPayload = null;
+                } else {
+                    const url = `${apiBaseActiva}${APP_CONFIG.controllerPath}${forzar ? '?recargar=true' : ''}`;
+                    const res = await fetchConTimeout(url, APP_CONFIG.timeoutMs);
+                    if (!res.ok) throw new Error("Error al obtener las tablas desde la API");
+                    payload = await res.json();
+                }
+
+                const tablas = payload.tablas || payload.Tablas || payload;
+                const tResProdPyDb = extraerCampo(tablas, 'T_ResProd_Py_DB', 't_ResProd_Py_DB', 't_resprod_py_db') || [];
+                const tDemandaPy = extraerCampo(tablas, 'T_DemandaPy', 't_DemandaPy', 't_demandapy') || [];
+                let tCodigoRelacion = extraerCampo(tablas, 'T_CodigoRelacion', 't_CodigoRelacion', 't_codigorelacion') || [];
+
+                if (tCodigoRelacion.length === 0) {
+                    try {
+                        const resRel = await fetchConTimeout(`${apiBaseActiva}${APP_CONFIG.controllerPath}/T_CodigoRelacion${forzar ? '?recargar=true' : ''}`, 8000);
+                        if (resRel.ok) {
+                            const dataRel = await resRel.json();
+                            if (Array.isArray(dataRel)) tCodigoRelacion = dataRel;
+                        }
+                    } catch (_) { }
+                }
+
+                procesarYConsolidarTablas(tResProdPyDb, tDemandaPy, tCodigoRelacion);
+
+                aniosDisponibles = [...new Set(consolidatedRows.map(d => d.Anio))].filter(Boolean).sort((a, b) => a - b);
+                escenariosDisponibles = [...new Set(consolidatedRows.map(d => d.Escenario))].filter(Boolean).sort((a, b) => {
+                    const na = Number(a), nb = Number(b);
+                    if (!isNaN(na) && !isNaN(nb)) return na - nb;
+                    return String(a).localeCompare(String(b), undefined, { numeric: true });
+                });
+                subPlantasDisponibles = [...new Set(consolidatedRows.map(d => d.SubPlanta))].filter(Boolean).sort();
+                semanasDisponibles = [...new Set(consolidatedRows.map(d => d.Semana))].filter(Boolean).sort((a, b) => a - b);
+
+                if (selectedYears.size === 0) aniosDisponibles.forEach(y => selectedYears.add(y));
+                if (selectedEscenarios.size === 0) escenariosDisponibles.forEach(esc => selectedEscenarios.add(esc));
+                if (selectedSubPlantas.size === 0) subPlantasDisponibles.forEach(sp => selectedSubPlantas.add(sp));
+                if (selectedWeeks.size === 0) {
+                    semanasDisponibles.slice(-9).forEach(s => selectedWeeks.add(s));
+                }
+
+                if (expandedFaltantes.size === 0 && semanasDisponibles.length > 0) {
+                    const ultSem = semanasDisponibles[semanasDisponibles.length - 1];
+                    expandedFaltantes.add(`sem_${ultSem}`);
+                    expandedSobrantes.add(`sem_${ultSem}`);
+                    if (subPlantasDisponibles.length > 0) {
+                        const firstSp = subPlantasDisponibles[0];
+                        expandedFaltantes.add(`sem_${ultSem}_sp_${firstSp}`);
+                        expandedSobrantes.add(`sem_${ultSem}_sp_${firstSp}`);
+                        consolidatedRows
+                            .filter(r => r.Semana === ultSem && r.SubPlanta === firstSp)
+                            .forEach(r => {
+                                expandedFaltantes.add(`sem_${ultSem}_sp_${firstSp}_mp_${r.TipoMP}`);
+                                expandedSobrantes.add(`sem_${ultSem}_sp_${firstSp}_mp_${r.TipoMP}`);
+                            });
+                    }
+                }
+
+                construirPildorasAnio();
+                construirPildorasEscenario();
+                construirPildorasSubPlanta();
+                construirPildorasSemana();
+
+                actualizarVista();
+                mostrarToast("Análisis de Sobrantes y Faltantes cargado", "✅");
+            } catch (e) {
+                console.error(e);
+                mostrarToast(e.message, "❌");
+            }
+        }
+
+        function procesarYConsolidarTablas(tResProdPyDb, tDemandaPy, tCodigoRelacion = []) {
+            const mapaRelacionMaestro = new Map();
+
+            tCodigoRelacion.forEach(row => {
+                const rawCod = extraerCampo(row, 'CodigoCorto', 'codigoCorto', 'Codigo', 'codigo');
+                const codNorm = normalizarCodigoCorto(rawCod);
+                if (!codNorm) return;
+
+                const nomOficial = String(extraerCampo(row, 'Nombre', 'nombre', 'Descripcion', 'descripcion') ?? '').trim();
+                const spOficial = String(extraerCampo(row, 'SubPlanta', 'subPlanta', 'Subplanta', 'subplanta') ?? '').trim().toUpperCase();
+                const tipoMpOficial = normalizarMP(extraerCampo(row, 'TipoMP', 'tipoMP', 'tipomp', 'MP'));
+
+                const registroMaestro = {
+                    CodigoCorto: codNorm,
+                    Nombre: nomOficial,
+                    SubPlanta: spOficial,
+                    TipoMP: tipoMpOficial
+                };
+                mapaRelacionMaestro.set(codNorm, registroMaestro);
+                const rawTrim = String(rawCod).trim();
+                if (rawTrim) mapaRelacionMaestro.set(rawTrim, registroMaestro);
+                if (/^\d+$/.test(codNorm)) {
+                    mapaRelacionMaestro.set(String(parseInt(codNorm, 10)), registroMaestro);
+                }
+            });
+
+            const mapaConsolidado = new Map();
+
+            const acumularTabla = (lista, tipoCampo) => {
+                lista.forEach(row => {
+                    const semRaw = extraerCampo(row, 'Semana', 'semana');
+                    const sem = parseInt(semRaw, 10);
+                    if (!sem || isNaN(sem)) return;
+
+                    const rawCod = extraerCampo(row, 'CodigoCorto', 'codigoCorto');
+                    const codNorm = normalizarCodigoCorto(rawCod) || 'SIN-COD';
+
+                    const relOficial = mapaRelacionMaestro.get(codNorm)
+                        || (rawCod !== null && rawCod !== undefined ? mapaRelacionMaestro.get(String(rawCod).trim()) : null);
+
+                    const cod = (relOficial && relOficial.CodigoCorto) ? relOficial.CodigoCorto : codNorm;
+                    let sp = (relOficial && relOficial.SubPlanta)
+                        ? relOficial.SubPlanta
+                        : String(extraerCampo(row, 'SubPlanta', 'subPlanta') ?? '').trim().toUpperCase();
+                    if (!sp) sp = 'SIN SUBPLANTA';
+
+                    const tipoMp = (relOficial && relOficial.TipoMP)
+                        ? relOficial.TipoMP
+                        : normalizarMP(extraerCampo(row, 'TipoMP', 'tipoMP', 'tipomp', 'MP'));
+
+                    let nom = (relOficial && relOficial.Nombre)
+                        ? relOficial.Nombre
+                        : String(extraerCampo(row, 'Nombre', 'nombre') ?? '').trim();
+                    if (!nom) nom = 'SIN NOMBRE';
+
+                    const kilos = Number(extraerCampo(row, 'Kilos', 'kilos') ?? 0) || 0;
+                    const escRaw = extraerCampo(row, 'Escenario', 'escenario');
+                    const esc = (escRaw !== null && escRaw !== undefined && String(escRaw).trim() !== '')
+                        ? String(escRaw).trim()
+                        : 'SIN ESCENARIO';
+
+                    const sStr = String(sem);
+                    const anio = sStr.length >= 4 ? parseInt(sStr.substring(0, 4), 10) : 0;
+
+                    const key = `${esc}|${sem}|${sp}|${tipoMp}|${cod}`;
+                    if (!mapaConsolidado.has(key)) {
+                        mapaConsolidado.set(key, {
+                            Escenario: esc,
+                            Semana: sem,
+                            Anio: anio,
+                            SubPlanta: sp,
+                            TipoMP: tipoMp,
+                            CodigoCorto: cod,
+                            Nombre: nom,
+                            PROG_PRODUCCION: 0,
+                            PROYECCION_COMERCIAL: 0
+                        });
+                    }
+
+                    const item = mapaConsolidado.get(key);
+                    item[tipoCampo] += kilos;
+                });
+            };
+
+            acumularTabla(tResProdPyDb, 'PROG_PRODUCCION');
+            acumularTabla(tDemandaPy, 'PROYECCION_COMERCIAL');
+
+            consolidatedRows = Array.from(mapaConsolidado.values());
+        }
+
+        // =========================================================================
+        // 🎛️ FILTROS (AÑO, ESCENARIO, SUBPLANTA, SEMANA)
+        // =========================================================================
+        function construirPildorasAnio() {
+            const container = document.getElementById('yearsPillsContainer');
+            container.innerHTML = '';
+            aniosDisponibles.forEach(y => {
+                const count = consolidatedRows.filter(d => d.Anio === y).length;
+                const pill = document.createElement('div');
+                pill.className = `year-pill ${selectedYears.has(y) ? 'selected' : ''}`;
+                pill.innerHTML = `<span>Año ${y}</span><span class="pill-badge-count">${count} reg</span>`;
+                pill.onclick = () => {
+                    if (selectedYears.has(y)) {
+                        if (selectedYears.size > 1) selectedYears.delete(y);
+                    } else selectedYears.add(y);
+                    construirPildorasAnio();
+                    construirPildorasSemana();
+                    actualizarVista();
+                };
+                container.appendChild(pill);
+            });
+            document.getElementById('btnQuickYearAll').classList.toggle('active', selectedYears.size === aniosDisponibles.length);
+        }
+
+        function seleccionarFiltroRapidoAnio() {
+            selectedYears.clear();
+            aniosDisponibles.forEach(y => selectedYears.add(y));
+            construirPildorasAnio();
+            construirPildorasSemana();
+            actualizarVista();
+        }
+
+        function construirPildorasEscenario() {
+            const container = document.getElementById('escenarioPillsContainer');
+            container.innerHTML = '';
+            escenariosDisponibles.forEach(esc => {
+                const filasEsc = consolidatedRows.filter(d => d.Escenario === esc);
+                const skusUnicos = new Set(filasEsc.map(d => d.CodigoCorto)).size;
+                const pill = document.createElement('div');
+                pill.className = `escenario-pill ${selectedEscenarios.has(esc) ? 'selected' : ''}`;
+                pill.innerHTML = `<span>Escenario ${esc}</span><span class="pill-badge-count">${skusUnicos} SKUs</span>`;
+                pill.onclick = () => {
+                    if (selectedEscenarios.has(esc)) {
+                        if (selectedEscenarios.size > 1) selectedEscenarios.delete(esc);
+                    } else selectedEscenarios.add(esc);
+                    construirPildorasEscenario();
+                    actualizarVista();
+                };
+                container.appendChild(pill);
+            });
+            document.getElementById('btnQuickEscAll').classList.toggle('active-escenario', selectedEscenarios.size === escenariosDisponibles.length);
+        }
+
+        function seleccionarFiltroRapidoEscenario() {
+            selectedEscenarios.clear();
+            escenariosDisponibles.forEach(esc => selectedEscenarios.add(esc));
+            construirPildorasEscenario();
+            actualizarVista();
+        }
+
+        function construirPildorasSubPlanta() {
+            const container = document.getElementById('subplantaPillsContainer');
+            container.innerHTML = '';
+            subPlantasDisponibles.forEach(sp => {
+                const skusUnicos = new Set(consolidatedRows.filter(d => d.SubPlanta === sp).map(d => d.CodigoCorto)).size;
+                const pill = document.createElement('div');
+                pill.className = `subplanta-pill ${selectedSubPlantas.has(sp) ? 'selected' : ''}`;
+                pill.innerHTML = `<span>${sp}</span><span class="pill-badge-count">${skusUnicos} SKUs</span>`;
+                pill.onclick = () => {
+                    if (selectedSubPlantas.has(sp)) {
+                        if (selectedSubPlantas.size > 1) selectedSubPlantas.delete(sp);
+                    } else selectedSubPlantas.add(sp);
+                    construirPildorasSubPlanta();
+                    actualizarVista();
+                };
+                container.appendChild(pill);
+            });
+            document.getElementById('btnQuickSpAll').classList.toggle('active-subplanta', selectedSubPlantas.size === subPlantasDisponibles.length);
+        }
+
+        function seleccionarFiltroRapidoSubPlanta() {
+            selectedSubPlantas.clear();
+            subPlantasDisponibles.forEach(sp => selectedSubPlantas.add(sp));
+            construirPildorasSubPlanta();
+            actualizarVista();
+        }
+
+        function toggleWeekDropdown(e) {
+            if (e) e.stopPropagation();
+            const wrapper = document.getElementById('weekComboboxWrapper');
+            if (!wrapper) return;
+            wrapper.classList.toggle('open');
+            if (wrapper.classList.contains('open')) {
+                const input = document.getElementById('weekSearchInput');
+                if (input) setTimeout(() => input.focus(), 40);
+            }
+        }
+
+        function construirPildorasSemana() {
+            const listContainer = document.getElementById('weekComboboxList');
+            if (!listContainer) return;
+            listContainer.innerHTML = '';
+
+            const semanasValidas = semanasDisponibles.filter(s => {
+                const anio = parseInt(String(s).substring(0, 4), 10);
+                return selectedYears.has(anio);
+            });
+
+            if (semanasValidas.length > 0 && !semanasValidas.some(s => selectedWeeks.has(s))) {
+                semanasValidas.slice(-9).forEach(s => selectedWeeks.add(s));
+            }
+
+            const filtroTexto = (document.getElementById('weekSearchInput')?.value || '').trim().toLowerCase();
+            const semanasOrdenadasDesc = [...semanasValidas].sort((a, b) => b - a);
+
+            semanasOrdenadasDesc.forEach(s => {
+                const rangoStr = obtenerRangoSemanaISO(s);
+                const textoBusqueda = `sem ${s} ${rangoStr}`.toLowerCase();
+                if (filtroTexto && !textoBusqueda.includes(filtroTexto)) return;
+
+                const isSelected = selectedWeeks.has(s);
+                const item = document.createElement('label');
+                item.className = `week-combobox-item ${isSelected ? 'checked' : ''}`;
+                item.innerHTML = `
+                    <div class="week-combobox-item-left">
+                        <input type="checkbox" ${isSelected ? 'checked' : ''}>
+                        <span>Sem ${s}</span>
+                    </div>
+                    <span class="week-combobox-range">${rangoStr}</span>
+                `;
+                const checkbox = item.querySelector('input[type="checkbox"]');
+                checkbox.addEventListener('change', () => {
+                    if (checkbox.checked) {
+                        selectedWeeks.add(s);
+                    } else {
+                        if (selectedWeeks.size > 1) {
+                            selectedWeeks.delete(s);
+                        } else {
+                            checkbox.checked = true;
+                            return;
+                        }
+                    }
+                    construirPildorasSemana();
+                    actualizarVista();
+                });
+                listContainer.appendChild(item);
+            });
+
+            const seleccionadasEnAnio = semanasValidas.filter(s => selectedWeeks.has(s));
+            const labelEl = document.getElementById('weekComboboxLabel');
+            const countEl = document.getElementById('weekComboboxCount');
+
+            if (countEl) countEl.textContent = `${seleccionadasEnAnio.length} / ${semanasValidas.length}`;
+
+            const ultimas9 = semanasValidas.slice(-9);
+            const esUltimas9 = semanasValidas.length > 0
+                && seleccionadasEnAnio.length === ultimas9.length
+                && ultimas9.every(s => selectedWeeks.has(s));
+
+            const ultimas4 = semanasValidas.slice(-4);
+            const esUltimas4 = semanasValidas.length >= 4
+                && seleccionadasEnAnio.length === ultimas4.length
+                && ultimas4.every(s => selectedWeeks.has(s));
+
+            if (labelEl) {
+                if (seleccionadasEnAnio.length === 0) {
+                    labelEl.textContent = 'Ninguna semana seleccionada';
+                } else if (esUltimas9 && semanasValidas.length > 1) {
+                    labelEl.textContent = `Últimas ${ultimas9.length} semanas (${ultimas9[0]} - ${ultimas9[ultimas9.length - 1]})`;
+                } else if (seleccionadasEnAnio.length === semanasValidas.length) {
+                    labelEl.textContent = `Todas las semanas (${semanasValidas.length})`;
+                } else if (seleccionadasEnAnio.length === 1) {
+                    const u = seleccionadasEnAnio[0];
+                    labelEl.textContent = `Sem ${u} — ${obtenerRangoSemanaISO(u)}`;
+                } else {
+                    const ultimas = seleccionadasEnAnio.slice(-2).map(s => `Sem ${s}`).join(', ');
+                    labelEl.textContent = `${seleccionadasEnAnio.length} semanas seleccionadas (...${ultimas})`;
+                }
+            }
+
+            document.getElementById('btnQuickAll')?.classList.toggle('active-semana', seleccionadasEnAnio.length === semanasValidas.length);
+            document.getElementById('btnQuickLast9')?.classList.toggle('active-semana', esUltimas9);
+            document.getElementById('btnQuickLast4')?.classList.toggle('active-semana', esUltimas4);
+            document.getElementById('btnQuickLatest')?.classList.toggle(
+                'active-semana',
+                seleccionadasEnAnio.length === 1 && semanasValidas.length > 0 && selectedWeeks.has(semanasValidas[semanasValidas.length - 1])
+            );
+        }
+
+        function filtrarOpcionesSemanaCombobox() {
+            construirPildorasSemana();
+        }
+
+        function seleccionarFiltroRapidoSemana(modo) {
+            selectedWeeks.clear();
+            const semanasValidas = semanasDisponibles.filter(s => {
+                const anio = parseInt(String(s).substring(0, 4), 10);
+                return selectedYears.has(anio);
+            });
+
+            if (modo === 'all') {
+                semanasValidas.forEach(s => selectedWeeks.add(s));
+            } else if (modo === 'last9') {
+                semanasValidas.slice(-9).forEach(s => selectedWeeks.add(s));
+            } else if (modo === 'last4') {
+                semanasValidas.slice(-4).forEach(s => selectedWeeks.add(s));
+            } else if (modo === 'latest') {
+                if (semanasValidas.length > 0) selectedWeeks.add(semanasValidas[semanasValidas.length - 1]);
+            }
+            construirPildorasSemana();
+            actualizarVista();
+        }
+
+        function obtenerFilasFiltradas() {
+            return consolidatedRows.filter(d =>
+                selectedYears.has(d.Anio) &&
+                selectedEscenarios.has(d.Escenario) &&
+                selectedSubPlantas.has(d.SubPlanta) &&
+                selectedWeeks.has(d.Semana)
+            );
+        }
+
+        // =========================================================================
+        // 🧮 CÁLCULO DE RESUMEN POR ESCENARIO Y MATRICES DE FALTANTES / SOBRANTES
+        // =========================================================================
+        function formatKgMatriz(n) {
+            if (n === null || n === undefined || isNaN(n)) return '0';
+            return Math.round(n).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        }
+
+        function calcPct(prog, demanda) {
+            if (!demanda || demanda === 0) return 0;
+            return (prog / demanda) * 100;
+        }
+
+        function badgeHtml(pct) {
+            if (pct === null || pct === undefined || isNaN(pct) || !isFinite(pct)) {
+                return `<span class="badge-kpi badge-low">0.00%</span>`;
+            }
+            let cls = 'badge-good';
+            if (pct < 85) cls = 'badge-low';
+            else if (pct < 98) cls = 'badge-mid';
+            return `<span class="badge-kpi ${cls}">${pct.toFixed(2)}%</span>`;
+        }
+
+        function actualizarVista() {
+            const filtrados = obtenerFilasFiltradas();
+            const skusDistintos = new Set(filtrados.map(d => d.CodigoCorto)).size;
+
+            const summary = document.getElementById('selectedWeeksSummary');
+            summary.innerHTML = `Mostrando: Años <b>[${Array.from(selectedYears).join(', ')}]</b> • Escenarios <b>[${Array.from(selectedEscenarios).join(', ')}]</b> • SubPlantas <b>[${selectedSubPlantas.size} seleccionadas]</b> • Semanas <b>[${selectedWeeks.size} seleccionadas]</b> • SKUs Únicos: <b>${skusDistintos}</b>`;
+
+            renderizarResumenEscenariosYKPIs(filtrados);
+            renderizarMatrizFaltantes(filtrados);
+            renderizarMatrizSobrantes(filtrados);
+        }
+
+        let expandedEscenarios = new Set();
+
+        function toggleEscenarioResumen(escId) {
+            if (expandedEscenarios.has(escId)) expandedEscenarios.delete(escId);
+            else expandedEscenarios.add(escId);
+            renderizarResumenEscenariosYKPIs(obtenerFilasFiltradas());
+        }
+
+        function renderizarResumenEscenariosYKPIs(data) {
+            const tbody = document.getElementById('tbodyResumenEscenario');
+            tbody.innerHTML = '';
+
+            // Evaluar por Escenario y por MP (Sí / No) para totalizar faltantes y sobrantes reales
+            const mapEsc = new Map();
+            let globalProg = 0, globalCom = 0, globalFaltaKg = 0, globalSobraKg = 0;
+            let globalProgMpSi = 0, globalComMpSi = 0, globalFaltaMpSi = 0, globalSobraMpSi = 0;
+            let globalProgMpNo = 0, globalComMpNo = 0, globalFaltaMpNo = 0, globalSobraMpNo = 0;
+            const setSkusFalta = new Set();
+            const setSkusSobra = new Set();
+            const setSkusFaltaMpSi = new Set();
+            const setSkusFaltaMpNo = new Set();
+            const setSkusSobraMpSi = new Set();
+            const setSkusSobraMpNo = new Set();
+
+            data.forEach(d => {
+                const esMpSi = d.TipoMP === 'Sí';
+                if (!mapEsc.has(d.Escenario)) {
+                    mapEsc.set(d.Escenario, {
+                        Escenario: d.Escenario,
+                        prog: 0, com: 0,
+                        faltaKg: 0, sobraKg: 0,
+                        faltaMpSi: 0, faltaMpNo: 0,
+                        sobraMpSi: 0, sobraMpNo: 0,
+                        skusFalta: new Set(),
+                        skusSobra: new Set(),
+                        mpGroups: {
+                            'Sí': { mp: 'Sí', prog: 0, com: 0, faltaKg: 0, sobraKg: 0, skusFalta: new Set(), skusSobra: new Set() },
+                            'No': { mp: 'No', prog: 0, com: 0, faltaKg: 0, sobraKg: 0, skusFalta: new Set(), skusSobra: new Set() }
+                        }
+                    });
+                    // Por defecto expandir todos los escenarios para mostrar MP: Sí / No en el resumen
+                    expandedEscenarios.add(`esc_${d.Escenario}`);
+                }
+                const eNode = mapEsc.get(d.Escenario);
+                const mpKey = esMpSi ? 'Sí' : 'No';
+                const mpSub = eNode.mpGroups[mpKey];
+                const dif = d.PROG_PRODUCCION - d.PROYECCION_COMERCIAL;
+
+                eNode.prog += d.PROG_PRODUCCION;
+                eNode.com += d.PROYECCION_COMERCIAL;
+                mpSub.prog += d.PROG_PRODUCCION;
+                mpSub.com += d.PROYECCION_COMERCIAL;
+
+                globalProg += d.PROG_PRODUCCION;
+                globalCom += d.PROYECCION_COMERCIAL;
+                if (esMpSi) {
+                    globalProgMpSi += d.PROG_PRODUCCION;
+                    globalComMpSi += d.PROYECCION_COMERCIAL;
+                } else {
+                    globalProgMpNo += d.PROG_PRODUCCION;
+                    globalComMpNo += d.PROYECCION_COMERCIAL;
+                }
+
+                if (dif < -0.004) {
+                    const f = Math.abs(dif);
+                    eNode.faltaKg += f;
+                    eNode.skusFalta.add(d.CodigoCorto);
+                    mpSub.faltaKg += f;
+                    mpSub.skusFalta.add(d.CodigoCorto);
+                    globalFaltaKg += f;
+                    setSkusFalta.add(d.CodigoCorto);
+
+                    if (esMpSi) {
+                        eNode.faltaMpSi += f;
+                        globalFaltaMpSi += f;
+                        setSkusFaltaMpSi.add(d.CodigoCorto);
+                    } else {
+                        eNode.faltaMpNo += f;
+                        globalFaltaMpNo += f;
+                        setSkusFaltaMpNo.add(d.CodigoCorto);
+                    }
+                } else if (dif > 0.004) {
+                    eNode.sobraKg += dif;
+                    eNode.skusSobra.add(d.CodigoCorto);
+                    mpSub.sobraKg += dif;
+                    mpSub.skusSobra.add(d.CodigoCorto);
+                    globalSobraKg += dif;
+                    setSkusSobra.add(d.CodigoCorto);
+
+                    if (esMpSi) {
+                        eNode.sobraMpSi += dif;
+                        globalSobraMpSi += dif;
+                        setSkusSobraMpSi.add(d.CodigoCorto);
+                    } else {
+                        eNode.sobraMpNo += dif;
+                        globalSobraMpNo += dif;
+                        setSkusSobraMpNo.add(d.CodigoCorto);
+                    }
+                }
+            });
+
+            // Actualizar las 4 tarjetas KPI superiores + etiquetas de totales MP
+            const globalDif = globalProg - globalCom;
+            const globalDifMpSi = globalProgMpSi - globalComMpSi;
+            const globalDifMpNo = globalProgMpNo - globalComMpNo;
+            const globalPct = calcPct(globalProg, globalCom);
+            const globalPctMpSi = calcPct(globalProgMpSi, globalComMpSi);
+            const globalPctMpNo = calcPct(globalProgMpNo, globalComMpNo);
+
+            document.getElementById('kpiFaltaVal').innerHTML = `-${formatKgMatriz(globalFaltaKg)}<span class="kpi-unit">kg</span>`;
+            document.getElementById('kpiFaltaMpSiBadge').textContent = `MP Sí: -${formatKgMatriz(globalFaltaMpSi)} kg (${setSkusFaltaMpSi.size} SKUs)`;
+            document.getElementById('kpiFaltaMpNoBadge').textContent = `MP No: -${formatKgMatriz(globalFaltaMpNo)} kg (${setSkusFaltaMpNo.size} SKUs)`;
+            document.getElementById('kpiFaltaSkusCount').textContent = `${setSkusFalta.size} SKUs únicos con faltante`;
+            document.getElementById('kpiFaltaTn').textContent = `-${(globalFaltaKg / 1000).toFixed(2)} Tn`;
+
+            document.getElementById('kpiSobraVal').innerHTML = `+${formatKgMatriz(globalSobraKg)}<span class="kpi-unit">kg</span>`;
+            document.getElementById('kpiSobraMpSiBadge').textContent = `MP Sí: +${formatKgMatriz(globalSobraMpSi)} kg (${setSkusSobraMpSi.size} SKUs)`;
+            document.getElementById('kpiSobraMpNoBadge').textContent = `MP No: +${formatKgMatriz(globalSobraMpNo)} kg (${setSkusSobraMpNo.size} SKUs)`;
+            document.getElementById('kpiSobraSkusCount').textContent = `${setSkusSobra.size} SKUs únicos con sobrante`;
+            document.getElementById('kpiSobraTn').textContent = `+${(globalSobraKg / 1000).toFixed(2)} Tn`;
+
+            document.getElementById('kpiDifVal').innerHTML = `${globalDif > 0 ? '+' : ''}${formatKgMatriz(globalDif)}<span class="kpi-unit">kg</span>`;
+            document.getElementById('kpiDifMpSiBadge').textContent = `Dif. MP Sí: ${globalDifMpSi > 0 ? '+' : ''}${formatKgMatriz(globalDifMpSi)} kg`;
+            document.getElementById('kpiDifMpNoBadge').textContent = `Dif. MP No: ${globalDifMpNo > 0 ? '+' : ''}${formatKgMatriz(globalDifMpNo)} kg`;
+            document.getElementById('kpiProgVsComLabel').textContent = `Prog: ${(globalProg / 1000).toFixed(1)} Tn | Proy: ${(globalCom / 1000).toFixed(1)} Tn`;
+            document.getElementById('kpiDifTn').textContent = `${(globalDif / 1000).toFixed(2)} Tn`;
+
+            document.getElementById('kpiPctVal').innerHTML = `${globalPct.toFixed(2)}<span class="kpi-unit">%</span>`;
+            document.getElementById('kpiPctMpSiBadge').textContent = `Cumpl. MP Sí: ${globalPctMpSi.toFixed(2)}%`;
+            document.getElementById('kpiPctMpNoBadge').textContent = `Cumpl. MP No: ${globalPctMpNo.toFixed(2)}%`;
+            document.getElementById('kpiEscenariosCount').textContent = `${mapEsc.size} escenarios evaluados`;
+            const badgeEstado = document.getElementById('kpiBadgeEstado');
+            if (globalPct >= 98) {
+                badgeEstado.className = 'badge-kpi badge-good';
+                badgeEstado.textContent = 'Óptimo';
+            } else if (globalPct >= 85) {
+                badgeEstado.className = 'badge-kpi badge-mid';
+                badgeEstado.textContent = 'En Rango';
+            } else {
+                badgeEstado.className = 'badge-kpi badge-low';
+                badgeEstado.textContent = 'Bajo';
+            }
+
+            if (mapEsc.size === 0) {
+                tbody.innerHTML = '<tr><td colspan="11" style="text-align:center; padding:24px; color:var(--text-muted);">No hay datos para los filtros seleccionados.</td></tr>';
+                return;
+            }
+
+            const escList = Array.from(mapEsc.values()).sort((a, b) =>
+                String(a.Escenario).localeCompare(String(b.Escenario), undefined, { numeric: true })
+            );
+
+            escList.forEach(eNode => {
+                const difNeta = eNode.prog - eNode.com;
+                const escId = `esc_${eNode.Escenario}`;
+                const isExpanded = expandedEscenarios.has(escId);
+
+                const tr = document.createElement('tr');
+                tr.className = 'level-1';
+                tr.innerHTML = `
+                    <td>
+                        <span class="toggle-icon" onclick="toggleEscenarioResumen('${escId.replace(/'/g, "\\'")}')">${isExpanded ? '−' : '+'}</span>
+                        <span class="tag-escenario">Escenario ${eNode.Escenario}</span>
+                    </td>
+                    <td class="num-cell col-prog col-group-prog-start"><b>${formatKgMatriz(eNode.prog)}</b></td>
+                    <td class="num-cell col-com col-group-com-start"><b>${formatKgMatriz(eNode.com)}</b></td>
+                    <td class="num-cell col-falta col-group-falta-start"><b class="val-negative">-${formatKgMatriz(eNode.faltaMpSi)}</b></td>
+                    <td class="num-cell col-falta"><span class="val-negative">-${formatKgMatriz(eNode.faltaMpNo)}</span></td>
+                    <td class="num-cell col-falta">
+                        <b class="val-negative">-${formatKgMatriz(eNode.faltaKg)}</b>
+                        <span class="sub-sku-count" style="color:var(--falta-dark);">${eNode.skusFalta.size} SKUs</span>
+                    </td>
+                    <td class="num-cell col-sobra col-group-sobra-start"><b class="val-positive">+${formatKgMatriz(eNode.sobraMpSi)}</b></td>
+                    <td class="num-cell col-sobra"><span class="val-positive">+${formatKgMatriz(eNode.sobraMpNo)}</span></td>
+                    <td class="num-cell col-sobra">
+                        <b class="val-positive">+${formatKgMatriz(eNode.sobraKg)}</b>
+                        <span class="sub-sku-count" style="color:var(--sobra-dark);">${eNode.skusSobra.size} SKUs</span>
+                    </td>
+                    <td class="num-cell col-dif col-group-dif-start ${difNeta >= 0 ? 'val-positive' : 'val-negative'}">
+                        <b>${difNeta > 0 ? '+' : ''}${formatKgMatriz(difNeta)}</b>
+                    </td>
+                    <td class="num-cell col-com">${badgeHtml(calcPct(eNode.prog, eNode.com))}</td>
+                `;
+                tbody.appendChild(tr);
+
+                if (isExpanded) {
+                    ['Sí', 'No'].forEach(mpKey => {
+                        const mpSub = eNode.mpGroups[mpKey];
+                        const difMp = mpSub.prog - mpSub.com;
+                        const isSi = mpKey === 'Sí';
+                        const trMp = document.createElement('tr');
+                        trMp.className = 'level-3';
+                        trMp.innerHTML = `
+                            <td style="padding-left: 36px;">
+                                <span class="tag-tipomp ${isSi ? '' : 'mp-no'}"><span class="tag-tipomp-prefix">MP:</span> ${mpKey}</span>
+                            </td>
+                            <td class="num-cell col-prog col-group-prog-start">${formatKgMatriz(mpSub.prog)}</td>
+                            <td class="num-cell col-com col-group-com-start">${formatKgMatriz(mpSub.com)}</td>
+                            <td class="num-cell col-falta col-group-falta-start">${isSi ? `<b class="val-negative">-${formatKgMatriz(mpSub.faltaKg)}</b>` : '—'}</td>
+                            <td class="num-cell col-falta">${!isSi ? `<span class="val-negative">-${formatKgMatriz(mpSub.faltaKg)}</span>` : '—'}</td>
+                            <td class="num-cell col-falta">
+                                <b class="val-negative">-${formatKgMatriz(mpSub.faltaKg)}</b>
+                                <span class="sub-sku-count" style="color:var(--falta-dark);">${mpSub.skusFalta.size} SKUs</span>
+                            </td>
+                            <td class="num-cell col-sobra col-group-sobra-start">${isSi ? `<b class="val-positive">+${formatKgMatriz(mpSub.sobraKg)}</b>` : '—'}</td>
+                            <td class="num-cell col-sobra">${!isSi ? `<span class="val-positive">+${formatKgMatriz(mpSub.sobraKg)}</span>` : '—'}</td>
+                            <td class="num-cell col-sobra">
+                                <b class="val-positive">+${formatKgMatriz(mpSub.sobraKg)}</b>
+                                <span class="sub-sku-count" style="color:var(--sobra-dark);">${mpSub.skusSobra.size} SKUs</span>
+                            </td>
+                            <td class="num-cell col-dif col-group-dif-start ${difMp >= 0 ? 'val-positive' : 'val-negative'}">
+                                ${difMp > 0 ? '+' : ''}${formatKgMatriz(difMp)}
+                            </td>
+                            <td class="num-cell col-com">${badgeHtml(calcPct(mpSub.prog, mpSub.com))}</td>
+                        `;
+                        tbody.appendChild(trMp);
+                    });
+                }
+            });
+
+            if (escList.length >= 1) {
+                const trTot = document.createElement('tr');
+                trTot.className = 'total-row';
+                trTot.innerHTML = `
+                    <td>TOTAL GENERAL (${escList.length} Escenario${escList.length > 1 ? 's' : ''})</td>
+                    <td class="num-cell col-group-prog-start">${formatKgMatriz(globalProg)}</td>
+                    <td class="num-cell col-group-com-start">${formatKgMatriz(globalCom)}</td>
+                    <td class="num-cell col-group-falta-start" style="color:#FADBD8 !important;">-${formatKgMatriz(globalFaltaMpSi)}</td>
+                    <td class="num-cell" style="color:#FADBD8 !important;">-${formatKgMatriz(globalFaltaMpNo)}</td>
+                    <td class="num-cell" style="color:#FADBD8 !important;">-${formatKgMatriz(globalFaltaKg)}</td>
+                    <td class="num-cell col-group-sobra-start" style="color:#D1F2EB !important;">+${formatKgMatriz(globalSobraMpSi)}</td>
+                    <td class="num-cell" style="color:#D1F2EB !important;">+${formatKgMatriz(globalSobraMpNo)}</td>
+                    <td class="num-cell" style="color:#D1F2EB !important;">+${formatKgMatriz(globalSobraKg)}</td>
+                    <td class="num-cell col-group-dif-start">${globalDif > 0 ? '+' : ''}${formatKgMatriz(globalDif)}</td>
+                    <td class="num-cell">${badgeHtml(globalPct)}</td>
+                `;
+                tbody.appendChild(trTot);
+            }
+        }
+
+        // =========================================================================
+        // 🔴 MATRIZ A: JERARQUÍA EXCLUSIVA DE SKUS FALTANTES (Semana -> SubPlanta -> MP (Sí/No) -> SKU)
+        // =========================================================================
+        function renderizarMatrizFaltantes(data) {
+            const tbody = document.getElementById('tbodyFaltantes');
+            tbody.innerHTML = '';
+
+            const term = (document.getElementById('searchFaltantes')?.value || '').trim().toUpperCase();
+
+            // Consolidar por Semana -> SubPlanta -> MP (Sí/No) -> SKU y quedarse solo con los SKUs donde Prog < Proy (FALTA)
+            const mapSem = new Map();
+            data.forEach(d => {
+                const tipoMp = d.TipoMP || 'No';
+                if (term.length > 0) {
+                    const match = String(d.Semana).includes(term) ||
+                        d.SubPlanta.toUpperCase().includes(term) ||
+                        `MP ${tipoMp}`.toUpperCase().includes(term) ||
+                        tipoMp.toUpperCase().includes(term) ||
+                        d.CodigoCorto.toUpperCase().includes(term) ||
+                        d.Nombre.toUpperCase().includes(term);
+                    if (!match) return;
+                }
+
+                if (!mapSem.has(d.Semana)) {
+                    mapSem.set(d.Semana, { Semana: d.Semana, subPlantas: new Map() });
+                }
+                const sNode = mapSem.get(d.Semana);
+
+                if (!sNode.subPlantas.has(d.SubPlanta)) {
+                    sNode.subPlantas.set(d.SubPlanta, { SubPlanta: d.SubPlanta, tiposMp: new Map() });
+                }
+                const spNode = sNode.subPlantas.get(d.SubPlanta);
+
+                if (!spNode.tiposMp.has(tipoMp)) {
+                    spNode.tiposMp.set(tipoMp, { TipoMP: tipoMp, skus: new Map() });
+                }
+                const mpNode = spNode.tiposMp.get(tipoMp);
+
+                if (!mpNode.skus.has(d.CodigoCorto)) {
+                    mpNode.skus.set(d.CodigoCorto, { CodigoCorto: d.CodigoCorto, Nombre: d.Nombre, TipoMP: tipoMp, prog: 0, com: 0 });
+                }
+                const skuNode = mpNode.skus.get(d.CodigoCorto);
+                skuNode.prog += d.PROG_PRODUCCION;
+                skuNode.com += d.PROYECCION_COMERCIAL;
+            });
+
+            let totalSkusFaltaCount = 0;
+            let totalFaltaMpSiKg = 0, totalFaltaMpNoKg = 0;
+            let countFaltaMpSi = 0, countFaltaMpNo = 0;
+            const forceExpand = term.length > 0;
+            const semList = Array.from(mapSem.values()).sort((a, b) => b.Semana - a.Semana);
+
+            semList.forEach(sNode => {
+                let sProg = 0, sCom = 0, sFalta = 0, sFaltaMpSi = 0, sFaltaMpNo = 0;
+                const spValidas = [];
+
+                const spList = Array.from(sNode.subPlantas.values()).sort((a, b) => a.SubPlanta.localeCompare(b.SubPlanta));
+                spList.forEach(spNode => {
+                    let spProg = 0, spCom = 0, spFalta = 0, spFaltaMpSi = 0, spFaltaMpNo = 0, spSkusCount = 0;
+                    const mpValidas = [];
+
+                    const mpList = Array.from(spNode.tiposMp.values()).sort((a, b) => (a.TipoMP === 'Sí' ? -1 : 1));
+                    mpList.forEach(mpNode => {
+                        let mpProg = 0, mpCom = 0, mpFalta = 0;
+                        const skusFaltantes = [];
+
+                        mpNode.skus.forEach(sku => {
+                            const dif = sku.prog - sku.com;
+                            if (dif < -0.004) {
+                                sku.faltaKg = Math.abs(dif);
+                                skusFaltantes.push(sku);
+                                mpProg += sku.prog;
+                                mpCom += sku.com;
+                                mpFalta += sku.faltaKg;
+                                totalSkusFaltaCount++;
+                                if (mpNode.TipoMP === 'Sí') {
+                                    totalFaltaMpSiKg += sku.faltaKg;
+                                    countFaltaMpSi++;
+                                } else {
+                                    totalFaltaMpNoKg += sku.faltaKg;
+                                    countFaltaMpNo++;
+                                }
+                            }
+                        });
+
+                        if (skusFaltantes.length > 0) {
+                            mpNode.prog = mpProg;
+                            mpNode.com = mpCom;
+                            mpNode.faltaKg = mpFalta;
+                            mpNode.skusFaltantes = skusFaltantes.sort((a, b) => b.faltaKg - a.faltaKg);
+                            mpValidas.push(mpNode);
+
+                            spProg += mpProg;
+                            spCom += mpCom;
+                            spFalta += mpFalta;
+                            if (mpNode.TipoMP === 'Sí') spFaltaMpSi += mpFalta;
+                            else spFaltaMpNo += mpFalta;
+                            spSkusCount += skusFaltantes.length;
+                        }
+                    });
+
+                    if (mpValidas.length > 0) {
+                        spNode.prog = spProg;
+                        spNode.com = spCom;
+                        spNode.faltaKg = spFalta;
+                        spNode.faltaMpSi = spFaltaMpSi;
+                        spNode.faltaMpNo = spFaltaMpNo;
+                        spNode.skusCount = spSkusCount;
+                        spNode.mpValidas = mpValidas;
+                        spValidas.push(spNode);
+
+                        sProg += spProg;
+                        sCom += spCom;
+                        sFalta += spFalta;
+                        sFaltaMpSi += spFaltaMpSi;
+                        sFaltaMpNo += spFaltaMpNo;
+                    }
+                });
+
+                if (spValidas.length === 0) return;
+
+                const sId = `sem_${sNode.Semana}`;
+                const isSemExpanded = expandedFaltantes.has(sId) || forceExpand;
+
+                const trSem = document.createElement('tr');
+                trSem.className = 'level-1';
+                trSem.innerHTML = `
+                    <td>
+                        <span class="toggle-icon" onclick="toggleNodeFaltantes('${sId}')">${isSemExpanded ? '−' : '+'}</span>
+                        <b style="color:var(--pantone-dark);">Semana ${sNode.Semana}</b>
+                        <span style="font-size:0.73rem; color:var(--text-secondary); margin-left:6px;">${obtenerRangoSemanaISO(sNode.Semana)}</span>
+                        <span class="badge-mp-total" title="Total Faltante MP (Sí) en Semana ${sNode.Semana}">MP Sí: -${formatKgMatriz(sFaltaMpSi)} kg</span>
+                        <span class="badge-mp-no-total" title="Total Faltante MP (No) en Semana ${sNode.Semana}">MP No: -${formatKgMatriz(sFaltaMpNo)} kg</span>
+                    </td>
+                    <td class="num-cell col-prog col-group-prog-start"><b>${formatKgMatriz(sProg)}</b></td>
+                    <td class="num-cell col-com col-group-com-start"><b>${formatKgMatriz(sCom)}</b></td>
+                    <td class="num-cell col-falta col-group-falta-start"><b class="val-negative">-${formatKgMatriz(sFalta)}</b></td>
+                    <td class="num-cell col-com">${badgeHtml(calcPct(sProg, sCom))}</td>
+                `;
+                tbody.appendChild(trSem);
+
+                if (isSemExpanded) {
+                    spValidas.forEach(spNode => {
+                        const spId = `sem_${sNode.Semana}_sp_${spNode.SubPlanta}`;
+                        const isSpExpanded = expandedFaltantes.has(spId) || forceExpand;
+
+                        const trSp = document.createElement('tr');
+                        trSp.className = 'level-2';
+                        trSp.innerHTML = `
+                            <td style="padding-left: 30px;">
+                                <span class="toggle-icon" onclick="toggleNodeFaltantes('${spId}')">${isSpExpanded ? '−' : '+'}</span>
+                                <span class="tag-subplanta">${spNode.SubPlanta}</span>
+                                <span class="sub-sku-count" style="color:var(--falta-dark);">${spNode.skusCount} SKUs</span>
+                                <span class="badge-mp-total">MP Sí: -${formatKgMatriz(spNode.faltaMpSi)} kg</span>
+                                <span class="badge-mp-no-total">MP No: -${formatKgMatriz(spNode.faltaMpNo)} kg</span>
+                            </td>
+                            <td class="num-cell col-prog col-group-prog-start" style="font-weight:600;">${formatKgMatriz(spNode.prog)}</td>
+                            <td class="num-cell col-com col-group-com-start">${formatKgMatriz(spNode.com)}</td>
+                            <td class="num-cell col-falta col-group-falta-start"><b class="val-negative">-${formatKgMatriz(spNode.faltaKg)}</b></td>
+                            <td class="num-cell col-com">${badgeHtml(calcPct(spNode.prog, spNode.com))}</td>
+                        `;
+                        tbody.appendChild(trSp);
+
+                        if (isSpExpanded) {
+                            spNode.mpValidas.forEach(mpNode => {
+                                const mpId = `sem_${sNode.Semana}_sp_${spNode.SubPlanta}_mp_${mpNode.TipoMP}`;
+                                const isMpExpanded = expandedFaltantes.has(mpId) || forceExpand;
+                                const isSi = mpNode.TipoMP === 'Sí';
+
+                                const trMp = document.createElement('tr');
+                                trMp.className = 'level-3';
+                                trMp.innerHTML = `
+                                    <td style="padding-left: 56px;">
+                                        <span class="toggle-icon" onclick="toggleNodeFaltantes('${mpId.replace(/'/g, "\\'")}')">${isMpExpanded ? '−' : '+'}</span>
+                                        <span class="tag-tipomp ${isSi ? '' : 'mp-no'}"><span class="tag-tipomp-prefix">MP:</span> ${mpNode.TipoMP}</span>
+                                        <span class="sub-sku-count" style="color:var(--falta-dark);">${mpNode.skusFaltantes.length} SKUs</span>
+                                        <span class="${isSi ? 'badge-mp-total' : 'badge-mp-no-total'}">Total MP ${mpNode.TipoMP}: -${formatKgMatriz(mpNode.faltaKg)} kg</span>
+                                    </td>
+                                    <td class="num-cell col-prog col-group-prog-start" style="font-weight:600;">${formatKgMatriz(mpNode.prog)}</td>
+                                    <td class="num-cell col-com col-group-com-start">${formatKgMatriz(mpNode.com)}</td>
+                                    <td class="num-cell col-falta col-group-falta-start"><b class="val-negative">-${formatKgMatriz(mpNode.faltaKg)}</b></td>
+                                    <td class="num-cell col-com">${badgeHtml(calcPct(mpNode.prog, mpNode.com))}</td>
+                                `;
+                                tbody.appendChild(trMp);
+
+                                if (isMpExpanded) {
+                                    mpNode.skusFaltantes.forEach(sku => {
+                                        const trSku = document.createElement('tr');
+                                        trSku.className = 'level-4';
+                                        trSku.innerHTML = `
+                                            <td style="padding-left: 84px;">
+                                                <span class="sku-code-badge">${sku.CodigoCorto}</span>
+                                                <span class="sku-name-text">${sku.Nombre}</span>
+                                            </td>
+                                            <td class="num-cell col-prog col-group-prog-start" style="font-weight:600;">${formatKgMatriz(sku.prog)}</td>
+                                            <td class="num-cell col-com col-group-com-start">${formatKgMatriz(sku.com)}</td>
+                                            <td class="num-cell col-falta col-group-falta-start"><span class="val-negative">-${formatKgMatriz(sku.faltaKg)}</span></td>
+                                            <td class="num-cell col-com">${badgeHtml(calcPct(sku.prog, sku.com))}</td>
+                                        `;
+                                        tbody.appendChild(trSku);
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+
+            document.getElementById('badgeCountMatrizFalta').textContent = `${totalSkusFaltaCount} SKUs-Sem`;
+            document.getElementById('badgeTotalFaltaMpSi').textContent = `MP Sí: -${formatKgMatriz(totalFaltaMpSiKg)} kg (${countFaltaMpSi})`;
+            document.getElementById('badgeTotalFaltaMpNo').textContent = `MP No: -${formatKgMatriz(totalFaltaMpNoKg)} kg (${countFaltaMpNo})`;
+
+            if (tbody.children.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:var(--text-muted);">No hay SKUs faltantes para la selección actual.</td></tr>';
+            }
+        }
+
+        function toggleNodeFaltantes(id) {
+            if (expandedFaltantes.has(id)) expandedFaltantes.delete(id);
+            else expandedFaltantes.add(id);
+            renderizarMatrizFaltantes(obtenerFilasFiltradas());
+        }
+
+        function toggleExpandirTodoFaltantes(exp) {
+            expandedFaltantes.clear();
+            if (exp) {
+                obtenerFilasFiltradas().forEach(d => {
+                    const mp = d.TipoMP || 'No';
+                    expandedFaltantes.add(`sem_${d.Semana}`);
+                    expandedFaltantes.add(`sem_${d.Semana}_sp_${d.SubPlanta}`);
+                    expandedFaltantes.add(`sem_${d.Semana}_sp_${d.SubPlanta}_mp_${mp}`);
+                });
+            }
+            renderizarMatrizFaltantes(obtenerFilasFiltradas());
+        }
+
+        function filtrarMatrizFaltantes() {
+            renderizarMatrizFaltantes(obtenerFilasFiltradas());
+        }
+
+        // =========================================================================
+        // 🟢 MATRIZ B: JERARQUÍA EXCLUSIVA DE SKUS SOBRANTES (Semana -> SubPlanta -> MP (Sí/No) -> SKU)
+        // =========================================================================
+        function renderizarMatrizSobrantes(data) {
+            const tbody = document.getElementById('tbodySobrantes');
+            tbody.innerHTML = '';
+
+            const term = (document.getElementById('searchSobrantes')?.value || '').trim().toUpperCase();
+
+            // Consolidar por Semana -> SubPlanta -> MP (Sí/No) -> SKU y quedarse solo con los SKUs donde Prog > Proy (SOBRA)
+            const mapSem = new Map();
+            data.forEach(d => {
+                const tipoMp = d.TipoMP || 'No';
+                if (term.length > 0) {
+                    const match = String(d.Semana).includes(term) ||
+                        d.SubPlanta.toUpperCase().includes(term) ||
+                        `MP ${tipoMp}`.toUpperCase().includes(term) ||
+                        tipoMp.toUpperCase().includes(term) ||
+                        d.CodigoCorto.toUpperCase().includes(term) ||
+                        d.Nombre.toUpperCase().includes(term);
+                    if (!match) return;
+                }
+
+                if (!mapSem.has(d.Semana)) {
+                    mapSem.set(d.Semana, { Semana: d.Semana, subPlantas: new Map() });
+                }
+                const sNode = mapSem.get(d.Semana);
+
+                if (!sNode.subPlantas.has(d.SubPlanta)) {
+                    sNode.subPlantas.set(d.SubPlanta, { SubPlanta: d.SubPlanta, tiposMp: new Map() });
+                }
+                const spNode = sNode.subPlantas.get(d.SubPlanta);
+
+                if (!spNode.tiposMp.has(tipoMp)) {
+                    spNode.tiposMp.set(tipoMp, { TipoMP: tipoMp, skus: new Map() });
+                }
+                const mpNode = spNode.tiposMp.get(tipoMp);
+
+                if (!mpNode.skus.has(d.CodigoCorto)) {
+                    mpNode.skus.set(d.CodigoCorto, { CodigoCorto: d.CodigoCorto, Nombre: d.Nombre, TipoMP: tipoMp, prog: 0, com: 0 });
+                }
+                const skuNode = mpNode.skus.get(d.CodigoCorto);
+                skuNode.prog += d.PROG_PRODUCCION;
+                skuNode.com += d.PROYECCION_COMERCIAL;
+            });
+
+            let totalSkusSobraCount = 0;
+            let totalSobraMpSiKg = 0, totalSobraMpNoKg = 0;
+            let countSobraMpSi = 0, countSobraMpNo = 0;
+            const forceExpand = term.length > 0;
+            const semList = Array.from(mapSem.values()).sort((a, b) => b.Semana - a.Semana);
+
+            semList.forEach(sNode => {
+                let sProg = 0, sCom = 0, sSobra = 0, sSobraMpSi = 0, sSobraMpNo = 0;
+                const spValidas = [];
+
+                const spList = Array.from(sNode.subPlantas.values()).sort((a, b) => a.SubPlanta.localeCompare(b.SubPlanta));
+                spList.forEach(spNode => {
+                    let spProg = 0, spCom = 0, spSobra = 0, spSobraMpSi = 0, spSobraMpNo = 0, spSkusCount = 0;
+                    const mpValidas = [];
+
+                    const mpList = Array.from(spNode.tiposMp.values()).sort((a, b) => (a.TipoMP === 'Sí' ? -1 : 1));
+                    mpList.forEach(mpNode => {
+                        let mpProg = 0, mpCom = 0, mpSobra = 0;
+                        const skusSobrantes = [];
+
+                        mpNode.skus.forEach(sku => {
+                            const dif = sku.prog - sku.com;
+                            if (dif > 0.004) {
+                                sku.sobraKg = dif;
+                                skusSobrantes.push(sku);
+                                mpProg += sku.prog;
+                                mpCom += sku.com;
+                                mpSobra += sku.sobraKg;
+                                totalSkusSobraCount++;
+                                if (mpNode.TipoMP === 'Sí') {
+                                    totalSobraMpSiKg += sku.sobraKg;
+                                    countSobraMpSi++;
+                                } else {
+                                    totalSobraMpNoKg += sku.sobraKg;
+                                    countSobraMpNo++;
+                                }
+                            }
+                        });
+
+                        if (skusSobrantes.length > 0) {
+                            mpNode.prog = mpProg;
+                            mpNode.com = mpCom;
+                            mpNode.sobraKg = mpSobra;
+                            mpNode.skusSobrantes = skusSobrantes.sort((a, b) => b.sobraKg - a.sobraKg);
+                            mpValidas.push(mpNode);
+
+                            spProg += mpProg;
+                            spCom += mpCom;
+                            spSobra += mpSobra;
+                            if (mpNode.TipoMP === 'Sí') spSobraMpSi += mpSobra;
+                            else spSobraMpNo += mpSobra;
+                            spSkusCount += skusSobrantes.length;
+                        }
+                    });
+
+                    if (mpValidas.length > 0) {
+                        spNode.prog = spProg;
+                        spNode.com = spCom;
+                        spNode.sobraKg = spSobra;
+                        spNode.sobraMpSi = spSobraMpSi;
+                        spNode.sobraMpNo = spSobraMpNo;
+                        spNode.skusCount = spSkusCount;
+                        spNode.mpValidas = mpValidas;
+                        spValidas.push(spNode);
+
+                        sProg += spProg;
+                        sCom += spCom;
+                        sSobra += spSobra;
+                        sSobraMpSi += spSobraMpSi;
+                        sSobraMpNo += spSobraMpNo;
+                    }
+                });
+
+                if (spValidas.length === 0) return;
+
+                const sId = `sem_${sNode.Semana}`;
+                const isSemExpanded = expandedSobrantes.has(sId) || forceExpand;
+
+                const trSem = document.createElement('tr');
+                trSem.className = 'level-1';
+                trSem.innerHTML = `
+                    <td>
+                        <span class="toggle-icon" onclick="toggleNodeSobrantes('${sId}')">${isSemExpanded ? '−' : '+'}</span>
+                        <b style="color:var(--pantone-dark);">Semana ${sNode.Semana}</b>
+                        <span style="font-size:0.73rem; color:var(--text-secondary); margin-left:6px;">${obtenerRangoSemanaISO(sNode.Semana)}</span>
+                        <span class="badge-mp-total" title="Total Sobrante MP (Sí) en Semana ${sNode.Semana}">MP Sí: +${formatKgMatriz(sSobraMpSi)} kg</span>
+                        <span class="badge-mp-no-total" title="Total Sobrante MP (No) en Semana ${sNode.Semana}">MP No: +${formatKgMatriz(sSobraMpNo)} kg</span>
+                    </td>
+                    <td class="num-cell col-prog col-group-prog-start"><b>${formatKgMatriz(sProg)}</b></td>
+                    <td class="num-cell col-com col-group-com-start"><b>${formatKgMatriz(sCom)}</b></td>
+                    <td class="num-cell col-sobra col-group-sobra-start"><b class="val-positive">+${formatKgMatriz(sSobra)}</b></td>
+                    <td class="num-cell col-com">${badgeHtml(calcPct(sProg, sCom))}</td>
+                `;
+                tbody.appendChild(trSem);
+
+                if (isSemExpanded) {
+                    spValidas.forEach(spNode => {
+                        const spId = `sem_${sNode.Semana}_sp_${spNode.SubPlanta}`;
+                        const isSpExpanded = expandedSobrantes.has(spId) || forceExpand;
+
+                        const trSp = document.createElement('tr');
+                        trSp.className = 'level-2';
+                        trSp.innerHTML = `
+                            <td style="padding-left: 30px;">
+                                <span class="toggle-icon" onclick="toggleNodeSobrantes('${spId}')">${isSpExpanded ? '−' : '+'}</span>
+                                <span class="tag-subplanta">${spNode.SubPlanta}</span>
+                                <span class="sub-sku-count" style="color:var(--sobra-dark);">${spNode.skusCount} SKUs</span>
+                                <span class="badge-mp-total">MP Sí: +${formatKgMatriz(spNode.sobraMpSi)} kg</span>
+                                <span class="badge-mp-no-total">MP No: +${formatKgMatriz(spNode.sobraMpNo)} kg</span>
+                            </td>
+                            <td class="num-cell col-prog col-group-prog-start" style="font-weight:600;">${formatKgMatriz(spNode.prog)}</td>
+                            <td class="num-cell col-com col-group-com-start">${formatKgMatriz(spNode.com)}</td>
+                            <td class="num-cell col-sobra col-group-sobra-start"><b class="val-positive">+${formatKgMatriz(spNode.sobraKg)}</b></td>
+                            <td class="num-cell col-com">${badgeHtml(calcPct(spNode.prog, spNode.com))}</td>
+                        `;
+                        tbody.appendChild(trSp);
+
+                        if (isSpExpanded) {
+                            spNode.mpValidas.forEach(mpNode => {
+                                const mpId = `sem_${sNode.Semana}_sp_${spNode.SubPlanta}_mp_${mpNode.TipoMP}`;
+                                const isMpExpanded = expandedSobrantes.has(mpId) || forceExpand;
+                                const isSi = mpNode.TipoMP === 'Sí';
+
+                                const trMp = document.createElement('tr');
+                                trMp.className = 'level-3';
+                                trMp.innerHTML = `
+                                    <td style="padding-left: 56px;">
+                                        <span class="toggle-icon" onclick="toggleNodeSobrantes('${mpId.replace(/'/g, "\\'")}')">${isMpExpanded ? '−' : '+'}</span>
+                                        <span class="tag-tipomp ${isSi ? '' : 'mp-no'}"><span class="tag-tipomp-prefix">MP:</span> ${mpNode.TipoMP}</span>
+                                        <span class="sub-sku-count" style="color:var(--sobra-dark);">${mpNode.skusSobrantes.length} SKUs</span>
+                                        <span class="${isSi ? 'badge-mp-total' : 'badge-mp-no-total'}">Total MP ${mpNode.TipoMP}: +${formatKgMatriz(mpNode.sobraKg)} kg</span>
+                                    </td>
+                                    <td class="num-cell col-prog col-group-prog-start" style="font-weight:600;">${formatKgMatriz(mpNode.prog)}</td>
+                                    <td class="num-cell col-com col-group-com-start">${formatKgMatriz(mpNode.com)}</td>
+                                    <td class="num-cell col-sobra col-group-sobra-start"><b class="val-positive">+${formatKgMatriz(mpNode.sobraKg)}</b></td>
+                                    <td class="num-cell col-com">${badgeHtml(calcPct(mpNode.prog, mpNode.com))}</td>
+                                `;
+                                tbody.appendChild(trMp);
+
+                                if (isMpExpanded) {
+                                    mpNode.skusSobrantes.forEach(sku => {
+                                        const trSku = document.createElement('tr');
+                                        trSku.className = 'level-4';
+                                        trSku.innerHTML = `
+                                            <td style="padding-left: 84px;">
+                                                <span class="sku-code-badge">${sku.CodigoCorto}</span>
+                                                <span class="sku-name-text">${sku.Nombre}</span>
+                                            </td>
+                                            <td class="num-cell col-prog col-group-prog-start" style="font-weight:600;">${formatKgMatriz(sku.prog)}</td>
+                                            <td class="num-cell col-com col-group-com-start">${formatKgMatriz(sku.com)}</td>
+                                            <td class="num-cell col-sobra col-group-sobra-start"><span class="val-positive">+${formatKgMatriz(sku.sobraKg)}</span></td>
+                                            <td class="num-cell col-com">${badgeHtml(calcPct(sku.prog, sku.com))}</td>
+                                        `;
+                                        tbody.appendChild(trSku);
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+
+            document.getElementById('badgeCountMatrizSobra').textContent = `${totalSkusSobraCount} SKUs-Sem`;
+            document.getElementById('badgeTotalSobraMpSi').textContent = `MP Sí: +${formatKgMatriz(totalSobraMpSiKg)} kg (${countSobraMpSi})`;
+            document.getElementById('badgeTotalSobraMpNo').textContent = `MP No: +${formatKgMatriz(totalSobraMpNoKg)} kg (${countSobraMpNo})`;
+
+            if (tbody.children.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:var(--text-muted);">No hay SKUs sobrantes para la selección actual.</td></tr>';
+            }
+        }
+
+        function toggleNodeSobrantes(id) {
+            if (expandedSobrantes.has(id)) expandedSobrantes.delete(id);
+            else expandedSobrantes.add(id);
+            renderizarMatrizSobrantes(obtenerFilasFiltradas());
+        }
+
+        function toggleExpandirTodoSobrantes(exp) {
+            expandedSobrantes.clear();
+            if (exp) {
+                obtenerFilasFiltradas().forEach(d => {
+                    const mp = d.TipoMP || 'No';
+                    expandedSobrantes.add(`sem_${d.Semana}`);
+                    expandedSobrantes.add(`sem_${d.Semana}_sp_${d.SubPlanta}`);
+                    expandedSobrantes.add(`sem_${d.Semana}_sp_${d.SubPlanta}_mp_${mp}`);
+                });
+            }
+            renderizarMatrizSobrantes(obtenerFilasFiltradas());
+        }
+
+        function filtrarMatrizSobrantes() {
+            renderizarMatrizSobrantes(obtenerFilasFiltradas());
+        }
+
+        // =========================================================================
+        // 📥 EXPORTAR A EXCEL (3 HOJAS: RESUMEN ESCENARIO, FALTANTES Y SOBRANTES)
+        // =========================================================================
+        function exportarExcelDetalle() {
+            const data = obtenerFilasFiltradas();
+            if (data.length === 0) {
+                mostrarToast("No hay datos para exportar", "⚠️");
+                return;
+            }
+
+            const mapEsc = new Map();
+            const filasFaltantes = [];
+            const filasSobrantes = [];
+
+            data.forEach(d => {
+                const esMpSi = d.TipoMP === 'Sí';
+                if (!mapEsc.has(d.Escenario)) {
+                    mapEsc.set(d.Escenario, {
+                        Escenario: d.Escenario,
+                        prog: 0, com: 0,
+                        faltaMpSi: 0, faltaMpNo: 0, faltaKg: 0,
+                        sobraMpSi: 0, sobraMpNo: 0, sobraKg: 0
+                    });
+                }
+                const eObj = mapEsc.get(d.Escenario);
+                const dif = d.PROG_PRODUCCION - d.PROYECCION_COMERCIAL;
+                eObj.prog += d.PROG_PRODUCCION;
+                eObj.com += d.PROYECCION_COMERCIAL;
+
+                if (dif < -0.004) {
+                    const f = Math.abs(dif);
+                    eObj.faltaKg += f;
+                    if (esMpSi) eObj.faltaMpSi += f;
+                    else eObj.faltaMpNo += f;
+
+                    filasFaltantes.push({
+                        "Escenario": d.Escenario,
+                        "Año": d.Anio,
+                        "Semana": d.Semana,
+                        "Rango Semana ISO": obtenerRangoSemanaISO(d.Semana),
+                        "SubPlanta": d.SubPlanta,
+                        "MP": d.TipoMP || 'No',
+                        "CodigoCorto": d.CodigoCorto,
+                        "Nombre": d.Nombre,
+                        "Programa Producción (kg)": Math.round(d.PROG_PRODUCCION),
+                        "Proyección Comercial (kg)": Math.round(d.PROYECCION_COMERCIAL),
+                        "Faltante / Falta (kg)": Math.round(f),
+                        "% Cumplimiento": Number(calcPct(d.PROG_PRODUCCION, d.PROYECCION_COMERCIAL).toFixed(2))
+                    });
+                } else if (dif > 0.004) {
+                    eObj.sobraKg += dif;
+                    if (esMpSi) eObj.sobraMpSi += dif;
+                    else eObj.sobraMpNo += dif;
+
+                    filasSobrantes.push({
+                        "Escenario": d.Escenario,
+                        "Año": d.Anio,
+                        "Semana": d.Semana,
+                        "Rango Semana ISO": obtenerRangoSemanaISO(d.Semana),
+                        "SubPlanta": d.SubPlanta,
+                        "MP": d.TipoMP || 'No',
+                        "CodigoCorto": d.CodigoCorto,
+                        "Nombre": d.Nombre,
+                        "Programa Producción (kg)": Math.round(d.PROG_PRODUCCION),
+                        "Proyección Comercial (kg)": Math.round(d.PROYECCION_COMERCIAL),
+                        "Sobrante / Sobra (kg)": Math.round(dif),
+                        "% Cumplimiento": Number(calcPct(d.PROG_PRODUCCION, d.PROYECCION_COMERCIAL).toFixed(2))
+                    });
+                }
+            });
+
+            const filasResumen = Array.from(mapEsc.values()).map(e => ({
+                "Escenario": e.Escenario,
+                "Programa Producción (kg)": Math.round(e.prog),
+                "Proyección Comercial (kg)": Math.round(e.com),
+                "Falta MP: Sí (kg)": Math.round(e.faltaMpSi),
+                "Falta MP: No (kg)": Math.round(e.faltaMpNo),
+                "Total Faltante (kg)": Math.round(e.faltaKg),
+                "Sobra MP: Sí (kg)": Math.round(e.sobraMpSi),
+                "Sobra MP: No (kg)": Math.round(e.sobraMpNo),
+                "Total Sobrante (kg)": Math.round(e.sobraKg),
+                "Diferencia Neta (kg)": Math.round(e.prog - e.com),
+                "% Cumplimiento": Number(calcPct(e.prog, e.com).toFixed(2))
+            }));
+
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(filasResumen), "Resumen_Escenarios");
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(filasFaltantes), "Matriz_Faltantes_SKU");
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(filasSobrantes), "Matriz_Sobrantes_SKU");
+            XLSX.writeFile(wb, `Analisis_Faltantes_Sobrantes_9Semanas_${new Date().toISOString().slice(0, 10)}.xlsx`);
+            mostrarToast("Excel de Faltantes y Sobrantes descargado", "✅");
+        }
+
+        function mostrarToast(msg, icon = 'ℹ️') {
+            const toast = document.getElementById('toastNotification');
+            document.getElementById('toastIcon').textContent = icon;
+            document.getElementById('toastMsg').textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3500);
+        }
+    </script>
+</body>
+
+</html>
+

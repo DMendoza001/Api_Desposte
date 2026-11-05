@@ -9,7 +9,7 @@ namespace ApiDesposte.Controllers.Excel
     /// Cumplimiento_PTC___Jorge.xlsm (Últimas 9 Semanas_PL):
     ///   - Hoja ResProd_Py_DB -> Tabla T_ResProd_Py_DB  (Semana, CodigoCorto, Kilos, Escenario)
     ///   - Hoja DemandaPy     -> Tabla T_DemandaPy      (Semana, CodigoCorto, Kilos, Escenario)
-    ///   - Hoja Auxiliares    -> Tabla T_CodigoRelacion (CodigoCorto, Nombre, SubPlanta)
+    ///   - Hoja Auxiliares    -> Tabla T_CodigoRelacion (CodigoCorto, Nombre, SubPlanta, TipoMP)
     /// </summary>
     [ApiController]
     [Route("api/[controller]")]

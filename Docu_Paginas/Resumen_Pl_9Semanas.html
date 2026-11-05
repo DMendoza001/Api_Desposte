@@ -23,36 +23,47 @@
 
     <style>
         /* =========================================================================
-           🎨 VARIABLES DEL TEMA (Industrial Slate Blue & Plomo)
+           🎨 VARIABLES DEL TEMA (Pantone Industrial Palette)
+           Palette:
+           #F4D03F (Yellow/Table Accent), #2E2A2F (Foreground/Dark Charcoal),
+           #CDCAC0 (Warm Light Gray), #605C5E (Medium Industrial Gray),
+           #BAA063 (Muted Gold), #252C37 (Deep Slate Navy),
+           #878994 (Cool Slate Gray), #F8CC5A (Bright Industrial Yellow),
+           #F2F4F8 (Background App)
            ========================================================================= */
         :root {
-            --pantone-yellow: #C9A968;
-            --pantone-red: #D96B6B;
+            --pantone-yellow: #F4D03F;
+            --pantone-yellow-bright: #F8CC5A;
+            --pantone-gold: #BAA063;
             --pantone-dark: #2E2A2F;
+            --pantone-deep-navy: #252C37;
+            --pantone-gray-med: #605C5E;
+            --pantone-gray-slate: #878994;
+            --pantone-gray-light: #CDCAC0;
 
-            --isg-slate-dark: #2C3E50;
-            --isg-slate-med: #5D6D7E;
-            --isg-slate-cool: #85929E;
-            --isg-slate-light: #D6DBDF;
+            --isg-slate-dark: #252C37;
+            --isg-slate-med: #605C5E;
+            --isg-slate-cool: #878994;
+            --isg-slate-light: #CDCAC0;
 
-            --chart-slate-navy: #2C4257;
-            --chart-steel-blue: #3D5A73;
-            --chart-cerulean-slate: #486F91;
+            --chart-slate-navy: #252C37;
+            --chart-steel-blue: #605C5E;
+            --chart-cerulean-slate: #878994;
 
-            --bg-app: #ECEFF3;
+            --bg-app: #F2F4F8;
             --bg-surface: #FFFFFF;
-            --bg-elevated: #F5F7FA;
-            --bg-hover: #E5E9F0;
-            --border-ui: #D5DCE4;
+            --bg-elevated: #F8F9FB;
+            --bg-hover: #ECEEF2;
+            --border-ui: #D7DAE0;
 
             --text-primary: #2E2A2F;
-            --text-secondary: #5D6D7E;
-            --text-muted: #7F8C8D;
+            --text-secondary: #605C5E;
+            --text-muted: #878994;
 
-            --success: #588B76;
-            --warning: #D4AC0D;
-            --danger: #CD5C5C;
-            --info: #486F91;
+            --success: #3D6B58;
+            --warning: #BAA063;
+            --danger: #B84A4A;
+            --info: #878994;
 
             --shadow-card: 0 2px 10px -2px rgba(46, 42, 47, 0.08), 0 1px 4px -1px rgba(46, 42, 47, 0.04);
             --radius-md: 12px;
@@ -799,7 +810,7 @@
             letter-spacing: 0.04em;
             padding: 11px 12px;
             text-align: left;
-            border-bottom: 2px solid #1C2833;
+            border-bottom: 2px solid var(--pantone-yellow);
             white-space: nowrap;
         }
 
@@ -808,57 +819,98 @@
         }
 
         table.matrix-table thead th.th-prog {
-            background: #2C4257;
-            color: #F5E6C4;
+            background: #252C37;
+            color: #F8CC5A;
         }
 
         table.matrix-table thead th.th-com {
-            background: #365571;
-            color: #EBF5FB;
+            background: #605C5E;
+            color: #F2F4F8;
         }
 
         table.matrix-table thead th.th-dif {
-            background: #3E4C59;
-            color: #EAEDED;
+            background: #2E2A2F;
+            color: #F4D03F;
+        }
+
+        table.matrix-table thead th.th-falta {
+            background: #6E2C2C;
+            color: #FDEDEC;
+        }
+
+        table.matrix-table thead th.th-sobra {
+            background: #275243;
+            color: #E8F8F5;
         }
 
         table.matrix-table tbody td.col-prog {
-            background-color: rgba(44, 66, 87, 0.05);
+            background-color: rgba(37, 44, 55, 0.04);
         }
 
         table.matrix-table tbody td.col-com {
-            background-color: rgba(72, 111, 145, 0.07);
+            background-color: rgba(96, 92, 94, 0.05);
         }
 
         table.matrix-table tbody td.col-dif {
-            background-color: rgba(93, 109, 126, 0.06);
+            background-color: rgba(244, 208, 63, 0.06);
         }
 
+        table.matrix-table tbody td.col-falta {
+            background-color: rgba(184, 74, 74, 0.06);
+        }
+
+        table.matrix-table tbody td.col-sobra {
+            background-color: rgba(61, 107, 88, 0.06);
+        }
+
+        table.matrix-table tbody tr.level-0 td.col-prog,
         table.matrix-table tbody tr.level-1 td.col-prog {
-            background-color: rgba(44, 66, 87, 0.12);
+            background-color: rgba(37, 44, 55, 0.10);
         }
 
+        table.matrix-table tbody tr.level-0 td.col-com,
         table.matrix-table tbody tr.level-1 td.col-com {
-            background-color: rgba(72, 111, 145, 0.15);
+            background-color: rgba(96, 92, 94, 0.12);
         }
 
+        table.matrix-table tbody tr.level-0 td.col-dif,
         table.matrix-table tbody tr.level-1 td.col-dif {
-            background-color: rgba(93, 109, 126, 0.14);
+            background-color: rgba(244, 208, 63, 0.16);
+        }
+
+        table.matrix-table tbody tr.level-0 td.col-falta,
+        table.matrix-table tbody tr.level-1 td.col-falta {
+            background-color: rgba(184, 74, 74, 0.12);
+        }
+
+        table.matrix-table tbody tr.level-0 td.col-sobra,
+        table.matrix-table tbody tr.level-1 td.col-sobra {
+            background-color: rgba(61, 107, 88, 0.12);
         }
 
         table.matrix-table th.col-group-prog-start,
         table.matrix-table td.col-group-prog-start {
-            border-left: 2px solid rgba(44, 66, 87, 0.35);
+            border-left: 2px solid rgba(37, 44, 55, 0.35);
         }
 
         table.matrix-table th.col-group-com-start,
         table.matrix-table td.col-group-com-start {
-            border-left: 2px solid rgba(72, 111, 145, 0.35);
+            border-left: 2px solid rgba(96, 92, 94, 0.35);
         }
 
         table.matrix-table th.col-group-dif-start,
         table.matrix-table td.col-group-dif-start {
-            border-left: 2px solid rgba(93, 109, 126, 0.35);
+            border-left: 2px solid rgba(244, 208, 63, 0.7);
+        }
+
+        table.matrix-table th.col-group-falta-start,
+        table.matrix-table td.col-group-falta-start {
+            border-left: 2px solid rgba(184, 74, 74, 0.35);
+        }
+
+        table.matrix-table th.col-group-sobra-start,
+        table.matrix-table td.col-group-sobra-start {
+            border-left: 2px solid rgba(61, 107, 88, 0.35);
         }
 
         table.matrix-table tbody td {
@@ -868,39 +920,388 @@
             white-space: nowrap;
         }
 
-        table.matrix-table tbody td.num-cell {
+        /* Tabla Compacta para Resumen General por Escenario */
+        table.matrix-table.compact-table thead th {
+            padding: 6px 8px;
+            font-size: 0.68rem;
+            line-height: 1.15;
+            text-align: center;
+            vertical-align: middle;
+            white-space: normal;
+            /* Permite wrap ordenado en encabezados */
+        }
+
+        table.matrix-table.compact-table thead th:first-child {
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        table.matrix-table.compact-table thead th.num-col {
             text-align: right;
-            font-variant-numeric: tabular-nums;
+        }
+
+        table.matrix-table.compact-table tbody td {
+            padding: 5px 8px;
+            font-size: 0.78rem;
+        }
+
+        table.matrix-table.compact-table th.col-head-sm {
+            max-width: 90px;
+            min-width: 75px;
+        }
+
+        table.matrix-table.compact-table th.col-head-xs {
+            max-width: 75px;
+            min-width: 65px;
+        }
+
+        /* Nivel 0: Escenario */
+        tr.level-0 {
+            background: #E5E8EC;
+            font-weight: 800;
+            border-top: 2px solid var(--pantone-gray-slate);
+        }
+
+        tr.level-0:hover {
+            background: #DCE0E7;
         }
 
         /* Nivel 1: Semana */
         tr.level-1 {
-            background: #E6ECF2;
+            background: #E8EBF0;
             font-weight: 700;
         }
 
         tr.level-1:hover {
-            background: #DCE4EC;
+            background: #DCE0E6;
         }
 
         /* Nivel 2: SubPlanta */
         tr.level-2 {
-            background: #F4F7FA;
+            background: #F3F5F8;
             font-weight: 600;
         }
 
         tr.level-2:hover {
-            background: #EBF0F5;
+            background: #EAECEF;
         }
 
         /* Nivel 3: SKU (CodigoCorto + Nombre) */
+        /* Nivel 3: MP (Sí / No) o SKU en vista general */
         tr.level-3 {
-            background: #FFFFFF;
+            background: #FAFBFD;
             font-size: 0.79rem;
+            font-weight: 600;
         }
 
         tr.level-3:hover {
-            background: #F8FAFC;
+            background: #F0F2F6;
+        }
+
+        /* Nivel 4: SKU en matrices de Faltantes / Sobrantes */
+        tr.level-4 {
+            background: #FFFFFF;
+            font-size: 0.78rem;
+        }
+
+        tr.level-4:hover {
+            background: #F8F9FA;
+        }
+
+        /* =========================================================================
+           MENÚ SUPERIOR DE NAVEGACIÓN ENTRE PÁGINAS (ESTILO PESTAÑAS)
+           ========================================================================= */
+        .page-tabs-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-ui);
+            border-radius: var(--radius-md);
+            padding: 8px 12px;
+            box-shadow: var(--shadow-card);
+            flex-wrap: wrap;
+        }
+
+        .page-tabs-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .page-tab-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            padding: 10px 18px;
+            border-radius: 9px;
+            font-size: 0.86rem;
+            font-weight: 800;
+            cursor: pointer;
+            border: 1px solid var(--border-ui);
+            background: var(--bg-elevated);
+            color: var(--text-secondary);
+            transition: all 0.18s ease;
+            user-select: none;
+        }
+
+        .page-tab-btn:hover {
+            background: var(--bg-hover);
+            color: var(--pantone-dark);
+            border-color: var(--pantone-yellow);
+        }
+
+        .page-tab-btn.active {
+            background: linear-gradient(135deg, #2E2A2F 0%, #252C37 100%);
+            color: #FFFFFF;
+            border-color: var(--pantone-yellow);
+            box-shadow: 0 4px 12px rgba(37, 44, 55, 0.25);
+        }
+
+        .page-tab-btn.active .page-tab-badge {
+            background: var(--pantone-yellow);
+            color: var(--pantone-dark);
+        }
+
+        .page-tab-badge {
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: rgba(244, 208, 63, 0.18);
+            color: #8D7400;
+        }
+
+        .page-view-section {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            min-width: 0;
+        }
+
+        .matrices-dual-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+            align-items: start;
+        }
+
+        .matrix-card.card-faltantes {
+            border-top: 4px solid #B84A4A;
+        }
+
+        .matrix-card.card-sobrantes {
+            border-top: 4px solid #2E5A4C;
+        }
+
+        .matrix-card.card-escenarios {
+            border-top: 4px solid var(--chart-slate-navy);
+        }
+
+        .matrix-header-title {
+            font-size: 0.95rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .tag-tipomp {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 2px 9px;
+            border-radius: 5px;
+            font-size: 0.73rem;
+            font-weight: 800;
+            background: rgba(244, 208, 63, 0.22);
+            color: #7D6608;
+            border: 1px solid rgba(186, 160, 99, 0.6);
+        }
+
+        .tag-tipomp.mp-no {
+            background: rgba(135, 137, 148, 0.14);
+            color: #605C5E;
+            border-color: rgba(135, 137, 148, 0.35);
+        }
+
+        .tag-tipomp-prefix {
+            font-weight: 700;
+            color: inherit;
+            opacity: 0.85;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+
+        .badge-mp-total {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            background: rgba(244, 208, 63, 0.24);
+            color: #7D6608;
+            border: 1px solid rgba(186, 160, 99, 0.65);
+            margin-left: 6px;
+        }
+
+        .badge-mp-no-total {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            background: rgba(135, 137, 148, 0.14);
+            color: #605C5E;
+            border: 1px solid rgba(135, 137, 148, 0.35);
+            margin-left: 4px;
+        }
+
+        .kpi-mp-badges {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 2px;
+        }
+
+        tr.total-row td {
+            background: #2C4257 !important;
+            color: #FFFFFF !important;
+            font-weight: 800 !important;
+            border-top: 2px solid #1C2833;
+        }
+
+        .tag-escenario {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 2px 9px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            background: #2E5A4C;
+            color: #FFFFFF;
+            letter-spacing: 0.02em;
+        }
+
+        .badge-status-falta {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 7px;
+            border-radius: 5px;
+            font-size: 0.69rem;
+            font-weight: 800;
+            background: rgba(184, 74, 74, 0.15);
+            color: #9E3333;
+            border: 1px solid rgba(184, 74, 74, 0.35);
+        }
+
+        .badge-status-sobra {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 7px;
+            border-radius: 5px;
+            font-size: 0.69rem;
+            font-weight: 800;
+            background: rgba(46, 90, 76, 0.15);
+            color: #245041;
+            border: 1px solid rgba(46, 90, 76, 0.35);
+        }
+
+        .badge-status-exacto {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 7px;
+            border-radius: 5px;
+            font-size: 0.69rem;
+            font-weight: 700;
+            background: #E8ECEF;
+            color: #5D6D7E;
+        }
+
+        .sub-sku-count {
+            display: inline-block;
+            font-size: 0.68rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-left: 5px;
+            padding: 1px 5px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.65);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        .cond-filter-group,
+        .hierarchy-mode-group {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: var(--bg-elevated);
+            padding: 3px 4px;
+            border-radius: 8px;
+            border: 1px solid var(--border-ui);
+            flex-wrap: wrap;
+        }
+
+        .cond-btn {
+            font-size: 0.74rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid transparent;
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .cond-btn:hover {
+            background: #FFFFFF;
+            color: var(--text-primary);
+        }
+
+        .cond-btn.active-all {
+            background: var(--chart-slate-navy);
+            color: #FFFFFF;
+        }
+
+        .cond-btn.active-falta {
+            background: #9E3333;
+            color: #FFFFFF;
+        }
+
+        .cond-btn.active-sobra {
+            background: #2E5A4C;
+            color: #FFFFFF;
+        }
+
+        .btn-mini-action {
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 5px;
+            border: 1px solid var(--border-ui);
+            background: #FFFFFF;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.14s ease;
+        }
+
+        .btn-mini-action:hover {
+            background: var(--chart-slate-navy);
+            color: #FFFFFF;
+            border-color: var(--chart-slate-navy);
         }
 
         .toggle-icon {
@@ -995,6 +1396,8 @@
         }
 
         .kpi-grid>*,
+        .matrices-dual-grid>*,
+        .page-view-section>*,
         .dashboard-container>*,
         .card,
         .kpi-card,
@@ -1020,6 +1423,10 @@
 
             .kpi-value {
                 font-size: 1.3rem;
+            }
+
+            .matrices-dual-grid {
+                grid-template-columns: 1fr;
             }
 
             .chart-box,
@@ -1128,14 +1535,14 @@
                     <span id="apiStatusText">Buscando servidor...</span>
                 </div>
 
-                <button class="btn btn-excel" onclick="exportarExcel()">
+                <button class="btn btn-excel" onclick="exportarExcelSegunPagina()">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
                         stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                         <polyline points="7 10 12 15 17 10"></polyline>
                         <line x1="12" y1="15" x2="12" y2="3"></line>
                     </svg>
-                    Exportar Excel 9 Semanas
+                    <span id="btnExcelLabel">Exportar Excel 9 Semanas</span>
                 </button>
 
                 <button class="btn btn-primary" onclick="recargarDatosAPI(true)">
@@ -1147,6 +1554,23 @@
                 </button>
             </div>
         </header>
+
+        <!-- MENÚ SUPERIOR DE NAVEGACIÓN ENTRE PÁGINAS / VISUALES -->
+        <nav class="page-tabs-bar" aria-label="Navegación de páginas del reporte">
+            <div class="page-tabs-group">
+                <button type="button" class="page-tab-btn active" id="tabBtnGeneral" onclick="cambiarPagina('general')">
+                    <span>📊 Página 1: Resumen General y Cumplimiento</span>
+                    <span class="page-tab-badge">Vista General</span>
+                </button>
+                <button type="button" class="page-tab-btn" id="tabBtnDetalle" onclick="cambiarPagina('detalle')">
+                    <span>⚖️ Página 2: Análisis de Sobrantes y Faltantes (MP Sí / No)</span>
+                    <span class="page-tab-badge" id="tabBadgeDetalleCount">Matrices Falta / Sobra</span>
+                </button>
+            </div>
+            <div style="font-size: 0.78rem; color: var(--text-secondary); font-weight: 600;">
+                Los filtros seleccionados se mantienen sincronizados entre ambas páginas
+            </div>
+        </nav>
 
         <!-- FILTROS (AÑO, ESCENARIO, SUBPLANTA Y SEMANAS) -->
         <section class="card">
@@ -1243,138 +1667,365 @@
             </div>
         </section>
 
-        <!-- KPIs COMPARATIVOS (3 TABLAS: T_ResProd_Py_DB, T_DemandaPy, T_CodigoRelacion) -->
-        <section class="kpi-grid">
-            <div class="kpi-card" style="--kpi-accent: var(--chart-slate-navy);">
-                <span class="kpi-label">Programa Producción (T_ResProd_Py_DB)</span>
-                <div class="kpi-value" id="kpiProgVal">0.00<span class="kpi-unit">kg</span></div>
-                <div class="kpi-footer">
-                    <span id="kpiSkusCount">0 SKUs activos</span>
-                    <span class="badge-kpi badge-success">ResProd_Py_DB</span>
+        <!-- =========================================================================
+             PÁGINA 1: VISTA GENERAL (KPIs, GRÁFICO SEMANAL Y MATRIZ GENERAL)
+             ========================================================================= -->
+        <div id="vistaPaginaGeneral" class="page-view-section">
+            <!-- KPIs COMPARATIVOS (3 TABLAS: T_ResProd_Py_DB, T_DemandaPy, T_CodigoRelacion) -->
+            <section class="kpi-grid">
+                <div class="kpi-card" style="--kpi-accent: var(--chart-slate-navy);">
+                    <span class="kpi-label">Programa Producción (T_ResProd_Py_DB)</span>
+                    <div class="kpi-value" id="kpiProgVal">0.00<span class="kpi-unit">kg</span></div>
+                    <div class="kpi-footer">
+                        <span id="kpiSkusCount">0 SKUs activos</span>
+                        <span class="badge-kpi badge-success">ResProd_Py_DB</span>
+                    </div>
                 </div>
-            </div>
 
-            <div class="kpi-card" style="--kpi-accent: var(--chart-cerulean-slate);">
-                <span class="kpi-label">Proyección Comercial (T_DemandaPy)</span>
-                <div class="kpi-value" id="kpiDemandaVal">0.00<span class="kpi-unit">kg</span></div>
-                <div class="kpi-footer">
-                    <span id="kpiWeeksCount">0 semanas evaluadas</span>
-                    <span class="badge-kpi">DemandaPy</span>
+                <div class="kpi-card" style="--kpi-accent: var(--chart-cerulean-slate);">
+                    <span class="kpi-label">Proyección Comercial (T_DemandaPy)</span>
+                    <div class="kpi-value" id="kpiDemandaVal">0.00<span class="kpi-unit">kg</span></div>
+                    <div class="kpi-footer">
+                        <span id="kpiWeeksCount">0 semanas evaluadas</span>
+                        <span class="badge-kpi">DemandaPy</span>
+                    </div>
                 </div>
-            </div>
 
-            <div class="kpi-card" style="--kpi-accent: var(--isg-slate-med);">
-                <span class="kpi-label">% Cumplimiento (Prog. Prod vs Demanda)</span>
-                <div class="kpi-value" id="kpiPctCumplimiento">0.00<span class="kpi-unit">%</span></div>
-                <div class="kpi-footer">
-                    <span id="kpiRatioLabel">Cobertura sobre DemandaPy</span>
-                    <span id="kpiBadgeEstado" class="badge-kpi badge-good">En Meta</span>
+                <div class="kpi-card" style="--kpi-accent: var(--isg-slate-med);">
+                    <span class="kpi-label">% Cumplimiento (Prog. Prod vs Demanda)</span>
+                    <div class="kpi-value" id="kpiPctCumplimiento">0.00<span class="kpi-unit">%</span></div>
+                    <div class="kpi-footer">
+                        <span id="kpiRatioLabel">Cobertura sobre DemandaPy</span>
+                        <span id="kpiBadgeEstado" class="badge-kpi badge-good">En Meta</span>
+                    </div>
                 </div>
-            </div>
 
-            <div class="kpi-card" style="--kpi-accent: var(--isg-slate-cool);">
-                <span class="kpi-label">Diferencia Neta (Prog. Prod - Demanda)</span>
-                <div class="kpi-value" id="kpiDifVal">0.00<span class="kpi-unit">kg</span></div>
-                <div class="kpi-footer">
-                    <span id="kpiDifTn">0.00 Tn</span>
-                    <span id="kpiCatalogoCount" class="badge-kpi">Maestro: 0 SKUs</span>
+                <div class="kpi-card" style="--kpi-accent: var(--isg-slate-cool);">
+                    <span class="kpi-label">Diferencia Neta (Prog. Prod - Demanda)</span>
+                    <div class="kpi-value" id="kpiDifVal">0.00<span class="kpi-unit">kg</span></div>
+                    <div class="kpi-footer">
+                        <span id="kpiDifTn">0.00 Tn</span>
+                        <span id="kpiCatalogoCount" class="badge-kpi">Maestro: 0 SKUs</span>
+                    </div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <!-- GRÁFICO COMPARATIVO POR SEMANA (BARRAS CON ETIQUETAS) -->
-        <section class="chart-card">
-            <div class="chart-top-bar">
-                <div class="chart-title">Comparativo Semanal: Programa Producción (T_ResProd_Py_DB) vs Proyección
-                    Comercial (T_DemandaPy)</div>
+            <!-- GRÁFICO COMPARATIVO POR SEMANA (BARRAS CON ETIQUETAS) -->
+            <section class="chart-card">
+                <div class="chart-top-bar">
+                    <div class="chart-title">Comparativo Semanal: Programa Producción (T_ResProd_Py_DB) vs Proyección
+                        Comercial (T_DemandaPy)</div>
 
-                <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-                    <!-- Filtro de Semanas exclusivo del Gráfico (Preselección: Últimas 9 semanas) -->
-                    <div class="week-combobox-wrapper" id="chartWeekComboboxWrapper"
-                        style="min-width: 310px; max-width: 390px;">
-                        <div class="week-combobox-trigger" style="padding: 6px 12px; font-size: 0.8rem;"
-                            onclick="toggleChartWeekDropdown(event)">
-                            <div class="week-combobox-trigger-left">
-                                <span>📅</span>
-                                <span id="chartWeekComboboxLabel">Últimas 9 semanas...</span>
-                            </div>
-                            <div style="display:flex; align-items:center; gap:6px;">
-                                <span class="pill-badge-count" id="chartWeekComboboxCount">0</span>
-                                <span class="week-combobox-chevron">▼</span>
-                            </div>
-                        </div>
-
-                        <div class="week-combobox-dropdown" id="chartWeekComboboxDropdown"
-                            onclick="event.stopPropagation()">
-                            <div class="week-combobox-search-bar">
-                                <input type="text" id="chartWeekSearchInput" class="week-combobox-search-input"
-                                    placeholder="Buscar semana o fecha en gráfico..."
-                                    oninput="filtrarOpcionesSemanaGraficoCombobox()">
-                                <div class="week-combobox-actions">
-                                    <button type="button" class="week-combo-action-btn"
-                                        onclick="seleccionarFiltroRapidoSemanaGrafico('last9')">Últimas 9</button>
-                                    <button type="button" class="week-combo-action-btn"
-                                        onclick="seleccionarFiltroRapidoSemanaGrafico('last4')">Últimas 4</button>
-                                    <button type="button" class="week-combo-action-btn"
-                                        onclick="seleccionarFiltroRapidoSemanaGrafico('latest')">Última</button>
-                                    <button type="button" class="week-combo-action-btn"
-                                        onclick="seleccionarFiltroRapidoSemanaGrafico('all')">✓ Todas</button>
+                    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                        <!-- Filtro de Semanas exclusivo del Gráfico (Preselección: Últimas 9 semanas) -->
+                        <div class="week-combobox-wrapper" id="chartWeekComboboxWrapper"
+                            style="min-width: 310px; max-width: 390px;">
+                            <div class="week-combobox-trigger" style="padding: 6px 12px; font-size: 0.8rem;"
+                                onclick="toggleChartWeekDropdown(event)">
+                                <div class="week-combobox-trigger-left">
+                                    <span>📅</span>
+                                    <span id="chartWeekComboboxLabel">Últimas 9 semanas...</span>
+                                </div>
+                                <div style="display:flex; align-items:center; gap:6px;">
+                                    <span class="pill-badge-count" id="chartWeekComboboxCount">0</span>
+                                    <span class="week-combobox-chevron">▼</span>
                                 </div>
                             </div>
-                            <div class="week-combobox-list" id="chartWeekComboboxList"></div>
+
+                            <div class="week-combobox-dropdown" id="chartWeekComboboxDropdown"
+                                onclick="event.stopPropagation()">
+                                <div class="week-combobox-search-bar">
+                                    <input type="text" id="chartWeekSearchInput" class="week-combobox-search-input"
+                                        placeholder="Buscar semana o fecha en gráfico..."
+                                        oninput="filtrarOpcionesSemanaGraficoCombobox()">
+                                    <div class="week-combobox-actions">
+                                        <button type="button" class="week-combo-action-btn"
+                                            onclick="seleccionarFiltroRapidoSemanaGrafico('last9')">Últimas 9</button>
+                                        <button type="button" class="week-combo-action-btn"
+                                            onclick="seleccionarFiltroRapidoSemanaGrafico('last4')">Últimas 4</button>
+                                        <button type="button" class="week-combo-action-btn"
+                                            onclick="seleccionarFiltroRapidoSemanaGrafico('latest')">Última</button>
+                                        <button type="button" class="week-combo-action-btn"
+                                            onclick="seleccionarFiltroRapidoSemanaGrafico('all')">✓ Todas</button>
+                                    </div>
+                                </div>
+                                <div class="week-combobox-list" id="chartWeekComboboxList"></div>
+                            </div>
+                        </div>
+
+                        <div
+                            style="display:flex; gap:4px; align-items:center; background:#E5E9F0; padding:3px 4px; border-radius:8px; border: 1px solid var(--border-ui);">
+                            <button class="filter-quick-btn active" id="btnUnitTn"
+                                style="padding:3px 8px; font-size:0.75rem;"
+                                onclick="cambiarUnidadGrafico('Tn')">Tn</button>
+                            <button class="filter-quick-btn" id="btnUnitKg" style="padding:3px 8px; font-size:0.75rem;"
+                                onclick="cambiarUnidadGrafico('Kg')">Kg</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-box chart-container-box">
+                    <canvas id="chartComparativo"></canvas>
+                </div>
+            </section>
+
+            <!-- MATRIZ DETALLADA PIVOTADA -->
+            <section class="matrix-card">
+                <div class="matrix-toolbar">
+                    <div class="search-box">
+                        <input type="text" id="searchMatriz"
+                            placeholder="Buscar semana, subplanta, código corto o nombre..." oninput="filtrarMatriz()">
+                    </div>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                        <button class="btn" style="padding:6px 12px; font-size:0.78rem;"
+                            onclick="toggleExpandirTodo(true)">⊞ Expandir Todo</button>
+                        <button class="btn" style="padding:6px 12px; font-size:0.78rem;"
+                            onclick="toggleExpandirTodo(false)">⊟ Contraer Todo</button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="matrix-table" id="tbMatriz">
+                        <thead id="theadMatriz">
+                            <tr>
+                                <th style="min-width:260px;">Semana / SubPlanta / CódigoCorto - Nombre</th>
+                                <th class="num-col th-prog col-group-prog-start">Prog. Producción (kg)</th>
+                                <th class="num-col th-com col-group-com-start">Proy. Comercial + Emb. (kg)</th>
+                                <th class="num-col th-dif col-group-dif-start">Diferencia (kg)</th>
+                                <th class="num-col th-com">% Cumpl.</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyMatriz">
+                            <tr>
+                                <td colspan="5" style="text-align:center; padding:30px; color:var(--text-muted);">
+                                    Cargando información de las últimas 9 semanas...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+
+        <!-- =========================================================================
+             PÁGINA 2: ANÁLISIS DE SOBRANTES Y FALTANTES (DISCRIMINACIÓN MP SÍ / NO)
+             ========================================================================= -->
+        <div id="vistaPaginaDetalle" class="page-view-section" style="display:none;">
+            <!-- KPIS DE SOBRANTES Y FALTANTES CON ETIQUETAS DE TOTALES MP -->
+            <section class="kpi-grid">
+                <div class="kpi-card" style="--kpi-accent: #B84A4A;">
+                    <span class="kpi-label">Total Kilos Faltantes (Prog. &lt; Demanda)</span>
+                    <div class="kpi-value val-negative" id="kpiDetFaltaVal">0<span class="kpi-unit">kg</span></div>
+                    <div class="kpi-mp-badges">
+                        <span class="badge-mp-total" id="kpiDetFaltaMpSiBadge" style="margin-left:0;">MP Sí: 0 kg</span>
+                        <span class="badge-mp-no-total" id="kpiDetFaltaMpNoBadge" style="margin-left:0;">MP No: 0
+                            kg</span>
+                    </div>
+                    <div class="kpi-footer">
+                        <span id="kpiDetFaltaSkusCount">0 SKUs con faltante</span>
+                        <span class="badge-kpi badge-low" id="kpiDetFaltaTn">0.00 Tn</span>
+                    </div>
+                </div>
+
+                <div class="kpi-card" style="--kpi-accent: #2E5A4C;">
+                    <span class="kpi-label">Total Kilos Sobrantes (Prog. &gt; Demanda)</span>
+                    <div class="kpi-value val-positive" id="kpiDetSobraVal">0<span class="kpi-unit">kg</span></div>
+                    <div class="kpi-mp-badges">
+                        <span class="badge-mp-total" id="kpiDetSobraMpSiBadge" style="margin-left:0;">MP Sí: 0 kg</span>
+                        <span class="badge-mp-no-total" id="kpiDetSobraMpNoBadge" style="margin-left:0;">MP No: 0
+                            kg</span>
+                    </div>
+                    <div class="kpi-footer">
+                        <span id="kpiDetSobraSkusCount">0 SKUs con sobrante</span>
+                        <span class="badge-kpi badge-good" id="kpiDetSobraTn">0.00 Tn</span>
+                    </div>
+                </div>
+
+                <div class="kpi-card" style="--kpi-accent: var(--chart-slate-navy);">
+                    <span class="kpi-label">Diferencia Neta (Sobrante - Faltante)</span>
+                    <div class="kpi-value" id="kpiDetDifVal">0<span class="kpi-unit">kg</span></div>
+                    <div class="kpi-mp-badges">
+                        <span class="badge-mp-total" id="kpiDetDifMpSiBadge" style="margin-left:0;">Dif. MP Sí: 0
+                            kg</span>
+                        <span class="badge-mp-no-total" id="kpiDetDifMpNoBadge" style="margin-left:0;">Dif. MP No: 0
+                            kg</span>
+                    </div>
+                    <div class="kpi-footer">
+                        <span id="kpiDetProgVsComLabel">Prog: 0 kg vs Proy: 0 kg</span>
+                        <span class="badge-kpi" id="kpiDetDifTn">0.00 Tn</span>
+                    </div>
+                </div>
+
+                <div class="kpi-card" style="--kpi-accent: var(--isg-gold-bright);">
+                    <span class="kpi-label">% Cumplimiento Global</span>
+                    <div class="kpi-value" id="kpiDetPctVal">0.00<span class="kpi-unit">%</span></div>
+                    <div class="kpi-mp-badges">
+                        <span class="badge-mp-total" id="kpiDetPctMpSiBadge" style="margin-left:0;">Cumpl. MP Sí:
+                            0.00%</span>
+                        <span class="badge-mp-no-total" id="kpiDetPctMpNoBadge" style="margin-left:0;">Cumpl. MP No:
+                            0.00%</span>
+                    </div>
+                    <div class="kpi-footer">
+                        <span id="kpiDetEscenariosCount">0 escenarios activos</span>
+                        <span class="badge-kpi badge-good" id="kpiDetBadgeEstado">Óptimo</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 1. RESUMEN POR ESCENARIO Y MP (SÍ / NO) -->
+            <section class="matrix-card card-escenarios">
+                <div class="matrix-toolbar">
+                    <div class="matrix-header-title" style="color: var(--chart-slate-navy);">
+                        <span>📊 1. Resumen General por Escenario, MP (Sí / No), SubPlanta y SKU</span>
+                        <span class="badge-tag" style="background: var(--chart-slate-navy); color: #FFFFFF;">Escenario ➔
+                            MP ➔ SubPlanta ➔ SKU</span>
+                    </div>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                        <div class="search-box" style="margin-bottom:0;">
+                            <input type="text" id="searchResumenEscenario"
+                                placeholder="Buscar escenario, MP, subplanta o SKU..."
+                                oninput="filtrarResumenEscenarios()">
+                        </div>
+                        <button class="btn" style="padding:5px 10px; font-size:0.76rem;"
+                            onclick="toggleExpandirTodoEscenarios(true)">⊞ Expandir</button>
+                        <button class="btn" style="padding:5px 10px; font-size:0.76rem;"
+                            onclick="toggleExpandirTodoEscenarios(false)">⊟ Contraer</button>
+                    </div>
+                </div>
+
+                <div class="table-responsive" style="max-height: 480px;">
+                    <table class="matrix-table compact-table" id="tbResumenEscenario">
+                        <thead>
+                            <tr>
+                                <th style="min-width:220px;">Escenario / MP / SubPlanta / SKU</th>
+                                <th class="num-col th-prog col-group-prog-start col-head-sm">Prog. Prod.<br><small
+                                        style="font-weight:normal;opacity:0.85;">(kg)</small></th>
+                                <th class="num-col th-com col-group-com-start col-head-sm">Proy. Com.<br><small
+                                        style="font-weight:normal;opacity:0.85;">(kg)</small></th>
+                                <th class="num-col th-falta col-group-falta-start col-head-xs">Falta<br>MP: Sí</th>
+                                <th class="num-col th-falta col-head-xs">Falta<br>MP: No</th>
+                                <th class="num-col th-falta col-head-sm">Tot. Falta<br><small
+                                        style="font-weight:normal;opacity:0.85;">(kg)</small></th>
+                                <th class="num-col th-sobra col-group-sobra-start col-head-xs">Sobra<br>MP: Sí</th>
+                                <th class="num-col th-sobra col-head-xs">Sobra<br>MP: No</th>
+                                <th class="num-col th-sobra col-head-sm">Tot. Sobra<br><small
+                                        style="font-weight:normal;opacity:0.85;">(kg)</small></th>
+                                <th class="num-col th-dif col-group-dif-start col-head-sm">Dif. Neta<br><small
+                                        style="font-weight:normal;opacity:0.85;">(kg)</small></th>
+                                <th class="num-col th-com col-head-xs">% Cumpl.</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyResumenEscenario">
+                            <tr>
+                                <td colspan="11" style="text-align:center; padding:24px; color:var(--text-muted);">
+                                    Cargando resumen por escenario y MP...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 2. DOS MATRICES DIFERENTES: MATRIZ DE FALTANTES Y MATRIZ DE SOBRANTES -->
+            <div class="matrices-dual-grid">
+
+                <!-- MATRIZ A: EXCLUSIVA DE SKUS FALTANTES (PROG < DEMANDA) -->
+                <section class="matrix-card card-faltantes">
+                    <div class="matrix-toolbar">
+                        <div class="matrix-header-title" style="color: #8F3232;">
+                            <span>🔴 Matriz de SKUs Faltantes (Falta)</span>
+                            <span class="badge-kpi badge-low" id="badgeCountMatrizFalta">0 SKUs-Sem</span>
+                            <span class="badge-mp-total" id="badgeTotalFaltaMpSi">MP Sí: 0 kg</span>
+                            <span class="badge-mp-no-total" id="badgeTotalFaltaMpNo">MP No: 0 kg</span>
                         </div>
                     </div>
 
-                    <div
-                        style="display:flex; gap:4px; align-items:center; background:#E5E9F0; padding:3px 4px; border-radius:8px; border: 1px solid var(--border-ui);">
-                        <button class="filter-quick-btn active" id="btnUnitTn"
-                            style="padding:3px 8px; font-size:0.75rem;" onclick="cambiarUnidadGrafico('Tn')">Tn</button>
-                        <button class="filter-quick-btn" id="btnUnitKg" style="padding:3px 8px; font-size:0.75rem;"
-                            onclick="cambiarUnidadGrafico('Kg')">Kg</button>
+                    <div class="matrix-toolbar">
+                        <div class="search-box">
+                            <input type="text" id="searchFaltantes"
+                                placeholder="Buscar semana, subplanta, MP (Sí/No) o SKU faltante..."
+                                oninput="filtrarMatrizFaltantes()">
+                        </div>
+                        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                            <button class="btn" style="padding:5px 10px; font-size:0.76rem;"
+                                onclick="toggleExpandirTodoFaltantes(true)">⊞ Expandir</button>
+                            <button class="btn" style="padding:5px 10px; font-size:0.76rem;"
+                                onclick="toggleExpandirTodoFaltantes(false)">⊟ Contraer</button>
+                        </div>
                     </div>
-                </div>
-            </div>
-            <div class="chart-box chart-container-box">
-                <canvas id="chartComparativo"></canvas>
-            </div>
-        </section>
 
-        <!-- MATRIZ DETALLADA PIVOTADA -->
-        <section class="matrix-card">
-            <div class="matrix-toolbar">
-                <div class="search-box">
-                    <input type="text" id="searchMatriz"
-                        placeholder="Buscar semana, subplanta, código corto o nombre..." oninput="filtrarMatriz()">
-                </div>
-                <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                    <button class="btn" style="padding:6px 12px; font-size:0.78rem;"
-                        onclick="toggleExpandirTodo(true)">⊞ Expandir Todo</button>
-                    <button class="btn" style="padding:6px 12px; font-size:0.78rem;"
-                        onclick="toggleExpandirTodo(false)">⊟ Contraer Todo</button>
-                </div>
-            </div>
+                    <div class="table-responsive">
+                        <table class="matrix-table" id="tbMatrizFaltantes">
+                            <thead>
+                                <tr>
+                                    <th style="min-width:270px;">Semana / SubPlanta / MP (Sí / No) / CódigoCorto -
+                                        Nombre</th>
+                                    <th class="num-col th-prog col-group-prog-start">Prog. Prod. (kg)</th>
+                                    <th class="num-col th-com col-group-com-start">Proy. Com. (kg)</th>
+                                    <th class="num-col th-falta col-group-falta-start">Falta / Faltante (kg)</th>
+                                    <th class="num-col th-com">% Cumpl.</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyFaltantes">
+                                <tr>
+                                    <td colspan="5" style="text-align:center; padding:30px; color:var(--text-muted);">
+                                        Cargando matriz de faltantes...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
 
-            <div class="table-responsive">
-                <table class="matrix-table" id="tbMatriz">
-                    <thead id="theadMatriz">
-                        <tr>
-                            <th style="min-width:260px;">Semana / SubPlanta / CódigoCorto - Nombre</th>
-                            <th class="num-col th-prog col-group-prog-start">Prog. Producción (kg)</th>
-                            <th class="num-col th-com col-group-com-start">Proy. Comercial + Emb. (kg)</th>
-                            <th class="num-col th-dif col-group-dif-start">Diferencia (kg)</th>
-                            <th class="num-col th-com">% Cumpl.</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tbodyMatriz">
-                        <tr>
-                            <td colspan="5" style="text-align:center; padding:30px; color:var(--text-muted);">
-                                Cargando información de las últimas 9 semanas...
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <!-- MATRIZ B: EXCLUSIVA DE SKUS SOBRANTES (PROG > DEMANDA) -->
+                <section class="matrix-card card-sobrantes">
+                    <div class="matrix-toolbar">
+                        <div class="matrix-header-title" style="color: #245041;">
+                            <span>🟢 Matriz de SKUs Sobrantes (Sobra)</span>
+                            <span class="badge-kpi badge-good" id="badgeCountMatrizSobra">0 SKUs-Sem</span>
+                            <span class="badge-mp-total" id="badgeTotalSobraMpSi">MP Sí: 0 kg</span>
+                            <span class="badge-mp-no-total" id="badgeTotalSobraMpNo">MP No: 0 kg</span>
+                        </div>
+                    </div>
+
+                    <div class="matrix-toolbar">
+                        <div class="search-box">
+                            <input type="text" id="searchSobrantes"
+                                placeholder="Buscar semana, subplanta, MP (Sí/No) o SKU sobrante..."
+                                oninput="filtrarMatrizSobrantes()">
+                        </div>
+                        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                            <button class="btn" style="padding:5px 10px; font-size:0.76rem;"
+                                onclick="toggleExpandirTodoSobrantes(true)">⊞ Expandir</button>
+                            <button class="btn" style="padding:5px 10px; font-size:0.76rem;"
+                                onclick="toggleExpandirTodoSobrantes(false)">⊟ Contraer</button>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="matrix-table" id="tbMatrizSobrantes">
+                            <thead>
+                                <tr>
+                                    <th style="min-width:270px;">Semana / SubPlanta / MP (Sí / No) / CódigoCorto -
+                                        Nombre</th>
+                                    <th class="num-col th-prog col-group-prog-start">Prog. Prod. (kg)</th>
+                                    <th class="num-col th-com col-group-com-start">Proy. Com. (kg)</th>
+                                    <th class="num-col th-sobra col-group-sobra-start">Sobra / Sobrante (kg)</th>
+                                    <th class="num-col th-com">% Cumpl.</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodySobrantes">
+                                <tr>
+                                    <td colspan="5" style="text-align:center; padding:30px; color:var(--text-muted);">
+                                        Cargando matriz de sobrantes...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
             </div>
-        </section>
+        </div>
     </div>
 
     <!-- TOAST -->
@@ -1385,12 +2036,26 @@
 
     <script>
         // =========================================================================
-        // 🎨 PALETA DEL TEMA (Industrial Slate Blue)
+        // 🎨 PALETA DEL TEMA (Pantone Industrial Palette)
         // =========================================================================
-        const THEME_SLATE_BLUE = {
+        const THEME_PANTONE_INDUSTRIAL = {
+            name: "Pantone Industrial Palette",
+            dataColors: [
+                "#F4D03F",
+                "#2E2A2F",
+                "#CDCAC0",
+                "#605C5E",
+                "#BAA063",
+                "#252C37",
+                "#878994",
+                "#F8CC5A"
+            ],
+            background: "#F2F4F8",
+            foreground: "#2E2A2F",
+            tableAccent: "#F4D03F",
             comparativoSeries: [
-                { serie: 1, label: 'Prog. Producción (T_ResProd_Py_DB)', backgroundColor: 'rgba(44, 66, 87, 0.92)', borderColor: '#1E2F3F', hoverBackgroundColor: '#1E2F3F' },
-                { serie: 2, label: 'Proyección Comercial (T_DemandaPy)', backgroundColor: 'rgba(72, 111, 145, 0.88)', borderColor: '#365773', hoverBackgroundColor: '#365773' }
+                { serie: 1, label: 'Prog. Producción (T_ResProd_Py_DB)', backgroundColor: '#252C37', borderColor: '#2E2A2F', hoverBackgroundColor: '#2E2A2F' },
+                { serie: 2, label: 'Proyección Comercial (T_DemandaPy)', backgroundColor: '#878994', borderColor: '#605C5E', hoverBackgroundColor: '#605C5E' }
             ]
         };
 
@@ -1496,7 +2161,34 @@
 
         let chartInstance = null;
         let unidadGrafico = 'Tn';
+        let paginaActiva = 'general';
         let expandedNodes = new Set();
+        let expandedEscenarios = new Set();
+        let expandedFaltantes = new Set();
+        let expandedSobrantes = new Set();
+
+        function cambiarPagina(pagina) {
+            paginaActiva = pagina;
+            const vistaGeneral = document.getElementById('vistaPaginaGeneral');
+            const vistaDetalle = document.getElementById('vistaPaginaDetalle');
+            const btnGeneral = document.getElementById('tabBtnGeneral');
+            const btnDetalle = document.getElementById('tabBtnDetalle');
+
+            if (pagina === 'detalle') {
+                if (vistaGeneral) vistaGeneral.style.display = 'none';
+                if (vistaDetalle) vistaDetalle.style.display = '';
+                btnGeneral?.classList.remove('active');
+                btnDetalle?.classList.add('active');
+            } else {
+                if (vistaGeneral) vistaGeneral.style.display = '';
+                if (vistaDetalle) vistaDetalle.style.display = 'none';
+                btnGeneral?.classList.add('active');
+                btnDetalle?.classList.remove('active');
+                if (chartInstance) {
+                    setTimeout(() => chartInstance.resize(), 50);
+                }
+            }
+        }
 
         document.addEventListener('DOMContentLoaded', async () => {
             initChartDefaults();
@@ -1574,6 +2266,18 @@
             return raw;
         }
 
+        function normalizarMP(valor) {
+            if (valor === null || valor === undefined) return 'No';
+            const raw = String(valor).trim().toUpperCase();
+            if (!raw || raw === '--' || raw === '-' || raw === 'NO' || raw === 'N' || raw === '0' || raw === 'SIN MP') {
+                return 'No';
+            }
+            if (raw === 'MP' || raw === 'SI' || raw === 'SÍ' || raw === 'S' || raw === '1' || raw.includes('MP')) {
+                return 'Sí';
+            }
+            return 'Sí';
+        }
+
         async function recargarDatosAPI(forzar = false) {
             mostrarToast("Leyendo T_ResProd_Py_DB, T_DemandaPy y T_CodigoRelacion...", "⏳");
             try {
@@ -1625,13 +2329,20 @@
                     semanasDisponibles.slice(-9).forEach(s => selectedChartWeeks.add(s));
                 }
 
-                if (expandedNodes.size === 0) {
-                    if (semanasDisponibles.length > 0) {
-                        const ultSem = semanasDisponibles[semanasDisponibles.length - 1];
-                        expandedNodes.add(`sem_${ultSem}`);
-                        if (subPlantasDisponibles.length > 0) {
-                            expandedNodes.add(`sem_${ultSem}_sp_${subPlantasDisponibles[0]}`);
-                        }
+                if (expandedNodes.size === 0 && semanasDisponibles.length > 0) {
+                    const ultSem = semanasDisponibles[semanasDisponibles.length - 1];
+                    expandedNodes.add(`sem_${ultSem}`);
+                    expandedFaltantes.add(`sem_${ultSem}`);
+                    expandedSobrantes.add(`sem_${ultSem}`);
+                    if (subPlantasDisponibles.length > 0) {
+                        const sp0 = subPlantasDisponibles[0];
+                        expandedNodes.add(`sem_${ultSem}_sp_${sp0}`);
+                        expandedFaltantes.add(`sem_${ultSem}_sp_${sp0}`);
+                        expandedSobrantes.add(`sem_${ultSem}_sp_${sp0}`);
+                        expandedFaltantes.add(`sem_${ultSem}_sp_${sp0}_mp_Sí`);
+                        expandedFaltantes.add(`sem_${ultSem}_sp_${sp0}_mp_No`);
+                        expandedSobrantes.add(`sem_${ultSem}_sp_${sp0}_mp_Sí`);
+                        expandedSobrantes.add(`sem_${ultSem}_sp_${sp0}_mp_No`);
                     }
                 }
 
@@ -1654,7 +2365,7 @@
 
         function procesarYConsolidarTablas(tResProdPyDb, tDemandaPy, tCodigoRelacion = []) {
             // 1. Tabla de Referencia: T_CodigoRelacion (Hoja Auxiliares)
-            //    Campo Llave: CodigoCorto | Campo Referencia: Nombre, SubPlanta
+            //    Campo Llave: CodigoCorto | Campo Referencia: Nombre, SubPlanta, TipoMP
             const mapaRelacionMaestro = new Map();
 
             tCodigoRelacion.forEach(row => {
@@ -1664,11 +2375,14 @@
 
                 const nomOficial = String(extraerCampo(row, 'Nombre', 'nombre', 'Descripcion', 'descripcion') ?? '').trim();
                 const spOficial = String(extraerCampo(row, 'SubPlanta', 'subPlanta', 'Subplanta', 'subplanta') ?? '').trim().toUpperCase();
+                const rawTipoMp = extraerCampo(row, 'TipoMP', 'tipoMP', 'tipomp', 'TipoMp');
+                const mpOficial = normalizarMP(rawTipoMp);
 
                 const registroMaestro = {
                     CodigoCorto: codNorm,
                     Nombre: nomOficial,
-                    SubPlanta: spOficial
+                    SubPlanta: spOficial,
+                    TipoMP: mpOficial
                 };
 
                 mapaRelacionMaestro.set(codNorm, registroMaestro);
@@ -1702,7 +2416,7 @@
             registrarEnFallback(tResProdPyDb);
             registrarEnFallback(tDemandaPy);
 
-            // 3. Consolidar por llave (Semana | SubPlanta | CodigoCorto)
+            // 3. Consolidar por llave (Escenario | Semana | SubPlanta | CodigoCorto)
             const mapaConsolidado = new Map();
 
             const acumularTabla = (lista, tipoCampo) => {
@@ -1730,6 +2444,10 @@
                         : (infoFallback.Nombre || String(extraerCampo(row, 'Nombre', 'nombre') ?? '').trim());
                     if (!nom) nom = 'SIN NOMBRE';
 
+                    const mp = (relOficial && relOficial.TipoMP)
+                        ? relOficial.TipoMP
+                        : normalizarMP(extraerCampo(row, 'TipoMP', 'tipoMP', 'tipomp'));
+
                     const kilos = Number(extraerCampo(row, 'Kilos', 'kilos') ?? 0) || 0;
                     const escRaw = extraerCampo(row, 'Escenario', 'escenario');
                     const esc = (escRaw !== null && escRaw !== undefined && String(escRaw).trim() !== '')
@@ -1748,6 +2466,7 @@
                             Anio: anio,
                             NSemana: nSem,
                             SubPlanta: sp,
+                            TipoMP: mp,
                             CodigoCorto: cod,
                             Nombre: nom,
                             PROG_PRODUCCION: 0,
@@ -1767,6 +2486,7 @@
                 a.Semana - b.Semana ||
                 a.Escenario.localeCompare(b.Escenario, undefined, { numeric: true }) ||
                 a.SubPlanta.localeCompare(b.SubPlanta) ||
+                b.TipoMP.localeCompare(a.TipoMP) ||
                 a.CodigoCorto.localeCompare(b.CodigoCorto, undefined, { numeric: true })
             );
         }
@@ -2161,9 +2881,15 @@
             const summary = document.getElementById('selectedWeeksSummary');
             summary.innerHTML = `Mostrando: Años <b>[${Array.from(selectedYears).join(', ')}]</b> • Escenarios <b>[${Array.from(selectedEscenarios).join(', ')}]</b> • SubPlantas <b>[${selectedSubPlantas.size} seleccionadas]</b> • Semanas <b>[${selectedWeeks.size} seleccionadas]</b> • SKUs Únicos: <b>${skusDistintos}</b>`;
 
+            // Página 1: Resumen General
             actualizarKPIs(filtrados, skusDistintos);
             renderizarGrafico(obtenerFilasFiltradasGrafico());
             renderizarMatriz(filtrados);
+
+            // Página 2: Análisis de Sobrantes y Faltantes con Discriminación MP (Sí / No)
+            renderizarResumenEscenariosYKPIs(filtrados);
+            renderizarMatrizFaltantes(filtrados);
+            renderizarMatrizSobrantes(filtrados);
         }
 
         function actualizarKPIs(data, skusDistintos) {
@@ -2232,7 +2958,7 @@
                 dPct.push(Number(calcPct(rawProg, rawCom).toFixed(2)));
             });
 
-            const sColors = THEME_SLATE_BLUE.comparativoSeries;
+            const sColors = THEME_PANTONE_INDUSTRIAL.comparativoSeries;
             const maxPct = dPct.length ? Math.max(...dPct, 100) : 100;
             const yPctMax = Math.ceil((maxPct + 12) / 10) * 10;
 
@@ -2249,11 +2975,11 @@
                             label: '% Cumplimiento',
                             data: dPct,
                             yAxisID: 'yPct',
-                            borderColor: '#C9A968',
-                            backgroundColor: 'rgba(201, 169, 104, 0.18)',
+                            borderColor: '#F4D03F',
+                            backgroundColor: 'rgba(244, 208, 63, 0.22)',
                             pointBackgroundColor: '#2E2A2F',
-                            pointBorderColor: '#C9A968',
-                            pointHoverBackgroundColor: '#C9A968',
+                            pointBorderColor: '#F4D03F',
+                            pointHoverBackgroundColor: '#F8CC5A',
                             pointHoverBorderColor: '#2E2A2F',
                             borderWidth: 2.5,
                             pointRadius: 5,
@@ -2266,10 +2992,10 @@
                                 anchor: 'end',
                                 offset: 6,
                                 backgroundColor: '#2E2A2F',
-                                borderColor: '#C9A968',
+                                borderColor: '#F4D03F',
                                 borderWidth: 1,
                                 borderRadius: 4,
-                                color: '#F5E6C4',
+                                color: '#F4D03F',
                                 padding: { top: 2, bottom: 2, left: 5, right: 5 },
                                 font: {
                                     family: "'Inter', sans-serif",
@@ -2365,14 +3091,14 @@
                     scales: {
                         x: {
                             grid: { display: false },
-                            ticks: { font: { weight: 600, size: 11 }, color: '#5D6D7E' }
+                            ticks: { font: { weight: 600, size: 11 }, color: '#605C5E' }
                         },
                         y: {
                             type: 'linear',
                             position: 'left',
                             beginAtZero: true,
-                            grid: { color: '#E2E8F0' },
-                            ticks: { callback: v => `${v.toLocaleString('es-PE')} ${unidadGrafico}`, color: '#5D6D7E' }
+                            grid: { color: '#E2E5EB' },
+                            ticks: { callback: v => `${v.toLocaleString('es-PE')} ${unidadGrafico}`, color: '#605C5E' }
                         },
                         yPct: {
                             type: 'linear',
@@ -2382,7 +3108,7 @@
                             grid: { drawOnChartArea: false },
                             ticks: {
                                 callback: v => `${v}%`,
-                                color: '#8D7400',
+                                color: '#BAA063',
                                 font: { weight: 700, size: 10.5 }
                             }
                         }
@@ -2392,7 +3118,7 @@
         }
 
         // =========================================================================
-        // 📋 RENDERIZADO DE MATRIZ (3 NIVELES: Semana -> SubPlanta -> SKU)
+        // 📋 1. PRIMER VISUAL: MATRIZ ORIGINAL (3 NIVELES: Semana -> SubPlanta -> SKU)
         // =========================================================================
         function renderizarMatriz(data) {
             const tbody = document.getElementById('tbodyMatriz');
@@ -2422,6 +3148,7 @@
                     mapSem.set(d.Semana, {
                         Semana: d.Semana,
                         prog: 0, com: 0,
+                        difMpSi: 0,
                         subPlantas: new Map()
                     });
                 }
@@ -2429,22 +3156,32 @@
                 sNode.prog += d.PROG_PRODUCCION;
                 sNode.com += d.PROYECCION_COMERCIAL;
 
+                const difFila = d.PROG_PRODUCCION - d.PROYECCION_COMERCIAL;
+                if (d.TipoMP === 'Sí') {
+                    sNode.difMpSi += difFila;
+                }
+
                 if (!sNode.subPlantas.has(d.SubPlanta)) {
                     sNode.subPlantas.set(d.SubPlanta, {
                         SubPlanta: d.SubPlanta,
                         prog: 0, com: 0,
+                        difMpSi: 0,
                         skus: new Map()
                     });
                 }
                 const spNode = sNode.subPlantas.get(d.SubPlanta);
                 spNode.prog += d.PROG_PRODUCCION;
                 spNode.com += d.PROYECCION_COMERCIAL;
+                if (d.TipoMP === 'Sí') {
+                    spNode.difMpSi += difFila;
+                }
 
                 const skuKey = d.CodigoCorto;
                 if (!spNode.skus.has(skuKey)) {
                     spNode.skus.set(skuKey, {
                         CodigoCorto: d.CodigoCorto,
                         Nombre: d.Nombre,
+                        TipoMP: d.TipoMP,
                         prog: 0, com: 0
                     });
                 }
@@ -2460,6 +3197,10 @@
                 const isSemExpanded = expandedNodes.has(sId) || forceExpand;
                 const difSem = sNode.prog - sNode.com;
 
+                const badgeDifMpSem = sNode.difMpSi !== 0
+                    ? `<div style="font-size:0.71rem; font-weight:700; color:${sNode.difMpSi >= 0 ? '#BAA063' : '#B84A4A'}; margin-top:2px;">(MP Neto: ${sNode.difMpSi >= 0 ? '+' : ''}${formatKgMatriz(sNode.difMpSi)} kg)</div>`
+                    : '';
+
                 const trSem = document.createElement('tr');
                 trSem.className = 'level-1';
                 trSem.innerHTML = `
@@ -2470,7 +3211,10 @@
                     </td>
                     <td class="num-cell col-prog col-group-prog-start"><b>${formatKgMatriz(sNode.prog)}</b></td>
                     <td class="num-cell col-com col-group-com-start"><b>${formatKgMatriz(sNode.com)}</b></td>
-                    <td class="num-cell col-dif col-group-dif-start ${difSem >= 0 ? 'val-positive' : 'val-negative'}"><b>${formatKgMatriz(difSem)}</b></td>
+                    <td class="num-cell col-dif col-group-dif-start ${difSem >= 0 ? 'val-positive' : 'val-negative'}">
+                        <b>${formatKgMatriz(difSem)}</b>
+                        ${badgeDifMpSem}
+                    </td>
                     <td class="num-cell col-com">${badgeHtml(calcPct(sNode.prog, sNode.com))}</td>
                 `;
                 tbody.appendChild(trSem);
@@ -2482,6 +3226,10 @@
                         const isSpExpanded = expandedNodes.has(spId) || forceExpand;
                         const difSp = spNode.prog - spNode.com;
 
+                        const badgeDifMpSp = spNode.difMpSi !== 0
+                            ? `<div style="font-size:0.71rem; font-weight:700; color:${spNode.difMpSi >= 0 ? '#BAA063' : '#B84A4A'}; margin-top:2px;">(MP Neto: ${spNode.difMpSi >= 0 ? '+' : ''}${formatKgMatriz(spNode.difMpSi)} kg)</div>`
+                            : '';
+
                         const trSp = document.createElement('tr');
                         trSp.className = 'level-2';
                         trSp.innerHTML = `
@@ -2491,7 +3239,10 @@
                             </td>
                             <td class="num-cell col-prog col-group-prog-start" style="font-weight:600;">${formatKgMatriz(spNode.prog)}</td>
                             <td class="num-cell col-com col-group-com-start">${formatKgMatriz(spNode.com)}</td>
-                            <td class="num-cell col-dif col-group-dif-start ${difSp >= 0 ? 'val-positive' : 'val-negative'}">${formatKgMatriz(difSp)}</td>
+                            <td class="num-cell col-dif col-group-dif-start ${difSp >= 0 ? 'val-positive' : 'val-negative'}">
+                                ${formatKgMatriz(difSp)}
+                                ${badgeDifMpSp}
+                            </td>
                             <td class="num-cell col-com">${badgeHtml(calcPct(spNode.prog, spNode.com))}</td>
                         `;
                         tbody.appendChild(trSp);
@@ -2503,16 +3254,25 @@
 
                             skusOrdenados.forEach(sku => {
                                 const difSku = sku.prog - sku.com;
+                                const esMp = sku.TipoMP === 'Sí';
+                                const tagMpBadge = esMp
+                                    ? `<span class="badge-mp-total" style="font-size:0.67rem; padding:1px 5px; margin-left:4px;">MP</span>`
+                                    : '';
+
                                 const trSku = document.createElement('tr');
                                 trSku.className = 'level-3';
                                 trSku.innerHTML = `
                                     <td style="padding-left: 68px;">
                                         <span class="sku-code-badge">${sku.CodigoCorto}</span>
                                         <span class="sku-name-text">${sku.Nombre}</span>
+                                        <span class="tag-mp-tipo ${esMp ? 'tag-mp-si' : 'tag-mp-no'}" style="margin-left:6px; font-size:0.67rem; padding:1px 5px;">MP: ${sku.TipoMP}</span>
                                     </td>
                                     <td class="num-cell col-prog col-group-prog-start" style="font-weight:600;">${formatKgMatriz(sku.prog)}</td>
                                     <td class="num-cell col-com col-group-com-start">${formatKgMatriz(sku.com)}</td>
-                                    <td class="num-cell col-dif col-group-dif-start ${difSku >= 0 ? 'val-positive' : 'val-negative'}">${formatKgMatriz(difSku)}</td>
+                                    <td class="num-cell col-dif col-group-dif-start ${difSku >= 0 ? 'val-positive' : 'val-negative'}">
+                                        ${formatKgMatriz(difSku)}
+                                        ${tagMpBadge}
+                                    </td>
                                     <td class="num-cell col-com">${badgeHtml(calcPct(sku.prog, sku.com))}</td>
                                 `;
                                 tbody.appendChild(trSku);
@@ -2545,21 +3305,808 @@
             renderizarMatriz(obtenerFilasFiltradas());
         }
 
-        function exportarExcel() {
+        // =========================================================================
+        // ⚖️ PÁGINA 2: ANÁLISIS DE SOBRANTES Y FALTANTES (DISCRIMINACIÓN MP SÍ / NO)
+        // =========================================================================
+
+        function renderizarResumenEscenariosYKPIs(data) {
+            const tbody = document.getElementById('tbodyResumenEscenario');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            let totalProg = 0;
+            let totalCom = 0;
+            let totalFaltaMpSi = 0;
+            let totalFaltaMpNo = 0;
+            let totalSobraMpSi = 0;
+            let totalSobraMpNo = 0;
+
+            const skusFaltaSet = new Set();
+            const skusSobraSet = new Set();
+            const escenariosMap = new Map();
+
+            data.forEach(d => {
+                totalProg += d.PROG_PRODUCCION;
+                totalCom += d.PROYECCION_COMERCIAL;
+                const dif = d.PROG_PRODUCCION - d.PROYECCION_COMERCIAL;
+                const esMpSi = d.TipoMP === 'Sí';
+
+                if (dif < 0) {
+                    const falta = Math.abs(dif);
+                    if (esMpSi) totalFaltaMpSi += falta;
+                    else totalFaltaMpNo += falta;
+                    skusFaltaSet.add(d.CodigoCorto);
+                } else if (dif > 0) {
+                    if (esMpSi) totalSobraMpSi += dif;
+                    else totalSobraMpNo += dif;
+                    skusSobraSet.add(d.CodigoCorto);
+                }
+
+                if (!escenariosMap.has(d.Escenario)) {
+                    escenariosMap.set(d.Escenario, {
+                        Escenario: d.Escenario,
+                        prog: 0,
+                        com: 0,
+                        faltaMpSi: 0,
+                        faltaMpNo: 0,
+                        sobraMpSi: 0,
+                        sobraMpNo: 0,
+                        mpGroups: new Map()
+                    });
+                }
+
+                const escNode = escenariosMap.get(d.Escenario);
+                escNode.prog += d.PROG_PRODUCCION;
+                escNode.com += d.PROYECCION_COMERCIAL;
+
+                const mpKey = esMpSi ? 'Sí' : 'No';
+                if (!escNode.mpGroups.has(mpKey)) {
+                    escNode.mpGroups.set(mpKey, {
+                        TipoMP: mpKey,
+                        prog: 0,
+                        com: 0,
+                        falta: 0,
+                        sobra: 0,
+                        subPlantas: new Map()
+                    });
+                }
+                const mpNode = escNode.mpGroups.get(mpKey);
+                mpNode.prog += d.PROG_PRODUCCION;
+                mpNode.com += d.PROYECCION_COMERCIAL;
+
+                const spKey = d.SubPlanta || 'SIN SUBPLANTA';
+                if (!mpNode.subPlantas.has(spKey)) {
+                    mpNode.subPlantas.set(spKey, {
+                        SubPlanta: spKey,
+                        prog: 0,
+                        com: 0,
+                        falta: 0,
+                        sobra: 0,
+                        skus: new Map()
+                    });
+                }
+                const spNode = mpNode.subPlantas.get(spKey);
+                spNode.prog += d.PROG_PRODUCCION;
+                spNode.com += d.PROYECCION_COMERCIAL;
+
+                const skuKey = d.CodigoCorto;
+                if (!spNode.skus.has(skuKey)) {
+                    spNode.skus.set(skuKey, {
+                        CodigoCorto: d.CodigoCorto,
+                        Nombre: d.Nombre,
+                        TipoMP: mpKey,
+                        prog: 0,
+                        com: 0
+                    });
+                }
+                const skuNode = spNode.skus.get(skuKey);
+                skuNode.prog += d.PROG_PRODUCCION;
+                skuNode.com += d.PROYECCION_COMERCIAL;
+
+                if (dif < 0) {
+                    const falta = Math.abs(dif);
+                    if (esMpSi) escNode.faltaMpSi += falta;
+                    else escNode.faltaMpNo += falta;
+                    mpNode.falta += falta;
+                    spNode.falta += falta;
+                } else if (dif > 0) {
+                    if (esMpSi) escNode.sobraMpSi += dif;
+                    else escNode.sobraMpNo += dif;
+                    mpNode.sobra += dif;
+                    spNode.sobra += dif;
+                }
+            });
+
+            const totalFalta = totalFaltaMpSi + totalFaltaMpNo;
+            const totalSobra = totalSobraMpSi + totalSobraMpNo;
+            const difNeta = totalProg - totalCom;
+            const pctGlobal = calcPct(totalProg, totalCom);
+
+            // 1. Actualizar KPIs de la Página 2 con etiquetas de MP Sí y No
+            const kpiFaltaEl = document.getElementById('kpiDetFaltaVal');
+            if (kpiFaltaEl) kpiFaltaEl.innerHTML = `-${formatKg(totalFalta)}<span class="kpi-unit">kg</span>`;
+            const badgeFaltaSi = document.getElementById('kpiDetFaltaMpSiBadge');
+            if (badgeFaltaSi) badgeFaltaSi.textContent = `MP Sí: -${formatKg(totalFaltaMpSi)} kg`;
+            const badgeFaltaNo = document.getElementById('kpiDetFaltaMpNoBadge');
+            if (badgeFaltaNo) badgeFaltaNo.textContent = `MP No: -${formatKg(totalFaltaMpNo)} kg`;
+            const skusFaltaEl = document.getElementById('kpiDetFaltaSkusCount');
+            if (skusFaltaEl) skusFaltaEl.textContent = `${skusFaltaSet.size} SKUs con faltante`;
+            const tnFaltaEl = document.getElementById('kpiDetFaltaTn');
+            if (tnFaltaEl) tnFaltaEl.textContent = `-${(totalFalta / 1000).toFixed(2)} Tn`;
+
+            const kpiSobraEl = document.getElementById('kpiDetSobraVal');
+            if (kpiSobraEl) kpiSobraEl.innerHTML = `+${formatKg(totalSobra)}<span class="kpi-unit">kg</span>`;
+            const badgeSobraSi = document.getElementById('kpiDetSobraMpSiBadge');
+            if (badgeSobraSi) badgeSobraSi.textContent = `MP Sí: +${formatKg(totalSobraMpSi)} kg`;
+            const badgeSobraNo = document.getElementById('kpiDetSobraMpNoBadge');
+            if (badgeSobraNo) badgeSobraNo.textContent = `MP No: +${formatKg(totalSobraMpNo)} kg`;
+            const skusSobraEl = document.getElementById('kpiDetSobraSkusCount');
+            if (skusSobraEl) skusSobraEl.textContent = `${skusSobraSet.size} SKUs con sobrante`;
+            const tnSobraEl = document.getElementById('kpiDetSobraTn');
+            if (tnSobraEl) tnSobraEl.textContent = `+${(totalSobra / 1000).toFixed(2)} Tn`;
+
+            const kpiDifEl = document.getElementById('kpiDetDifVal');
+            if (kpiDifEl) {
+                kpiDifEl.innerHTML = `${formatKg(difNeta)}<span class="kpi-unit">kg</span>`;
+                kpiDifEl.className = `kpi-value ${difNeta >= 0 ? 'val-positive' : 'val-negative'}`;
+            }
+            const badgeDifSi = document.getElementById('kpiDetDifMpSiBadge');
+            const difMpSi = totalSobraMpSi - totalFaltaMpSi;
+            if (badgeDifSi) badgeDifSi.textContent = `Dif. MP Sí: ${(difMpSi >= 0 ? '+' : '')}${formatKg(difMpSi)} kg`;
+            const badgeDifNo = document.getElementById('kpiDetDifMpNoBadge');
+            const difMpNo = totalSobraMpNo - totalFaltaMpNo;
+            if (badgeDifNo) badgeDifNo.textContent = `Dif. MP No: ${(difMpNo >= 0 ? '+' : '')}${formatKg(difMpNo)} kg`;
+            const labelProgVsCom = document.getElementById('kpiDetProgVsComLabel');
+            if (labelProgVsCom) labelProgVsCom.textContent = `Prog: ${formatKgMatriz(totalProg)} kg vs Proy: ${formatKgMatriz(totalCom)} kg`;
+            const tnDifEl = document.getElementById('kpiDetDifTn');
+            if (tnDifEl) {
+                tnDifEl.textContent = `${(difNeta / 1000).toFixed(2)} Tn`;
+                tnDifEl.className = `badge-kpi ${difNeta >= 0 ? 'badge-good' : 'badge-low'}`;
+            }
+
+            const kpiPctEl = document.getElementById('kpiDetPctVal');
+            if (kpiPctEl) kpiPctEl.innerHTML = `${pctGlobal.toFixed(2)}<span class="kpi-unit">%</span>`;
+            const badgePctSi = document.getElementById('kpiDetPctMpSiBadge');
+            const progMpSi = (data.filter(d => d.TipoMP === 'Sí').reduce((acc, c) => acc + c.PROG_PRODUCCION, 0));
+            const comMpSi = (data.filter(d => d.TipoMP === 'Sí').reduce((acc, c) => acc + c.PROYECCION_COMERCIAL, 0));
+            if (badgePctSi) badgePctSi.textContent = `Cumpl. MP Sí: ${calcPct(progMpSi, comMpSi).toFixed(2)}%`;
+            const badgePctNo = document.getElementById('kpiDetPctMpNoBadge');
+            const progMpNo = totalProg - progMpSi;
+            const comMpNo = totalCom - comMpSi;
+            if (badgePctNo) badgePctNo.textContent = `Cumpl. MP No: ${calcPct(progMpNo, comMpNo).toFixed(2)}%`;
+            const escCountEl = document.getElementById('kpiDetEscenariosCount');
+            if (escCountEl) escCountEl.textContent = `${escenariosMap.size} escenarios activos`;
+            const badgeEstadoDet = document.getElementById('kpiDetBadgeEstado');
+            if (badgeEstadoDet) {
+                if (pctGlobal >= 98) {
+                    badgeEstadoDet.className = 'badge-kpi badge-good';
+                    badgeEstadoDet.textContent = 'Óptimo';
+                } else if (pctGlobal >= 85) {
+                    badgeEstadoDet.className = 'badge-kpi badge-mid';
+                    badgeEstadoDet.textContent = 'En Rango';
+                } else {
+                    badgeEstadoDet.className = 'badge-kpi badge-low';
+                    badgeEstadoDet.textContent = 'Bajo';
+                }
+            }
+
+            // Etiquetas de encabezado de las dos matrices
+            const bMatFaltaSi = document.getElementById('badgeTotalFaltaMpSi');
+            if (bMatFaltaSi) bMatFaltaSi.textContent = `MP Sí: -${formatKgMatriz(totalFaltaMpSi)} kg`;
+            const bMatFaltaNo = document.getElementById('badgeTotalFaltaMpNo');
+            if (bMatFaltaNo) bMatFaltaNo.textContent = `MP No: -${formatKgMatriz(totalFaltaMpNo)} kg`;
+
+            const bMatSobraSi = document.getElementById('badgeTotalSobraMpSi');
+            if (bMatSobraSi) bMatSobraSi.textContent = `MP Sí: +${formatKgMatriz(totalSobraMpSi)} kg`;
+            const bMatSobraNo = document.getElementById('badgeTotalSobraMpNo');
+            if (bMatSobraNo) bMatSobraNo.textContent = `MP No: +${formatKgMatriz(totalSobraMpNo)} kg`;
+
+            // 2. Renderizar tabla de Resumen por Escenario y MP (Sí / No)
+            const escenariosList = Array.from(escenariosMap.values()).sort((a, b) =>
+                a.Escenario.localeCompare(b.Escenario, undefined, { numeric: true })
+            );
+
+            if (escenariosList.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="11" style="text-align:center; padding:24px; color:var(--text-muted);">No hay escenarios para mostrar.</td></tr>';
+                return;
+            }
+
+            const termEsc = (document.getElementById('searchResumenEscenario')?.value || '').trim().toUpperCase();
+
+            escenariosList.forEach(esc => {
+                const escFaltaTotal = esc.faltaMpSi + esc.faltaMpNo;
+                const escSobraTotal = esc.sobraMpSi + esc.sobraMpNo;
+                const escDif = esc.prog - esc.com;
+                const escPct = calcPct(esc.prog, esc.com);
+                const escId = `esc_${esc.Escenario}`;
+                const isExp = expandedEscenarios.has(escId) || (termEsc.length > 0);
+
+                const trEsc = document.createElement('tr');
+                trEsc.className = 'level-1';
+                trEsc.innerHTML = `
+                    <td>
+                        <span class="toggle-icon" onclick="toggleEscenario('${escId}')">${isExp ? '−' : '+'}</span>
+                        <b style="color:#1C3D32;">Escenario ${esc.Escenario}</b>
+                    </td>
+                    <td class="num-cell col-prog col-group-prog-start"><b>${formatKgMatriz(esc.prog)}</b></td>
+                    <td class="num-cell col-com col-group-com-start"><b>${formatKgMatriz(esc.com)}</b></td>
+                    <td class="num-cell col-falta col-group-falta-start">${esc.faltaMpSi > 0 ? `-${formatKgMatriz(esc.faltaMpSi)}` : '0'}</td>
+                    <td class="num-cell col-falta">${esc.faltaMpNo > 0 ? `-${formatKgMatriz(esc.faltaMpNo)}` : '0'}</td>
+                    <td class="num-cell col-falta" style="font-weight:700;">${escFaltaTotal > 0 ? `-${formatKgMatriz(escFaltaTotal)}` : '0'}</td>
+                    <td class="num-cell col-sobra col-group-sobra-start">${esc.sobraMpSi > 0 ? `+${formatKgMatriz(esc.sobraMpSi)}` : '0'}</td>
+                    <td class="num-cell col-sobra">${esc.sobraMpNo > 0 ? `+${formatKgMatriz(esc.sobraMpNo)}` : '0'}</td>
+                    <td class="num-cell col-sobra" style="font-weight:700;">${escSobraTotal > 0 ? `+${formatKgMatriz(escSobraTotal)}` : '0'}</td>
+                    <td class="num-cell col-dif col-group-dif-start ${escDif >= 0 ? 'val-positive' : 'val-negative'}"><b>${formatKgMatriz(escDif)}</b></td>
+                    <td class="num-cell col-com">${badgeHtml(escPct)}</td>
+                `;
+                tbody.appendChild(trEsc);
+
+                if (isExp) {
+                    ['Sí', 'No'].forEach(mpTipo => {
+                        const mpData = esc.mpGroups.get(mpTipo);
+                        if (!mpData) return;
+                        const mpDif = mpData.prog - mpData.com;
+                        const mpPct = calcPct(mpData.prog, mpData.com);
+                        const mpId = `esc_${esc.Escenario}_mp_${mpTipo}`;
+                        const isMpExp = expandedEscenarios.has(mpId) || (termEsc.length > 0);
+
+                        const trMp = document.createElement('tr');
+                        trMp.className = 'level-2';
+                        trMp.innerHTML = `
+                            <td style="padding-left: 28px;">
+                                <span class="toggle-icon" onclick="toggleEscenario('${mpId}')">${isMpExp ? '−' : '+'}</span>
+                                <span class="tag-mp-tipo ${mpTipo === 'Sí' ? 'tag-mp-si' : 'tag-mp-no'}">MP: ${mpTipo}</span>
+                                <span style="font-size:0.75rem; color:var(--text-secondary); margin-left:6px;">(${mpData.subPlantas.size} SubPlantas)</span>
+                            </td>
+                            <td class="num-cell col-prog col-group-prog-start" style="font-weight:600;">${formatKgMatriz(mpData.prog)}</td>
+                            <td class="num-cell col-com col-group-com-start">${formatKgMatriz(mpData.com)}</td>
+                            <td class="num-cell col-falta col-group-falta-start">${mpTipo === 'Sí' && mpData.falta > 0 ? `-${formatKgMatriz(mpData.falta)}` : '0'}</td>
+                            <td class="num-cell col-falta">${mpTipo === 'No' && mpData.falta > 0 ? `-${formatKgMatriz(mpData.falta)}` : '0'}</td>
+                            <td class="num-cell col-falta" style="font-weight:600;">${mpData.falta > 0 ? `-${formatKgMatriz(mpData.falta)}` : '0'}</td>
+                            <td class="num-cell col-sobra col-group-sobra-start">${mpTipo === 'Sí' && mpData.sobra > 0 ? `+${formatKgMatriz(mpData.sobra)}` : '0'}</td>
+                            <td class="num-cell col-sobra">${mpTipo === 'No' && mpData.sobra > 0 ? `+${formatKgMatriz(mpData.sobra)}` : '0'}</td>
+                            <td class="num-cell col-sobra" style="font-weight:600;">${mpData.sobra > 0 ? `+${formatKgMatriz(mpData.sobra)}` : '0'}</td>
+                            <td class="num-cell col-dif col-group-dif-start ${mpDif >= 0 ? 'val-positive' : 'val-negative'}" style="font-weight:600;">${formatKgMatriz(mpDif)}</td>
+                            <td class="num-cell col-com">${badgeHtml(mpPct)}</td>
+                        `;
+                        tbody.appendChild(trMp);
+
+                        if (isMpExp) {
+                            const subPlantasList = Array.from(mpData.subPlantas.values()).sort((a, b) =>
+                                a.SubPlanta.localeCompare(b.SubPlanta)
+                            );
+
+                            subPlantasList.forEach(sp => {
+                                const spDif = sp.prog - sp.com;
+                                const spPct = calcPct(sp.prog, sp.com);
+                                const spId = `esc_${esc.Escenario}_mp_${mpTipo}_sp_${sp.SubPlanta}`;
+                                const isSpExp = expandedEscenarios.has(spId) || (termEsc.length > 0);
+
+                                const trSp = document.createElement('tr');
+                                trSp.className = 'level-mp';
+                                trSp.innerHTML = `
+                                    <td style="padding-left: 52px;">
+                                        <span class="toggle-icon" onclick="toggleEscenario('${spId}')">${isSpExp ? '−' : '+'}</span>
+                                        <span class="tag-subplanta">${sp.SubPlanta}</span>
+                                        <span style="font-size:0.73rem; color:var(--text-secondary); margin-left:6px;">(${sp.skus.size} SKUs)</span>
+                                    </td>
+                                    <td class="num-cell col-prog col-group-prog-start">${formatKgMatriz(sp.prog)}</td>
+                                    <td class="num-cell col-com col-group-com-start">${formatKgMatriz(sp.com)}</td>
+                                    <td class="num-cell col-falta col-group-falta-start">${mpTipo === 'Sí' && sp.falta > 0 ? `-${formatKgMatriz(sp.falta)}` : '0'}</td>
+                                    <td class="num-cell col-falta">${mpTipo === 'No' && sp.falta > 0 ? `-${formatKgMatriz(sp.falta)}` : '0'}</td>
+                                    <td class="num-cell col-falta">${sp.falta > 0 ? `-${formatKgMatriz(sp.falta)}` : '0'}</td>
+                                    <td class="num-cell col-sobra col-group-sobra-start">${mpTipo === 'Sí' && sp.sobra > 0 ? `+${formatKgMatriz(sp.sobra)}` : '0'}</td>
+                                    <td class="num-cell col-sobra">${mpTipo === 'No' && sp.sobra > 0 ? `+${formatKgMatriz(sp.sobra)}` : '0'}</td>
+                                    <td class="num-cell col-sobra">${sp.sobra > 0 ? `+${formatKgMatriz(sp.sobra)}` : '0'}</td>
+                                    <td class="num-cell col-dif col-group-dif-start ${spDif >= 0 ? 'val-positive' : 'val-negative'}">${formatKgMatriz(spDif)}</td>
+                                    <td class="num-cell col-com">${badgeHtml(spPct)}</td>
+                                `;
+                                tbody.appendChild(trSp);
+
+                                if (isSpExp) {
+                                    const skusList = Array.from(sp.skus.values()).sort((a, b) =>
+                                        Math.abs(b.prog - b.com) - Math.abs(a.prog - a.com) ||
+                                        a.CodigoCorto.localeCompare(b.CodigoCorto, undefined, { numeric: true })
+                                    );
+
+                                    skusList.forEach(sku => {
+                                        if (termEsc.length > 0) {
+                                            const match = esc.Escenario.toUpperCase().includes(termEsc) ||
+                                                mpTipo.toUpperCase().includes(termEsc) ||
+                                                sp.SubPlanta.toUpperCase().includes(termEsc) ||
+                                                sku.CodigoCorto.toUpperCase().includes(termEsc) ||
+                                                sku.Nombre.toUpperCase().includes(termEsc);
+                                            if (!match) return;
+                                        }
+
+                                        const skuDif = sku.prog - sku.com;
+                                        const skuFalta = skuDif < 0 ? Math.abs(skuDif) : 0;
+                                        const skuSobra = skuDif > 0 ? skuDif : 0;
+                                        const skuPct = calcPct(sku.prog, sku.com);
+
+                                        const trSku = document.createElement('tr');
+                                        trSku.className = 'level-3';
+                                        trSku.innerHTML = `
+                                            <td style="padding-left: 78px;">
+                                                <span class="sku-code-badge">${sku.CodigoCorto}</span>
+                                                <span class="sku-name-text">${sku.Nombre}</span>
+                                            </td>
+                                            <td class="num-cell col-prog col-group-prog-start">${formatKgMatriz(sku.prog)}</td>
+                                            <td class="num-cell col-com col-group-com-start">${formatKgMatriz(sku.com)}</td>
+                                            <td class="num-cell col-falta col-group-falta-start">${mpTipo === 'Sí' && skuFalta > 0 ? `-${formatKgMatriz(skuFalta)}` : '0'}</td>
+                                            <td class="num-cell col-falta">${mpTipo === 'No' && skuFalta > 0 ? `-${formatKgMatriz(skuFalta)}` : '0'}</td>
+                                            <td class="num-cell col-falta">${skuFalta > 0 ? `-${formatKgMatriz(skuFalta)}` : '0'}</td>
+                                            <td class="num-cell col-sobra col-group-sobra-start">${mpTipo === 'Sí' && skuSobra > 0 ? `+${formatKgMatriz(skuSobra)}` : '0'}</td>
+                                            <td class="num-cell col-sobra">${mpTipo === 'No' && skuSobra > 0 ? `+${formatKgMatriz(skuSobra)}` : '0'}</td>
+                                            <td class="num-cell col-sobra">${skuSobra > 0 ? `+${formatKgMatriz(skuSobra)}` : '0'}</td>
+                                            <td class="num-cell col-dif col-group-dif-start ${skuDif >= 0 ? 'val-positive' : 'val-negative'}">${formatKgMatriz(skuDif)}</td>
+                                            <td class="num-cell col-com">${badgeHtml(skuPct)}</td>
+                                        `;
+                                        tbody.appendChild(trSku);
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        function toggleEscenario(id) {
+            if (expandedEscenarios.has(id)) expandedEscenarios.delete(id);
+            else expandedEscenarios.add(id);
+            renderizarResumenEscenariosYKPIs(obtenerFilasFiltradas());
+        }
+
+        function toggleExpandirTodoEscenarios(exp) {
+            expandedEscenarios.clear();
+            if (exp) {
+                const data = obtenerFilasFiltradas();
+                data.forEach(d => {
+                    expandedEscenarios.add(`esc_${d.Escenario}`);
+                    expandedEscenarios.add(`esc_${d.Escenario}_mp_${d.TipoMP}`);
+                    expandedEscenarios.add(`esc_${d.Escenario}_mp_${d.TipoMP}_sp_${d.SubPlanta}`);
+                });
+            }
+            renderizarResumenEscenariosYKPIs(obtenerFilasFiltradas());
+        }
+
+        function filtrarResumenEscenarios() {
+            renderizarResumenEscenariosYKPIs(obtenerFilasFiltradas());
+        }
+
+        // =========================================================================
+        // 🔴 2. MATRIZ EXCLUSIVA DE SKUS FALTANTES (4 NIVELES CON MP SÍ / NO)
+        // =========================================================================
+        function renderizarMatrizFaltantes(data) {
+            const tbody = document.getElementById('tbodyFaltantes');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            const soloFaltantes = data.filter(d => (d.PROG_PRODUCCION - d.PROYECCION_COMERCIAL) < 0);
+            const badgeCount = document.getElementById('badgeCountMatrizFalta');
+            if (badgeCount) badgeCount.textContent = `${soloFaltantes.length} SKUs-Sem`;
+
+            const term = (document.getElementById('searchFaltantes')?.value || '').trim().toUpperCase();
+            const dataBuscada = term.length === 0 ? soloFaltantes : soloFaltantes.filter(d =>
+                String(d.Semana).includes(term) ||
+                d.SubPlanta.toUpperCase().includes(term) ||
+                d.TipoMP.toUpperCase().includes(term) ||
+                d.CodigoCorto.toUpperCase().includes(term) ||
+                d.Nombre.toUpperCase().includes(term)
+            );
+
+            if (dataBuscada.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:24px; color:var(--text-muted);">No hay SKUs faltantes para los filtros seleccionados.</td></tr>';
+                return;
+            }
+
+            renderizarJerarquiaFaltantes(dataBuscada, tbody, term.length > 0);
+        }
+
+        function renderizarJerarquiaFaltantes(data, tbody, forceExpand) {
+            const mapSem = new Map();
+
+            data.forEach(d => {
+                const falta = Math.abs(d.PROG_PRODUCCION - d.PROYECCION_COMERCIAL);
+                if (!mapSem.has(d.Semana)) {
+                    mapSem.set(d.Semana, {
+                        Semana: d.Semana,
+                        prog: 0, com: 0, falta: 0,
+                        faltaMpSi: 0, faltaMpNo: 0,
+                        subPlantas: new Map()
+                    });
+                }
+                const sNode = mapSem.get(d.Semana);
+                sNode.prog += d.PROG_PRODUCCION;
+                sNode.com += d.PROYECCION_COMERCIAL;
+                sNode.falta += falta;
+                if (d.TipoMP === 'Sí') sNode.faltaMpSi += falta;
+                else sNode.faltaMpNo += falta;
+
+                if (!sNode.subPlantas.has(d.SubPlanta)) {
+                    sNode.subPlantas.set(d.SubPlanta, {
+                        SubPlanta: d.SubPlanta,
+                        prog: 0, com: 0, falta: 0,
+                        faltaMpSi: 0, faltaMpNo: 0,
+                        mpGroups: new Map()
+                    });
+                }
+                const spNode = sNode.subPlantas.get(d.SubPlanta);
+                spNode.prog += d.PROG_PRODUCCION;
+                spNode.com += d.PROYECCION_COMERCIAL;
+                spNode.falta += falta;
+                if (d.TipoMP === 'Sí') spNode.faltaMpSi += falta;
+                else spNode.faltaMpNo += falta;
+
+                const mpKey = d.TipoMP;
+                if (!spNode.mpGroups.has(mpKey)) {
+                    spNode.mpGroups.set(mpKey, {
+                        TipoMP: mpKey,
+                        prog: 0, com: 0, falta: 0,
+                        skus: new Map()
+                    });
+                }
+                const mpNode = spNode.mpGroups.get(mpKey);
+                mpNode.prog += d.PROG_PRODUCCION;
+                mpNode.com += d.PROYECCION_COMERCIAL;
+                mpNode.falta += falta;
+
+                const skuKey = d.CodigoCorto;
+                if (!mpNode.skus.has(skuKey)) {
+                    mpNode.skus.set(skuKey, {
+                        CodigoCorto: d.CodigoCorto,
+                        Nombre: d.Nombre,
+                        TipoMP: d.TipoMP,
+                        prog: 0, com: 0, falta: 0
+                    });
+                }
+                const skuNode = mpNode.skus.get(skuKey);
+                skuNode.prog += d.PROG_PRODUCCION;
+                skuNode.com += d.PROYECCION_COMERCIAL;
+                skuNode.falta += falta;
+            });
+
+            const semList = Array.from(mapSem.values()).sort((a, b) => b.Semana - a.Semana);
+
+            semList.forEach(sNode => {
+                const sId = `sem_${sNode.Semana}`;
+                const isSemExpanded = expandedFaltantes.has(sId) || forceExpand;
+
+                const trSem = document.createElement('tr');
+                trSem.className = 'level-1';
+                trSem.innerHTML = `
+                    <td>
+                        <span class="toggle-icon" onclick="toggleNodeFaltantes('${sId}')">${isSemExpanded ? '−' : '+'}</span>
+                        <b style="color:var(--pantone-dark);">Semana ${sNode.Semana}</b>
+                        <span style="font-size:0.74rem; color:var(--text-secondary); margin-left:6px;">${obtenerRangoSemanaISO(sNode.Semana)}</span>
+                        <span class="badge-mp-total">MP Sí: -${formatKgMatriz(sNode.faltaMpSi)} kg</span>
+                        <span class="badge-mp-no-total">MP No: -${formatKgMatriz(sNode.faltaMpNo)} kg</span>
+                    </td>
+                    <td class="num-cell col-prog col-group-prog-start"><b>${formatKgMatriz(sNode.prog)}</b></td>
+                    <td class="num-cell col-com col-group-com-start"><b>${formatKgMatriz(sNode.com)}</b></td>
+                    <td class="num-cell col-falta col-group-falta-start"><b>-${formatKgMatriz(sNode.falta)}</b></td>
+                    <td class="num-cell col-com">${badgeHtml(calcPct(sNode.prog, sNode.com))}</td>
+                `;
+                tbody.appendChild(trSem);
+
+                if (isSemExpanded) {
+                    const spList = Array.from(sNode.subPlantas.values()).sort((a, b) => a.SubPlanta.localeCompare(b.SubPlanta));
+                    spList.forEach(spNode => {
+                        const spId = `sem_${sNode.Semana}_sp_${spNode.SubPlanta}`;
+                        const isSpExpanded = expandedFaltantes.has(spId) || forceExpand;
+
+                        const trSp = document.createElement('tr');
+                        trSp.className = 'level-2';
+                        trSp.innerHTML = `
+                            <td style="padding-left: 32px;">
+                                <span class="toggle-icon" onclick="toggleNodeFaltantes('${spId}')">${isSpExpanded ? '−' : '+'}</span>
+                                <span class="tag-subplanta">${spNode.SubPlanta}</span>
+                                <span class="badge-mp-total">MP Sí: -${formatKgMatriz(spNode.faltaMpSi)} kg</span>
+                                <span class="badge-mp-no-total">MP No: -${formatKgMatriz(spNode.faltaMpNo)} kg</span>
+                            </td>
+                            <td class="num-cell col-prog col-group-prog-start" style="font-weight:600;">${formatKgMatriz(spNode.prog)}</td>
+                            <td class="num-cell col-com col-group-com-start">${formatKgMatriz(spNode.com)}</td>
+                            <td class="num-cell col-falta col-group-falta-start" style="font-weight:700;">-${formatKgMatriz(spNode.falta)}</td>
+                            <td class="num-cell col-com">${badgeHtml(calcPct(spNode.prog, spNode.com))}</td>
+                        `;
+                        tbody.appendChild(trSp);
+
+                        if (isSpExpanded) {
+                            const mpList = Array.from(spNode.mpGroups.values()).sort((a, b) => b.TipoMP.localeCompare(a.TipoMP));
+                            mpList.forEach(mpNode => {
+                                const mpId = `sem_${sNode.Semana}_sp_${spNode.SubPlanta}_mp_${mpNode.TipoMP}`;
+                                const isMpExpanded = expandedFaltantes.has(mpId) || forceExpand;
+
+                                const trMp = document.createElement('tr');
+                                trMp.className = 'level-mp';
+                                trMp.innerHTML = `
+                                    <td style="padding-left: 54px;">
+                                        <span class="toggle-icon" onclick="toggleNodeFaltantes('${mpId}')">${isMpExpanded ? '−' : '+'}</span>
+                                        <span class="tag-mp-tipo ${mpNode.TipoMP === 'Sí' ? 'tag-mp-si' : 'tag-mp-no'}">MP: ${mpNode.TipoMP}</span>
+                                        <span class="${mpNode.TipoMP === 'Sí' ? 'badge-mp-total' : 'badge-mp-no-total'}">Total: -${formatKgMatriz(mpNode.falta)} kg (${mpNode.skus.size} SKUs)</span>
+                                    </td>
+                                    <td class="num-cell col-prog col-group-prog-start">${formatKgMatriz(mpNode.prog)}</td>
+                                    <td class="num-cell col-com col-group-com-start">${formatKgMatriz(mpNode.com)}</td>
+                                    <td class="num-cell col-falta col-group-falta-start">-${formatKgMatriz(mpNode.falta)}</td>
+                                    <td class="num-cell col-com">${badgeHtml(calcPct(mpNode.prog, mpNode.com))}</td>
+                                `;
+                                tbody.appendChild(trMp);
+
+                                if (isMpExpanded) {
+                                    const skusOrdenados = Array.from(mpNode.skus.values()).sort((a, b) => b.falta - a.falta);
+                                    skusOrdenados.forEach(sku => {
+                                        const trSku = document.createElement('tr');
+                                        trSku.className = 'level-3';
+                                        trSku.innerHTML = `
+                                            <td style="padding-left: 80px;">
+                                                <span class="sku-code-badge">${sku.CodigoCorto}</span>
+                                                <span class="sku-name-text">${sku.Nombre}</span>
+                                                <span class="tag-mp-tipo ${sku.TipoMP === 'Sí' ? 'tag-mp-si' : 'tag-mp-no'}" style="margin-left:6px; font-size:0.68rem; padding:1px 6px;">MP: ${sku.TipoMP}</span>
+                                            </td>
+                                            <td class="num-cell col-prog col-group-prog-start">${formatKgMatriz(sku.prog)}</td>
+                                            <td class="num-cell col-com col-group-com-start">${formatKgMatriz(sku.com)}</td>
+                                            <td class="num-cell col-falta col-group-falta-start" style="font-weight:700;">-${formatKgMatriz(sku.falta)}</td>
+                                            <td class="num-cell col-com">${badgeHtml(calcPct(sku.prog, sku.com))}</td>
+                                        `;
+                                        tbody.appendChild(trSku);
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        function toggleNodeFaltantes(id) {
+            if (expandedFaltantes.has(id)) expandedFaltantes.delete(id);
+            else expandedFaltantes.add(id);
+            renderizarMatrizFaltantes(obtenerFilasFiltradas());
+        }
+
+        function toggleExpandirTodoFaltantes(exp) {
+            expandedFaltantes.clear();
+            if (exp) {
+                const soloFaltantes = obtenerFilasFiltradas().filter(d => (d.PROG_PRODUCCION - d.PROYECCION_COMERCIAL) < 0);
+                soloFaltantes.forEach(d => {
+                    expandedFaltantes.add(`sem_${d.Semana}`);
+                    expandedFaltantes.add(`sem_${d.Semana}_sp_${d.SubPlanta}`);
+                    expandedFaltantes.add(`sem_${d.Semana}_sp_${d.SubPlanta}_mp_${d.TipoMP}`);
+                });
+            }
+            renderizarMatrizFaltantes(obtenerFilasFiltradas());
+        }
+
+        function filtrarMatrizFaltantes() {
+            renderizarMatrizFaltantes(obtenerFilasFiltradas());
+        }
+
+        // =========================================================================
+        // 🟢 3. MATRIZ EXCLUSIVA DE SKUS SOBRANTES (4 NIVELES CON MP SÍ / NO)
+        // =========================================================================
+        function renderizarMatrizSobrantes(data) {
+            const tbody = document.getElementById('tbodySobrantes');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            const soloSobrantes = data.filter(d => (d.PROG_PRODUCCION - d.PROYECCION_COMERCIAL) > 0);
+            const badgeCount = document.getElementById('badgeCountMatrizSobra');
+            if (badgeCount) badgeCount.textContent = `${soloSobrantes.length} SKUs-Sem`;
+
+            const term = (document.getElementById('searchSobrantes')?.value || '').trim().toUpperCase();
+            const dataBuscada = term.length === 0 ? soloSobrantes : soloSobrantes.filter(d =>
+                String(d.Semana).includes(term) ||
+                d.SubPlanta.toUpperCase().includes(term) ||
+                d.TipoMP.toUpperCase().includes(term) ||
+                d.CodigoCorto.toUpperCase().includes(term) ||
+                d.Nombre.toUpperCase().includes(term)
+            );
+
+            if (dataBuscada.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:24px; color:var(--text-muted);">No hay SKUs sobrantes para los filtros seleccionados.</td></tr>';
+                return;
+            }
+
+            renderizarJerarquiaSobrantes(dataBuscada, tbody, term.length > 0);
+        }
+
+        function renderizarJerarquiaSobrantes(data, tbody, forceExpand) {
+            const mapSem = new Map();
+
+            data.forEach(d => {
+                const sobra = d.PROG_PRODUCCION - d.PROYECCION_COMERCIAL;
+                if (!mapSem.has(d.Semana)) {
+                    mapSem.set(d.Semana, {
+                        Semana: d.Semana,
+                        prog: 0, com: 0, sobra: 0,
+                        sobraMpSi: 0, sobraMpNo: 0,
+                        subPlantas: new Map()
+                    });
+                }
+                const sNode = mapSem.get(d.Semana);
+                sNode.prog += d.PROG_PRODUCCION;
+                sNode.com += d.PROYECCION_COMERCIAL;
+                sNode.sobra += sobra;
+                if (d.TipoMP === 'Sí') sNode.sobraMpSi += sobra;
+                else sNode.sobraMpNo += sobra;
+
+                if (!sNode.subPlantas.has(d.SubPlanta)) {
+                    sNode.subPlantas.set(d.SubPlanta, {
+                        SubPlanta: d.SubPlanta,
+                        prog: 0, com: 0, sobra: 0,
+                        sobraMpSi: 0, sobraMpNo: 0,
+                        mpGroups: new Map()
+                    });
+                }
+                const spNode = sNode.subPlantas.get(d.SubPlanta);
+                spNode.prog += d.PROG_PRODUCCION;
+                spNode.com += d.PROYECCION_COMERCIAL;
+                spNode.sobra += sobra;
+                if (d.TipoMP === 'Sí') spNode.sobraMpSi += sobra;
+                else spNode.sobraMpNo += sobra;
+
+                const mpKey = d.TipoMP;
+                if (!spNode.mpGroups.has(mpKey)) {
+                    spNode.mpGroups.set(mpKey, {
+                        TipoMP: mpKey,
+                        prog: 0, com: 0, sobra: 0,
+                        skus: new Map()
+                    });
+                }
+                const mpNode = spNode.mpGroups.get(mpKey);
+                mpNode.prog += d.PROG_PRODUCCION;
+                mpNode.com += d.PROYECCION_COMERCIAL;
+                mpNode.sobra += sobra;
+
+                const skuKey = d.CodigoCorto;
+                if (!mpNode.skus.has(skuKey)) {
+                    mpNode.skus.set(skuKey, {
+                        CodigoCorto: d.CodigoCorto,
+                        Nombre: d.Nombre,
+                        TipoMP: d.TipoMP,
+                        prog: 0, com: 0, sobra: 0
+                    });
+                }
+                const skuNode = mpNode.skus.get(skuKey);
+                skuNode.prog += d.PROG_PRODUCCION;
+                skuNode.com += d.PROYECCION_COMERCIAL;
+                skuNode.sobra += sobra;
+            });
+
+            const semList = Array.from(mapSem.values()).sort((a, b) => b.Semana - a.Semana);
+
+            semList.forEach(sNode => {
+                const sId = `sem_${sNode.Semana}`;
+                const isSemExpanded = expandedSobrantes.has(sId) || forceExpand;
+
+                const trSem = document.createElement('tr');
+                trSem.className = 'level-1';
+                trSem.innerHTML = `
+                    <td>
+                        <span class="toggle-icon" onclick="toggleNodeSobrantes('${sId}')">${isSemExpanded ? '−' : '+'}</span>
+                        <b style="color:var(--pantone-dark);">Semana ${sNode.Semana}</b>
+                        <span style="font-size:0.74rem; color:var(--text-secondary); margin-left:6px;">${obtenerRangoSemanaISO(sNode.Semana)}</span>
+                        <span class="badge-mp-total">MP Sí: +${formatKgMatriz(sNode.sobraMpSi)} kg</span>
+                        <span class="badge-mp-no-total">MP No: +${formatKgMatriz(sNode.sobraMpNo)} kg</span>
+                    </td>
+                    <td class="num-cell col-prog col-group-prog-start"><b>${formatKgMatriz(sNode.prog)}</b></td>
+                    <td class="num-cell col-com col-group-com-start"><b>${formatKgMatriz(sNode.com)}</b></td>
+                    <td class="num-cell col-sobra col-group-sobra-start"><b>+${formatKgMatriz(sNode.sobra)}</b></td>
+                    <td class="num-cell col-com">${badgeHtml(calcPct(sNode.prog, sNode.com))}</td>
+                `;
+                tbody.appendChild(trSem);
+
+                if (isSemExpanded) {
+                    const spList = Array.from(sNode.subPlantas.values()).sort((a, b) => a.SubPlanta.localeCompare(b.SubPlanta));
+                    spList.forEach(spNode => {
+                        const spId = `sem_${sNode.Semana}_sp_${spNode.SubPlanta}`;
+                        const isSpExpanded = expandedSobrantes.has(spId) || forceExpand;
+
+                        const trSp = document.createElement('tr');
+                        trSp.className = 'level-2';
+                        trSp.innerHTML = `
+                            <td style="padding-left: 32px;">
+                                <span class="toggle-icon" onclick="toggleNodeSobrantes('${spId}')">${isSpExpanded ? '−' : '+'}</span>
+                                <span class="tag-subplanta">${spNode.SubPlanta}</span>
+                                <span class="badge-mp-total">MP Sí: +${formatKgMatriz(spNode.sobraMpSi)} kg</span>
+                                <span class="badge-mp-no-total">MP No: +${formatKgMatriz(spNode.sobraMpNo)} kg</span>
+                            </td>
+                            <td class="num-cell col-prog col-group-prog-start" style="font-weight:600;">${formatKgMatriz(spNode.prog)}</td>
+                            <td class="num-cell col-com col-group-com-start">${formatKgMatriz(spNode.com)}</td>
+                            <td class="num-cell col-sobra col-group-sobra-start" style="font-weight:700;">+${formatKgMatriz(spNode.sobra)}</td>
+                            <td class="num-cell col-com">${badgeHtml(calcPct(spNode.prog, spNode.com))}</td>
+                        `;
+                        tbody.appendChild(trSp);
+
+                        if (isSpExpanded) {
+                            const mpList = Array.from(spNode.mpGroups.values()).sort((a, b) => b.TipoMP.localeCompare(a.TipoMP));
+                            mpList.forEach(mpNode => {
+                                const mpId = `sem_${sNode.Semana}_sp_${spNode.SubPlanta}_mp_${mpNode.TipoMP}`;
+                                const isMpExpanded = expandedSobrantes.has(mpId) || forceExpand;
+
+                                const trMp = document.createElement('tr');
+                                trMp.className = 'level-mp';
+                                trMp.innerHTML = `
+                                    <td style="padding-left: 54px;">
+                                        <span class="toggle-icon" onclick="toggleNodeSobrantes('${mpId}')">${isMpExpanded ? '−' : '+'}</span>
+                                        <span class="tag-mp-tipo ${mpNode.TipoMP === 'Sí' ? 'tag-mp-si' : 'tag-mp-no'}">MP: ${mpNode.TipoMP}</span>
+                                        <span class="${mpNode.TipoMP === 'Sí' ? 'badge-mp-total' : 'badge-mp-no-total'}">Total: +${formatKgMatriz(mpNode.sobra)} kg (${mpNode.skus.size} SKUs)</span>
+                                    </td>
+                                    <td class="num-cell col-prog col-group-prog-start">${formatKgMatriz(mpNode.prog)}</td>
+                                    <td class="num-cell col-com col-group-com-start">${formatKgMatriz(mpNode.com)}</td>
+                                    <td class="num-cell col-sobra col-group-sobra-start">+${formatKgMatriz(mpNode.sobra)}</td>
+                                    <td class="num-cell col-com">${badgeHtml(calcPct(mpNode.prog, mpNode.com))}</td>
+                                `;
+                                tbody.appendChild(trMp);
+
+                                if (isMpExpanded) {
+                                    const skusOrdenados = Array.from(mpNode.skus.values()).sort((a, b) => b.sobra - a.sobra);
+                                    skusOrdenados.forEach(sku => {
+                                        const trSku = document.createElement('tr');
+                                        trSku.className = 'level-3';
+                                        trSku.innerHTML = `
+                                            <td style="padding-left: 80px;">
+                                                <span class="sku-code-badge">${sku.CodigoCorto}</span>
+                                                <span class="sku-name-text">${sku.Nombre}</span>
+                                                <span class="tag-mp-tipo ${sku.TipoMP === 'Sí' ? 'tag-mp-si' : 'tag-mp-no'}" style="margin-left:6px; font-size:0.68rem; padding:1px 6px;">MP: ${sku.TipoMP}</span>
+                                            </td>
+                                            <td class="num-cell col-prog col-group-prog-start">${formatKgMatriz(sku.prog)}</td>
+                                            <td class="num-cell col-com col-group-com-start">${formatKgMatriz(sku.com)}</td>
+                                            <td class="num-cell col-sobra col-group-sobra-start" style="font-weight:700;">+${formatKgMatriz(sku.sobra)}</td>
+                                            <td class="num-cell col-com">${badgeHtml(calcPct(sku.prog, sku.com))}</td>
+                                        `;
+                                        tbody.appendChild(trSku);
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        function toggleNodeSobrantes(id) {
+            if (expandedSobrantes.has(id)) expandedSobrantes.delete(id);
+            else expandedSobrantes.add(id);
+            renderizarMatrizSobrantes(obtenerFilasFiltradas());
+        }
+
+        function toggleExpandirTodoSobrantes(exp) {
+            expandedSobrantes.clear();
+            if (exp) {
+                const soloSobrantes = obtenerFilasFiltradas().filter(d => (d.PROG_PRODUCCION - d.PROYECCION_COMERCIAL) > 0);
+                soloSobrantes.forEach(d => {
+                    expandedSobrantes.add(`sem_${d.Semana}`);
+                    expandedSobrantes.add(`sem_${d.Semana}_sp_${d.SubPlanta}`);
+                    expandedSobrantes.add(`sem_${d.Semana}_sp_${d.SubPlanta}_mp_${d.TipoMP}`);
+                });
+            }
+            renderizarMatrizSobrantes(obtenerFilasFiltradas());
+        }
+
+        function filtrarMatrizSobrantes() {
+            renderizarMatrizSobrantes(obtenerFilasFiltradas());
+        }
+
+        function exportarExcelSegunPagina() {
             const data = obtenerFilasFiltradas();
             if (data.length === 0) {
                 mostrarToast("No hay datos para exportar", "⚠️");
                 return;
             }
 
-            // Hoja 1: Agrupado por Escenario, SubPlanta, CodigoCorto y Nombre
+            const wb = XLSX.utils.book_new();
+
+            // Hoja 1: Resumen General Agrupado
             const mapAgrupado = new Map();
             data.forEach(d => {
-                const key = `${d.Escenario}|${d.SubPlanta}|${d.CodigoCorto}`;
+                const key = `${d.Escenario}|${d.SubPlanta}|${d.TipoMP}|${d.CodigoCorto}`;
                 if (!mapAgrupado.has(key)) {
                     mapAgrupado.set(key, {
                         Escenario: d.Escenario,
                         SubPlanta: d.SubPlanta,
+                        TipoMP: d.TipoMP,
                         CodigoCorto: d.CodigoCorto,
                         Nombre: d.Nombre,
                         PROG_PRODUCCION: 0,
@@ -2571,39 +4118,86 @@
                 obj.PROYECCION_COMERCIAL += d.PROYECCION_COMERCIAL;
             });
 
-            const filasAgrupadas = Array.from(mapAgrupado.values()).map(d => ({
-                "Escenario": d.Escenario,
-                "SubPlanta": d.SubPlanta,
-                "CodigoCorto": d.CodigoCorto,
-                "Nombre": d.Nombre,
-                "Programa Producción (kg) [T_ResProd_Py_DB]": Math.round(d.PROG_PRODUCCION),
-                "Proyección Comercial (kg) [T_DemandaPy]": Math.round(d.PROYECCION_COMERCIAL),
-                "Diferencia (kg)": Math.round(d.PROG_PRODUCCION - d.PROYECCION_COMERCIAL),
-                "% Cumplimiento": Number(calcPct(d.PROG_PRODUCCION, d.PROYECCION_COMERCIAL).toFixed(2))
-            }));
+            const filasAgrupadas = Array.from(mapAgrupado.values()).map(d => {
+                const dif = d.PROG_PRODUCCION - d.PROYECCION_COMERCIAL;
+                return {
+                    "Escenario": d.Escenario,
+                    "SubPlanta": d.SubPlanta,
+                    "MP (Sí / No)": d.TipoMP,
+                    "CodigoCorto": d.CodigoCorto,
+                    "Nombre": d.Nombre,
+                    "Prog. Producción (kg)": Math.round(d.PROG_PRODUCCION),
+                    "Proy. Comercial (kg)": Math.round(d.PROYECCION_COMERCIAL),
+                    "Diferencia (kg)": Math.round(dif),
+                    "Tipo Diferencia": dif < 0 ? "Faltante" : (dif > 0 ? "Sobrante" : "Exacto"),
+                    "% Cumplimiento": Number(calcPct(d.PROG_PRODUCCION, d.PROYECCION_COMERCIAL).toFixed(2))
+                };
+            });
 
-            // Hoja 2: Detalle por Escenario, Semana, SubPlanta, CodigoCorto y Nombre
-            const filasSemanal = data.map(d => ({
-                "Escenario": d.Escenario,
-                "Año": d.Anio,
-                "Semana": d.Semana,
-                "Rango Semana ISO": obtenerRangoSemanaISO(d.Semana),
-                "SubPlanta": d.SubPlanta,
-                "CodigoCorto": d.CodigoCorto,
-                "Nombre": d.Nombre,
-                "Programa Producción (kg) [T_ResProd_Py_DB]": Math.round(d.PROG_PRODUCCION),
-                "Proyección Comercial (kg) [T_DemandaPy]": Math.round(d.PROYECCION_COMERCIAL),
-                "Diferencia (kg)": Math.round(d.PROG_PRODUCCION - d.PROYECCION_COMERCIAL),
-                "% Cumplimiento": Number(calcPct(d.PROG_PRODUCCION, d.PROYECCION_COMERCIAL).toFixed(2))
-            }));
+            // Hoja 2: Detalle Semanal con MP
+            const filasSemanal = data.map(d => {
+                const dif = d.PROG_PRODUCCION - d.PROYECCION_COMERCIAL;
+                return {
+                    "Escenario": d.Escenario,
+                    "Año": d.Anio,
+                    "Semana": d.Semana,
+                    "Rango Semana ISO": obtenerRangoSemanaISO(d.Semana),
+                    "SubPlanta": d.SubPlanta,
+                    "MP (Sí / No)": d.TipoMP,
+                    "CodigoCorto": d.CodigoCorto,
+                    "Nombre": d.Nombre,
+                    "Prog. Producción (kg)": Math.round(d.PROG_PRODUCCION),
+                    "Proy. Comercial (kg)": Math.round(d.PROYECCION_COMERCIAL),
+                    "Faltante (kg)": dif < 0 ? Math.round(Math.abs(dif)) : 0,
+                    "Sobrante (kg)": dif > 0 ? Math.round(dif) : 0,
+                    "Diferencia Neta (kg)": Math.round(dif),
+                    "% Cumplimiento": Number(calcPct(d.PROG_PRODUCCION, d.PROYECCION_COMERCIAL).toFixed(2))
+                };
+            });
 
-            const wb = XLSX.utils.book_new();
-            const wsAgrupado = XLSX.utils.json_to_sheet(filasAgrupadas);
-            const wsSemanal = XLSX.utils.json_to_sheet(filasSemanal);
-            XLSX.utils.book_append_sheet(wb, wsAgrupado, "Agrupado_SubPlanta_SKU");
-            XLSX.utils.book_append_sheet(wb, wsSemanal, "Detalle_9Semanas_SKU");
-            XLSX.writeFile(wb, `Resumen_Pl_9Semanas_${new Date().toISOString().slice(0, 10)}.xlsx`);
-            mostrarToast("Archivo Excel descargado exitosamente", "✅");
+            // Hoja 3: SKUs Faltantes
+            const filasFaltantes = data
+                .filter(d => (d.PROG_PRODUCCION - d.PROYECCION_COMERCIAL) < 0)
+                .map(d => ({
+                    "Escenario": d.Escenario,
+                    "Semana": d.Semana,
+                    "SubPlanta": d.SubPlanta,
+                    "MP (Sí / No)": d.TipoMP,
+                    "CodigoCorto": d.CodigoCorto,
+                    "Nombre": d.Nombre,
+                    "Prog. Prod (kg)": Math.round(d.PROG_PRODUCCION),
+                    "Proy. Com (kg)": Math.round(d.PROYECCION_COMERCIAL),
+                    "Faltante (kg)": Math.round(Math.abs(d.PROG_PRODUCCION - d.PROYECCION_COMERCIAL)),
+                    "% Cumplimiento": Number(calcPct(d.PROG_PRODUCCION, d.PROYECCION_COMERCIAL).toFixed(2))
+                }));
+
+            // Hoja 4: SKUs Sobrantes
+            const filasSobrantes = data
+                .filter(d => (d.PROG_PRODUCCION - d.PROYECCION_COMERCIAL) > 0)
+                .map(d => ({
+                    "Escenario": d.Escenario,
+                    "Semana": d.Semana,
+                    "SubPlanta": d.SubPlanta,
+                    "MP (Sí / No)": d.TipoMP,
+                    "CodigoCorto": d.CodigoCorto,
+                    "Nombre": d.Nombre,
+                    "Prog. Prod (kg)": Math.round(d.PROG_PRODUCCION),
+                    "Proy. Com (kg)": Math.round(d.PROYECCION_COMERCIAL),
+                    "Sobrante (kg)": Math.round(d.PROG_PRODUCCION - d.PROYECCION_COMERCIAL),
+                    "% Cumplimiento": Number(calcPct(d.PROG_PRODUCCION, d.PROYECCION_COMERCIAL).toFixed(2))
+                }));
+
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(filasAgrupadas), "Resumen_Agrupado_MP");
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(filasSemanal), "Detalle_Semanal_MP");
+            if (filasFaltantes.length > 0) {
+                XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(filasFaltantes), "SKUs_Faltantes");
+            }
+            if (filasSobrantes.length > 0) {
+                XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(filasSobrantes), "SKUs_Sobrantes");
+            }
+
+            XLSX.writeFile(wb, `Resumen_Pl_9Semanas_Completo_${new Date().toISOString().slice(0, 10)}.xlsx`);
+            mostrarToast("Excel descargado con hojas de Resumen, Faltantes y Sobrantes", "✅");
         }
 
         function mostrarToast(msg, icon = 'ℹ️') {
