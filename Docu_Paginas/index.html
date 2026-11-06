@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -1489,6 +1489,17 @@
                 icono: '📅',
                 endpoint: 'GET /api/CumplimientosJorge',
                 descripcion: 'Dashboard integral con pestañas: Página 1 (Resumen general y gráfico semanal) y Página 2 (Resumen por Escenario y matrices separadas de Faltantes y Sobrantes con discriminación MP: Sí / No).'
+            },
+            {
+                id: 'balance-escenarios-mp',
+                titulo: 'Balance Sobrantes y Faltantes por Escenario y MP (3500 vs 4200 vs 2300)',
+                archivo: 'Balance_Escenarios_MP.html',
+                categoria: 'CUMPLIMIENTOS',
+                categoriaNombre: 'Cumplimientos PTC',
+                categoriaClase: 'cat-cumplimientos',
+                icono: '⚖️',
+                endpoint: 'GET /api/CumplimientosJorge',
+                descripcion: 'Visualización comparativa tripartita de los 3 escenarios con tarjetas de balance (Sobrante/Faltante), gráfico comparativo y matriz jerárquica SubPlanta ➔ MP ➔ SKU.'
             },
             {
                 id: 'cumplimiento-embutidos',

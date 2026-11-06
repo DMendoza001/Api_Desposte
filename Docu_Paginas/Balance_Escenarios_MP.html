@@ -1,0 +1,1981 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Balance Sobrantes y Faltantes por Escenario y MP | Rico</title>
+
+    <!-- Configuración compartida de conexión a la API y responsive -->
+    <link rel="stylesheet" href="responsive.css?v=3">
+    <script src="config.js"></script>
+
+    <!-- Tipografía Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Chart.js + DataLabels Plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+
+    <!-- SheetJS para Exportación a Excel -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <style>
+        /* =========================================================================
+           🎨 PALETA PANTONE INDUSTRIAL PALETTE
+           #F4D03F (Yellow/Table Accent) | #2E2A2F (Dark Charcoal/Foreground)
+           #CDCAC0 (Warm Light Gray)    | #605C5E (Medium Industrial Gray)
+           #BAA063 (Muted Gold)          | #252C37 (Deep Slate Navy)
+           #878994 (Cool Slate Gray)     | #F8CC5A (Bright Industrial Yellow)
+           #F2F4F8 (App Background)
+           ========================================================================= */
+        :root {
+            --pantone-yellow: #F4D03F;
+            --pantone-yellow-bright: #F8CC5A;
+            --pantone-gold: #BAA063;
+            --pantone-dark: #2E2A2F;
+            --pantone-deep-navy: #252C37;
+            --pantone-gray-med: #605C5E;
+            --pantone-gray-slate: #878994;
+            --pantone-gray-light: #CDCAC0;
+
+            --bg-app: #F2F4F8;
+            --bg-surface: #FFFFFF;
+            --bg-elevated: #F8F9FB;
+            --bg-hover: #ECEEF2;
+            --border-ui: #D7DAE0;
+
+            --text-primary: #2E2A2F;
+            --text-secondary: #605C5E;
+            --text-muted: #878994;
+
+            --color-sobra: #275243;
+            --color-sobra-bg: rgba(39, 82, 67, 0.08);
+            --color-falta: #8F3232;
+            --color-falta-bg: rgba(143, 50, 50, 0.08);
+
+            --shadow-card: 0 2px 10px -2px rgba(46, 42, 47, 0.08), 0 1px 4px -1px rgba(46, 42, 47, 0.04);
+            --radius-md: 12px;
+            --radius-sm: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-app);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.45;
+            padding: 16px 20px;
+        }
+
+        .dashboard-container {
+            max-width: 1820px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            min-width: 0;
+        }
+
+        .dashboard-container > * {
+            min-width: 0;
+        }
+
+        /* =========================================================================
+           CABECERA PRINCIPAL
+           ========================================================================= */
+        .dashboard-header {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-ui);
+            border-radius: var(--radius-md);
+            padding: 14px 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 14px;
+            box-shadow: var(--shadow-card);
+            border-left: 6px solid var(--pantone-yellow);
+        }
+
+        .header-title-group {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .header-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--pantone-deep-navy), var(--pantone-dark));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--pantone-yellow);
+            font-size: 1.3rem;
+            box-shadow: 0 4px 10px rgba(37, 44, 55, 0.25);
+        }
+
+        .header-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--pantone-dark);
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .header-subtitle {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .badge-tag {
+            font-size: 0.72rem;
+            font-weight: 800;
+            background: rgba(244, 208, 63, 0.2);
+            color: #7D6608;
+            border: 1px solid var(--pantone-yellow);
+            padding: 3px 10px;
+            border-radius: 999px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: var(--bg-elevated);
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-ui);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #95A5A6;
+        }
+
+        .status-dot.online {
+            background: #27AE60;
+            box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.2);
+        }
+
+        .status-dot.loading {
+            background: var(--pantone-yellow);
+            animation: pulse 1.4s infinite;
+        }
+
+        .status-dot.error {
+            background: #E74C3C;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.85); }
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 7px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            border: 1px solid var(--border-ui);
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+            transition: all 0.16s ease;
+            user-select: none;
+        }
+
+        .btn:hover {
+            background: var(--bg-hover);
+        }
+
+        .btn-primary {
+            background: var(--pantone-dark);
+            color: #FFFFFF;
+            border-color: var(--pantone-dark);
+        }
+
+        .btn-primary:hover {
+            background: #1F1C20;
+            color: var(--pantone-yellow);
+        }
+
+        .btn-excel {
+            background: #275243;
+            color: #FFFFFF;
+            border-color: #275243;
+        }
+
+        .btn-excel:hover {
+            background: #1E3F33;
+            color: #F8CC5A;
+        }
+
+        /* =========================================================================
+           BARRA DE FILTROS SUPERIOR
+           ========================================================================= */
+        .card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-ui);
+            border-radius: var(--radius-md);
+            padding: 14px 18px;
+            box-shadow: var(--shadow-card);
+            min-width: 0;
+        }
+
+        .filter-header-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-section-title {
+            font-size: 0.78rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--pantone-dark);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .pills-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .pill-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            cursor: pointer;
+            border: 1px solid var(--border-ui);
+            background: var(--bg-elevated);
+            color: var(--text-secondary);
+            transition: all 0.15s ease;
+            user-select: none;
+        }
+
+        .pill-btn:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .pill-btn.active {
+            background: var(--pantone-dark);
+            color: #FFFFFF;
+            border-color: var(--pantone-dark);
+        }
+
+        .pill-btn.active-subplanta {
+            background: var(--pantone-deep-navy);
+            color: #FFFFFF;
+            border-color: var(--pantone-deep-navy);
+        }
+
+        .pill-badge-num {
+            font-size: 0.68rem;
+            padding: 1px 6px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.22);
+            color: inherit;
+        }
+
+        .pill-btn:not(.active) .pill-badge-num {
+            background: var(--border-ui);
+            color: var(--text-secondary);
+        }
+
+        /* COMBOBOX DE SEMANAS */
+        .week-combobox-wrapper {
+            position: relative;
+            min-width: 320px;
+            max-width: 480px;
+            flex: 1;
+        }
+
+        .week-combobox-trigger {
+            width: 100%;
+            padding: 7px 12px;
+            border: 1px solid var(--border-ui);
+            border-radius: var(--radius-sm);
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+            font-size: 0.81rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.15s ease;
+        }
+
+        .week-combobox-trigger:hover {
+            background: var(--bg-hover);
+            border-color: var(--pantone-gray-slate);
+        }
+
+        .week-combobox-dropdown {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-ui);
+            border-radius: var(--radius-sm);
+            box-shadow: 0 10px 24px rgba(46, 42, 47, 0.18);
+            z-index: 1200;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .week-combobox-wrapper.open .week-combobox-dropdown {
+            display: flex;
+        }
+
+        .week-combobox-search-bar {
+            padding: 8px 10px;
+            border-bottom: 1px solid var(--border-ui);
+            background: var(--bg-elevated);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .week-combobox-search-input {
+            width: 100%;
+            padding: 6px 10px;
+            border: 1px solid var(--border-ui);
+            border-radius: 6px;
+            font-size: 0.78rem;
+            outline: none;
+        }
+
+        .week-combobox-search-input:focus {
+            border-color: var(--pantone-yellow);
+        }
+
+        .week-combo-action-btn {
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--border-ui);
+            background: #FFFFFF;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+
+        .week-combo-action-btn:hover {
+            background: var(--pantone-dark);
+            color: var(--pantone-yellow);
+        }
+
+        .week-combobox-list {
+            max-height: 240px;
+            overflow-y: auto;
+            padding: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .week-combobox-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 9px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.78rem;
+            user-select: none;
+        }
+
+        .week-combobox-item:hover {
+            background: var(--bg-hover);
+        }
+
+        .week-combobox-item.checked {
+            background: rgba(244, 208, 63, 0.18);
+            font-weight: 700;
+        }
+
+        .summary-bar {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            background: var(--bg-elevated);
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            border-left: 3px solid var(--pantone-dark);
+            margin-top: 10px;
+        }
+
+        /* =========================================================================
+           TARJETAS DE LOS 3 ESCENARIOS (KPIs PARALELOS)
+           ========================================================================= */
+        .scenarios-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+            min-width: 0;
+        }
+
+        .scenario-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-ui);
+            border-radius: var(--radius-md);
+            padding: 16px 18px;
+            box-shadow: var(--shadow-card);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            position: relative;
+            overflow: hidden;
+            border-top: 5px solid var(--scenario-color, var(--pantone-dark));
+            min-width: 0;
+        }
+
+        .scenario-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .scenario-title {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--pantone-dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .scenario-tag {
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: var(--bg-elevated);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-ui);
+        }
+
+        .scenario-summary-metrics {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+            background: var(--bg-elevated);
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+        }
+
+        .metric-mini-box {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .metric-mini-label {
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.04em;
+        }
+
+        .metric-mini-val {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--pantone-dark);
+        }
+
+        /* BLOQUES DE BALANCE: SOBRANTE Y FALTANTE */
+        .balance-dual-boxes {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .balance-box {
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            border: 1px solid var(--border-ui);
+        }
+
+        .balance-box.sobra {
+            background: var(--color-sobra-bg);
+            border-color: rgba(39, 82, 67, 0.25);
+        }
+
+        .balance-box.falta {
+            background: var(--color-falta-bg);
+            border-color: rgba(143, 50, 50, 0.25);
+        }
+
+        .balance-box-label {
+            font-size: 0.72rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .balance-box.sobra .balance-box-label {
+            color: var(--color-sobra);
+        }
+
+        .balance-box.falta .balance-box-label {
+            color: var(--color-falta);
+        }
+
+        .balance-box-total {
+            font-size: 1.25rem;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+
+        .balance-box.sobra .balance-box-total {
+            color: var(--color-sobra);
+        }
+
+        .balance-box.falta .balance-box-total {
+            color: var(--color-falta);
+        }
+
+        .mp-breakdown-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.72rem;
+            padding-top: 4px;
+            margin-top: 4px;
+            border-top: 1px dashed rgba(0, 0, 0, 0.1);
+        }
+
+        .badge-mp-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            padding: 2px 7px;
+            border-radius: 999px;
+            font-size: 0.68rem;
+            font-weight: 800;
+        }
+
+        .badge-mp-chip.si {
+            background: rgba(244, 208, 63, 0.3);
+            color: #7D6608;
+            border: 1px solid rgba(186, 160, 99, 0.6);
+        }
+
+        .badge-mp-chip.no {
+            background: rgba(135, 137, 148, 0.18);
+            color: #605C5E;
+            border: 1px solid rgba(135, 137, 148, 0.4);
+        }
+
+        /* =========================================================================
+           SECCIÓN DE GRÁFICO COMPARATIVO TRIPARTITO
+           ========================================================================= */
+        .chart-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-ui);
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            box-shadow: var(--shadow-card);
+            min-width: 0;
+        }
+
+        .chart-top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .chart-title {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--pantone-dark);
+        }
+
+        .chart-box {
+            position: relative;
+            width: 100%;
+            height: 320px;
+            min-width: 0;
+        }
+
+        /* =========================================================================
+           TABLA COMPARATIVA TRIPARTITA DE ESCENARIOS Y MATRICES
+           ========================================================================= */
+        .matrix-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-ui);
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            box-shadow: var(--shadow-card);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .matrix-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .search-box {
+            position: relative;
+            min-width: 280px;
+            max-width: 420px;
+            flex: 1;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 7px 12px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-ui);
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+            font-size: 0.8rem;
+            outline: none;
+        }
+
+        .search-box input:focus {
+            border-color: var(--pantone-yellow);
+            background: #FFFFFF;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            max-height: 520px;
+            border: 1px solid var(--border-ui);
+            border-radius: var(--radius-sm);
+            min-width: 0;
+        }
+
+        table.matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.79rem;
+        }
+
+        table.matrix-table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: var(--pantone-deep-navy);
+            color: #FFFFFF;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.69rem;
+            letter-spacing: 0.04em;
+            padding: 8px 10px;
+            text-align: left;
+            border-bottom: 2px solid var(--pantone-yellow);
+            white-space: nowrap;
+        }
+
+        table.matrix-table thead th.num-col {
+            text-align: right;
+        }
+
+        table.matrix-table thead th.th-esc-header {
+            text-align: center;
+            background: #1F252E;
+            border-left: 2px solid rgba(244, 208, 63, 0.4);
+        }
+
+        table.matrix-table thead th.th-sobra {
+            background: #275243;
+            color: #E8F8F5;
+        }
+
+        table.matrix-table thead th.th-falta {
+            background: #6E2C2C;
+            color: #FDEDEC;
+        }
+
+        table.matrix-table tbody td {
+            padding: 7px 10px;
+            border-bottom: 1px solid var(--border-ui);
+            color: var(--text-primary);
+            white-space: nowrap;
+        }
+
+        table.matrix-table tbody td.num-cell {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+
+        table.matrix-table tbody td.col-border-esc {
+            border-left: 2px solid var(--border-ui);
+        }
+
+        tr.level-1 {
+            background: #E8EBF0;
+            font-weight: 700;
+        }
+
+        tr.level-1:hover {
+            background: #DCE0E6;
+        }
+
+        tr.level-2 {
+            background: #F3F5F8;
+            font-weight: 600;
+        }
+
+        tr.level-2:hover {
+            background: #EAECEF;
+        }
+
+        tr.level-mp {
+            background: #F8F9FA;
+            font-weight: 600;
+        }
+
+        tr.level-mp:hover {
+            background: #F0F2F5;
+        }
+
+        tr.level-3 {
+            background: #FFFFFF;
+            font-size: 0.77rem;
+        }
+
+        tr.level-3:hover {
+            background: #F8F9FA;
+        }
+
+        .toggle-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 17px;
+            height: 17px;
+            border-radius: 4px;
+            background: var(--pantone-dark);
+            color: var(--pantone-yellow);
+            font-weight: 800;
+            font-size: 0.72rem;
+            margin-right: 6px;
+            cursor: pointer;
+            user-select: none;
+            line-height: 1;
+        }
+
+        .sku-code-badge {
+            background: var(--bg-elevated);
+            color: var(--pantone-dark);
+            border: 1px solid var(--border-ui);
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-weight: 800;
+            font-size: 0.72rem;
+            margin-right: 6px;
+        }
+
+        .sku-name-text {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .tag-subplanta {
+            background: rgba(37, 44, 55, 0.1);
+            color: var(--pantone-deep-navy);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 800;
+            font-size: 0.72rem;
+            border: 1px solid rgba(37, 44, 55, 0.2);
+        }
+
+        /* TOAST */
+        .toast-notification {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--pantone-dark);
+            color: #FFFFFF;
+            padding: 12px 18px;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.83rem;
+            z-index: 9999;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none;
+            border-left: 4px solid var(--pantone-yellow);
+        }
+
+        .toast-notification.show {
+            transform: translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* DENSIDAD COMPACTA EN LAPTOP (<= 1600px) */
+        @media screen and (max-width: 1600px) {
+            body { padding: 12px 16px; }
+            .scenarios-grid { gap: 12px; }
+            .scenario-card { padding: 12px 14px; gap: 10px; }
+            .chart-box { height: 280px; }
+            .table-responsive { max-height: 460px; }
+        }
+
+        /* TABLET (<= 980px) */
+        @media screen and (max-width: 980px) {
+            .scenarios-grid { grid-template-columns: 1fr; }
+            .balance-dual-boxes { grid-template-columns: 1fr; }
+            .chart-box { height: 250px; }
+        }
+
+        /* CELULAR (<= 768px) */
+        @media screen and (max-width: 768px) {
+            body { padding: 8px 10px; }
+            .dashboard-header { flex-direction: column; align-items: flex-start; }
+            .week-combobox-wrapper { width: 100%; max-width: 100%; }
+            .chart-box { height: 220px; }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-container">
+
+        <!-- CABECERA -->
+        <header class="dashboard-header">
+            <div class="header-title-group">
+                <div class="header-icon">⚖️</div>
+                <div>
+                    <div class="header-title">
+                        <span>Balance de Sobrantes y Faltantes por Escenario y MP</span>
+                        <span class="badge-tag">Pantone Industrial</span>
+                    </div>
+                    <div class="header-subtitle">
+                        Análisis comparativo de los 3 Escenarios (3500, 4200 y 2300) con discriminación de Materia Prima (MP: Sí / No)
+                    </div>
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <div class="status-badge" id="apiStatusBadge">
+                    <span class="status-dot"></span>
+                    <span id="apiStatusText">Buscando servidor...</span>
+                </div>
+
+                <button class="btn btn-excel" onclick="exportarExcel()">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    <span>Exportar Excel</span>
+                </button>
+
+                <button class="btn btn-primary" onclick="recargarDatosAPI(true)">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+                    </svg>
+                    <span>Actualizar</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- FILTROS (AÑO, SUBPLANTA Y SEMANAS) -->
+        <section class="card">
+            <!-- 1. AÑO -->
+            <div class="filter-header-bar">
+                <div class="filter-section-title">1. Año</div>
+                <button class="pill-btn active" id="btnQuickYearAll" onclick="seleccionarFiltroRapidoAnio()">Todos</button>
+            </div>
+            <div class="pills-container" id="yearsPillsContainer"></div>
+
+            <div style="border-top: 1px solid var(--border-ui); margin: 10px 0;"></div>
+
+            <!-- 2. SUBPLANTA -->
+            <div class="filter-header-bar">
+                <div class="filter-section-title">2. SubPlanta</div>
+                <button class="pill-btn active-subplanta" id="btnQuickSpAll" onclick="seleccionarFiltroRapidoSubPlanta()">Todas las SubPlantas</button>
+            </div>
+            <div class="pills-container" id="subplantaPillsContainer"></div>
+
+            <div style="border-top: 1px solid var(--border-ui); margin: 10px 0;"></div>
+
+            <!-- 3. SEMANAS ISO-8601 -->
+            <div class="filter-header-bar">
+                <div class="filter-section-title">3. Semanas ISO-8601 (Lunes a Domingo)</div>
+                <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                    <button class="pill-btn" onclick="seleccionarFiltroRapidoSemana('latest')">Última</button>
+                    <button class="pill-btn" onclick="seleccionarFiltroRapidoSemana('last4')">Últimas 4</button>
+                    <button class="pill-btn active" id="btnQuickLast9" onclick="seleccionarFiltroRapidoSemana('last9')">Últimas 9</button>
+                    <button class="pill-btn" onclick="seleccionarFiltroRapidoSemana('all')">Todas</button>
+                </div>
+            </div>
+
+            <div class="week-combobox-wrapper" id="weekComboboxWrapper">
+                <div class="week-combobox-trigger" onclick="toggleWeekDropdown(event)">
+                    <span id="weekComboboxLabel">Cargando semanas...</span>
+                    <span id="weekComboboxCount" class="pill-badge-num">0</span>
+                </div>
+                <div class="week-combobox-dropdown" id="weekComboboxDropdown" onclick="event.stopPropagation()">
+                    <div class="week-combobox-search-bar">
+                        <input type="text" id="weekSearchInput" class="week-combobox-search-input" placeholder="Buscar semana o fecha (ej. 202645)..." oninput="construirPildorasSemana()">
+                    </div>
+                    <div class="week-combobox-list" id="weekComboboxList"></div>
+                </div>
+            </div>
+
+            <div class="summary-bar" id="selectedWeeksSummary">
+                Cargando resumen de filtros...
+            </div>
+        </section>
+
+        <!-- TARJETAS PARALELAS DE LOS 3 ESCENARIOS (3500, 4200, 2300) -->
+        <section class="scenarios-grid" id="scenariosCardsContainer">
+            <!-- Renderizado dinámico vía JS -->
+        </section>
+
+        <!-- GRÁFICO COMPARATIVO: FALTANTES Y SOBRANTES POR ESCENARIO Y SEMANA -->
+        <section class="chart-card">
+            <div class="chart-top-bar">
+                <div class="chart-title">Comparativo Semanal: Sobrantes (+) y Faltantes (−) por Escenario</div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <div class="pill-btn active" id="btnChartTn" onclick="cambiarUnidadGrafico('Tn')">Toneladas (Tn)</div>
+                    <div class="pill-btn" id="btnChartKg" onclick="cambiarUnidadGrafico('Kg')">Kilos (kg)</div>
+                </div>
+            </div>
+            <div class="chart-box">
+                <canvas id="chartEscenarios"></canvas>
+            </div>
+        </section>
+
+        <!-- TABLA COMPARATIVA TRIPARTITA CON DETALLE DE SUBPLANTA, MP Y SKU -->
+        <section class="matrix-card">
+            <div class="matrix-toolbar">
+                <div class="chart-title">Matriz Comparativa Tripartita: Escenario 3500 vs 4200 vs 2300 (SubPlanta ➔ MP ➔ SKU)</div>
+                <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                    <div class="search-box">
+                        <input type="text" id="searchMatriz" placeholder="Buscar subplanta, MP (Sí/No) o SKU..." oninput="renderizarMatrizTripartita()">
+                    </div>
+                    <button class="btn" onclick="toggleExpandirTodo(true)">⊞ Expandir</button>
+                    <button class="btn" onclick="toggleExpandirTodo(false)">⊟ Contraer</button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="matrix-table" id="tbMatrizTripartita">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" style="min-width: 250px; vertical-align: middle;">Semana / SubPlanta / MP / SKU</th>
+                            <th colspan="3" class="th-esc-header" style="border-left: 3px solid #252C37;">Escenario 3500</th>
+                            <th colspan="3" class="th-esc-header" style="border-left: 3px solid #605C5E;">Escenario 4200</th>
+                            <th colspan="3" class="th-esc-header" style="border-left: 3px solid #BAA063;">Escenario 2300</th>
+                        </tr>
+                        <tr>
+                            <!-- 3500 -->
+                            <th class="num-col th-falta" style="border-left: 3px solid #252C37;">Falta (kg)</th>
+                            <th class="num-col th-sobra">Sobra (kg)</th>
+                            <th class="num-col" style="background:#2E2A2F; color:#F4D03F;">Dif. Neta</th>
+
+                            <!-- 4200 -->
+                            <th class="num-col th-falta" style="border-left: 3px solid #605C5E;">Falta (kg)</th>
+                            <th class="num-col th-sobra">Sobra (kg)</th>
+                            <th class="num-col" style="background:#2E2A2F; color:#F4D03F;">Dif. Neta</th>
+
+                            <!-- 2300 -->
+                            <th class="num-col th-falta" style="border-left: 3px solid #BAA063;">Falta (kg)</th>
+                            <th class="num-col th-sobra">Sobra (kg)</th>
+                            <th class="num-col" style="background:#2E2A2F; color:#F4D03F;">Dif. Neta</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyMatrizTripartita">
+                        <tr>
+                            <td colspan="10" style="text-align:center; padding:30px; color:var(--text-muted);">
+                                Cargando información de escenarios...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- TOAST -->
+    <div id="toastNotification" class="toast-notification">
+        <span id="toastIcon">ℹ️</span>
+        <span id="toastMsg">Mensaje</span>
+    </div>
+
+    <script>
+        // =========================================================================
+        // ⚙️ CONFIGURACIÓN DE CONEXIÓN HÍBRIDA A LA API .NET (Regla Obligatoria)
+        // =========================================================================
+        const APP_CONFIG = {
+            servidor: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.servidor)
+                ? GLOBAL_CONFIG.servidor
+                : "RAEVSALL001",
+            puertos: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.puertos)
+                ? GLOBAL_CONFIG.puertos
+                : [8080, 5000],
+            controllerPath: "/api/CumplimientosJorge",
+            timeoutMs: 30000
+        };
+
+        function generarBasesApi() {
+            if (typeof generarBasesApiGlobal === 'function') {
+                return generarBasesApiGlobal();
+            }
+            const bases = [];
+            for (const puerto of APP_CONFIG.puertos) {
+                bases.push(`http://${APP_CONFIG.servidor}:${puerto}`);
+            }
+            return bases;
+        }
+
+        let apiBaseActiva = null;
+        let cachedInitialPayload = null;
+
+        async function fetchConTimeout(url, timeoutMs = 10000) {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+                const res = await fetch(url, { signal: controller.signal });
+                clearTimeout(id);
+                return res;
+            } catch (err) {
+                clearTimeout(id);
+                throw err;
+            }
+        }
+
+        async function detectarServidorApi() {
+            const bases = generarBasesApi();
+            for (const base of bases) {
+                try {
+                    const res = await fetchConTimeout(`${base}${APP_CONFIG.controllerPath}`, 3500);
+                    if (res.ok) {
+                        try { cachedInitialPayload = await res.json(); } catch (_) { }
+                        return base;
+                    }
+                } catch (e) {
+                    try {
+                        const pingRes = await fetchConTimeout(`${base}/`, 2500);
+                        if (pingRes.ok) return base;
+                    } catch (errPing) { }
+                }
+            }
+            return null;
+        }
+
+        // =========================================================================
+        // 📅 CÁLCULO ISO-8601 DE SEMANAS (Lunes a Domingo - Regla Obligatoria)
+        // =========================================================================
+        function obtenerRangoSemanaISO(semanaNum) {
+            const sStr = String(semanaNum);
+            if (sStr.length < 5) return `Sem. ${semanaNum}`;
+            const anio = parseInt(sStr.substring(0, 4), 10);
+            const sem = parseInt(sStr.substring(4), 10);
+            if (!anio || !sem || sem < 1 || sem > 53) return `Sem. ${semanaNum}`;
+
+            const simple = new Date(Date.UTC(anio, 0, 4));
+            const dayOfWeek = (simple.getUTCDay() + 6) % 7; // 0 = Lunes, 6 = Domingo
+            const isoWeek1Monday = new Date(simple);
+            isoWeek1Monday.setUTCDate(simple.getUTCDate() - dayOfWeek + (sem - 1) * 7);
+
+            const sunday = new Date(isoWeek1Monday);
+            sunday.setUTCDate(isoWeek1Monday.getUTCDate() + 6);
+
+            const fmt = (d) => `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
+            return `Sem. ${String(sem).padStart(2, '0')} (${fmt(isoWeek1Monday)} al ${fmt(sunday)})`;
+        }
+
+        // =========================================================================
+        // 🗂️ ESTADO GLOBAL
+        // =========================================================================
+        let consolidatedRows = [];
+        let totalSkusMaestro = 0;
+        let selectedYears = new Set();
+        let selectedSubPlantas = new Set();
+        let selectedWeeks = new Set();
+        let aniosDisponibles = [];
+        let subPlantasDisponibles = [];
+        let semanasDisponibles = [];
+        const ESCENARIOS_OBJETIVO = ['3500', '4200', '2300'];
+
+        let chartInstance = null;
+        let unidadGrafico = 'Tn';
+        let expandedNodes = new Set();
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            initChartDefaults();
+            document.addEventListener('click', (e) => {
+                const wrapper = document.getElementById('weekComboboxWrapper');
+                if (wrapper && !wrapper.contains(e.target)) wrapper.classList.remove('open');
+            });
+            await inicializarDashboard();
+        });
+
+        function initChartDefaults() {
+            if (typeof ChartDataLabels !== 'undefined') Chart.register(ChartDataLabels);
+            Chart.defaults.color = '#605C5E';
+            Chart.defaults.font.family = "'Inter', sans-serif";
+        }
+
+        async function inicializarDashboard() {
+            const statusBadge = document.getElementById('apiStatusBadge');
+            const statusText = document.getElementById('apiStatusText');
+            statusText.textContent = `Buscando ${APP_CONFIG.servidor}...`;
+            document.querySelector('.status-dot').className = 'status-dot loading';
+
+            try {
+                apiBaseActiva = await detectarServidorApi();
+                if (!apiBaseActiva) throw new Error(`No se pudo conectar a ${APP_CONFIG.servidor}`);
+
+                const urlObj = new URL(apiBaseActiva);
+                statusBadge.innerHTML = `<span class="status-dot online"></span><span>En Línea (${urlObj.host})</span>`;
+                mostrarToast(`Conectado al servidor en ${urlObj.host}`, '✅');
+                await recargarDatosAPI(false);
+            } catch (err) {
+                console.error(err);
+                statusBadge.innerHTML = `<span class="status-dot error"></span><span style="color:#B84A4A">Sin Conexión</span>`;
+                mostrarToast(`Error: ${err.message}`, '⚠️');
+            }
+        }
+
+        function extraerCampo(obj, ...claves) {
+            if (!obj) return null;
+            for (const k of claves) {
+                if (obj[k] !== undefined && obj[k] !== null) return obj[k];
+            }
+            const objKeys = Object.keys(obj);
+            for (const k of claves) {
+                const kLower = String(k).toLowerCase();
+                const foundKey = objKeys.find(ok => ok.toLowerCase() === kLower);
+                if (foundKey !== undefined && obj[foundKey] !== undefined && obj[foundKey] !== null) {
+                    return obj[foundKey];
+                }
+            }
+            return null;
+        }
+
+        function normalizarCodigoCorto(valor) {
+            if (valor === null || valor === undefined) return '';
+            const raw = String(valor).trim();
+            if (!raw) return '';
+            if (/^\d+$/.test(raw) && raw.length < 5) return raw.padStart(5, '0');
+            return raw;
+        }
+
+        function normalizarMP(valor) {
+            if (valor === null || valor === undefined) return 'No';
+            const raw = String(valor).trim().toUpperCase();
+            if (!raw || raw === '--' || raw === '-' || raw === 'NO' || raw === 'N' || raw === '0' || raw === 'SIN MP') {
+                return 'No';
+            }
+            if (raw === 'MP' || raw === 'SI' || raw === 'SÍ' || raw === 'S' || raw === '1' || raw.includes('MP')) {
+                return 'Sí';
+            }
+            return 'Sí';
+        }
+
+        async function recargarDatosAPI(forzar = false) {
+            mostrarToast("Leyendo tablas desde API .NET...", "⏳");
+            try {
+                let payload = null;
+                if (!forzar && cachedInitialPayload) {
+                    payload = cachedInitialPayload;
+                    cachedInitialPayload = null;
+                } else {
+                    const url = `${apiBaseActiva}${APP_CONFIG.controllerPath}${forzar ? '?recargar=true' : ''}`;
+                    const res = await fetchConTimeout(url, APP_CONFIG.timeoutMs);
+                    if (!res.ok) throw new Error("Error al obtener datos desde la API");
+                    payload = await res.json();
+                }
+
+                const tablas = payload.tablas || payload.Tablas || payload;
+                const tResProdPyDb = extraerCampo(tablas, 'T_ResProd_Py_DB', 't_ResProd_Py_DB') || [];
+                const tDemandaPy = extraerCampo(tablas, 'T_DemandaPy', 't_DemandaPy') || [];
+                let tCodigoRelacion = extraerCampo(tablas, 'T_CodigoRelacion', 't_CodigoRelacion') || [];
+
+                totalSkusMaestro = tCodigoRelacion.length;
+                procesarYConsolidarTablas(tResProdPyDb, tDemandaPy, tCodigoRelacion);
+
+                aniosDisponibles = [...new Set(consolidatedRows.map(d => d.Anio))].filter(Boolean).sort((a, b) => a - b);
+                subPlantasDisponibles = [...new Set(consolidatedRows.map(d => d.SubPlanta))].filter(Boolean).sort();
+                semanasDisponibles = [...new Set(consolidatedRows.map(d => d.Semana))].filter(Boolean).sort((a, b) => a - b);
+
+                if (selectedYears.size === 0) aniosDisponibles.forEach(y => selectedYears.add(y));
+                if (selectedSubPlantas.size === 0) subPlantasDisponibles.forEach(sp => selectedSubPlantas.add(sp));
+                if (selectedWeeks.size === 0) semanasDisponibles.slice(-9).forEach(s => selectedWeeks.add(s));
+
+                if (expandedNodes.size === 0 && semanasDisponibles.length > 0) {
+                    const ultSem = semanasDisponibles[semanasDisponibles.length - 1];
+                    expandedNodes.add(`sem_${ultSem}`);
+                    if (subPlantasDisponibles.length > 0) {
+                        expandedNodes.add(`sem_${ultSem}_sp_${subPlantasDisponibles[0]}`);
+                    }
+                }
+
+                construirPildorasAnio();
+                construirPildorasSubPlanta();
+                construirPildorasSemana();
+
+                actualizarVista();
+                mostrarToast(`Datos sincronizados: ${consolidatedRows.length} registros consolidados`, "✅");
+            } catch (e) {
+                console.error(e);
+                mostrarToast(e.message, "❌");
+            }
+        }
+
+        function procesarYConsolidarTablas(tResProdPyDb, tDemandaPy, tCodigoRelacion = []) {
+            const mapaRelacionMaestro = new Map();
+
+            tCodigoRelacion.forEach(row => {
+                const rawCod = extraerCampo(row, 'CodigoCorto', 'codigoCorto', 'Codigo', 'codigo');
+                const codNorm = normalizarCodigoCorto(rawCod);
+                if (!codNorm) return;
+
+                const nom = String(extraerCampo(row, 'Nombre', 'nombre', 'Descripcion') ?? '').trim();
+                const sp = String(extraerCampo(row, 'SubPlanta', 'subPlanta') ?? '').trim().toUpperCase();
+                const rawTipoMp = extraerCampo(row, 'TipoMP', 'tipoMP', 'tipomp');
+                const mp = normalizarMP(rawTipoMp);
+
+                const item = { CodigoCorto: codNorm, Nombre: nom, SubPlanta: sp, TipoMP: mp };
+                mapaRelacionMaestro.set(codNorm, item);
+                const rawTrim = String(rawCod).trim();
+                if (rawTrim) mapaRelacionMaestro.set(rawTrim, item);
+                if (/^\d+$/.test(codNorm)) mapaRelacionMaestro.set(String(parseInt(codNorm, 10)), item);
+            });
+
+            const mapaConsolidado = new Map();
+
+            const acumular = (lista, tipoCampo) => {
+                lista.forEach(row => {
+                    const semRaw = extraerCampo(row, 'Semana', 'semana');
+                    const sem = parseInt(semRaw, 10);
+                    if (!sem || isNaN(sem)) return;
+
+                    const rawCod = extraerCampo(row, 'CodigoCorto', 'codigoCorto');
+                    const codNorm = normalizarCodigoCorto(rawCod) || 'SIN-COD';
+
+                    const rel = mapaRelacionMaestro.get(codNorm) || (rawCod ? mapaRelacionMaestro.get(String(rawCod).trim()) : null) || {};
+                    const cod = rel.CodigoCorto || codNorm;
+                    const sp = rel.SubPlanta || String(extraerCampo(row, 'SubPlanta', 'subPlanta') ?? '').trim().toUpperCase() || 'SIN SUBPLANTA';
+                    const nom = rel.Nombre || String(extraerCampo(row, 'Nombre', 'nombre') ?? '').trim() || 'SIN NOMBRE';
+                    const mp = rel.TipoMP || normalizarMP(extraerCampo(row, 'TipoMP', 'tipoMP'));
+
+                    const kilos = Number(extraerCampo(row, 'Kilos', 'kilos') ?? 0) || 0;
+                    const escRaw = extraerCampo(row, 'Escenario', 'escenario');
+                    const esc = (escRaw !== null && escRaw !== undefined && String(escRaw).trim() !== '') ? String(escRaw).trim() : 'SIN ESCENARIO';
+
+                    const sStr = String(sem);
+                    const anio = sStr.length >= 4 ? parseInt(sStr.substring(0, 4), 10) : 0;
+                    const nSem = sStr.length >= 5 ? parseInt(sStr.substring(4), 10) : 0;
+
+                    const key = `${esc}|${sem}|${sp}|${cod}`;
+                    if (!mapaConsolidado.has(key)) {
+                        mapaConsolidado.set(key, {
+                            Escenario: esc,
+                            Semana: sem,
+                            Anio: anio,
+                            NSemana: nSem,
+                            SubPlanta: sp,
+                            TipoMP: mp,
+                            CodigoCorto: cod,
+                            Nombre: nom,
+                            PROG_PRODUCCION: 0,
+                            PROYECCION_COMERCIAL: 0
+                        });
+                    }
+
+                    mapaConsolidado.get(key)[tipoCampo] += kilos;
+                });
+            };
+
+            acumular(tResProdPyDb, 'PROG_PRODUCCION');
+            acumular(tDemandaPy, 'PROYECCION_COMERCIAL');
+
+            consolidatedRows = Array.from(mapaConsolidado.values()).sort((a, b) =>
+                a.Semana - b.Semana ||
+                a.Escenario.localeCompare(b.Escenario, undefined, { numeric: true }) ||
+                a.SubPlanta.localeCompare(b.SubPlanta) ||
+                b.TipoMP.localeCompare(a.TipoMP) ||
+                a.CodigoCorto.localeCompare(b.CodigoCorto, undefined, { numeric: true })
+            );
+        }
+
+        // =========================================================================
+        // 🎛️ FILTROS (AÑO, SUBPLANTA Y SEMANAS)
+        // =========================================================================
+        function construirPildorasAnio() {
+            const container = document.getElementById('yearsPillsContainer');
+            container.innerHTML = '';
+            aniosDisponibles.forEach(y => {
+                const btn = document.createElement('div');
+                btn.className = `pill-btn ${selectedYears.has(y) ? 'active' : ''}`;
+                btn.innerHTML = `<span>Año ${y}</span>`;
+                btn.onclick = () => {
+                    if (selectedYears.has(y)) {
+                        if (selectedYears.size > 1) selectedYears.delete(y);
+                    } else selectedYears.add(y);
+                    construirPildorasAnio();
+                    construirPildorasSemana();
+                    actualizarVista();
+                };
+                container.appendChild(btn);
+            });
+            document.getElementById('btnQuickYearAll').classList.toggle('active', selectedYears.size === aniosDisponibles.length);
+        }
+
+        function seleccionarFiltroRapidoAnio() {
+            selectedYears.clear();
+            aniosDisponibles.forEach(y => selectedYears.add(y));
+            construirPildorasAnio();
+            construirPildorasSemana();
+            actualizarVista();
+        }
+
+        function construirPildorasSubPlanta() {
+            const container = document.getElementById('subplantaPillsContainer');
+            container.innerHTML = '';
+            subPlantasDisponibles.forEach(sp => {
+                const count = new Set(consolidatedRows.filter(d => d.SubPlanta === sp).map(d => d.CodigoCorto)).size;
+                const btn = document.createElement('div');
+                btn.className = `pill-btn ${selectedSubPlantas.has(sp) ? 'active-subplanta' : ''}`;
+                btn.innerHTML = `<span>${sp}</span><span class="pill-badge-num">${count} SKUs</span>`;
+                btn.onclick = () => {
+                    if (selectedSubPlantas.has(sp)) {
+                        if (selectedSubPlantas.size > 1) selectedSubPlantas.delete(sp);
+                    } else selectedSubPlantas.add(sp);
+                    construirPildorasSubPlanta();
+                    actualizarVista();
+                };
+                container.appendChild(btn);
+            });
+            document.getElementById('btnQuickSpAll').classList.toggle('active-subplanta', selectedSubPlantas.size === subPlantasDisponibles.length);
+        }
+
+        function seleccionarFiltroRapidoSubPlanta() {
+            selectedSubPlantas.clear();
+            subPlantasDisponibles.forEach(sp => selectedSubPlantas.add(sp));
+            construirPildorasSubPlanta();
+            actualizarVista();
+        }
+
+        function toggleWeekDropdown(e) {
+            if (e) e.stopPropagation();
+            const wrapper = document.getElementById('weekComboboxWrapper');
+            wrapper?.classList.toggle('open');
+            if (wrapper?.classList.contains('open')) {
+                document.getElementById('weekSearchInput')?.focus();
+            }
+        }
+
+        function construirPildorasSemana() {
+            const listContainer = document.getElementById('weekComboboxList');
+            if (!listContainer) return;
+            listContainer.innerHTML = '';
+
+            const semanasValidas = semanasDisponibles.filter(s => selectedYears.has(parseInt(String(s).substring(0, 4), 10)));
+            const filtroTexto = (document.getElementById('weekSearchInput')?.value || '').trim().toLowerCase();
+            const ordenadasDesc = [...semanasValidas].sort((a, b) => b - a);
+
+            ordenadasDesc.forEach(s => {
+                const rangoStr = obtenerRangoSemanaISO(s);
+                if (filtroTexto && !`sem ${s} ${rangoStr}`.toLowerCase().includes(filtroTexto)) return;
+
+                const isSelected = selectedWeeks.has(s);
+                const item = document.createElement('label');
+                item.className = `week-combobox-item ${isSelected ? 'checked' : ''}`;
+                item.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <input type="checkbox" ${isSelected ? 'checked' : ''}>
+                        <span>Sem ${s}</span>
+                    </div>
+                    <span style="font-size:0.7rem; color:var(--text-secondary);">${rangoStr}</span>
+                `;
+                const cb = item.querySelector('input');
+                cb.onchange = () => {
+                    if (cb.checked) selectedWeeks.add(s);
+                    else {
+                        if (selectedWeeks.size > 1) selectedWeeks.delete(s);
+                        else { cb.checked = true; return; }
+                    }
+                    construirPildorasSemana();
+                    actualizarVista();
+                };
+                listContainer.appendChild(item);
+            });
+
+            const selCount = semanasValidas.filter(s => selectedWeeks.has(s)).length;
+            document.getElementById('weekComboboxCount').textContent = `${selCount} / ${semanasValidas.length}`;
+            const labelEl = document.getElementById('weekComboboxLabel');
+            if (labelEl) {
+                if (selCount === semanasValidas.length) labelEl.textContent = `Todas las semanas (${selCount})`;
+                else if (selCount === 1) labelEl.textContent = `Sem ${Array.from(selectedWeeks)[0]}`;
+                else labelEl.textContent = `${selCount} semanas seleccionadas`;
+            }
+        }
+
+        function seleccionarFiltroRapidoSemana(modo) {
+            selectedWeeks.clear();
+            const semanasValidas = semanasDisponibles.filter(s => selectedYears.has(parseInt(String(s).substring(0, 4), 10)));
+            if (modo === 'all') semanasValidas.forEach(s => selectedWeeks.add(s));
+            else if (modo === 'last9') semanasValidas.slice(-9).forEach(s => selectedWeeks.add(s));
+            else if (modo === 'last4') semanasValidas.slice(-4).forEach(s => selectedWeeks.add(s));
+            else if (modo === 'latest') {
+                if (semanasValidas.length) selectedWeeks.add(semanasValidas[semanasValidas.length - 1]);
+            }
+            construirPildorasSemana();
+            actualizarVista();
+        }
+
+        function obtenerFilasFiltradas() {
+            return consolidatedRows.filter(d =>
+                selectedYears.has(d.Anio) &&
+                selectedSubPlantas.has(d.SubPlanta) &&
+                selectedWeeks.has(d.Semana)
+            );
+        }
+
+        function formatKg(n) {
+            return (n || 0).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        }
+
+        function formatTn(n) {
+            return ((n || 0) / 1000).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function calcPct(prog, com) {
+            if (!com || com === 0) return 0;
+            return (prog / com) * 100;
+        }
+
+        // =========================================================================
+        // 🔄 ACTUALIZACIÓN PRINCIPAL DE LA VISTA
+        // =========================================================================
+        function actualizarVista() {
+            const data = obtenerFilasFiltradas();
+            const summary = document.getElementById('selectedWeeksSummary');
+            summary.innerHTML = `Mostrando: Años <b>[${Array.from(selectedYears).join(', ')}]</b> • SubPlantas <b>[${selectedSubPlantas.size}]</b> • Semanas <b>[${selectedWeeks.size}]</b> • Total Registros: <b>${data.length}</b>`;
+
+            renderizarTarjetasEscenarios(data);
+            renderizarGraficoEscenarios(data);
+            renderizarMatrizTripartita();
+        }
+
+        // =========================================================================
+        // 1. TARJETAS DE ESCENARIOS (3500, 4200, 2300)
+        // =========================================================================
+        function renderizarTarjetasEscenarios(data) {
+            const container = document.getElementById('scenariosCardsContainer');
+            container.innerHTML = '';
+
+            const coloresEscenario = {
+                '3500': '#252C37', // Deep Slate Navy
+                '4200': '#605C5E', // Medium Industrial Gray
+                '2300': '#BAA063'  // Muted Gold
+            };
+
+            ESCENARIOS_OBJETIVO.forEach(esc => {
+                const sub = data.filter(d => d.Escenario === esc);
+
+                let totalProg = 0, totalCom = 0;
+                let sobraTotal = 0, sobraMpSi = 0, sobraMpNo = 0;
+                let faltaTotal = 0, faltaMpSi = 0, faltaMpNo = 0;
+
+                sub.forEach(d => {
+                    totalProg += d.PROG_PRODUCCION;
+                    totalCom += d.PROYECCION_COMERCIAL;
+                    const dif = d.PROG_PRODUCCION - d.PROYECCION_COMERCIAL;
+                    const esMp = d.TipoMP === 'Sí';
+
+                    if (dif > 0) {
+                        sobraTotal += dif;
+                        if (esMp) sobraMpSi += dif;
+                        else sobraMpNo += dif;
+                    } else if (dif < 0) {
+                        const f = Math.abs(dif);
+                        faltaTotal += f;
+                        if (esMp) faltaMpSi += f;
+                        else faltaMpNo += f;
+                    }
+                });
+
+                const difNeta = totalProg - totalCom;
+                const pct = calcPct(totalProg, totalCom);
+                const colorEsc = coloresEscenario[esc] || '#252C37';
+
+                const card = document.createElement('div');
+                card.className = 'scenario-card';
+                card.style.setProperty('--scenario-color', colorEsc);
+                card.innerHTML = `
+                    <div class="scenario-header">
+                        <div class="scenario-title">
+                            <span style="display:inline-block; width:12px; height:12px; border-radius:50%; background:${colorEsc};"></span>
+                            <span>Escenario ${esc}</span>
+                        </div>
+                        <span class="scenario-tag">${sub.length} registros</span>
+                    </div>
+
+                    <div class="scenario-summary-metrics">
+                        <div class="metric-mini-box">
+                            <span class="metric-mini-label">Prog. Prod.</span>
+                            <span class="metric-mini-val">${formatKg(totalProg)} kg</span>
+                        </div>
+                        <div class="metric-mini-box">
+                            <span class="metric-mini-label">Proy. Com.</span>
+                            <span class="metric-mini-val">${formatKg(totalCom)} kg</span>
+                        </div>
+                        <div class="metric-mini-box" style="margin-top:4px;">
+                            <span class="metric-mini-label">Diferencia Neta</span>
+                            <span class="metric-mini-val" style="color:${difNeta >= 0 ? 'var(--color-sobra)' : 'var(--color-falta)'};">
+                                ${difNeta >= 0 ? '+' : ''}${formatKg(difNeta)} kg
+                            </span>
+                        </div>
+                        <div class="metric-mini-box" style="margin-top:4px;">
+                            <span class="metric-mini-label">% Cumplimiento</span>
+                            <span class="metric-mini-val" style="color:${pct >= 98 ? 'var(--color-sobra)' : '#BAA063'};">${pct.toFixed(2)}%</span>
+                        </div>
+                    </div>
+
+                    <div class="balance-dual-boxes">
+                        <!-- SOBRANTE -->
+                        <div class="balance-box sobra">
+                            <div class="balance-box-label">
+                                <span>🟢 Sobrante</span>
+                                <span style="font-size:0.68rem; font-weight:700;">+${formatTn(sobraTotal)} Tn</span>
+                            </div>
+                            <div class="balance-box-total">+${formatKg(sobraTotal)} <small style="font-size:0.75rem;">kg</small></div>
+                            <div class="mp-breakdown-row">
+                                <span class="badge-mp-chip si">MP Sí</span>
+                                <b>+${formatKg(sobraMpSi)} kg</b>
+                            </div>
+                            <div class="mp-breakdown-row">
+                                <span class="badge-mp-chip no">MP No</span>
+                                <span>+${formatKg(sobraMpNo)} kg</span>
+                            </div>
+                        </div>
+
+                        <!-- FALTANTE -->
+                        <div class="balance-box falta">
+                            <div class="balance-box-label">
+                                <span>🔴 Faltante</span>
+                                <span style="font-size:0.68rem; font-weight:700;">-${formatTn(faltaTotal)} Tn</span>
+                            </div>
+                            <div class="balance-box-total">-${formatKg(faltaTotal)} <small style="font-size:0.75rem;">kg</small></div>
+                            <div class="mp-breakdown-row">
+                                <span class="badge-mp-chip si">MP Sí</span>
+                                <b>-${formatKg(faltaMpSi)} kg</b>
+                            </div>
+                            <div class="mp-breakdown-row">
+                                <span class="badge-mp-chip no">MP No</span>
+                                <span>-${formatKg(faltaMpNo)} kg</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // =========================================================================
+        // 2. GRÁFICO COMPARATIVO SEMANAL DE LOS 3 ESCENARIOS
+        // =========================================================================
+        function cambiarUnidadGrafico(u) {
+            unidadGrafico = u;
+            document.getElementById('btnChartTn').classList.toggle('active', u === 'Tn');
+            document.getElementById('btnChartKg').classList.toggle('active', u === 'Kg');
+            renderizarGraficoEscenarios(obtenerFilasFiltradas());
+        }
+
+        function renderizarGraficoEscenarios(data) {
+            const ctx = document.getElementById('chartEscenarios').getContext('2d');
+            if (chartInstance) chartInstance.destroy();
+
+            const semanas = [...new Set(data.map(d => d.Semana))].sort((a, b) => a - b);
+            const factor = unidadGrafico === 'Tn' ? 1000 : 1;
+
+            const datasets = [];
+            const configEscenarios = [
+                { esc: '3500', label: 'Esc. 3500', colorSobra: 'rgba(39, 82, 67, 0.9)', colorFalta: 'rgba(143, 50, 50, 0.9)' },
+                { esc: '4200', label: 'Esc. 4200', colorSobra: 'rgba(39, 82, 67, 0.65)', colorFalta: 'rgba(143, 50, 50, 0.65)' },
+                { esc: '2300', label: 'Esc. 2300', colorSobra: 'rgba(186, 160, 99, 0.85)', colorFalta: 'rgba(186, 160, 99, 0.45)' }
+            ];
+
+            configEscenarios.forEach(cfg => {
+                const dSobra = [], dFalta = [];
+                semanas.forEach(s => {
+                    const sub = data.filter(d => d.Semana === s && d.Escenario === cfg.esc);
+                    let sTot = 0, fTot = 0;
+                    sub.forEach(d => {
+                        const dif = d.PROG_PRODUCCION - d.PROYECCION_COMERCIAL;
+                        if (dif > 0) sTot += dif;
+                        else if (dif < 0) fTot += Math.abs(dif);
+                    });
+                    dSobra.push(Math.round(sTot / factor));
+                    dFalta.push(-Math.round(fTot / factor));
+                });
+
+                datasets.push({
+                    type: 'bar',
+                    label: `${cfg.label} (+ Sobra)`,
+                    data: dSobra,
+                    backgroundColor: cfg.colorSobra,
+                    borderRadius: 4
+                });
+
+                datasets.push({
+                    type: 'bar',
+                    label: `${cfg.label} (− Falta)`,
+                    data: dFalta,
+                    backgroundColor: cfg.colorFalta,
+                    borderRadius: 4
+                });
+            });
+
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: semanas.map(s => {
+                        const str = String(s);
+                        return str.length >= 5 ? `Sem ${parseInt(str.substring(4), 10)}` : `Sem ${s}`;
+                    }),
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: { boxWidth: 12, font: { weight: 600, size: 10.5 }, color: '#2E2A2F' }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => ` ${ctx.dataset.label}: ${Math.abs(ctx.raw).toLocaleString('es-PE')} ${unidadGrafico}`
+                            }
+                        },
+                        datalabels: { display: false }
+                    },
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: {
+                            grid: { color: '#E2E5EB' },
+                            ticks: {
+                                callback: v => `${Math.abs(v).toLocaleString('es-PE')} ${unidadGrafico}`
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // =========================================================================
+        // 3. MATRIZ TRIPARTITA (SEMANA -> SUBPLANTA -> MP -> SKU)
+        // =========================================================================
+        function toggleNode(id) {
+            if (expandedNodes.has(id)) expandedNodes.delete(id);
+            else expandedNodes.add(id);
+            renderizarMatrizTripartita();
+        }
+
+        function toggleExpandirTodo(exp) {
+            expandedNodes.clear();
+            if (exp) {
+                const data = obtenerFilasFiltradas();
+                data.forEach(d => {
+                    expandedNodes.add(`sem_${d.Semana}`);
+                    expandedNodes.add(`sem_${d.Semana}_sp_${d.SubPlanta}`);
+                    expandedNodes.add(`sem_${d.Semana}_sp_${d.SubPlanta}_mp_${d.TipoMP}`);
+                });
+            }
+            renderizarMatrizTripartita();
+        }
+
+        function renderizarMatrizTripartita() {
+            const data = obtenerFilasFiltradas();
+            const tbody = document.getElementById('tbodyMatrizTripartita');
+            tbody.innerHTML = '';
+
+            const term = (document.getElementById('searchMatriz')?.value || '').trim().toUpperCase();
+
+            // Agrupar en jerarquía: Semana -> SubPlanta -> MP -> SKU
+            const mapSem = new Map();
+
+            data.forEach(d => {
+                if (!mapSem.has(d.Semana)) {
+                    mapSem.set(d.Semana, {
+                        Semana: d.Semana,
+                        subPlantas: new Map(),
+                        escData: { '3500': { falta: 0, sobra: 0, dif: 0 }, '4200': { falta: 0, sobra: 0, dif: 0 }, '2300': { falta: 0, sobra: 0, dif: 0 } }
+                    });
+                }
+                const sNode = mapSem.get(d.Semana);
+                const dif = d.PROG_PRODUCCION - d.PROYECCION_COMERCIAL;
+                if (sNode.escData[d.Escenario]) {
+                    sNode.escData[d.Escenario].dif += dif;
+                    if (dif > 0) sNode.escData[d.Escenario].sobra += dif;
+                    else if (dif < 0) sNode.escData[d.Escenario].falta += Math.abs(dif);
+                }
+
+                if (!sNode.subPlantas.has(d.SubPlanta)) {
+                    sNode.subPlantas.set(d.SubPlanta, {
+                        SubPlanta: d.SubPlanta,
+                        mpGroups: new Map(),
+                        escData: { '3500': { falta: 0, sobra: 0, dif: 0 }, '4200': { falta: 0, sobra: 0, dif: 0 }, '2300': { falta: 0, sobra: 0, dif: 0 } }
+                    });
+                }
+                const spNode = sNode.subPlantas.get(d.SubPlanta);
+                if (spNode.escData[d.Escenario]) {
+                    spNode.escData[d.Escenario].dif += dif;
+                    if (dif > 0) spNode.escData[d.Escenario].sobra += dif;
+                    else if (dif < 0) spNode.escData[d.Escenario].falta += Math.abs(dif);
+                }
+
+                const mpKey = d.TipoMP;
+                if (!spNode.mpGroups.has(mpKey)) {
+                    spNode.mpGroups.set(mpKey, {
+                        TipoMP: mpKey,
+                        skus: new Map(),
+                        escData: { '3500': { falta: 0, sobra: 0, dif: 0 }, '4200': { falta: 0, sobra: 0, dif: 0 }, '2300': { falta: 0, sobra: 0, dif: 0 } }
+                    });
+                }
+                const mpNode = spNode.mpGroups.get(mpKey);
+                if (mpNode.escData[d.Escenario]) {
+                    mpNode.escData[d.Escenario].dif += dif;
+                    if (dif > 0) mpNode.escData[d.Escenario].sobra += dif;
+                    else if (dif < 0) mpNode.escData[d.Escenario].falta += Math.abs(dif);
+                }
+
+                const skuKey = d.CodigoCorto;
+                if (!mpNode.skus.has(skuKey)) {
+                    mpNode.skus.set(skuKey, {
+                        CodigoCorto: d.CodigoCorto,
+                        Nombre: d.Nombre,
+                        TipoMP: d.TipoMP,
+                        escData: { '3500': { falta: 0, sobra: 0, dif: 0 }, '4200': { falta: 0, sobra: 0, dif: 0 }, '2300': { falta: 0, sobra: 0, dif: 0 } }
+                    });
+                }
+                const skuNode = mpNode.skus.get(skuKey);
+                if (skuNode.escData[d.Escenario]) {
+                    skuNode.escData[d.Escenario].dif += dif;
+                    if (dif > 0) skuNode.escData[d.Escenario].sobra += dif;
+                    else if (dif < 0) skuNode.escData[d.Escenario].falta += Math.abs(dif);
+                }
+            });
+
+            const semList = Array.from(mapSem.values()).sort((a, b) => b.Semana - a.Semana);
+
+            semList.forEach(sNode => {
+                const sId = `sem_${sNode.Semana}`;
+                const isSemExp = expandedNodes.has(sId) || (term.length > 0);
+
+                const trSem = document.createElement('tr');
+                trSem.className = 'level-1';
+                trSem.innerHTML = `
+                    <td>
+                        <span class="toggle-icon" onclick="toggleNode('${sId}')">${isSemExp ? '−' : '+'}</span>
+                        <b>Semana ${sNode.Semana}</b>
+                        <span style="font-size:0.72rem; color:var(--text-secondary); margin-left:6px;">${obtenerRangoSemanaISO(sNode.Semana)}</span>
+                    </td>
+                    ${renderCeldasEscenarios(sNode.escData, true)}
+                `;
+                tbody.appendChild(trSem);
+
+                if (isSemExp) {
+                    const spList = Array.from(sNode.subPlantas.values()).sort((a, b) => a.SubPlanta.localeCompare(b.SubPlanta));
+                    spList.forEach(spNode => {
+                        const spId = `sem_${sNode.Semana}_sp_${spNode.SubPlanta}`;
+                        const isSpExp = expandedNodes.has(spId) || (term.length > 0);
+
+                        const trSp = document.createElement('tr');
+                        trSp.className = 'level-2';
+                        trSp.innerHTML = `
+                            <td style="padding-left: 32px;">
+                                <span class="toggle-icon" onclick="toggleNode('${spId}')">${isSpExp ? '−' : '+'}</span>
+                                <span class="tag-subplanta">${spNode.SubPlanta}</span>
+                            </td>
+                            ${renderCeldasEscenarios(spNode.escData, false)}
+                        `;
+                        tbody.appendChild(trSp);
+
+                        if (isSpExp) {
+                            const mpList = Array.from(spNode.mpGroups.values()).sort((a, b) => b.TipoMP.localeCompare(a.TipoMP));
+                            mpList.forEach(mpNode => {
+                                const mpId = `sem_${sNode.Semana}_sp_${spNode.SubPlanta}_mp_${mpNode.TipoMP}`;
+                                const isMpExp = expandedNodes.has(mpId) || (term.length > 0);
+
+                                const trMp = document.createElement('tr');
+                                trMp.className = 'level-mp';
+                                trMp.innerHTML = `
+                                    <td style="padding-left: 54px;">
+                                        <span class="toggle-icon" onclick="toggleNode('${mpId}')">${isMpExp ? '−' : '+'}</span>
+                                        <span class="badge-mp-chip ${mpNode.TipoMP === 'Sí' ? 'si' : 'no'}">MP: ${mpNode.TipoMP}</span>
+                                        <span style="font-size:0.72rem; color:var(--text-secondary); margin-left:6px;">(${mpNode.skus.size} SKUs)</span>
+                                    </td>
+                                    ${renderCeldasEscenarios(mpNode.escData, false)}
+                                `;
+                                tbody.appendChild(trMp);
+
+                                if (isMpExp) {
+                                    const skusList = Array.from(mpNode.skus.values()).sort((a, b) =>
+                                        a.CodigoCorto.localeCompare(b.CodigoCorto, undefined, { numeric: true })
+                                    );
+
+                                    skusList.forEach(sku => {
+                                        if (term.length > 0) {
+                                            const match = spNode.SubPlanta.toUpperCase().includes(term) ||
+                                                mpNode.TipoMP.toUpperCase().includes(term) ||
+                                                sku.CodigoCorto.toUpperCase().includes(term) ||
+                                                sku.Nombre.toUpperCase().includes(term);
+                                            if (!match) return;
+                                        }
+
+                                        const trSku = document.createElement('tr');
+                                        trSku.className = 'level-3';
+                                        trSku.innerHTML = `
+                                            <td style="padding-left: 78px;">
+                                                <span class="sku-code-badge">${sku.CodigoCorto}</span>
+                                                <span class="sku-name-text">${sku.Nombre}</span>
+                                            </td>
+                                            ${renderCeldasEscenarios(sku.escData, false)}
+                                        `;
+                                        tbody.appendChild(trSku);
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        function renderCeldasEscenarios(escData, isBold = false) {
+            let html = '';
+            ESCENARIOS_OBJETIVO.forEach(esc => {
+                const item = escData[esc] || { falta: 0, sobra: 0, dif: 0 };
+                const faltaStr = item.falta > 0 ? `-${formatKg(item.falta)}` : '0';
+                const sobraStr = item.sobra > 0 ? `+${formatKg(item.sobra)}` : '0';
+                const difStr = (item.dif >= 0 ? '+' : '') + formatKg(item.dif);
+                const difColor = item.dif >= 0 ? 'var(--color-sobra)' : 'var(--color-falta)';
+
+                html += `
+                    <td class="num-cell col-border-esc" style="${isBold ? 'font-weight:700;' : ''} color:${item.falta > 0 ? 'var(--color-falta)' : 'inherit'};">${faltaStr}</td>
+                    <td class="num-cell" style="${isBold ? 'font-weight:700;' : ''} color:${item.sobra > 0 ? 'var(--color-sobra)' : 'inherit'};">${sobraStr}</td>
+                    <td class="num-cell" style="font-weight:800; color:${difColor};">${difStr}</td>
+                `;
+            });
+            return html;
+        }
+
+        // =========================================================================
+        // 📤 EXPORTAR A EXCEL
+        // =========================================================================
+        function exportarExcel() {
+            const data = obtenerFilasFiltradas();
+            if (data.length === 0) {
+                mostrarToast("No hay datos para exportar", "⚠️");
+                return;
+            }
+
+            const filasExcel = data.map(d => {
+                const dif = d.PROG_PRODUCCION - d.PROYECCION_COMERCIAL;
+                return {
+                    "Escenario": d.Escenario,
+                    "Año": d.Anio,
+                    "Semana": d.Semana,
+                    "Rango Semana ISO": obtenerRangoSemanaISO(d.Semana),
+                    "SubPlanta": d.SubPlanta,
+                    "Tipo MP": d.TipoMP,
+                    "CodigoCorto": d.CodigoCorto,
+                    "Nombre": d.Nombre,
+                    "Prog. Prod. (kg)": Math.round(d.PROG_PRODUCCION),
+                    "Proy. Com. (kg)": Math.round(d.PROYECCION_COMERCIAL),
+                    "Faltante (kg)": dif < 0 ? Math.round(Math.abs(dif)) : 0,
+                    "Sobrante (kg)": dif > 0 ? Math.round(dif) : 0,
+                    "Diferencia Neta (kg)": Math.round(dif),
+                    "% Cumplimiento": Number(calcPct(d.PROG_PRODUCCION, d.PROYECCION_COMERCIAL).toFixed(2))
+                };
+            });
+
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(filasExcel), "Balance_Sobrantes_Faltantes");
+            XLSX.writeFile(wb, `Balance_Escenarios_MP_${new Date().toISOString().slice(0, 10)}.xlsx`);
+            mostrarToast("Archivo Excel descargado exitosamente", "✅");
+        }
+
+        function mostrarToast(msg, icon = 'ℹ️') {
+            const toast = document.getElementById('toastNotification');
+            document.getElementById('toastIcon').textContent = icon;
+            document.getElementById('toastMsg').textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3500);
+        }
+    </script>
+</body>
+
+</html>
