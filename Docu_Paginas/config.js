@@ -28,14 +28,17 @@ function generarBasesApiGlobal() {
         }
     }
 
-    // 2. Si se abre en la misma máquina (localhost / 127.0.0.1 / archivo local), probar localhost primero para autodetección inmediata en cualquier PC
+    // 2. Si se abre en la misma máquina (localhost / 127.0.0.1 / archivo local), probar localhost y 127.0.0.1
     var hostNavegador = (typeof window !== 'undefined' && window.location && window.location.hostname) ? window.location.hostname.toLowerCase() : "";
     var esNavegacionLocal = (!hostNavegador || hostNavegador === "localhost" || hostNavegador === "127.0.0.1");
 
     if (esNavegacionLocal) {
-        for (var l = 0; l < puertos.length; l++) {
-            var localCand = "http://localhost:" + puertos[l];
-            if (bases.indexOf(localCand) === -1) bases.push(localCand);
+        var hostsLocales = (hostNavegador === "127.0.0.1") ? ["127.0.0.1", "localhost"] : ["localhost", "127.0.0.1"];
+        for (var h = 0; h < hostsLocales.length; h++) {
+            for (var l = 0; l < puertos.length; l++) {
+                var localCand = "http://" + hostsLocales[h] + ":" + puertos[l];
+                if (bases.indexOf(localCand) === -1) bases.push(localCand);
+            }
         }
     }
 

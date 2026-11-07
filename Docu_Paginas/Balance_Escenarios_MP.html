@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -24,39 +24,52 @@
 
     <style>
         /* =========================================================================
-           🎨 PALETA PANTONE INDUSTRIAL PALETTE
-           #F4D03F (Yellow/Table Accent) | #2E2A2F (Dark Charcoal/Foreground)
-           #CDCAC0 (Warm Light Gray)    | #605C5E (Medium Industrial Gray)
-           #BAA063 (Muted Gold)          | #252C37 (Deep Slate Navy)
-           #878994 (Cool Slate Gray)     | #F8CC5A (Bright Industrial Yellow)
-           #F2F4F8 (App Background)
+           🎨 PALETA: SLATE STEEL & AERONAVAL LIGHT (PaletaAzules_SlateSteel_Light.json)
+           Azul pizarra (#334155 / #475569), azul marino profundo (#1E293B / #0F172A),
+           lienzo (#F8FAFC / #FFFFFF), bordes (#E2E8F0), acentos acero (#475569 / #64748B).
            ========================================================================= */
         :root {
-            --pantone-yellow: #F4D03F;
-            --pantone-yellow-bright: #F8CC5A;
-            --pantone-gold: #BAA063;
-            --pantone-dark: #2E2A2F;
-            --pantone-deep-navy: #252C37;
-            --pantone-gray-med: #605C5E;
-            --pantone-gray-slate: #878994;
-            --pantone-gray-light: #CDCAC0;
-
-            --bg-app: #F2F4F8;
+            --bg-app: #F8FAFC;
             --bg-surface: #FFFFFF;
-            --bg-elevated: #F8F9FB;
-            --bg-hover: #ECEEF2;
-            --border-ui: #D7DAE0;
+            --bg-elevated: #F1F5F9;
+            --bg-hover: #E2E8F0;
+            --border-ui: #E2E8F0;
+            --border-subtle: #F1F5F9;
+            --border-strong: #94A3B8;
 
-            --text-primary: #2E2A2F;
-            --text-secondary: #605C5E;
-            --text-muted: #878994;
+            --text-heading: #1E293B;
+            --text-primary: #334155;
+            --text-secondary: #475569;
+            --text-muted: #64748B;
+            --text-inverse: #FFFFFF;
 
-            --color-sobra: #275243;
-            --color-sobra-bg: rgba(39, 82, 67, 0.08);
-            --color-falta: #8F3232;
-            --color-falta-bg: rgba(143, 50, 50, 0.08);
+            --primary: #334155;
+            --primary-hover: #1E293B;
+            --primary-active: #0F172A;
+            --secondary: #475569;
+            --accent: #475569;
+            --accent-hover: #334155;
+            --accent-soft: #F1F5F9;
+            --accent-text: #1E293B;
+            --accent-border: #CBD5E1;
 
-            --shadow-card: 0 2px 10px -2px rgba(46, 42, 47, 0.08), 0 1px 4px -1px rgba(46, 42, 47, 0.04);
+            --header-from: #1E293B;
+            --header-to: #334155;
+            --header-line: #64748B;
+            --header-muted: #94A3B8;
+            --header-text: #FFFFFF;
+
+            --color-sobra: #059669;
+            --color-sobra-bg: #ECFDF5;
+            --color-sobra-text: #065F46;
+            --color-sobra-border: #A7F3D0;
+
+            --color-falta: #E11D48;
+            --color-falta-bg: #FFF1F2;
+            --color-falta-text: #9F1239;
+            --color-falta-border: #FECDD3;
+
+            --shadow-card: 0 1px 3px 0 rgba(15, 23, 42, 0.08), 0 1px 2px -1px rgba(15, 23, 42, 0.04);
             --radius-md: 12px;
             --radius-sm: 8px;
         }
@@ -93,7 +106,7 @@
            CABECERA PRINCIPAL
            ========================================================================= */
         .dashboard-header {
-            background: var(--bg-surface);
+            background: linear-gradient(135deg, var(--header-from) 0%, var(--header-to) 100%);
             border: 1px solid var(--border-ui);
             border-radius: var(--radius-md);
             padding: 14px 22px;
@@ -102,8 +115,8 @@
             justify-content: space-between;
             flex-wrap: wrap;
             gap: 14px;
-            box-shadow: var(--shadow-card);
-            border-left: 6px solid var(--pantone-yellow);
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.15);
+            border-left: 6px solid var(--header-line);
         }
 
         .header-title-group {
@@ -116,19 +129,20 @@
             width: 44px;
             height: 44px;
             border-radius: 10px;
-            background: linear-gradient(135deg, var(--pantone-deep-navy), var(--pantone-dark));
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(148, 163, 184, 0.35);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--pantone-yellow);
+            color: var(--header-muted);
             font-size: 1.3rem;
-            box-shadow: 0 4px 10px rgba(37, 44, 55, 0.25);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
 
         .header-title {
             font-size: 1.25rem;
             font-weight: 800;
-            color: var(--pantone-dark);
+            color: var(--header-text);
             letter-spacing: -0.02em;
             display: flex;
             align-items: center;
@@ -138,16 +152,16 @@
 
         .header-subtitle {
             font-size: 0.82rem;
-            color: var(--text-secondary);
+            color: var(--header-muted);
             margin-top: 2px;
         }
 
         .badge-tag {
             font-size: 0.72rem;
             font-weight: 800;
-            background: rgba(244, 208, 63, 0.2);
-            color: #7D6608;
-            border: 1px solid var(--pantone-yellow);
+            background: var(--accent-soft);
+            color: var(--accent-text);
+            border: 1px solid var(--accent-border);
             padding: 3px 10px;
             border-radius: 999px;
             text-transform: uppercase;
@@ -165,34 +179,34 @@
             display: inline-flex;
             align-items: center;
             gap: 7px;
-            background: var(--bg-elevated);
+            background: rgba(255, 255, 255, 0.12);
             padding: 6px 12px;
             border-radius: 999px;
             font-size: 0.75rem;
             font-weight: 600;
-            color: var(--text-secondary);
-            border: 1px solid var(--border-ui);
+            color: #FFFFFF;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .status-dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: #95A5A6;
+            background: #94A3B8;
         }
 
         .status-dot.online {
-            background: #27AE60;
-            box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.2);
+            background: var(--color-sobra);
+            box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.25);
         }
 
         .status-dot.loading {
-            background: var(--pantone-yellow);
+            background: #64748B;
             animation: pulse 1.4s infinite;
         }
 
         .status-dot.error {
-            background: #E74C3C;
+            background: var(--color-falta);
         }
 
         @keyframes pulse {
@@ -218,28 +232,29 @@
 
         .btn:hover {
             background: var(--bg-hover);
+            border-color: var(--border-strong);
         }
 
         .btn-primary {
-            background: var(--pantone-dark);
+            background: #0F172A;
             color: #FFFFFF;
-            border-color: var(--pantone-dark);
+            border-color: #0F172A;
         }
 
         .btn-primary:hover {
-            background: #1F1C20;
-            color: var(--pantone-yellow);
+            background: var(--primary);
+            color: #FFFFFF;
         }
 
         .btn-excel {
-            background: #275243;
+            background: var(--color-sobra);
             color: #FFFFFF;
-            border-color: #275243;
+            border-color: var(--color-sobra);
         }
 
         .btn-excel:hover {
-            background: #1E3F33;
-            color: #F8CC5A;
+            background: #047857;
+            color: #FFFFFF;
         }
 
         /* =========================================================================
@@ -268,7 +283,7 @@
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            color: var(--pantone-dark);
+            color: var(--text-heading);
             display: flex;
             align-items: center;
             gap: 6px;
@@ -299,19 +314,19 @@
 
         .pill-btn:hover {
             background: var(--bg-hover);
-            color: var(--text-primary);
+            color: var(--text-heading);
         }
 
         .pill-btn.active {
-            background: var(--pantone-dark);
+            background: var(--primary);
             color: #FFFFFF;
-            border-color: var(--pantone-dark);
+            border-color: var(--primary);
         }
 
         .pill-btn.active-subplanta {
-            background: var(--pantone-deep-navy);
+            background: var(--secondary);
             color: #FFFFFF;
-            border-color: var(--pantone-deep-navy);
+            border-color: var(--secondary);
         }
 
         .pill-badge-num {
@@ -322,9 +337,9 @@
             color: inherit;
         }
 
-        .pill-btn:not(.active) .pill-badge-num {
+        .pill-btn:not(.active):not(.active-subplanta) .pill-badge-num {
             background: var(--border-ui);
-            color: var(--text-secondary);
+            color: var(--text-muted);
         }
 
         /* COMBOBOX DE SEMANAS */
@@ -354,7 +369,7 @@
 
         .week-combobox-trigger:hover {
             background: var(--bg-hover);
-            border-color: var(--pantone-gray-slate);
+            border-color: var(--secondary);
         }
 
         .week-combobox-dropdown {
@@ -365,7 +380,7 @@
             background: var(--bg-surface);
             border: 1px solid var(--border-ui);
             border-radius: var(--radius-sm);
-            box-shadow: 0 10px 24px rgba(46, 42, 47, 0.18);
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18);
             z-index: 1200;
             display: none;
             flex-direction: column;
@@ -395,7 +410,7 @@
         }
 
         .week-combobox-search-input:focus {
-            border-color: var(--pantone-yellow);
+            border-color: var(--secondary);
         }
 
         .week-combo-action-btn {
@@ -410,8 +425,8 @@
         }
 
         .week-combo-action-btn:hover {
-            background: var(--pantone-dark);
-            color: var(--pantone-yellow);
+            background: var(--primary);
+            color: #FFFFFF;
         }
 
         .week-combobox-list {
@@ -439,7 +454,8 @@
         }
 
         .week-combobox-item.checked {
-            background: rgba(244, 208, 63, 0.18);
+            background: var(--accent-soft);
+            color: var(--accent-text);
             font-weight: 700;
         }
 
@@ -449,7 +465,7 @@
             background: var(--bg-elevated);
             padding: 8px 12px;
             border-radius: var(--radius-sm);
-            border-left: 3px solid var(--pantone-dark);
+            border-left: 3px solid var(--secondary);
             margin-top: 10px;
         }
 
@@ -474,7 +490,7 @@
             gap: 12px;
             position: relative;
             overflow: hidden;
-            border-top: 5px solid var(--scenario-color, var(--pantone-dark));
+            border-top: 5px solid var(--scenario-color, var(--primary));
             min-width: 0;
         }
 
@@ -488,7 +504,7 @@
         .scenario-title {
             font-size: 1.15rem;
             font-weight: 800;
-            color: var(--pantone-dark);
+            color: var(--text-heading);
             display: flex;
             align-items: center;
             gap: 8px;
@@ -529,7 +545,7 @@
         .metric-mini-val {
             font-size: 1.05rem;
             font-weight: 800;
-            color: var(--pantone-dark);
+            color: var(--text-heading);
         }
 
         /* BLOQUES DE BALANCE: SOBRANTE Y FALTANTE */
@@ -550,12 +566,12 @@
 
         .balance-box.sobra {
             background: var(--color-sobra-bg);
-            border-color: rgba(39, 82, 67, 0.25);
+            border-color: var(--color-sobra-border);
         }
 
         .balance-box.falta {
             background: var(--color-falta-bg);
-            border-color: rgba(143, 50, 50, 0.25);
+            border-color: var(--color-falta-border);
         }
 
         .balance-box-label {
@@ -596,7 +612,7 @@
             font-size: 0.72rem;
             padding-top: 4px;
             margin-top: 4px;
-            border-top: 1px dashed rgba(0, 0, 0, 0.1);
+            border-top: 1px dashed var(--border-ui);
         }
 
         .badge-mp-chip {
@@ -610,15 +626,15 @@
         }
 
         .badge-mp-chip.si {
-            background: rgba(244, 208, 63, 0.3);
-            color: #7D6608;
-            border: 1px solid rgba(186, 160, 99, 0.6);
+            background: #F1F5F9;
+            color: #1E293B;
+            border: 1px solid #CBD5E1;
         }
 
         .badge-mp-chip.no {
-            background: rgba(135, 137, 148, 0.18);
-            color: #605C5E;
-            border: 1px solid rgba(135, 137, 148, 0.4);
+            background: #F8FAFC;
+            color: #64748B;
+            border: 1px solid #E2E8F0;
         }
 
         /* =========================================================================
@@ -645,7 +661,7 @@
         .chart-title {
             font-size: 0.95rem;
             font-weight: 800;
-            color: var(--pantone-dark);
+            color: var(--text-heading);
         }
 
         .chart-box {
@@ -697,7 +713,7 @@
         }
 
         .search-box input:focus {
-            border-color: var(--pantone-yellow);
+            border-color: var(--secondary);
             background: #FFFFFF;
         }
 
@@ -719,7 +735,7 @@
             position: sticky;
             top: 0;
             z-index: 10;
-            background: var(--pantone-deep-navy);
+            background: var(--primary);
             color: #FFFFFF;
             font-weight: 700;
             text-transform: uppercase;
@@ -727,7 +743,7 @@
             letter-spacing: 0.04em;
             padding: 8px 10px;
             text-align: left;
-            border-bottom: 2px solid var(--pantone-yellow);
+            border-bottom: 2px solid #64748B;
             white-space: nowrap;
         }
 
@@ -737,18 +753,18 @@
 
         table.matrix-table thead th.th-esc-header {
             text-align: center;
-            background: #1F252E;
-            border-left: 2px solid rgba(244, 208, 63, 0.4);
+            background: #1E293B;
+            border-left: 2px solid #475569;
         }
 
         table.matrix-table thead th.th-sobra {
-            background: #275243;
-            color: #E8F8F5;
+            background: #065F46;
+            color: #ECFDF5;
         }
 
         table.matrix-table thead th.th-falta {
-            background: #6E2C2C;
-            color: #FDEDEC;
+            background: #9F1239;
+            color: #FFF1F2;
         }
 
         table.matrix-table tbody td {
@@ -768,39 +784,43 @@
         }
 
         tr.level-1 {
-            background: #E8EBF0;
+            background: #F1F5F9;
             font-weight: 700;
+            color: #1E293B;
         }
 
         tr.level-1:hover {
-            background: #DCE0E6;
+            background: #E2E8F0;
         }
 
         tr.level-2 {
-            background: #F3F5F8;
+            background: #F8FAFC;
             font-weight: 600;
+            color: #334155;
         }
 
         tr.level-2:hover {
-            background: #EAECEF;
+            background: #F1F5F9;
         }
 
         tr.level-mp {
-            background: #F8F9FA;
+            background: #FFFFFF;
             font-weight: 600;
+            color: #334155;
         }
 
         tr.level-mp:hover {
-            background: #F0F2F5;
+            background: #F8FAFC;
         }
 
         tr.level-3 {
             background: #FFFFFF;
             font-size: 0.77rem;
+            color: #334155;
         }
 
         tr.level-3:hover {
-            background: #F8F9FA;
+            background: #F1F5F9;
         }
 
         .toggle-icon {
@@ -810,8 +830,8 @@
             width: 17px;
             height: 17px;
             border-radius: 4px;
-            background: var(--pantone-dark);
-            color: var(--pantone-yellow);
+            background: var(--primary);
+            color: #FFFFFF;
             font-weight: 800;
             font-size: 0.72rem;
             margin-right: 6px;
@@ -822,7 +842,7 @@
 
         .sku-code-badge {
             background: var(--bg-elevated);
-            color: var(--pantone-dark);
+            color: var(--text-heading);
             border: 1px solid var(--border-ui);
             padding: 1px 6px;
             border-radius: 4px;
@@ -837,13 +857,13 @@
         }
 
         .tag-subplanta {
-            background: rgba(37, 44, 55, 0.1);
-            color: var(--pantone-deep-navy);
+            background: #F1F5F9;
+            color: #1E293B;
             padding: 2px 8px;
             border-radius: 4px;
             font-weight: 800;
             font-size: 0.72rem;
-            border: 1px solid rgba(37, 44, 55, 0.2);
+            border: 1px solid #CBD5E1;
         }
 
         /* TOAST */
@@ -851,7 +871,7 @@
             position: fixed;
             bottom: 24px;
             right: 24px;
-            background: var(--pantone-dark);
+            background: #1E293B;
             color: #FFFFFF;
             padding: 12px 18px;
             border-radius: 8px;
@@ -865,7 +885,7 @@
             opacity: 0;
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             pointer-events: none;
-            border-left: 4px solid var(--pantone-yellow);
+            border-left: 4px solid #64748B;
         }
 
         .toast-notification.show {
@@ -910,7 +930,7 @@
                 <div>
                     <div class="header-title">
                         <span>Balance de Sobrantes y Faltantes por Escenario y MP</span>
-                        <span class="badge-tag">Pantone Industrial</span>
+                        <span class="badge-tag">Slate Steel Light</span>
                     </div>
                     <div class="header-subtitle">
                         Análisis comparativo de los 3 Escenarios (3500, 4200 y 2300) con discriminación de Materia Prima (MP: Sí / No)
@@ -1028,25 +1048,25 @@
                     <thead>
                         <tr>
                             <th rowspan="2" style="min-width: 250px; vertical-align: middle;">Semana / SubPlanta / MP / SKU</th>
-                            <th colspan="3" class="th-esc-header" style="border-left: 3px solid #252C37;">Escenario 3500</th>
-                            <th colspan="3" class="th-esc-header" style="border-left: 3px solid #605C5E;">Escenario 4200</th>
-                            <th colspan="3" class="th-esc-header" style="border-left: 3px solid #BAA063;">Escenario 2300</th>
+                            <th colspan="3" class="th-esc-header" style="border-left: 3px solid #1E293B;">Escenario 3500</th>
+                            <th colspan="3" class="th-esc-header" style="border-left: 3px solid #334155;">Escenario 4200</th>
+                            <th colspan="3" class="th-esc-header" style="border-left: 3px solid #64748B;">Escenario 2300</th>
                         </tr>
                         <tr>
                             <!-- 3500 -->
-                            <th class="num-col th-falta" style="border-left: 3px solid #252C37;">Falta (kg)</th>
+                            <th class="num-col th-falta" style="border-left: 3px solid #1E293B;">Falta (kg)</th>
                             <th class="num-col th-sobra">Sobra (kg)</th>
-                            <th class="num-col" style="background:#2E2A2F; color:#F4D03F;">Dif. Neta</th>
+                            <th class="num-col" style="background:#1E293B; color:#FFFFFF;">Dif. Neta</th>
 
                             <!-- 4200 -->
-                            <th class="num-col th-falta" style="border-left: 3px solid #605C5E;">Falta (kg)</th>
+                            <th class="num-col th-falta" style="border-left: 3px solid #334155;">Falta (kg)</th>
                             <th class="num-col th-sobra">Sobra (kg)</th>
-                            <th class="num-col" style="background:#2E2A2F; color:#F4D03F;">Dif. Neta</th>
+                            <th class="num-col" style="background:#334155; color:#FFFFFF;">Dif. Neta</th>
 
                             <!-- 2300 -->
-                            <th class="num-col th-falta" style="border-left: 3px solid #BAA063;">Falta (kg)</th>
+                            <th class="num-col th-falta" style="border-left: 3px solid #64748B;">Falta (kg)</th>
                             <th class="num-col th-sobra">Sobra (kg)</th>
-                            <th class="num-col" style="background:#2E2A2F; color:#F4D03F;">Dif. Neta</th>
+                            <th class="num-col" style="background:#475569; color:#FFFFFF;">Dif. Neta</th>
                         </tr>
                     </thead>
                     <tbody id="tbodyMatrizTripartita">
@@ -1113,18 +1133,26 @@
         async function detectarServidorApi() {
             const bases = generarBasesApi();
             for (const base of bases) {
+                // 1. Ping ultrarrápido al healthcheck de la API
                 try {
-                    const res = await fetchConTimeout(`${base}${APP_CONFIG.controllerPath}`, 3500);
+                    const pingHealth = await fetchConTimeout(`${base}/api/health`, 2000);
+                    if (pingHealth.ok) return base;
+                } catch (_) { }
+
+                // 2. Ping a la raíz del servidor
+                try {
+                    const pingRes = await fetchConTimeout(`${base}/`, 1500);
+                    if (pingRes.ok) return base;
+                } catch (_) { }
+
+                // 3. Fallback directo al endpoint del controlador
+                try {
+                    const res = await fetchConTimeout(`${base}${APP_CONFIG.controllerPath}`, 8000);
                     if (res.ok) {
                         try { cachedInitialPayload = await res.json(); } catch (_) { }
                         return base;
                     }
-                } catch (e) {
-                    try {
-                        const pingRes = await fetchConTimeout(`${base}/`, 2500);
-                        if (pingRes.ok) return base;
-                    } catch (errPing) { }
-                }
+                } catch (e) { }
             }
             return null;
         }
@@ -1179,7 +1207,7 @@
 
         function initChartDefaults() {
             if (typeof ChartDataLabels !== 'undefined') Chart.register(ChartDataLabels);
-            Chart.defaults.color = '#605C5E';
+            Chart.defaults.color = '#64748B';
             Chart.defaults.font.family = "'Inter', sans-serif";
         }
 
@@ -1535,9 +1563,9 @@
             container.innerHTML = '';
 
             const coloresEscenario = {
-                '3500': '#252C37', // Deep Slate Navy
-                '4200': '#605C5E', // Medium Industrial Gray
-                '2300': '#BAA063'  // Muted Gold
+                '3500': '#1E293B', // Slate Navy Profundo
+                '4200': '#334155', // Slate Steel Primario
+                '2300': '#64748B'  // Muted Slate Acero
             };
 
             ESCENARIOS_OBJETIVO.forEach(esc => {
@@ -1567,7 +1595,7 @@
 
                 const difNeta = totalProg - totalCom;
                 const pct = calcPct(totalProg, totalCom);
-                const colorEsc = coloresEscenario[esc] || '#252C37';
+                const colorEsc = coloresEscenario[esc] || '#334155';
 
                 const card = document.createElement('div');
                 card.className = 'scenario-card';
@@ -1598,7 +1626,7 @@
                         </div>
                         <div class="metric-mini-box" style="margin-top:4px;">
                             <span class="metric-mini-label">% Cumplimiento</span>
-                            <span class="metric-mini-val" style="color:${pct >= 98 ? 'var(--color-sobra)' : '#BAA063'};">${pct.toFixed(2)}%</span>
+                            <span class="metric-mini-val" style="color:${pct >= 98 ? 'var(--color-sobra)' : '#64748B'};">${pct.toFixed(2)}%</span>
                         </div>
                     </div>
 
@@ -1661,9 +1689,9 @@
 
             const datasets = [];
             const configEscenarios = [
-                { esc: '3500', label: 'Esc. 3500', colorSobra: 'rgba(39, 82, 67, 0.9)', colorFalta: 'rgba(143, 50, 50, 0.9)' },
-                { esc: '4200', label: 'Esc. 4200', colorSobra: 'rgba(39, 82, 67, 0.65)', colorFalta: 'rgba(143, 50, 50, 0.65)' },
-                { esc: '2300', label: 'Esc. 2300', colorSobra: 'rgba(186, 160, 99, 0.85)', colorFalta: 'rgba(186, 160, 99, 0.45)' }
+                { esc: '3500', label: 'Esc. 3500', colorSobra: 'rgba(5, 150, 105, 0.95)', colorFalta: 'rgba(225, 29, 72, 0.95)' },
+                { esc: '4200', label: 'Esc. 4200', colorSobra: 'rgba(5, 150, 105, 0.65)', colorFalta: 'rgba(225, 29, 72, 0.65)' },
+                { esc: '2300', label: 'Esc. 2300', colorSobra: 'rgba(71, 85, 105, 0.85)', colorFalta: 'rgba(100, 116, 139, 0.65)' }
             ];
 
             configEscenarios.forEach(cfg => {
@@ -1712,7 +1740,7 @@
                     plugins: {
                         legend: {
                             position: 'top',
-                            labels: { boxWidth: 12, font: { weight: 600, size: 10.5 }, color: '#2E2A2F' }
+                            labels: { boxWidth: 12, font: { weight: 600, size: 10.5 }, color: '#1E293B' }
                         },
                         tooltip: {
                             callbacks: {
@@ -1722,10 +1750,14 @@
                         datalabels: { display: false }
                     },
                     scales: {
-                        x: { grid: { display: false } },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#475569' }
+                        },
                         y: {
-                            grid: { color: '#E2E5EB' },
+                            grid: { color: '#E2E8F0' },
                             ticks: {
+                                color: '#64748B',
                                 callback: v => `${Math.abs(v).toLocaleString('es-PE')} ${unidadGrafico}`
                             }
                         }
