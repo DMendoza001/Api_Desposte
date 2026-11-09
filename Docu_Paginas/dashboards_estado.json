@@ -12,5 +12,6 @@
   "Presupuestos_Final.html": true,
   "Informe_Costo_Produccion.html": false,
   "Personal_Prueba.html": false,
-  "Planilla_ConCarga_Archivo.html": false
+  "Planilla_ConCarga_Archivo.html": false,
+  "InformeCabezas.html": true
 }

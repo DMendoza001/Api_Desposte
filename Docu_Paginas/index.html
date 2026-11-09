@@ -1410,7 +1410,7 @@
         // (Se excluyeron los de prueba y temporales)
         // =========================================================================
         const LISTA_DASHBOARDS = [
-            // OPERACIONES (4)
+            // OPERACIONES (5)
             {
                 id: 'informe-diario',
                 titulo: 'Informe Diario de Operaciones',
@@ -1454,6 +1454,18 @@
                 icono: '🥩',
                 endpoint: 'GET /api/ProdChuletas',
                 descripcion: 'Control y rendimiento del Area de Chuletas'
+            },
+
+            {
+                id: 'informe-Prod. Cabezas',
+                titulo: 'Informe Produccion de Cabezas',
+                archivo: 'InformeCabezas.html',
+                categoria: 'OPERACIONES',
+                categoriaNombre: 'Operaciones',
+                categoriaClase: 'cat-operaciones',
+                icono: '📋',
+                endpoint: 'GET /api/InformeCabezas',
+                descripcion: 'Informe de producción de cabezas de cerdo, y saldos de cabezas sin procesar'
             },
 
             // CUMPLIMIENTOS PTC
