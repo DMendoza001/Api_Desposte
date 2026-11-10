@@ -2,6 +2,7 @@ using Dapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Data;
+using System.Globalization;
 
 namespace ApiDesposte.Controllers.Sql
 {
@@ -25,19 +26,45 @@ namespace ApiDesposte.Controllers.Sql
 
         private static (string f1, string f2) NormalizarFechas(string? fechaInicio, string? fechaFin)
         {
-            string f1 = string.IsNullOrWhiteSpace(fechaInicio) ? "2026-01-01T00:00:00" : fechaInicio.Trim();
-            if (!f1.Contains('T') && !f1.Contains(' '))
-            {
-                f1 = $"{f1}T00:00:00";
-            }
+            DateTime hoy = DateTime.Today;
+            DateTime inicioDefault = hoy.AddDays(-7);
 
-            string f2 = string.IsNullOrWhiteSpace(fechaFin) ? "2026-08-31T23:59:59" : fechaFin.Trim();
-            if (!f2.Contains('T') && !f2.Contains(' '))
-            {
-                f2 = $"{f2}T23:59:59";
-            }
+            string f1 = FormatearFechaIndividual(fechaInicio, inicioDefault, esFechaFinal: false);
+            string f2 = FormatearFechaIndividual(fechaFin, hoy, esFechaFinal: true);
 
             return (f1, f2);
+        }
+
+        private static string FormatearFechaIndividual(string? input, DateTime valorPorDefecto, bool esFechaFinal)
+        {
+            string sufijoHora = esFechaFinal ? "T23:59:59" : "T00:00:00";
+
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                return $"{valorPorDefecto:yyyy-MM-dd}{sufijoHora}";
+            }
+
+            string limpio = input.Trim();
+
+            if (limpio.Contains('T') && limpio.Length >= 19)
+            {
+                return limpio;
+            }
+
+            string[] formatos = { "yyyy-MM-dd", "dd/MM/yyyy", "dd-MM-yyyy", "yyyy/MM/dd", "M/d/yyyy", "d/M/yyyy" };
+            if (DateTime.TryParseExact(limpio, formatos, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime fechaExacta) ||
+                DateTime.TryParse(limpio, new CultureInfo("es-PE"), DateTimeStyles.None, out fechaExacta) ||
+                DateTime.TryParse(limpio, CultureInfo.InvariantCulture, DateTimeStyles.None, out fechaExacta))
+            {
+                return $"{fechaExacta:yyyy-MM-dd}{sufijoHora}";
+            }
+
+            if (!limpio.Contains('T') && !limpio.Contains(' '))
+            {
+                return $"{limpio}{sufijoHora}";
+            }
+
+            return limpio;
         }
 
         private async Task<List<ProdCabezaItemDto>> ObtenerDatosSpAsync(string f1, string f2, bool forzarRecarga = false)
