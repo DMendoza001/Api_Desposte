@@ -520,7 +520,7 @@ html, body {
     .sticky-col,
     th.sticky-col,
     td.sticky-col,
-    table.matrix-table th:first-child,
+    table.matrix-table th:first-child:not(.metric-header),
     table.matrix-table td:first-child,
     table.detail-table th:first-child,
     table.detail-table td:first-child,

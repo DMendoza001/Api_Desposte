@@ -31,3 +31,11 @@ Todos los archivos `.html` en `Docu_Paginas/` deben seguir el estándar de dise�
 - Aplicar `min-width: 0` tanto en hijos de **CSS Grid** como de **Flexbox** (`.dashboard-container > *`, `.kpi-card`, `.chart-card`, `.matrix-card`) para evitar que tablas anchas o gráficos desborden la pantalla.
 - Mantener las 4 tarjetas KPI en una sola fila en laptops (`repeat(4, minmax(0, 1fr))` o `minmax(185px, 1fr)`, nunca `minmax(260px, 1fr)`).
 - Activar la densidad compacta de laptop desde **`@media screen and (max-width: 1600px)`** (para cubrir laptops Full HD 1920x1080 con escala de Windows al 125% = `1536px`, además de 150% y 1366x768) y adaptar filtros, gráficos y columnas fijas en tablets (`<= 980px`) y celulares (`<= 768px`).
+
+### 5. Matrices Jerárquicas sin Iconos Decorativos (Regla Obligatoria)
+Toda tabla o matriz jerárquica de los dashboards en `Docu_Paginas/` debe mostrar sus etiquetas como **texto plano**:
+- **Único icono permitido:** el control de expansión/colapso, porque comunica una acción. Cualquier icono, emoji o pictograma meramente decorativo se elimina.
+- **Etiquetas planas:** los niveles se muestran sin fondo, borde, sombra ni decoración adicional; sólo tipografía y colores de la paleta.
+- **Limpieza por CSS:** las decoraciones se anulan con reglas de hoja de estilos, sin modificar la lógica que genera las filas.
+- **Jerarquía por estructura:** la profundidad se comunica con sangría, peso tipográfico y color, no con iconos repetidos en cada fila.
+- **Reparto de anchos:** la columna de jerarquía absorbe el espacio sobrante y las columnas numéricas se ajustan a su contenido, para que el nombre de la fila se muestre completo.

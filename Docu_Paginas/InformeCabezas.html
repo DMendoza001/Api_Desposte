@@ -19,58 +19,70 @@
   <!-- SheetJS para exportar a Excel (.xlsx) -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
+  <!-- Diseño responsive compartido (laptops, tablets y celulares) -->
+  <link rel="stylesheet" href="responsive.css?v=3">
+
   <!-- Configuración compartida de conexión a la API -->
   <script src="config.js"></script>
 
   <style>
     /* =========================================================================
-       🎨 PALETA DE COLORES: PALETA FINANZA INDUSTRIAL (Industrial Slate & Gold / Pantone)
+       🎨 TEMA OFICIAL: PaletaFinanza_Industrial (PaletaFinanza_Industrial.json)
+       Las variables --color-* son las del JSON; los alias --pantone-* se
+       conservan como compatibilidad para el resto de la hoja de estilos.
        ========================================================================= */
     :root {
-      /* Tokens Oficiales PaletaFinanza_Industrial */
-      --isg-gold-bright: #F4D03F;     /* 01. Vivid Gold / Yellow */
-      --isg-slate-dark: #34495E;      /* 02. Dark Slate Plomo */
-      --isg-slate-med: #5D6D7E;       /* 03. Medium Slate Plomo */
-      --isg-slate-cool: #85929E;      /* 04. Cool Slate Plomo */
-      --isg-slate-deep: #2C3E50;      /* 05. Midnight Slate Plomo */
-      --isg-gold-rich: #D4AC0D;       /* 06. Rich Industrial Gold */
-      --isg-slate-charcoal: #1C2833;  /* 07. Charcoal Slate Antracita */
-      --isg-slate-silver: #AEB6BF;    /* 08. Silver Slate Plomo */
-      --isg-slate-stone: #7F8C8D;     /* 09. Stone Gray Plomo */
-      --isg-gold-bronze: #B7950B;     /* 10. Dark Bronze Gold */
+      --color-heading: #2E2A2F;
+      --color-text: #2E2A2F;
+      --color-text-muted: #605C5E;
+      --color-primary: #F4D03F;
+      --color-secondary: #BAA063;
+      --color-accent: #F4D03F;
+      --color-bg: #F2F4F8;
+      --color-surface: #FFFFFF;
+      --color-border: #E2E8F0;
 
-      /* Roles Estructurales */
-      --bg-canvas: #F2F4F8;
-      --text-dark: #2E2A2F;
-      --table-accent: #F4D03F;
+      /* Tonos de apoyo tomados de chartColors del JSON */
+      --color-primary-soft: #F8CC5A;
+      --color-gray-300: #CDCAC0;
+      --color-gray-400: #878994;
+      --color-gray-600: #605C5E;
+      --color-ink-700: #2E2A2F;
+      --color-ink-900: #252C37;
 
-      /* Mapeos funcionales */
-      --pantone-yellow: #F4D03F;
-      --pantone-yellow-light: #F8CC5A;
-      --pantone-yellow-soft: rgba(244, 208, 63, 0.16);
-      --pantone-yellow-border: rgba(244, 208, 63, 0.45);
-      --pantone-gold: #D4AC0D;
-      --pantone-gold-soft: rgba(212, 172, 13, 0.16);
-      --pantone-gold-border: rgba(212, 172, 13, 0.4);
-      --pantone-dark: #2C3E50;
-      --pantone-darker: #1C2833;
-      --pantone-gray-dark: #34495E;
-      --pantone-gray-med: #5D6D7E;
-      --pantone-gray-light: #AEB6BF;
-      --pantone-bg: #F2F4F8;
-      --pantone-card: #FFFFFF;
-      --pantone-border: #E2E8F0;
+      /* Derivados con transparencia sobre primary / secondary */
+      --color-primary-soft-bg: rgba(244, 208, 63, 0.16);
+      --color-primary-border: rgba(244, 208, 63, 0.45);
+      --color-secondary-soft-bg: rgba(186, 160, 99, 0.16);
+      --color-secondary-border: rgba(186, 160, 99, 0.42);
+      --color-hover-tint: rgba(186, 160, 99, 0.10);
 
-      --bg-card: #FFFFFF;
-      --border-ui: #E2E8F0;
-      --text-muted: #5D6D7E;
-      --success: #10B981;
-      --warning: #F59E0B;
-      --danger: #EF4444;
+      /* Alias de compatibilidad (nombres usados en esta hoja) */
+      --bg-canvas: var(--color-bg);
+      --text-dark: var(--color-text);
+      --table-accent: var(--color-primary);
 
-      --shadow-sm: 0 1px 3px rgba(28, 40, 51, 0.06), 0 1px 2px rgba(28, 40, 51, 0.04);
-      --shadow-md: 0 4px 6px -1px rgba(28, 40, 51, 0.08), 0 2px 4px -1px rgba(28, 40, 51, 0.04);
-      --shadow-lg: 0 10px 15px -3px rgba(28, 40, 51, 0.12), 0 4px 6px -2px rgba(28, 40, 51, 0.06);
+      --pantone-yellow: var(--color-primary);
+      --pantone-yellow-light: var(--color-primary-soft);
+      --pantone-yellow-soft: var(--color-primary-soft-bg);
+      --pantone-yellow-border: var(--color-primary-border);
+      --pantone-gold: var(--color-secondary);
+      --pantone-gold-soft: var(--color-secondary-soft-bg);
+      --pantone-gold-border: var(--color-secondary-border);
+      --pantone-dark: var(--color-ink-700);
+      --pantone-darker: var(--color-ink-900);
+      --pantone-gray-dark: var(--color-gray-600);
+      --pantone-gray-med: var(--color-gray-400);
+      --pantone-gray-light: var(--color-gray-300);
+      --pantone-bg: var(--color-bg);
+      --pantone-card: var(--color-surface);
+      --pantone-border: var(--color-border);
+
+      --bg-card: var(--color-surface);
+      --border-ui: var(--color-border);
+      --text-muted: var(--color-text-muted);
+      --shadow-sm: 0 1px 3px rgba(37, 44, 55, 0.06), 0 1px 2px rgba(37, 44, 55, 0.04);
+      --shadow-lg: 0 10px 15px -3px rgba(37, 44, 55, 0.12), 0 4px 6px -2px rgba(37, 44, 55, 0.06);
     }
 
     * {
@@ -87,14 +99,12 @@
       min-height: 100vh;
     }
 
-    /* Layout Principal con Barra Lateral */
     .app-layout {
       display: flex;
       min-height: 100vh;
       width: 100%;
     }
 
-    /* Sidebar Navegación Subpáginas - Ancho optimizado */
     .sidebar {
       width: 180px;
       background: linear-gradient(180deg, var(--pantone-darker) 0%, var(--pantone-dark) 100%);
@@ -181,7 +191,6 @@
       color: var(--pantone-yellow);
     }
 
-    /* Area Principal */
     .main-content {
       flex: 1;
       padding: 20px 25px 40px;
@@ -194,7 +203,17 @@
       margin: 0 auto;
     }
 
-    /* Header */
+    /* Prevención de desbordamiento en hijos de CSS Grid y Flexbox */
+    .kpi-container > *,
+    .charts-grid > *,
+    .kpi-card,
+    .chart-card,
+    .chart-box,
+    .matrix-card,
+    .dashboard-wrapper {
+      min-width: 0;
+    }
+
     .header-banner {
       background: linear-gradient(135deg, var(--pantone-dark) 0%, var(--pantone-darker) 100%);
       border: 1px solid rgba(255, 255, 255, 0.08);
@@ -269,7 +288,6 @@
       to { transform: scale(1.2); opacity: 1; }
     }
 
-    /* Alerta Error */
     .alert-error-box {
       background: #FEE2E2;
       border: 1px solid #FCA5A5;
@@ -289,7 +307,6 @@
       background: transparent; border: none; font-size: 1.1rem; color: #991B1B; cursor: pointer;
     }
 
-    /* Panel de Filtros Globales */
     .filter-panel {
       background-color: var(--bg-card);
       border: 1px solid var(--border-ui);
@@ -364,7 +381,7 @@
     }
 
     .btn-reset {
-      background-color: #F8FAFC;
+      background-color: var(--color-bg);
       color: var(--text-muted);
       border: 1px solid var(--border-ui);
       padding: 9px 16px;
@@ -374,7 +391,6 @@
       font-weight: 600;
     }
 
-    /* KPIs */
     .kpi-container {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
@@ -416,7 +432,6 @@
       font-weight: 500;
     }
 
-    /* Gráficos Grid - Gráfico Temporal a Ancho Completo */
     .charts-grid {
       display: grid;
       grid-template-columns: 1fr;
@@ -463,7 +478,6 @@
       height: 330px;
     }
 
-    /* Matriz Jerárquica */
     .matrix-card {
       background-color: var(--bg-card);
       border: 1px solid var(--border-ui);
@@ -498,6 +512,86 @@
       gap: 8px;
     }
 
+    .matrix-controls-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .matrix-filter-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .matrix-filter-group label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--pantone-dark);
+    }
+
+    .matrix-filter-group select {
+      border: 1px solid var(--border-ui);
+      padding: 7px 12px;
+      border-radius: 8px;
+      outline: none;
+      font-size: 0.82rem;
+      font-weight: 600;
+      background: #FFFFFF;
+    }
+
+    /* Custom Multiselect de Periodos */
+    .periodo-multiselect-box {
+      position: relative;
+      display: inline-block;
+    }
+
+    .periodo-dropdown-btn {
+      border: 1px solid var(--border-ui);
+      padding: 7px 12px;
+      border-radius: 8px;
+      background: #FFFFFF;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--pantone-dark);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .periodo-dropdown-content {
+      display: none;
+      position: absolute;
+      top: 105%;
+      left: 0;
+      background-color: #FFFFFF;
+      min-width: 200px;
+      max-height: 250px;
+      overflow-y: auto;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+      border: 1px solid var(--border-ui);
+      border-radius: 8px;
+      z-index: 100;
+      padding: 8px;
+    }
+
+    .periodo-dropdown-content.show { display: block; }
+
+    .periodo-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    .periodo-option:hover { background-color: var(--color-hover-tint); }
+    .periodo-option input { cursor: pointer; }
+
     .matrix-toolbar {
       display: flex;
       justify-content: space-between;
@@ -531,29 +625,6 @@
       font-size: 0.85rem;
     }
 
-    /* Filtro local Nivel exclusivo para Matriz */
-    .matrix-filter-group {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .matrix-filter-group label {
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: var(--pantone-dark);
-    }
-
-    .matrix-filter-group select {
-      border: 1px solid var(--border-ui);
-      padding: 7px 12px;
-      border-radius: 8px;
-      outline: none;
-      font-size: 0.82rem;
-      font-weight: 600;
-      background: #FFFFFF;
-    }
-
     .matrix-actions {
       display: flex;
       gap: 8px;
@@ -575,14 +646,12 @@
     }
 
     .btn-excel {
-      background: #F0FDF4;
-      border-color: #86EFAC;
-      color: #166534;
+      background: var(--color-secondary-soft-bg);
+      border-color: var(--color-secondary-border);
+      color: var(--color-heading);
       font-weight: 700;
     }
 
-    
-    /* Tabla y Espaciado de Matriz */
     .table-wrapper {
       overflow-x: auto;
       max-height: 650px;
@@ -598,82 +667,113 @@
     .matrix-table th {
       background-color: var(--pantone-dark);
       color: #FFFFFF;
-      padding: 12px 16px;
+      padding: 9px 12px;
       position: sticky;
       top: 0;
       z-index: 10;
-      text-align: left;
+      text-align: center;
       font-weight: 700;
-      font-size: 0.81rem;
+      font-size: 0.78rem;
       letter-spacing: 0.02em;
-      border-bottom: 3px solid var(--pantone-yellow);
+      border-bottom: 1px solid var(--pantone-darker);
+      border-right: 1px solid rgba(255, 255, 255, 0.10);
+    }
+
+    .matrix-table th.periodo-header {
+      background-color: var(--pantone-darker);
+      border-bottom: 2px solid var(--pantone-yellow);
+    }
+
+    .matrix-table th.metric-header {
+      background-color: var(--pantone-dark);
+      font-size: 0.74rem;
+      color: var(--pantone-yellow-light);
+      padding-left: 8px;
+      padding-right: 8px;
+    }
+
+    /* 📐 Reparto de anchos: las columnas numéricas se encogen a su contenido
+       (width: 1% + nowrap + padding compacto) y TODO el espacio sobrante pasa a
+       la 1ª columna, que es la que muestra el código y el nombre del producto. */
+    .matrix-table th.metric-header,
+    .matrix-table td.num-col {
+      width: 1%;
+      white-space: nowrap;
+    }
+
+    .matrix-table td.num-col {
+      padding-left: 8px;
+      padding-right: 8px;
+    }
+
+    .matrix-table th.col-jerarquia {
+      width: 100%;
+      min-width: 310px;
+      position: sticky;
+      left: 0;
+      z-index: 12;
+      vertical-align: middle;
+      /* El encabezado se alinea con el código/nombre de las filas para que el
+         texto se lea de izquierda a derecha sin quedar flotando al centro. */
+      text-align: left;
+      padding-left: 14px;
     }
 
     .row-nivel {
-      background: linear-gradient(90deg, #1C2833 0%, #2C3E50 100%) !important;
+      background: linear-gradient(90deg, var(--pantone-darker) 0%, var(--pantone-dark) 100%) !important;
       color: #FFFFFF !important;
       font-weight: 700;
       cursor: pointer;
     }
 
-    .row-nivel td { border-bottom: 1px solid #34495E; padding: 11px 16px; }
+    .row-nivel td { border-bottom: 1px solid var(--pantone-darker); padding: 10px 14px; border-right: 1px solid rgba(255,255,255,0.05); }
     .nivel-title { font-size: 0.88rem; color: var(--pantone-yellow); letter-spacing: 0.02em; }
 
     .row-nttra {
-      background-color: #F8FAFC !important;
+      background-color: var(--color-bg) !important;
       color: var(--pantone-dark) !important;
       font-weight: 600;
       cursor: pointer;
-      transition: background-color 0.15s ease;
     }
-    .row-nttra:hover { background-color: #F1F5F9 !important; }
-
-    .row-nttra td { border-bottom: 1px solid #E2E8F0; padding: 9px 16px; }
+    .row-nttra:hover { background-color: var(--color-hover-tint) !important; }
+    .row-nttra td { border-bottom: 1px solid var(--color-border); padding: 8px 14px; border-right: 1px solid var(--color-border); }
 
     .row-desposte {
       background-color: #FFFFFF !important;
       color: var(--pantone-dark) !important;
       font-weight: 600;
       cursor: pointer;
-      transition: background-color 0.15s ease;
     }
-    .row-desposte:hover { background-color: #F8FAFC !important; }
+    .row-desposte:hover { background-color: var(--color-hover-tint) !important; }
+    .row-desposte td { border-bottom: 1px solid #E2E8F0; padding: 8px 14px; border-right: 1px solid #E2E8F0; }
 
-    .row-desposte td { border-bottom: 1px solid #E2E8F0; padding: 8px 16px; }
-
-    .desposte-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 3px 9px;
-      border-radius: 6px;
-      font-size: 0.76rem;
-      font-weight: 700;
-      background: #F1F5F9;
-      color: var(--pantone-dark);
-      border: 1px solid #CBD5E1;
-    }
-
+    /* Etiquetas planas de la matriz: sin icono, sin fondo, sin borde y sin sombra
+       (mismo criterio visual que .producto-code) */
+    .desposte-badge,
     .nttra-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 3px 9px;
-      border-radius: 6px;
-      font-size: 0.76rem;
+      display: inline;
+      padding: 0;
+      border: none;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+      text-shadow: none;
+      font-size: 0.8rem;
       font-weight: 700;
-      background: var(--pantone-gold-soft);
       color: var(--pantone-dark);
-      border: 1px solid var(--pantone-gold-border);
     }
 
-    .row-producto { background-color: #FFFFFF !important; color: var(--pantone-dark); transition: background-color 0.15s ease; }
-    .row-producto:hover { background-color: #F8FAFC !important; }
-    .row-producto:nth-child(even) { background-color: #FAFBFD !important; }
-    .row-producto td { border-bottom: 1px solid #EDF2F7; padding: 7px 16px; font-size: 0.82rem; }
+    .row-producto { background-color: var(--color-surface) !important; color: var(--pantone-dark); }
+    .row-producto:hover { background-color: var(--color-hover-tint) !important; }
+    .row-producto:nth-child(even) { background-color: rgba(37, 44, 55, 0.02) !important; }
+    .row-producto td { border-bottom: 1px solid var(--color-border); padding: 7px 14px; font-size: 0.82rem; border-right: 1px solid var(--color-border); }
+
+    .producto-nombre {
+      font-size: 0.76rem;
+    }
 
     .producto-code {
-      background: #EDF2F7; color: var(--pantone-dark); border: 1px solid #CBD5E1;
+      background: var(--color-bg); color: var(--color-heading); border: 1px solid var(--color-border);
       font-size: 0.74rem; font-weight: 700; padding: 2px 7px; border-radius: 4px; font-family: monospace;
       margin-right: 6px;
     }
@@ -689,20 +789,11 @@
       font-weight: 700 !important; color: #7D6608 !important;
     }
 
-    .row-grand-total {
-      background: var(--pantone-darker) !important;
-      color: #FFFFFF !important; font-weight: 700; position: sticky; bottom: 0; z-index: 8;
-    }
-
-    .row-grand-total td { padding: 12px 16px; border-top: 3px solid var(--pantone-yellow); }
-
-
     .num-col { font-variant-numeric: tabular-nums; font-family: 'Inter', monospace; }
     .text-right { text-align: right; }
     .font-bold { font-weight: 700; }
     .text-gold { color: var(--pantone-gold); }
 
-    /* Overlay Carga y Toast */
     .loading-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(37, 44, 55, 0.6); backdrop-filter: blur(4px);
@@ -730,61 +821,109 @@
       z-index: 10000; transform: translateY(100px); opacity: 0; transition: all 0.3s;
     }
     .toast-notification.show { transform: translateY(0); opacity: 1; }
-  
-    /* Estilos Responsivos Integrados */
-    @media (max-width: 1024px) {
-      .app-layout {
-        flex-direction: column;
-      }
+
+    /* =========================================================================
+       📱💻 RESPONSIVE HÍBRIDO (Laptops, Tablets y Celulares)
+       Reglas autónomas por si el archivo se comparte sin responsive.css
+       ========================================================================= */
+
+    /* 💻 NIVEL 1: LAPTOPS (<= 1600px incluye FHD 1920 al 125% = 1536px) */
+    @media screen and (max-width: 1600px) {
+      .sidebar { width: 158px; }
+      .main-content { padding: 12px 14px 28px; }
+      .header-banner { padding: 14px 18px; margin-bottom: 14px; }
+      .header-info h1 { font-size: 1.15rem; }
+      .filter-panel { padding: 12px 14px; gap: 10px; margin-bottom: 14px; }
+      .kpi-container { gap: 10px; margin-bottom: 14px; }
+      .kpi-card { padding: 12px 16px; }
+      .kpi-value { font-size: 1.32rem; }
+      .charts-grid { gap: 14px; margin-bottom: 14px; }
+      .chart-card { padding: 14px 16px; }
+      .chart-box { height: 290px !important; }
+      .matrix-header-bar { padding: 12px 14px; gap: 10px; }
+      .table-wrapper { max-height: 460px !important; }
+      .matrix-table th,
+      .matrix-table td { padding: 6px 9px; font-size: 11.5px; }
+      /* OJO: sólo la 1ª columna del encabezado (jerarquía/producto). Usar
+         `th:first-child` a secas también alcanzaba a la métrica "Unidades" de
+         la 2ª fila y la inflaba a 260px quitándole espacio al producto. */
+      .matrix-table thead th.col-jerarquia { min-width: 260px !important; }
+    }
+
+    /* 📲 NIVEL 2: TABLETS HORIZONTALES (<= 980px) */
+    @media screen and (max-width: 980px) {
+      .sidebar { width: 70px; }
+      .sidebar-header { padding: 0 4px 10px; text-align: center; }
+      .sidebar-header h2 { font-size: 0; justify-content: center; gap: 0; }
+      .sidebar-header h2 i { font-size: 0.95rem; }
+      .sidebar-header p { display: none; }
+      .sidebar-menu { padding: 0 6px; }
+      .sidebar-btn { justify-content: center; padding: 9px 6px; }
+      .sidebar-btn .btn-info span { display: none; }
+      .sidebar-badge { display: none; }
+      .kpi-container { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+      .charts-grid { grid-template-columns: 1fr !important; }
+      .matrix-table thead th.col-jerarquia { min-width: 220px !important; }
+    }
+
+    /* 📱 NIVEL 3: CELULARES Y TABLETS VERTICALES (<= 768px) */
+    @media screen and (max-width: 768px) {
+      .app-layout { flex-direction: column; }
       .sidebar {
-        width: 100% !important;
-        padding: 10px 15px;
-      }
-      .sidebar-menu {
-        flex-direction: row;
-        justify-content: space-around;
-        gap: 8px;
-      }
-      .sidebar-btn {
-        padding: 8px 10px;
-        font-size: 0.78rem;
-      }
-      .filter-panel {
-        flex-direction: column;
-        align-items: stretch;
-      }
-      .btn-action-group {
-        margin-left: 0;
         width: 100%;
-        justify-content: flex-end;
+        flex-direction: row;
+        align-items: center;
+        padding: 6px 8px;
+        gap: 6px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
       }
-    }
+      .sidebar-header { display: none; }
+      .sidebar-menu { flex-direction: row; gap: 6px; padding: 0; width: 100%; overflow-x: auto; }
+      .sidebar-btn { flex: 1 1 auto; padding: 8px 10px; font-size: 0.76rem; }
+      .sidebar-btn .btn-info span { display: inline; }
+      .sidebar-badge { display: inline-block; }
 
-    @media (max-width: 768px) {
-      .main-content {
-        padding: 12px;
-      }
-      .header-banner {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-      .kpi-container {
-        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      }
-      .matrix-header-top, .matrix-toolbar {
-        flex-direction: column;
-        align-items: stretch;
-      }
-      .table-search {
-        max-width: 100%;
-      }
-      .matrix-actions {
-        justify-content: space-between;
-      }
-    }
+      .main-content { padding: 10px 8px 24px; }
+      .header-banner { flex-direction: column; align-items: stretch; padding: 12px 14px; }
+      .header-info h1 { font-size: 1.02rem; flex-wrap: wrap; }
 
+      .filter-panel { flex-direction: column; align-items: stretch; padding: 12px 14px; }
+      .filter-group input { min-width: 0; width: 100%; }
+      .btn-action-group { margin-left: 0; width: 100%; flex-wrap: wrap; }
+      .btn-primary-action,
+      .btn-reset { flex: 1 1 140px; justify-content: center; }
+
+      .kpi-container { grid-template-columns: 1fr !important; }
+      .chart-box { height: 240px !important; }
+      .chart-header { flex-wrap: wrap; gap: 6px; }
+
+      .matrix-header-top { flex-direction: column; align-items: stretch; }
+      .matrix-controls-row { flex-direction: column; align-items: stretch; gap: 10px; }
+      .matrix-filter-group { flex-wrap: wrap; }
+      .matrix-filter-group select,
+      .periodo-dropdown-btn { width: 100%; }
+      .periodo-multiselect-box { width: 100%; }
+      .periodo-dropdown-content { width: 100%; max-height: 200px; }
+      .matrix-toolbar { flex-direction: column; align-items: stretch; }
+      .table-search { max-width: 100%; min-width: 0; }
+      .matrix-actions { flex-wrap: wrap; }
+      .matrix-actions .btn-tool { flex: 1 1 120px; justify-content: center; }
+
+      .table-wrapper { max-height: 70vh !important; }
+      /* Primera columna liberada: permite deslizar la matriz con el dedo */
+      .matrix-table thead th.col-jerarquia,
+      .matrix-table tbody td:first-child {
+        position: static !important;
+        min-width: 150px !important;
+        max-width: 210px;
+        white-space: normal;
+        word-break: break-word;
+      }
+      .matrix-table thead th.col-jerarquia { z-index: auto !important; }
+
+      .toast-notification { left: 12px; right: 12px; bottom: 12px; }
+    }
   </style>
-  <link rel="stylesheet" href="responsive.css?v=3">
 </head>
 
 <body>
@@ -925,21 +1064,38 @@
           </div>
         </section>
 
-        <!-- Matriz Jerárquica con Filtro Exclusivo de Nivel -->
+        <!-- Matriz Jerárquica -->
         <section class="matrix-card">
           <div class="matrix-header-bar">
             <div class="matrix-header-top">
-              <h3 id="matrixTitle">Matriz Jerárquica de Control (Nivel ➔ NTtra ➔ TipoDesposte ➔ Producto)</h3>
+              <h3 id="matrixTitle">Matriz Jerárquica (Nivel ➔ NTtra ➔ TipoDesposte ➔ Producto)</h3>
 
-              <div class="matrix-filter-group">
-                <label for="matrixNivelFilter"><i class="fa-solid fa-filter me-1"></i> Filtrar Nivel:</label>
-                <select id="matrixNivelFilter" onchange="aplicarFiltroMatrizNivel(this.value)">
-                  <option value="ALL">-- Todos los Niveles --</option>
-                  <option value="CORTE PRIMARIO">1. CORTE PRIMARIO</option>
-                  <option value="LINEA DE CABEZA">2. LINEA DE CABEZA</option>
-                  <option value="TERCER CORTE">3. TERCER CORTE</option>
-                  <option value="SALDO PENDIENTE">4. SALDO PENDIENTE</option>
-                </select>
+              <div class="matrix-controls-row">
+                <!-- Filtro Nivel -->
+                <div class="matrix-filter-group">
+                  <label for="matrixNivelFilter"><i class="fa-solid fa-filter me-1"></i> Nivel:</label>
+                  <select id="matrixNivelFilter" onchange="aplicarFiltroMatrizNivel(this.value)">
+                    <option value="ALL">-- Todos los Niveles --</option>
+                    <option value="CORTE PRIMARIO">1. CORTE PRIMARIO</option>
+                    <option value="LINEA DE CABEZA">2. LINEA DE CABEZA</option>
+                    <option value="TERCER CORTE">3. TERCER CORTE</option>
+                    <option value="SALDO PENDIENTE">4. SALDO PENDIENTE</option>
+                  </select>
+                </div>
+
+                <!-- Filtro Multiselect Periodos (Por defecto últimos 4) -->
+                <div class="matrix-filter-group">
+                  <label><i class="fa-solid fa-calendar-check me-1"></i> Periodos:</label>
+                  <div class="periodo-multiselect-box">
+                    <button type="button" class="periodo-dropdown-btn" onclick="togglePeriodoDropdown()">
+                      <span id="periodoSelectedText">Últimos 4 periodos</span>
+                      <i class="fa-solid fa-chevron-down"></i>
+                    </button>
+                    <div class="periodo-dropdown-content" id="periodoDropdownContent">
+                      <!-- Opciones dinámicas -->
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -949,43 +1105,17 @@
                 <input type="text" id="tableSearchInput" placeholder="Buscar código, producto o nivel..." oninput="filtrarMatrizTexto()">
               </div>
               <div class="matrix-actions">
-                <button class="btn-tool" onclick="expandirTodo(true)">
-                  <span>📂</span> Expandir
-                </button>
-                <button class="btn-tool" onclick="expandirTodo(false)">
-                  <span>📁</span> Colapsar
-                </button>
-                <button class="btn-tool btn-excel" id="btnExportarExcel" onclick="exportarExcel()">
-                  <span>📊</span> Exportar a Excel (.xlsx)
-                </button>
+                <button class="btn-tool" onclick="expandirTodo(true)"><span>📂</span> Expandir</button>
+                <button class="btn-tool" onclick="expandirTodo(false)"><span>📁</span> Colapsar</button>
+                <button class="btn-tool btn-excel" onclick="exportarExcel()"><span>📊</span> Excel (.xlsx)</button>
               </div>
             </div>
           </div>
 
           <div class="table-wrapper">
             <table class="matrix-table" id="matrixTable">
-              <thead>
-                <tr>
-                  <th style="min-width: 360px;">Jerarquía: Nivel / NTtra / TipoDesposte / Código - Producto</th>
-                  <th style="text-align: right; width: 140px;">Und</th>
-                  <th style="text-align: right; width: 160px;">Kg</th>
-                  <th style="text-align: right; width: 140px;">Peso Prom.</th>
-                  <th style="text-align: right; width: 140px;">% Rend.</th>
-                </tr>
-              </thead>
-              <tbody id="tableMatrixBody">
-                <tr>
-                  <td colspan="5" style="text-align: center; padding: 55px 20px; color: var(--text-muted);">
-                    <div style="font-size: 2.2rem; margin-bottom: 10px;">📋</div>
-                    <div style="font-weight: 700; font-size: 1.05rem; color: var(--pantone-dark); margin-bottom: 6px;">
-                      Dashboard de Control de Cabezas listo
-                    </div>
-                    <div style="font-size: 0.85rem; max-width: 520px; margin: 0 auto; line-height: 1.5;">
-                      Haga clic en <strong style="color: var(--pantone-dark);">"🚀 Generar Reporte"</strong> para cargar los datos.
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
+              <thead></thead>
+              <tbody id="tableMatrixBody"></tbody>
               <tfoot id="tableMatrixFoot"></tfoot>
             </table>
           </div>
@@ -994,21 +1124,16 @@
     </main>
   </div>
 
-  <!-- Toast Notification -->
   <div id="toastNotification" class="toast-notification">
     <span id="toastIcon">ℹ️</span>
     <span id="toastMsg">Mensaje</span>
   </div>
 
-  <!-- Script Principal -->
   <script>
-    // =========================================================================
-    // ⚙️ CONFIGURACIÓN API .NET
-    // =========================================================================
     const APP_CONFIG = {
       servidor: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.servidor) ? GLOBAL_CONFIG.servidor : "RAEVSALL001",
       puertos: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.puertos) ? GLOBAL_CONFIG.puertos : [8080, 5000],
-      controllerPath: "/api/ProduccionCabezasControlles",
+      controllerPath: "/api/ProduccionCabezasController",
       timeoutMs: 120000
     };
 
@@ -1024,25 +1149,26 @@
       return bases;
     }
 
-    // Estados
     let apiBaseActiva = null;
     let cargando = false;
-    let reporteGenerado = false;
     let rawData = [];
     let datosFiltrados = [];
 
-    // Filtros
     let nivelFiltroMatriz = "ALL";
     let modoMatrizActivo = "semanal"; 
     let textoBusqueda = "";
 
+    // Periodos Seleccionados en el Multiselect
+    let periodosSeleccionados = new Set();
+    let periodosDisponiblesOrdenados = [];
+
     const ORDEN_NIVELES = ["CORTE PRIMARIO", "LINEA DE CABEZA", "TERCER CORTE", "SALDO PENDIENTE"];
     const collapsedNiveles = new Set();
     const collapsedNTtras = new Set();
+    const collapsedTiposDesposte = new Set();
 
     let chartTemporalObj = null;
 
-    // Red
     async function fetchConTimeout(url, timeoutMs = 120000) {
       const controller = new AbortController();
       const id = setTimeout(() => controller.abort(), timeoutMs);
@@ -1083,8 +1209,8 @@
 
     function inicializarFechas() {
       const hoy = new Date();
-      const hace7Dias = new Date();
-      hace7Dias.setDate(hoy.getDate() - 7);
+      const hace30Dias = new Date();
+      hace30Dias.setDate(hoy.getDate() - 30);
 
       const toYMD = (d) => {
         const yyyy = d.getFullYear();
@@ -1094,7 +1220,7 @@
       };
 
       document.getElementById('fechaFin').value = toYMD(hoy);
-      document.getElementById('fechaInicio').value = toYMD(hace7Dias);
+      document.getElementById('fechaInicio').value = toYMD(hace30Dias);
     }
 
     window.addEventListener('DOMContentLoaded', async () => {
@@ -1106,7 +1232,16 @@
         actualizarEstadoUI('loading', `En Línea - Consultando...`);
         await consultarReporte();
       } else {
+        const msgConexion = `No se pudo conectar a ${APP_CONFIG.servidor} en puertos ${APP_CONFIG.puertos.join('/')}. Verifica que la API .NET esté activa.`;
         actualizarEstadoUI('error', `Sin conexión con ${APP_CONFIG.servidor}`);
+        mostrarError(msgConexion);
+      }
+    });
+
+    window.addEventListener('click', function(e) {
+      const multiselectBox = document.querySelector('.periodo-multiselect-box');
+      if (multiselectBox && !multiselectBox.contains(e.target)) {
+        document.getElementById('periodoDropdownContent').classList.remove('show');
       }
     });
 
@@ -1125,7 +1260,8 @@
       mostrarCargando(true, 'Consultando base de datos...', `Periodo ${fIni} al ${fFin}...`);
 
       const queryParams = `?fechaInicio=${encodeURIComponent(fIni)}&fechaFin=${encodeURIComponent(fFin)}`;
-      const rutas = ["/api/ProduccionCabezasControlles", "/api/ProdCabezas"];
+      // Ruta principal desde APP_CONFIG.controllerPath (regla .agents/rules/api-connection.md)
+      const rutas = Array.from(new Set([APP_CONFIG.controllerPath, "/api/ProdCabezas"].filter(Boolean)));
       const endpoints = rutas.flatMap(ruta => generarEndpointsApi(`${ruta}${queryParams}`));
       let exito = false;
 
@@ -1136,7 +1272,6 @@
             const json = await res.json();
             const items = Array.isArray(json) ? json : (json.datos || []);
             rawData = items.map(mapearItemCabezas);
-            reporteGenerado = true;
             actualizarEstadoUI('online', `En Línea - ${rawData.length.toLocaleString('es-PE')} registros`);
             aplicarFiltrosLocales();
             mostrarToast(`✅ ${rawData.length.toLocaleString('es-PE')} registros cargados`, 3000);
@@ -1147,7 +1282,7 @@
       }
 
       if (!exito) {
-        mostrarError(`Error al consultar la API.`);
+        mostrarError(`No se pudo obtener datos de ${APP_CONFIG.servidor} en puertos ${APP_CONFIG.puertos.join('/')}. Revisa el rango de fechas y el estado de la API .NET.`);
         actualizarEstadoUI('error', 'Error en consulta');
       }
 
@@ -1170,8 +1305,7 @@
         Nombre: (d.nombre || d.Nombre || '').toString().trim(),
         TipoDesposte: (d.tipoDesposte || d.TipoDesposte || d.tipoDeDesposte || d.TipoDeDesposte || 'GENERAL').toString().trim().toUpperCase(),
         Unidades: Number(d.unidades ?? d.Unidades) || 0,
-        Kilos: Number(d.kilos ?? d.Kilos) || 0,
-        Semana: d.semana ?? d.Semana ?? 0
+        Kilos: Number(d.kilos ?? d.Kilos) || 0
       };
     }
 
@@ -1180,6 +1314,161 @@
       calcularKPIs();
       actualizarBadgesSegmentadores();
       actualizarGraficoTemporal();
+      reconstruirOpcionesMultiselectPeriodos();
+      renderMatrizJerarquica();
+    }
+
+    function getWeekOfYearISO(d) {
+      const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+      const dayNum = date.getUTCDay() === 0 ? 7 : date.getUTCDay();
+      date.setUTCDate(date.getUTCDate() + 4 - dayNum);
+      const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+      return Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
+    }
+
+    function getYearOfISOWeek(d) {
+      const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+      const dayNum = date.getUTCDay() === 0 ? 7 : date.getUTCDay();
+      date.setUTCDate(date.getUTCDate() + 4 - dayNum);
+      return date.getUTCFullYear();
+    }
+
+    function obtenerPeriodoKey(fecha, modo) {
+      const m = modo || modoMatrizActivo;
+      const yyyy = fecha.getFullYear();
+      const mm = String(fecha.getMonth() + 1).padStart(2, '0');
+      const dd = String(fecha.getDate()).padStart(2, '0');
+
+      if (m === "diario") return `${yyyy}-${mm}-${dd}`;
+      if (m === "semanal") return `${getYearOfISOWeek(fecha)}-S${String(getWeekOfYearISO(fecha)).padStart(2, '0')}`;
+      if (m === "mensual") return `${yyyy}-${mm}`;
+      if (m === "anual") return `${yyyy}`;
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    // -------------------------------------------------------------------------
+    // 📅 Regla .agents/rules/calculo-semanas.md: semana ISO-8601 con inicio LUNES
+    //    La clave interna se mantiene como "YYYY-Snn" para agrupar/ordenar y la
+    //    etiqueta visible agrega el rango "Sem. nn (DD/MM al DD/MM)".
+    //    El 3er parámetro `compacta` devuelve la versión reducida usada en el eje
+    //    X del gráfico ("Sem 44"), mientras matriz, filtros y tooltip conservan
+    //    el rango completo.
+    // -------------------------------------------------------------------------
+    function fechaLunesDeSemanaISO(anoSemana, numSemana) {
+      // La semana ISO 1 es la que contiene el 4 de enero
+      const ene4 = new Date(anoSemana, 0, 4);
+      const offsetLunes = (ene4.getDay() + 6) % 7; // Lunes = 0, Domingo = 6
+      const lunesSemana1 = new Date(ene4);
+      lunesSemana1.setDate(ene4.getDate() - offsetLunes);
+
+      const lunes = new Date(lunesSemana1);
+      lunes.setDate(lunesSemana1.getDate() + (numSemana - 1) * 7);
+      return lunes;
+    }
+
+    function etiquetaPeriodo(key, modo, compacta) {
+      const m = modo || modoMatrizActivo;
+      const pad = n => String(n).padStart(2, '0');
+
+      if (m === "semanal") {
+        const partes = /^(\d{4})-S(\d{2})$/.exec(key || "");
+        if (!partes) return key;
+        const anoSemana = Number(partes[1]);
+        const numSemana = Number(partes[2]);
+        // Etiqueta corta para el eje X del gráfico: "Sem 44"
+        if (compacta) return `Sem ${pad(numSemana)}`;
+        const lunes = fechaLunesDeSemanaISO(anoSemana, numSemana);
+        const domingo = new Date(lunes);
+        domingo.setDate(lunes.getDate() + 6);
+        const rangoTexto = `${pad(lunes.getDate())}/${pad(lunes.getMonth() + 1)} al ${pad(domingo.getDate())}/${pad(domingo.getMonth() + 1)}`;
+        return `Sem. ${pad(numSemana)} (${rangoTexto})`;
+      }
+
+      if (m === "diario") {
+        const p = (key || "").split("-");
+        if (p.length !== 3) return key;
+        return compacta ? `${p[2]}/${p[1]}` : `${p[2]}/${p[1]}/${p[0]}`;
+      }
+
+      if (m === "mensual") {
+        const nombresMes = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+        const p = (key || "").split("-");
+        if (p.length !== 2) return key;
+        return `${nombresMes[Number(p[1]) - 1] || p[1]} ${p[0]}`;
+      }
+
+      return key;
+    }
+
+    function reconstruirOpcionesMultiselectPeriodos() {
+      const setP = new Set();
+      datosFiltrados.forEach(d => setP.add(obtenerPeriodoKey(d.FechaOrden, modoMatrizActivo)));
+      periodosDisponiblesOrdenados = Array.from(setP).sort();
+
+      periodosSeleccionados.clear();
+      const ultimos4 = periodosDisponiblesOrdenados.slice(-4);
+      ultimos4.forEach(p => periodosSeleccionados.add(p));
+
+      renderOpcionesDropdownPeriodos();
+    }
+
+    function renderOpcionesDropdownPeriodos() {
+      const container = document.getElementById('periodoDropdownContent');
+      if (!container) return;
+
+      let html = "";
+      periodosDisponiblesOrdenados.forEach(p => {
+        const checked = periodosSeleccionados.has(p) ? "checked" : "";
+        html += `
+          <label class="periodo-option">
+            <input type="checkbox" value="${p}" ${checked} onchange="onPeriodoCheckboxChange(this)">
+            <span>${etiquetaPeriodo(p)}</span>
+          </label>
+        `;
+      });
+
+      container.innerHTML = html;
+      actualizarTextoBotonPeriodos();
+    }
+
+    function togglePeriodoDropdown() {
+      document.getElementById('periodoDropdownContent').classList.toggle('show');
+    }
+
+    function onPeriodoCheckboxChange(checkbox) {
+      if (checkbox.checked) periodosSeleccionados.add(checkbox.value);
+      else periodosSeleccionados.delete(checkbox.value);
+
+      actualizarTextoBotonPeriodos();
+      renderMatrizJerarquica();
+    }
+
+    function actualizarTextoBotonPeriodos() {
+      const btnTxt = document.getElementById('periodoSelectedText');
+      if (!btnTxt) return;
+
+      const totalDisponibles = periodosDisponiblesOrdenados.length;
+      const totalSeleccionados = periodosSeleccionados.size;
+
+      if (totalSeleccionados === 0) {
+        btnTxt.textContent = "Ningún periodo";
+      } else if (totalSeleccionados === totalDisponibles) {
+        btnTxt.textContent = `Todos (${totalSeleccionados})`;
+      } else if (totalSeleccionados === 4 && periodosDisponiblesOrdenados.slice(-4).every(p => periodosSeleccionados.has(p))) {
+        btnTxt.textContent = "Últimos 4 periodos";
+      } else {
+        btnTxt.textContent = `${totalSeleccionados} selec.`;
+      }
+    }
+
+    function cambiarModoMatriz(modo) {
+      modoMatrizActivo = modo;
+      document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
+      const activeBtn = document.getElementById(`sideTab${modo.charAt(0).toUpperCase() + modo.slice(1)}`);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      actualizarGraficoTemporal();
+      reconstruirOpcionesMultiselectPeriodos();
       renderMatrizJerarquica();
     }
 
@@ -1233,35 +1522,6 @@
       return Number(val || 0).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
     }
 
-    // Fechas ISO
-    function getWeekOfYearISO(d) {
-      const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-      const dayNum = date.getUTCDay() === 0 ? 7 : date.getUTCDay();
-      date.setUTCDate(date.getUTCDate() + 4 - dayNum);
-      const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
-      return Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
-    }
-
-    function getYearOfISOWeek(d) {
-      const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-      const dayNum = date.getUTCDay() === 0 ? 7 : date.getUTCDay();
-      date.setUTCDate(date.getUTCDate() + 4 - dayNum);
-      return date.getUTCFullYear();
-    }
-
-    function obtenerPeriodoKey(fecha, modo) {
-      const m = modo || modoMatrizActivo;
-      const yyyy = fecha.getFullYear();
-      const mm = String(fecha.getMonth() + 1).padStart(2, '0');
-      const dd = String(fecha.getDate()).padStart(2, '0');
-
-      if (m === "diario") return `${yyyy}-${mm}-${dd}`;
-      if (m === "semanal") return `${getYearOfISOWeek(fecha)}-S${String(getWeekOfYearISO(fecha)).padStart(2, '0')}`;
-      if (m === "mensual") return `${yyyy}-${mm}`;
-      if (m === "anual") return `${yyyy}`;
-      return `${yyyy}-${mm}-${dd}`;
-    }
-
     function actualizarBadgesSegmentadores() {
       document.getElementById('sideBadgeDiario').textContent = new Set(datosFiltrados.map(d => obtenerPeriodoKey(d.FechaOrden, 'diario'))).size;
       document.getElementById('sideBadgeSemanal').textContent = new Set(datosFiltrados.map(d => obtenerPeriodoKey(d.FechaOrden, 'semanal'))).size;
@@ -1269,19 +1529,6 @@
       document.getElementById('sideBadgeAnual').textContent = new Set(datosFiltrados.map(d => obtenerPeriodoKey(d.FechaOrden, 'anual'))).size;
     }
 
-    function cambiarModoMatriz(modo) {
-      modoMatrizActivo = modo;
-      document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
-      const activeBtn = document.getElementById(`sideTab${modo.charAt(0).toUpperCase() + modo.slice(1)}`);
-      if (activeBtn) activeBtn.classList.add('active');
-
-      actualizarGraficoTemporal();
-      renderMatrizJerarquica();
-    }
-
-    // =========================================================================
-    // 📈 GRÁFICO DE BARRAS: SOLO UNIDADES DE CORTE PRIMARIO Y SALDO PENDIENTE
-    // =========================================================================
     function actualizarGraficoTemporal() {
       if (datosFiltrados.length === 0) {
         if (chartTemporalObj) { chartTemporalObj.destroy(); chartTemporalObj = null; }
@@ -1293,12 +1540,9 @@
         const key = obtenerPeriodoKey(item.FechaOrden);
         if (!groups[key]) groups[key] = { primarioUnd: 0, saldoUnd: 0 };
 
-        // Cabezas Entrada (Corte Primario)
         if (item.Nivel === "CORTE PRIMARIO" && (item.NTtra === "ORIGEN" || item.CodigoCorto === "05829" || item.Producto === "040508029")) {
           groups[key].primarioUnd += item.Unidades;
-        } 
-        // Saldo Pendiente de Cabeza
-        else if (item.Nivel === "SALDO PENDIENTE") {
+        } else if (item.Nivel === "SALDO PENDIENTE") {
           groups[key].saldoUnd += item.Unidades;
         }
       });
@@ -1313,13 +1557,14 @@
       chartTemporalObj = new Chart(ctx, {
         type: 'bar',
         data: {
-          labels: sortedKeys,
+          // Eje X con etiqueta corta: "Sem 44" (el rango completo va en el tooltip)
+          labels: sortedKeys.map(k => etiquetaPeriodo(k, null, true)),
           datasets: [
             {
               label: 'Cabezas Entradas (Corte Primario)',
               data: primarioVals,
-              backgroundColor: 'rgba(44, 62, 80, 0.90)',
-              borderColor: '#1C2833',
+              backgroundColor: 'rgba(37, 44, 55, 0.90)',
+              borderColor: '#252C37',
               borderWidth: 1,
               borderRadius: 4
             },
@@ -1327,7 +1572,7 @@
               label: 'Saldo Pendiente (Cabezas)',
               data: saldoVals,
               backgroundColor: 'rgba(244, 208, 63, 0.95)',
-              borderColor: '#D4AC0D',
+              borderColor: '#BAA063',
               borderWidth: 1,
               borderRadius: 4
             }
@@ -1339,35 +1584,27 @@
           plugins: {
             legend: { position: 'top', labels: { font: { family: 'Inter', size: 11, weight: '600' } } },
             tooltip: {
-              backgroundColor: '#1C2833',
-              titleColor: '#F4D03F',
-              bodyColor: '#FFFFFF',
               callbacks: {
-                label: (ctx) => ` ${ctx.dataset.label}: ${Number(ctx.raw).toLocaleString('es-PE')} und`
+                // El eje X usa la etiqueta corta; el tooltip conserva el rango completo
+                title: (items) => (items.length ? etiquetaPeriodo(sortedKeys[items[0].dataIndex]) : '')
               }
             }
           },
           scales: {
-            y: { 
-              beginAtZero: true, 
-              grid: { color: '#E2E8F0' },
-              title: { display: true, text: 'Unidades (und)', font: { family: 'Inter', size: 11, weight: '600' } }
-            },
-            x: { grid: { display: false } }
+            y: { beginAtZero: true, grid: { color: '#E2E8F0' } },
+            x: { grid: { display: false }, ticks: { autoSkip: true, maxRotation: 0, minRotation: 0, font: { size: 10 } } }
           }
         }
       });
     }
 
     // =========================================================================
-    // 🥩 MATRIZ JERÁRQUICA
-    // % Rendimiento/Distribución calculado en base al Total de Kilos del NIVEL
+    // 🥩 MATRIZ JERÁRQUICA PIVOTADA: UNIDADES, KILOS Y %REND POR CADA PERIODO ELEGIDO
     // =========================================================================
-        const collapsedTiposDesposte = new Set();
-
     function renderMatrizJerarquica() {
       const tbody = document.getElementById('tableMatrixBody');
       const tfoot = document.getElementById('tableMatrixFoot');
+      const thead = document.querySelector('#matrixTable thead');
       if (!tbody) return;
 
       let dataMatriz = datosFiltrados;
@@ -1375,8 +1612,31 @@
         dataMatriz = datosFiltrados.filter(d => d.Nivel === nivelFiltroMatriz);
       }
 
-      if (dataMatriz.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 36px; color: var(--text-muted);">❌ No hay datos para la selección actual.</td></tr>`;
+      const periodosActivos = periodosDisponiblesOrdenados.filter(p => periodosSeleccionados.has(p));
+
+      // Fila 1 de Encabezado: Nombre del Periodo con colspan="3"
+      let headRow1 = `<tr>
+        <th rowspan="2" class="col-jerarquia">Jerarquía: Nivel / NTtra / TipoDesposte / Código - Producto</th>`;
+      
+      // Fila 2 de Encabezado: Subcolumnas (Unidades, Kilos, % Rend)
+      let headRow2 = `<tr>`;
+
+      periodosActivos.forEach(p => {
+        headRow1 += `<th colspan="3" class="periodo-header">${etiquetaPeriodo(p)}</th>`;
+        headRow2 += `
+          <th class="metric-header">Unidades</th>
+          <th class="metric-header">Kilos</th>
+          <th class="metric-header">% Rend.</th>
+        `;
+      });
+
+      headRow1 += `</tr>`;
+      headRow2 += `</tr>`;
+
+      if (thead) thead.innerHTML = headRow1 + headRow2;
+
+      if (dataMatriz.length === 0 || periodosActivos.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="${1 + (periodosActivos.length * 3)}" style="text-align: center; padding: 36px; color: var(--text-muted);">No hay datos o periodos seleccionados.</td></tr>`;
         if (tfoot) tfoot.innerHTML = "";
         return;
       }
@@ -1387,6 +1647,9 @@
       });
 
       dataMatriz.forEach(d => {
+        const pKey = obtenerPeriodoKey(d.FechaOrden, modoMatrizActivo);
+        if (!periodosSeleccionados.has(pKey)) return;
+
         const nKey = d.Nivel || "OTROS";
         if (!nivelesMap.has(nKey)) nivelesMap.set(nKey, { nivelKey: nKey, rows: [], nttras: new Map() });
         const nObj = nivelesMap.get(nKey);
@@ -1402,43 +1665,63 @@
         const tdObj = tObj.tiposDesposte.get(tdKey);
         tdObj.rows.push(d);
 
-        const pKey = `${d.CodigoCorto} - ${d.Nombre}`;
-        if (!tdObj.productos.has(pKey)) {
-          tdObj.productos.set(pKey, { codigoCorto: d.CodigoCorto, nombre: d.Nombre, productoCodigo: d.Producto, rows: [] });
+        const prodKey = `${d.CodigoCorto} - ${d.Nombre}`;
+        if (!tdObj.productos.has(prodKey)) {
+          tdObj.productos.set(prodKey, { codigoCorto: d.CodigoCorto, nombre: d.Nombre, productoCodigo: d.Producto, rows: [] });
         }
-        tdObj.productos.get(pKey).rows.push(d);
+        tdObj.productos.get(prodKey).rows.push(d);
       });
 
-      const totalKilosGlobal = dataMatriz.reduce((a, b) => a + b.Kilos, 0);
+      // Calcular total kilos globales por periodo para los cálculos de % Rendimiento
+      const totalKilosPeriodosMap = {};
+      dataMatriz.forEach(r => {
+        const pk = obtenerPeriodoKey(r.FechaOrden, modoMatrizActivo);
+        if (periodosSeleccionados.has(pk)) {
+          totalKilosPeriodosMap[pk] = (totalKilosPeriodosMap[pk] || 0) + r.Kilos;
+        }
+      });
+
+      const sumarMétricasPorPeriodo = (rows) => {
+        const mapa = {};
+        rows.forEach(r => {
+          const pk = obtenerPeriodoKey(r.FechaOrden, modoMatrizActivo);
+          if (!mapa[pk]) mapa[pk] = { und: 0, kg: 0 };
+          mapa[pk].und += r.Unidades;
+          mapa[pk].kg += r.Kilos;
+        });
+        return mapa;
+      };
+
       let html = "";
 
       nivelesMap.forEach((nGrupo, nKey) => {
         if (nGrupo.rows.length === 0) return;
 
-        const totalUndNivel = nGrupo.rows.reduce((a, b) => a + b.Unidades, 0);
-        const totalKgNivel = nGrupo.rows.reduce((a, b) => a + b.Kilos, 0);
-        const pesoPromNivel = totalUndNivel > 0 ? totalKgNivel / totalUndNivel : 0;
-        const pctDistNivel = totalKilosGlobal > 0 ? (totalKgNivel / totalKilosGlobal) * 100 : 0;
-
+        const periodosMetricasNivel = sumarMétricasPorPeriodo(nGrupo.rows);
         const isNCollapsed = collapsedNiveles.has(nKey);
         const iconNivel = isNCollapsed ? "▶" : "▼";
         const isSaldo = nKey === "SALDO PENDIENTE";
 
         html += `
           <tr class="row-nivel ${isSaldo ? 'row-saldo-pendiente' : ''}" onclick="toggleColapsoNivel('${nKey}')">
-            <td>
+            <td style="position: sticky; left: 0; z-index: 5;">
               <span class="tree-toggle-icon">${iconNivel}</span>
-              <span class="nivel-title">${isSaldo ? '⚠️' : '📌'} ${nKey}</span>
+              <span class="nivel-title">${nKey}</span>
             </td>
-            <td class="text-right num-col">${totalUndNivel.toLocaleString('es-PE')}</td>
-            <td class="text-right num-col">${formatKg(totalKgNivel)}</td>
-            <td class="text-right num-col">${pesoPromNivel.toFixed(2)}</td>
-            <td class="text-right num-col">${pctDistNivel.toFixed(2)}%</td>
+            ${periodosActivos.map(p => {
+              const m = periodosMetricasNivel[p] || { und: 0, kg: 0 };
+              const totalKgPeriodo = totalKilosPeriodosMap[p] || 0;
+              const pctRend = totalKgPeriodo > 0 ? (m.kg / totalKgPeriodo) * 100 : 0;
+              return `
+                <td class="text-right num-col">${m.und.toLocaleString('es-PE')}</td>
+                <td class="text-right num-col">${formatKg(m.kg)}</td>
+                <td class="text-right num-col">${pctRend.toFixed(1)}%</td>
+              `;
+            }).join('')}
           </tr>
         `;
 
         if (!isNCollapsed) {
-          // Ordenar NTtra: ORIGEN primero, luego RESULTADO / otros
           const nttrasOrdenados = Array.from(nGrupo.nttras.keys()).sort((a, b) => {
             if (a === "ORIGEN") return -1;
             if (b === "ORIGEN") return 1;
@@ -1447,10 +1730,7 @@
 
           nttrasOrdenados.forEach(tKey => {
             const tGrupo = nGrupo.nttras.get(tKey);
-            const totalUndNTtra = tGrupo.rows.reduce((a, b) => a + b.Unidades, 0);
-            const totalKgNTtra = tGrupo.rows.reduce((a, b) => a + b.Kilos, 0);
-            const pesoPromNTtra = totalUndNTtra > 0 ? totalKgNTtra / totalUndNTtra : 0;
-            const pctNTtra = totalKgNivel > 0 ? (totalKgNTtra / totalKgNivel) * 100 : 0;
+            const periodosMetricasNTtra = sumarMétricasPorPeriodo(tGrupo.rows);
 
             const fullTKey = `${nKey}___${tKey}`;
             const isTCollapsed = collapsedNTtras.has(fullTKey);
@@ -1458,29 +1738,32 @@
 
             html += `
               <tr class="row-nttra" onclick="toggleColapsoNTtra('${fullTKey}')">
-                <td style="padding-left: 28px;">
+                <td style="padding-left: 28px; position: sticky; left: 0; z-index: 5; background-color: inherit;">
                   <span class="tree-toggle-icon">${iconNTtra}</span>
-                  <span class="nttra-badge">🏷️ Tipo: ${tKey}</span>
+                  <span class="nttra-badge">${tKey}</span>
                 </td>
-                <td class="text-right num-col font-bold">${totalUndNTtra.toLocaleString('es-PE')}</td>
-                <td class="text-right num-col font-bold text-gold">${formatKg(totalKgNTtra)}</td>
-                <td class="text-right num-col">${pesoPromNTtra.toFixed(2)}</td>
-                <td class="text-right num-col">${pctNTtra.toFixed(2)}%</td>
+                ${periodosActivos.map(p => {
+                  const m = periodosMetricasNTtra[p] || { und: 0, kg: 0 };
+                  const kgNivelP = periodosMetricasNivel[p] ? periodosMetricasNivel[p].kg : 0;
+                  const pctRend = kgNivelP > 0 ? (m.kg / kgNivelP) * 100 : 0;
+                  return `
+                    <td class="text-right num-col font-bold">${m.und.toLocaleString('es-PE')}</td>
+                    <td class="text-right num-col font-bold text-gold">${formatKg(m.kg)}</td>
+                    <td class="text-right num-col">${pctRend.toFixed(1)}%</td>
+                  `;
+                }).join('')}
               </tr>
             `;
 
             if (!isTCollapsed) {
-              // ORDENAR TipoDesposte DE MAYOR A MENOR SEGÚN KILOS
               const tiposDesposteOrdenados = Array.from(tGrupo.tiposDesposte.values()).map(td => {
                 const totalKgTD = td.rows.reduce((a, b) => a + b.Kilos, 0);
-                const totalUndTD = td.rows.reduce((a, b) => a + b.Unidades, 0);
-                return { ...td, totalKgTD, totalUndTD };
+                return { ...td, totalKgTD };
               }).sort((a, b) => b.totalKgTD - a.totalKgTD);
 
               tiposDesposteOrdenados.forEach((tdGrupo) => {
                 const tdKey = tdGrupo.tipoDesposteKey;
-                const pesoPromTD = tdGrupo.totalUndTD > 0 ? tdGrupo.totalKgTD / tdGrupo.totalUndTD : 0;
-                const pctTD = totalKgNivel > 0 ? (tdGrupo.totalKgTD / totalKgNivel) * 100 : 0;
+                const periodosMetricasTD = sumarMétricasPorPeriodo(tdGrupo.rows);
 
                 const fullTDKey = `${fullTKey}___${tdKey}`;
                 const isTDCollapsed = collapsedTiposDesposte.has(fullTDKey);
@@ -1488,39 +1771,48 @@
 
                 html += `
                   <tr class="row-desposte" onclick="toggleColapsoTipoDesposte('${fullTDKey}')">
-                    <td style="padding-left: 48px;">
+                    <td style="padding-left: 48px; position: sticky; left: 0; z-index: 5; background-color: inherit;">
                       <span class="tree-toggle-icon">${iconTD}</span>
-                      <span class="desposte-badge">🔪 Desposte: ${tdKey}</span>
+                      <span class="desposte-badge">${tdKey}</span>
                     </td>
-                    <td class="text-right num-col font-bold">${tdGrupo.totalUndTD.toLocaleString('es-PE')}</td>
-                    <td class="text-right num-col font-bold text-gold">${formatKg(tdGrupo.totalKgTD)}</td>
-                    <td class="text-right num-col">${pesoPromTD.toFixed(2)}</td>
-                    <td class="text-right num-col">${pctTD.toFixed(2)}%</td>
+                    ${periodosActivos.map(p => {
+                      const m = periodosMetricasTD[p] || { und: 0, kg: 0 };
+                      const kgNivelP = periodosMetricasNivel[p] ? periodosMetricasNivel[p].kg : 0;
+                      const pctRend = kgNivelP > 0 ? (m.kg / kgNivelP) * 100 : 0;
+                      return `
+                        <td class="text-right num-col font-bold">${m.und.toLocaleString('es-PE')}</td>
+                        <td class="text-right num-col font-bold text-gold">${formatKg(m.kg)}</td>
+                        <td class="text-right num-col">${pctRend.toFixed(1)}%</td>
+                      `;
+                    }).join('')}
                   </tr>
                 `;
 
                 if (!isTDCollapsed) {
-                  // ORDENAR CodigoCorto / Productos DE MAYOR A MENOR SEGÚN KILOS
                   const productosOrdenados = Array.from(tdGrupo.productos.values()).map(pGrupo => {
                     const totalKgProd = pGrupo.rows.reduce((a, b) => a + b.Kilos, 0);
-                    const totalUndProd = pGrupo.rows.reduce((a, b) => a + b.Unidades, 0);
-                    return { ...pGrupo, totalKgProd, totalUndProd };
+                    return { ...pGrupo, totalKgProd };
                   }).sort((a, b) => b.totalKgProd - a.totalKgProd);
 
                   productosOrdenados.forEach((pGrupo) => {
-                    const pesoPromProd = pGrupo.totalUndProd > 0 ? pGrupo.totalKgProd / pGrupo.totalUndProd : 0;
-                    const pctProd = totalKgNivel > 0 ? (pGrupo.totalKgProd / totalKgNivel) * 100 : 0;
+                    const periodosMetricasProd = sumarMétricasPorPeriodo(pGrupo.rows);
 
                     html += `
                       <tr class="row-producto">
-                        <td style="padding-left: 72px;">
+                        <td style="padding-left: 72px; position: sticky; left: 0; z-index: 5; background-color: inherit;">
                           <span class="producto-code">${pGrupo.codigoCorto || pGrupo.productoCodigo}</span>
-                          <span>${pGrupo.nombre}</span>
+                          <span class="producto-nombre">${pGrupo.nombre}</span>
                         </td>
-                        <td class="text-right num-col">${pGrupo.totalUndProd.toLocaleString('es-PE')}</td>
-                        <td class="text-right num-col text-gold">${formatKg(pGrupo.totalKgProd)}</td>
-                        <td class="text-right num-col">${pesoPromProd.toFixed(2)}</td>
-                        <td class="text-right num-col">${pctProd.toFixed(2)}%</td>
+                        ${periodosActivos.map(p => {
+                          const m = periodosMetricasProd[p] || { und: 0, kg: 0 };
+                          const kgNivelP = periodosMetricasNivel[p] ? periodosMetricasNivel[p].kg : 0;
+                          const pctRend = kgNivelP > 0 ? (m.kg / kgNivelP) * 100 : 0;
+                          return `
+                            <td class="text-right num-col">${m.und.toLocaleString('es-PE')}</td>
+                            <td class="text-right num-col text-gold">${formatKg(m.kg)}</td>
+                            <td class="text-right num-col">${pctRend.toFixed(1)}%</td>
+                          `;
+                        }).join('')}
                       </tr>
                     `;
                   });
@@ -1533,25 +1825,13 @@
 
       tbody.innerHTML = html;
 
-      const totalUndGlobal = dataMatriz.reduce((a, b) => a + b.Unidades, 0);
-      const pesoPromGlobal = totalUndGlobal > 0 ? totalKilosGlobal / totalUndGlobal : 0;
-
-      if (tfoot) {
-        tfoot.innerHTML = `
-          <tr class="row-grand-total">
-            <td>🏆 TOTAL GENERAL CONSOLIDADO</td>
-            <td class="text-right num-col">${totalUndGlobal.toLocaleString('es-PE')}</td>
-            <td class="text-right num-col" style="color: var(--pantone-yellow);">${formatKg(totalKilosGlobal)}</td>
-            <td class="text-right num-col">${pesoPromGlobal.toFixed(2)}</td>
-            <td class="text-right num-col">100.00%</td>
-          </tr>
-        `;
-      }
+      // Sin fila tfoot (Total General removido a petición)
+      if (tfoot) tfoot.innerHTML = "";
     }
 
-    function toggleColapsoTipoDesposte(fullKey) {
-      if (collapsedTiposDesposte.has(fullKey)) collapsedTiposDesposte.delete(fullKey);
-      else collapsedTiposDesposte.add(fullKey);
+    function toggleColapsoNivel(key) {
+      if (collapsedNiveles.has(key)) collapsedNiveles.delete(key);
+      else collapsedNiveles.add(key);
       renderMatrizJerarquica();
     }
 
@@ -1561,10 +1841,17 @@
       renderMatrizJerarquica();
     }
 
+    function toggleColapsoTipoDesposte(fullKey) {
+      if (collapsedTiposDesposte.has(fullKey)) collapsedTiposDesposte.delete(fullKey);
+      else collapsedTiposDesposte.add(fullKey);
+      renderMatrizJerarquica();
+    }
+
     function expandirTodo(expandir) {
       if (expandir) {
         collapsedNiveles.clear();
         collapsedNTtras.clear();
+        collapsedTiposDesposte.clear();
       } else {
         ORDEN_NIVELES.forEach(nKey => collapsedNiveles.add(nKey));
       }

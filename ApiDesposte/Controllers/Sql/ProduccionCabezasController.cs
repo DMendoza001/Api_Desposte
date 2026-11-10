@@ -7,8 +7,9 @@ using System.Globalization;
 namespace ApiDesposte.Controllers.Sql
 {
     [ApiController]
-    [Route("api/[controller]")]
-    [Route("api/ProduccionCabezasControlles")]
+    [Route("api/[controller]")]                          // Alias corto: /api/ProdCabezas (fallback de dashboards)
+    [Route("api/ProduccionCabezasController")]            // Ruta nueva con el nombre corregido
+    [Route("api/ProduccionCabezasControlles")]            // Alias legacy: mantiene compatibilidad con consumidores externos (Excel/Power Query). Eliminar cuando ya nadie la use.
     public class ProdCabezasController : ControllerBase
     {
         private readonly string _connectionString;
