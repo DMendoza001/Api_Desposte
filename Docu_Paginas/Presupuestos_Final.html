@@ -18,49 +18,64 @@
 
     <style>
         /* =========================================================================
-           🎨 PALETA: INDUSTRIAL SLATE & GOLD (Idéntico a RendimientosChuletas002.html)
+           🎨 PALETA: PANTONE INDUSTRIAL PALETTE (Bronce Mate, Piedra Taupe y Pizarra Suave)
            ========================================================================= */
         :root {
-            /* Tokens Oficiales: Industrial Slate & Gold */
-            --isg-gold-bright: #F4D03F;
-            /* 01. Vivid Gold / Yellow */
-            --isg-slate-dark: #34495E;
-            /* 02. Dark Slate Plomo */
-            --isg-slate-med: #5D6D7E;
-            /* 03. Medium Slate Plomo */
-            --isg-slate-cool: #85929E;
-            /* 04. Cool Slate Plomo */
-            --isg-slate-deep: #2C3E50;
-            /* 05. Midnight Slate Plomo */
-            --isg-gold-rich: #D4AC0D;
-            /* 06. Rich Industrial Gold */
-            --isg-slate-charcoal: #1C2833;
-            /* 07. Charcoal Slate Antracita */
-            --isg-slate-silver: #AEB6BF;
-            /* 08. Silver Slate Plomo */
-            --isg-slate-stone: #7F8C8D;
-            /* 09. Stone Gray Plomo */
-            --isg-gold-bronze: #B7950B;
-            /* 10. Dark Bronze Gold */
+            /* Variables Oficiales del Tema */
+            --color-header-bg: #38353B;
+            --color-header-gradient: linear-gradient(135deg, #38353B 0%, #434B57 100%);
+            --color-header-text: #FFFFFF;
+            --color-header-subtext: #E2D5B5;
+            --color-heading: #38353B;
+            --color-text: #4A474C;
+            --color-text-muted: #787479;
+            --color-primary: #BAA063;
+            --color-secondary: #7A828E;
+            --color-accent: #BAA063;
+            --color-bg: #F2F4F8;
+            --color-surface: #FFFFFF;
+            --color-border: #E2E8F0;
+
+            /* Tokens Oficiales: Pantone Industrial Palette */
+            --isg-gold-bright: #BAA063;
+            /* 01. Bronce Mate */
+            --isg-slate-dark: #4A474C;
+            /* 02. Pizarra Oscura */
+            --isg-slate-med: #7A828E;
+            /* 03. Pizarra Suave */
+            --isg-slate-cool: #878994;
+            /* 04. Gris Pizarra */
+            --isg-slate-deep: #38353B;
+            /* 05. Carbón Taupe */
+            --isg-gold-rich: #BAA063;
+            /* 06. Bronce Mate */
+            --isg-slate-charcoal: #434B57;
+            /* 07. Pizarra Profunda */
+            --isg-slate-silver: #B5B2AA;
+            /* 08. Piedra Clara */
+            --isg-slate-stone: #948E88;
+            /* 09. Piedra Taupe */
+            --isg-gold-bronze: #C4B282;
+            /* 10. Bronce Claro */
 
             /* Roles Estructurales */
             --bg-canvas: #F2F4F8;
-            --text-dark: #2E2A2F;
-            --table-accent: #F4D03F;
+            --text-dark: #4A474C;
+            --table-accent: #BAA063;
 
             /* Mapeos funcionales */
-            --pantone-yellow: #F4D03F;
-            --pantone-yellow-light: #F8CC5A;
-            --pantone-yellow-soft: rgba(244, 208, 63, 0.16);
-            --pantone-yellow-border: rgba(244, 208, 63, 0.45);
-            --pantone-gold: #D4AC0D;
-            --pantone-gold-soft: rgba(212, 172, 13, 0.16);
-            --pantone-gold-border: rgba(212, 172, 13, 0.4);
-            --pantone-dark: #2C3E50;
-            --pantone-darker: #1C2833;
-            --pantone-gray-dark: #34495E;
-            --pantone-gray-med: #5D6D7E;
-            --pantone-gray-light: #AEB6BF;
+            --pantone-yellow: #BAA063;
+            --pantone-yellow-light: #C4B282;
+            --pantone-yellow-soft: rgba(186, 160, 99, 0.16);
+            --pantone-yellow-border: rgba(186, 160, 99, 0.45);
+            --pantone-gold: #7A828E;
+            --pantone-gold-soft: rgba(122, 130, 142, 0.16);
+            --pantone-gold-border: rgba(122, 130, 142, 0.42);
+            --pantone-dark: #38353B;
+            --pantone-darker: #434B57;
+            --pantone-gray-dark: #4A474C;
+            --pantone-gray-med: #787479;
+            --pantone-gray-light: #B5B2AA;
             --pantone-bg: #F2F4F8;
             --pantone-card: #FFFFFF;
             --pantone-card-alt: #F8FAFC;
@@ -68,25 +83,25 @@
             --pantone-border-subtle: #EDF2F7;
 
             /* Mapeo de compatibilidad */
-            --navy-peony: #2C3E50;
-            --cyan-blue: #F4D03F;
-            --cool-blue: #AEB6BF;
-            --blue-sapphire: #1C2833;
-            --foggy-dew: #AEB6BF;
-            --lagoon: #D4AC0D;
-            --teal-blue: #5D6D7E;
-            --aegean-blue: #34495E;
+            --navy-peony: #38353B;
+            --cyan-blue: #BAA063;
+            --cool-blue: #B5B2AA;
+            --blue-sapphire: #434B57;
+            --foggy-dew: #B5B2AA;
+            --lagoon: #7A828E;
+            --teal-blue: #787479;
+            --aegean-blue: #4A474C;
 
             --bg-card: #FFFFFF;
             --bg-card-alt: #F8FAFC;
             --border-ui: #E2E8F0;
-            --text-muted: #5D6D7E;
+            --text-muted: #787479;
             --success: #10B981;
             --warning: #F59E0B;
             --danger: #EF4444;
-            --shadow-sm: 0 1px 3px rgba(28, 40, 51, 0.06), 0 1px 2px rgba(28, 40, 51, 0.04);
-            --shadow-md: 0 4px 6px -1px rgba(28, 40, 51, 0.08), 0 2px 4px -1px rgba(28, 40, 51, 0.04);
-            --shadow-lg: 0 10px 15px -3px rgba(28, 40, 51, 0.12), 0 4px 6px -2px rgba(28, 40, 51, 0.06);
+            --shadow-sm: 0 1px 3px rgba(56, 53, 59, 0.06), 0 1px 2px rgba(56, 53, 59, 0.04);
+            --shadow-md: 0 4px 6px -1px rgba(56, 53, 59, 0.08), 0 2px 4px -1px rgba(56, 53, 59, 0.04);
+            --shadow-lg: 0 10px 15px -3px rgba(56, 53, 59, 0.12), 0 4px 6px -2px rgba(56, 53, 59, 0.06);
 
             --primary: var(--pantone-dark);
             --primary-dark: var(--pantone-darker);
@@ -161,7 +176,7 @@
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.03em;
-            color: var(--pantone-yellow);
+            color: var(--color-header-subtext);
         }
 
         .filter-container select {
@@ -307,7 +322,7 @@
 
         /* Fila Nivel 1: GRUPO (Idéntico a .row-periodo en RendimientosChuletas002) */
         .row-grupo {
-            background: linear-gradient(90deg, #1C2833 0%, #2C3E50 100%) !important;
+            background: linear-gradient(90deg, #38353B 0%, #434B57 100%) !important;
             color: #FFFFFF !important;
             font-weight: 700;
             cursor: pointer;
@@ -316,16 +331,16 @@
         }
 
         .row-grupo:hover {
-            background: linear-gradient(90deg, #151E27 0%, #1C2833 100%) !important;
+            background: linear-gradient(90deg, #2D2A30 0%, #38353B 100%) !important;
         }
 
         .row-grupo td {
-            border-bottom: 1px solid #34495E;
+            border-bottom: 1px solid #4A474C;
             padding: 10px 14px;
         }
 
         .grupo-title {
-            color: var(--pantone-yellow);
+            color: var(--color-header-subtext);
             font-weight: 700;
             font-size: 0.9rem;
         }
@@ -341,7 +356,7 @@
         }
 
         .row-clase:hover {
-            background-color: rgba(244, 208, 63, 0.12) !important;
+            background-color: rgba(186, 160, 99, 0.12) !important;
         }
 
         .row-clase td {
@@ -375,7 +390,7 @@
         }
 
         .row-articulo:hover {
-            background-color: rgba(244, 208, 63, 0.06) !important;
+            background-color: rgba(186, 160, 99, 0.06) !important;
         }
 
         .row-articulo td {
@@ -471,11 +486,11 @@
         }
 
         .row-grupo .sticky-col {
-            background: #1C2833 !important;
+            background: #38353B !important;
         }
 
         .row-grupo:hover .sticky-col {
-            background: #151E27 !important;
+            background: #2D2A30 !important;
         }
 
         .row-clase .sticky-col {
@@ -483,7 +498,7 @@
         }
 
         .row-clase:hover .sticky-col {
-            background-color: #FDF8E1 !important;
+            background-color: #F6F2E9 !important;
         }
 
         .row-articulo .sticky-col {
@@ -495,7 +510,7 @@
         }
 
         .row-articulo:hover .sticky-col {
-            background-color: #FEFCF0 !important;
+            background-color: #FBF9F4 !important;
         }
 
         .kpi-card,
@@ -760,77 +775,61 @@
 
     <script>
         // =========================================================================
-        // 🎨 PALETA OFICIAL DE RENDIMIENTOSCHULETAS002.HTML
+        // 🎨 PALETA OFICIAL: PANTONE INDUSTRIAL PALETTE (Bronce Mate, Piedra Taupe y Pizarra Suave)
         // =========================================================================
         const INDUSTRIAL_SLATE_GOLD = {
             dataColors: [
-                "#F4D03F",
-                "#34495E",
-                "#5D6D7E",
-                "#85929E",
-                "#2C3E50",
-                "#D4AC0D",
-                "#1C2833",
-                "#AEB6BF",
-                "#7F8C8D",
-                "#B7950B"
+                "#BAA063",
+                "#7A828E",
+                "#948E88",
+                "#A89F91",
+                "#878994",
+                "#C4B282",
+                "#B5B2AA",
+                "#6B727D"
             ],
             background: "#F2F4F8",
-            foreground: "#2E2A2F",
-            tableAccent: "#F4D03F",
+            foreground: "#38353B",
+            tableAccent: "#BAA063",
             card: "#FFFFFF",
             grid: "#E2E8F0",
-            textMuted: "#5D6D7E",
+            textMuted: "#787479",
             white: "#FFFFFF"
         };
 
         const GRAFICOS_PALETA = {
             rankingPlantillas: [
-                "rgba(44, 66, 87, 0.92)",   // 01. Deep Slate Navy (#2C4257)
-                "rgba(53, 83, 110, 0.90)",  // 02. Muted Steel Blue (#35536E)
-                "rgba(62, 98, 130, 0.90)",  // 03. Industrial Slate Blue (#3E6282)
-                "rgba(72, 111, 145, 0.88)", // 04. Smoky Cerulean Slate (#486F91)
-                "rgba(82, 122, 154, 0.88)", // 05. Blue-Gray Pewter (#527A9A)
-                "rgba(52, 73, 94, 0.90)",   // 06. Dark Slate Plomo (#34495E)
-                "rgba(91, 127, 149, 0.88)", // 07. Cool Steel Slate (#5B7F95)
-                "rgba(74, 96, 116, 0.88)",  // 08. Medium Slate Blue-Gray (#4A6074)
-                "rgba(99, 130, 154, 0.86)", // 09. Muted Air Force Slate (#63829A)
-                "rgba(93, 109, 126, 0.88)", // 10. Cool Slate Plomo (#5D6D7E)
-                "rgba(110, 138, 159, 0.86)",// 11. Dusty Blue-Slate (#6E8A9F)
-                "rgba(108, 122, 137, 0.86)",// 12. Balanced Pewter Plomo (#6C7A89)
-                "rgba(124, 149, 168, 0.85)",// 13. Mist Blue-Gray (#7C95A8)
-                "rgba(133, 146, 158, 0.85)",// 14. Silver Slate Plomo (#85929E)
-                "rgba(149, 165, 178, 0.85)" // 15. Pale Metallic Slate (#95A5B2)
+                "#BAA063",
+                "#7A828E",
+                "#948E88",
+                "#A89F91",
+                "#878994",
+                "#C4B282",
+                "#B5B2AA",
+                "#6B727D"
             ],
             rankingPlantillasBorder: [
-                "#1E2F3F",
-                "#263D52",
-                "#2E4B64",
-                "#365773",
-                "#3E617D",
-                "#253544",
-                "#456376",
-                "#374857",
-                "#4B6578",
-                "#465360",
-                "#546C7E",
-                "#525D69",
-                "#5F7485",
-                "#68737D",
-                "#758591"
+                "#9A824C",
+                "#6B727D",
+                "#787479",
+                "#878994",
+                "#6B727D",
+                "#BAA063",
+                "#948E88",
+                "#434B57"
             ],
             temporal: {
-                rendimientoLine: "#F4D03F",
-                rendimientoFill: "rgba(58, 91, 120, 0.12)",
-                rendimientoPoint: "#1C2833",
-                rendimientoPointBorder: "#F4D03F",
-                rendimientoHoverPoint: "#D4AC0D",
-                kilosOrigenBar: "rgba(115, 128, 142, 0.85)",
-                kilosOrigenBorder: "#5D6D7E",
-                kilosOrigenHover: "#475569",
-                kilosResultadoBar: "rgba(58, 91, 120, 0.90)",
-                kilosResultadoBorder: "#2C4760",
-                kilosResultadoHover: "#243B50"
+                rendimientoLine: "#BAA063",
+                rendimientoFill: "rgba(186, 160, 99, 0.16)",
+                rendimientoPoint: "#38353B",
+                rendimientoPointBorder: "#BAA063",
+                rendimientoHoverPoint: "#C4B282",
+                kilosOrigenBar: "#948E88",
+                kilosOrigenBorder: "#787479",
+                kilosOrigenHover: "#4A474C",
+                kilosResultadoBar: "#BAA063",
+                kilosResultadoBorder: "#9A824C",
+                kilosResultadoHover: "#38353B"
             }
         };
 
@@ -1051,11 +1050,11 @@
 
             const coloresGrupo = datosGrupo.etiquetas.map((_, i) => GRAFICOS_PALETA.rankingPlantillas[i % GRAFICOS_PALETA.rankingPlantillas.length]);
             const bordesGrupo = datosGrupo.etiquetas.map((_, i) => GRAFICOS_PALETA.rankingPlantillasBorder[i % GRAFICOS_PALETA.rankingPlantillasBorder.length]);
-            actualizarGrafico('chartGrupo', 'bar-h', datosGrupo.etiquetas, datosGrupo.valores, coloresGrupo, bordesGrupo, '#2C4760');
+            actualizarGrafico('chartGrupo', 'bar-h', datosGrupo.etiquetas, datosGrupo.valores, coloresGrupo, bordesGrupo, '#38353B');
 
             const coloresClase = datosClase.etiquetas.map((_, i) => GRAFICOS_PALETA.rankingPlantillas[i % GRAFICOS_PALETA.rankingPlantillas.length]);
             const bordesClase = datosClase.etiquetas.map((_, i) => GRAFICOS_PALETA.rankingPlantillasBorder[i % GRAFICOS_PALETA.rankingPlantillasBorder.length]);
-            actualizarGrafico('chartClase', 'bar-h', datosClase.etiquetas, datosClase.valores, coloresClase, bordesClase, '#2C4760');
+            actualizarGrafico('chartClase', 'bar-h', datosClase.etiquetas, datosClase.valores, coloresClase, bordesClase, '#38353B');
 
             // 4. Matrices Dinámicas (Mensual y Resumen)
             renderizarMatrizMensual(data, campoMonto);
@@ -1520,17 +1519,17 @@
             return objAgrupado.etiquetas[maxIdx];
         }
 
-        function actualizarGrafico(idCanvas, tipo, etiquetas, valores, colores, colorBorde = '#2C4760', colorHover = '#243B50') {
+        function actualizarGrafico(idCanvas, tipo, etiquetas, valores, colores, colorBorde = '#6B727D', colorHover = '#38353B') {
             if (instGraficos[idCanvas]) instGraficos[idCanvas].destroy();
 
             const ctx = document.getElementById(idCanvas).getContext('2d');
             const tooltipTheme = {
-                backgroundColor: '#1C2833',
-                titleColor: '#F4D03F',
+                backgroundColor: '#38353B',
+                titleColor: '#E2D5B5',
                 titleFont: { family: 'Inter', weight: '700', size: 12 },
                 bodyFont: { family: 'Inter', size: 11 },
                 bodyColor: '#FFFFFF',
-                borderColor: '#34495E',
+                borderColor: '#BAA063',
                 borderWidth: 1,
                 padding: 10
             };
@@ -1563,25 +1562,25 @@
                 config.type = 'bar';
                 config.options.plugins.legend = {
                     position: 'top',
-                    labels: { boxWidth: 12, color: '#2E2A2F', font: { family: 'Inter', size: 11, weight: '600' } }
+                    labels: { boxWidth: 12, color: '#38353B', font: { family: 'Inter', size: 11, weight: '600' } }
                 };
                 config.options.scales = {
-                    x: { grid: { display: false }, ticks: { color: '#5D6D7E', font: { family: 'Inter', size: 10 } } },
-                    y: { grid: { color: '#E2E8F0' }, ticks: { color: '#5D6D7E', font: { family: 'Inter', size: 10 } } }
+                    x: { grid: { display: false }, ticks: { color: '#787479', font: { family: 'Inter', size: 10 } } },
+                    y: { grid: { color: '#E2E8F0' }, ticks: { color: '#787479', font: { family: 'Inter', size: 10 } } }
                 };
             } else if (tipo === 'bar-h') {
                 config.type = 'bar';
                 config.options.indexAxis = 'y';
                 config.options.plugins.legend = { display: false };
                 config.options.scales = {
-                    x: { grid: { color: '#E2E8F0' }, ticks: { color: '#5D6D7E', font: { family: 'Inter', size: 10 } } },
-                    y: { grid: { display: false }, ticks: { color: '#2E2A2F', font: { family: 'Inter', size: 11, weight: '500' } } }
+                    x: { grid: { color: '#E2E8F0' }, ticks: { color: '#787479', font: { family: 'Inter', size: 10 } } },
+                    y: { grid: { display: false }, ticks: { color: '#38353B', font: { family: 'Inter', size: 11, weight: '500' } } }
                 };
             } else if (tipo === 'doughnut') {
                 config.type = 'doughnut';
                 config.options.plugins.legend = {
                     position: 'right',
-                    labels: { color: '#2E2A2F', font: { family: 'Inter', size: 11, weight: '600' } }
+                    labels: { color: '#38353B', font: { family: 'Inter', size: 11, weight: '600' } }
                 };
             }
 

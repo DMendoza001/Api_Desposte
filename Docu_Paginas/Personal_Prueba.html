@@ -7,23 +7,39 @@
     <title>Gestión de Personal - Excel SharePoint</title>
     <style>
         /* =========================================================================
-           🎨 PALETA PANTONE INDUSTRIAL
+           🎨 PALETA PANTONE INDUSTRIAL (Bronce Mate, Piedra Taupe y Pizarra Suave)
            ========================================================================= */
         :root {
-            --pantone-yellow: #F4D03F;
-            --pantone-yellow-light: #F8CC5A;
-            --pantone-gold: #BAA063;
-            --pantone-dark: #2E2A2F;
-            --pantone-darker: #252C37;
-            --pantone-gray-dark: #605C5E;
-            --pantone-gray-med: #878994;
-            --pantone-gray-light: #CDCAC0;
+            /* Variables Oficiales del Tema */
+            --color-header-bg: #38353B;
+            --color-header-gradient: linear-gradient(135deg, #38353B 0%, #434B57 100%);
+            --color-header-text: #FFFFFF;
+            --color-header-subtext: #E2D5B5;
+            --color-heading: #38353B;
+            --color-text: #4A474C;
+            --color-text-muted: #787479;
+            --color-primary: #BAA063;
+            --color-secondary: #7A828E;
+            --color-accent: #BAA063;
+            --color-bg: #F2F4F8;
+            --color-surface: #FFFFFF;
+            --color-border: #E2E8F0;
+
+            /* Escala Pantone Industrial */
+            --pantone-yellow: #BAA063;
+            --pantone-yellow-light: #C4B282;
+            --pantone-gold: #7A828E;
+            --pantone-dark: #38353B;
+            --pantone-darker: #434B57;
+            --pantone-gray-dark: #4A474C;
+            --pantone-gray-med: #787479;
+            --pantone-gray-light: #B5B2AA;
             --pantone-bg: #F2F4F8;
             --pantone-card: #FFFFFF;
             --pantone-border: #E2E8F0;
-            --table-accent: #F4D03F;
+            --table-accent: #BAA063;
 
-            --primary: #2E2A2F;
+            --primary: #38353B;
             --danger: #EF4444;
             --success: #10B981;
             --bg: #F2F4F8;
@@ -40,7 +56,7 @@
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background-color: var(--bg);
             padding: 20px;
-            color: #2E2A2F;
+            color: var(--color-text);
         }
 
         .container {
@@ -50,17 +66,17 @@
         }
 
         .card {
-            background: white;
+            background: var(--color-surface);
             padding: 20px;
             border-radius: 8px;
             border: 1px solid var(--border);
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 1px 3px rgba(56, 53, 59, 0.06);
         }
 
         h2 {
             font-size: 16px;
             margin-bottom: 15px;
-            color: var(--primary);
+            color: var(--color-heading);
         }
 
         .form-group {
@@ -72,7 +88,7 @@
             font-size: 12px;
             font-weight: 600;
             margin-bottom: 4px;
-            color: #64748b;
+            color: var(--color-text-muted);
         }
 
         input {
@@ -81,6 +97,12 @@
             border: 1px solid var(--border);
             border-radius: 4px;
             outline: none;
+            color: var(--color-text);
+        }
+
+        input:focus {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 2px rgba(186, 160, 99, 0.2);
         }
 
         .btn-group {
@@ -100,11 +122,11 @@
         }
 
         .btn-save {
-            background: var(--primary);
+            background: var(--color-header-gradient);
         }
 
         .btn-clear {
-            background: #64748b;
+            background: var(--color-secondary);
         }
 
         table {
@@ -114,19 +136,21 @@
         }
 
         th {
-            background: var(--primary);
-            color: white;
+            background: var(--color-header-bg);
+            color: var(--color-header-text);
             padding: 10px;
             text-align: left;
+            border-bottom: 2px solid var(--color-primary);
         }
 
         td {
             padding: 10px;
             border-bottom: 1px solid var(--border);
+            color: var(--color-text);
         }
 
         tr:hover {
-            background-color: #f1f5f9;
+            background-color: rgba(186, 160, 99, 0.08);
         }
 
         .btn-action {
@@ -136,7 +160,8 @@
         }
 
         .btn-edit {
-            background: #2563eb;
+            background: var(--color-primary);
+            color: #FFFFFF;
         }
 
         .btn-delete {

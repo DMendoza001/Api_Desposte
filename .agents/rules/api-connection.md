@@ -120,3 +120,12 @@ El archivo `Docu_Paginas/config.js` define:
 - `servidor`: Nombre de equipo en red (e.g. `"RAEVSALL001"`) o `"localhost"`.
 - `puertos`: Lista priorizada de puertos `[8080, 5000]`.
 - Función `generarBasesApiGlobal()` con detección y fallbacks automáticos a `localhost` y `127.0.0.1`.
+
+---
+
+## 6. Ruta Canónica Única en Controladores Backend (.NET)
+
+Para mantener un contrato limpio entre el Frontend y la API .NET (y evitar endpoints duplicados en Swagger/OpenAPI):
+1. **Un solo `[Route]` por controlador:** Todo controlador debe definir únicamente `[Route("api/[controller]")]` y el nombre de la clase `<Nombre>Controller` debe coincidir con el nombre del archivo. No se deben apilar múltiples atributos `[Route(...)]` con alias o nombres legacy.
+2. **Un solo atributo HTTP por endpoint:** Cada método de acción debe exponer una única ruta (por ejemplo, `[HttpGet]` o `[HttpGet("subruta")]`), sin combinar `[HttpGet]`, `[HttpGet("listar")]` y `[HttpGet("informe")]` en el mismo método.
+3. **Coherencia con `APP_CONFIG.controllerPath`:** El frontend debe apuntar directamente a la ruta canónica única del controlador (ej. `"/api/ProduccionCabezas"`).

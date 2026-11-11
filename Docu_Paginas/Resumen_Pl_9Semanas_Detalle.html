@@ -19,49 +19,66 @@
 
     <style>
         /* =========================================================================
-           🎨 TEMA: INDUSTRIAL SLATE, STEEL BLUE & GOLD
+           🎨 TEMA: PANTONE INDUSTRIAL PALETTE (Bronce Mate, Piedra Taupe y Pizarra Suave)
            ========================================================================= */
         :root {
-            --isg-gold-bright: #C9A968;
-            --isg-slate-dark: #34495E;
-            --isg-slate-med: #5D6D7E;
-            --isg-slate-cool: #85929E;
-            --isg-slate-deep: #2C3E50;
-            --isg-gold-rich: #B39252;
-            --isg-slate-charcoal: #1C2833;
-            --isg-slate-silver: #AEB6BF;
-            --isg-slate-stone: #7F8C8D;
-            --isg-gold-bronze: #9C7D41;
+            /* Variables Oficiales del Tema */
+            --color-header-bg: #38353B;
+            --color-header-gradient: linear-gradient(135deg, #38353B 0%, #434B57 100%);
+            --color-header-text: #FFFFFF;
+            --color-header-subtext: #E2D5B5;
+            --color-heading: #38353B;
+            --color-text: #4A474C;
+            --color-text-muted: #787479;
+            --color-primary: #BAA063;
+            --color-secondary: #7A828E;
+            --color-accent: #BAA063;
+            --color-bg: #F2F4F8;
+            --color-surface: #FFFFFF;
+            --color-border: #E2E8F0;
 
-            --chart-slate-navy: #2C4257;
-            --chart-steel-blue: #3A5B78;
-            --chart-cerulean-slate: #486F91;
-            --chart-pewter-blue: #527A9A;
-            --chart-plomo-neutro: #73808E;
-            --chart-plomo-pizarra: #6C7A89;
+            --isg-gold-bright: #BAA063;
+            --isg-slate-dark: #4A474C;
+            --isg-slate-med: #7A828E;
+            --isg-slate-cool: #878994;
+            --isg-slate-deep: #434B57;
+            --isg-gold-rich: #BAA063;
+            --isg-slate-charcoal: #38353B;
+            --isg-slate-silver: #B5B2AA;
+            --isg-slate-stone: #948E88;
+            --isg-gold-bronze: #C4B282;
 
-            --pantone-yellow: #C9A968;
-            --pantone-yellow-light: #DEC690;
-            --pantone-gold: #B39252;
-            --pantone-dark: #2E2A2F;
-            --pantone-gray-dark: #605C5E;
-            --pantone-gray-med: #878994;
-            --pantone-gray-light: #CDCAC0;
+            --chart-slate-navy: #38353B;
+            --chart-steel-blue: #7A828E;
+            --chart-cerulean-slate: #948E88;
+            --chart-pewter-blue: #A89F91;
+            --chart-plomo-neutro: #878994;
+            --chart-plomo-pizarra: #B5B2AA;
 
-            --bg-main: #F4F6F9;
+            --pantone-yellow: #BAA063;
+            --pantone-yellow-light: #C4B282;
+            --pantone-gold: #7A828E;
+            --pantone-dark: #38353B;
+            --pantone-darker: #434B57;
+            --pantone-gray-dark: #4A474C;
+            --pantone-gray-med: #787479;
+            --pantone-gray-light: #B5B2AA;
+
+            --bg-main: #F2F4F8;
             --bg-surface: #FFFFFF;
-            --bg-elevated: #EDF1F5;
+            --bg-elevated: #F8F9FB;
             --bg-hover: #E2E8F0;
 
-            --text-primary: #2E2A2F;
-            --text-secondary: #5D6D7E;
-            --text-muted: #7F8C8D;
+            --text-heading: #38353B;
+            --text-primary: #4A474C;
+            --text-secondary: #787479;
+            --text-muted: #787479;
 
-            --border-ui: #D5DCE4;
-            --border-strong: #AEB6BF;
+            --border-ui: #E2E8F0;
+            --border-strong: #B5B2AA;
 
             --success: #558B76;
-            --warning: #C9A968;
+            --warning: #BAA063;
             --danger: #B84A4A;
 
             --falta-dark: #7A2828;
@@ -72,7 +89,7 @@
             --sobra-accent: #2E5A4C;
             --sobra-soft: rgba(46, 90, 76, 0.08);
 
-            --shadow-card: 0 4px 14px rgba(28, 40, 51, 0.06);
+            --shadow-card: 0 4px 14px rgba(56, 53, 59, 0.06);
             --radius-md: 12px;
             --radius-sm: 8px;
         }
@@ -103,9 +120,9 @@
            HEADER
            ========================================================================= */
         .dashboard-header {
-            background: linear-gradient(135deg, var(--pantone-dark) 0%, var(--isg-slate-deep) 100%);
-            border: 1px solid var(--isg-slate-dark);
-            border-bottom: 3px solid var(--pantone-yellow);
+            background: var(--color-header-gradient);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-bottom: 3px solid var(--color-primary);
             border-radius: var(--radius-md);
             padding: 16px 24px;
             display: flex;
@@ -113,8 +130,8 @@
             justify-content: space-between;
             flex-wrap: wrap;
             gap: 16px;
-            box-shadow: 0 6px 18px rgba(28, 40, 51, 0.15);
-            color: #FFFFFF;
+            box-shadow: 0 6px 18px rgba(56, 53, 59, 0.16);
+            color: var(--color-header-text);
         }
 
         .header-title-group {
@@ -127,19 +144,19 @@
             width: 46px;
             height: 46px;
             border-radius: 10px;
-            background: rgba(201, 169, 104, 0.16);
-            border: 1px solid rgba(201, 169, 104, 0.45);
+            background: rgba(186, 160, 99, 0.16);
+            border: 1px solid rgba(186, 160, 99, 0.45);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--pantone-yellow);
+            color: var(--color-primary);
             flex-shrink: 0;
         }
 
         .header-title {
             font-size: 1.3rem;
             font-weight: 800;
-            color: #FFFFFF;
+            color: var(--color-header-text);
             letter-spacing: -0.02em;
             display: flex;
             align-items: center;
@@ -152,15 +169,16 @@
             font-weight: 700;
             padding: 3px 10px;
             border-radius: 999px;
-            background: var(--pantone-yellow);
-            color: var(--pantone-dark);
+            background: rgba(186, 160, 99, 0.22);
+            color: var(--color-header-subtext);
+            border: 1px solid rgba(226, 213, 181, 0.40);
             text-transform: uppercase;
             letter-spacing: 0.04em;
         }
 
         .header-subtitle {
             font-size: 0.82rem;
-            color: var(--pantone-gray-light);
+            color: var(--color-header-subtext);
             margin-top: 3px;
         }
 
@@ -222,14 +240,16 @@
         }
 
         .btn-primary {
-            background: var(--chart-slate-navy);
+            background: linear-gradient(135deg, var(--pantone-yellow) 0%, var(--pantone-yellow-light) 100%);
             color: #FFFFFF;
-            border-color: var(--chart-slate-navy);
+            border-color: rgba(186, 160, 99, 0.65);
+            font-weight: 700;
         }
 
         .btn-primary:hover {
-            background: var(--chart-steel-blue);
-            border-color: var(--chart-steel-blue);
+            background: linear-gradient(135deg, var(--pantone-yellow-light) 0%, var(--pantone-yellow) 100%);
+            border-color: var(--pantone-yellow-light);
+            color: #FFFFFF;
         }
 
         .btn-excel {
@@ -787,7 +807,7 @@
             letter-spacing: 0.04em;
             padding: 10px 11px;
             text-align: left;
-            border-bottom: 2px solid #1C2833;
+            border-bottom: 2px solid var(--pantone-yellow);
             white-space: nowrap;
         }
 
@@ -796,18 +816,18 @@
         }
 
         table.matrix-table thead th.th-prog {
-            background: #2C4257;
-            color: #F5E6C4;
+            background: #38353B;
+            color: #E2D5B5;
         }
 
         table.matrix-table thead th.th-com {
-            background: #365571;
-            color: #EBF5FB;
+            background: #434B57;
+            color: #F2F4F8;
         }
 
         table.matrix-table thead th.th-dif {
-            background: #3E4C59;
-            color: #EAEDED;
+            background: #4A474C;
+            color: #E2D5B5;
         }
 
         table.matrix-table thead th.th-falta {
@@ -935,10 +955,10 @@
         }
 
         tr.total-row td {
-            background: #2C4257 !important;
+            background: #38353B !important;
             color: #FFFFFF !important;
             font-weight: 800 !important;
-            border-top: 2px solid #1C2833;
+            border-top: 2px solid #434B57;
         }
 
         .toggle-icon {
@@ -1361,7 +1381,7 @@
                 </div>
             </div>
 
-            <div class="kpi-card" style="--kpi-accent: var(--chart-slate-navy);">
+            <div class="kpi-card" style="--kpi-accent: #7A828E;">
                 <span class="kpi-label">Diferencia Neta (Sobrante - Faltante)</span>
                 <div class="kpi-value" id="kpiDifVal">0<span class="kpi-unit">kg</span></div>
                 <div class="kpi-mp-badges">
@@ -1374,7 +1394,7 @@
                 </div>
             </div>
 
-            <div class="kpi-card" style="--kpi-accent: var(--isg-gold-bright);">
+            <div class="kpi-card" style="--kpi-accent: #BAA063;">
                 <span class="kpi-label">% Cumplimiento Global</span>
                 <div class="kpi-value" id="kpiPctVal">0.00<span class="kpi-unit">%</span></div>
                 <div class="kpi-mp-badges">

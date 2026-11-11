@@ -24,58 +24,73 @@
 
     <style>
         /* =========================================================================
-           🎨 TEMA: INDUSTRIAL SLATE, STEEL BLUE & GOLD (tema_colores_industrial_slate_blue.json)
+           🎨 TEMA: PANTONE INDUSTRIAL PALETTE (Bronce Mate, Piedra Taupe y Pizarra Suave)
            ========================================================================= */
         :root {
-            /* Tokens Base Industrial Slate & Gold */
-            --isg-gold-bright: #F4D03F;
-            --isg-slate-dark: #34495E;
-            --isg-slate-med: #5D6D7E;
-            --isg-slate-cool: #85929E;
-            --isg-slate-deep: #2C3E50;
-            --isg-gold-rich: #D4AC0D;
-            --isg-slate-charcoal: #1C2833;
-            --isg-slate-silver: #AEB6BF;
-            --isg-slate-stone: #7F8C8D;
-            --isg-gold-bronze: #B7950B;
+            /* Variables Oficiales del Tema */
+            --color-header-bg: #38353B;
+            --color-header-gradient: linear-gradient(135deg, #38353B 0%, #434B57 100%);
+            --color-header-text: #FFFFFF;
+            --color-header-subtext: #E2D5B5;
+            --color-heading: #38353B;
+            --color-text: #4A474C;
+            --color-text-muted: #787479;
+            --color-primary: #BAA063;
+            --color-secondary: #7A828E;
+            --color-accent: #BAA063;
+            --color-bg: #F2F4F8;
+            --color-surface: #FFFFFF;
+            --color-border: #E2E8F0;
 
-            /* Tokens de Gráficos Azules Plomizos y Plomos */
-            --chart-slate-navy: #2C4257;
-            --chart-steel-blue: #3A5B78;
-            --chart-cerulean-slate: #486F91;
-            --chart-pewter-blue: #527A9A;
-            --chart-plomo-neutro: #73808E;
-            --chart-plomo-pizarra: #6C7A89;
+            /* Escala Pantone Industrial y Chart Colors */
+            --isg-gold-bright: #BAA063;
+            --isg-slate-dark: #4A474C;
+            --isg-slate-med: #7A828E;
+            --isg-slate-cool: #878994;
+            --isg-slate-deep: #38353B;
+            --isg-gold-rich: #BAA063;
+            --isg-slate-charcoal: #434B57;
+            --isg-slate-silver: #B5B2AA;
+            --isg-slate-stone: #948E88;
+            --isg-gold-bronze: #C4B282;
+
+            /* Tokens de Gráficos (Bronce Mate, Piedra Taupe y Pizarra Suave) */
+            --chart-slate-navy: #38353B;
+            --chart-steel-blue: #7A828E;
+            --chart-cerulean-slate: #948E88;
+            --chart-pewter-blue: #A89F91;
+            --chart-plomo-neutro: #878994;
+            --chart-plomo-pizarra: #B5B2AA;
 
             /* Mapeo de tokens estructurales */
-            --pantone-yellow: #F4D03F;
-            --pantone-yellow-light: #F8CC5A;
-            --pantone-yellow-soft: rgba(244, 208, 63, 0.16);
-            --pantone-yellow-border: rgba(244, 208, 63, 0.45);
-            --pantone-gold: #D4AC0D;
-            --pantone-gold-soft: rgba(212, 172, 13, 0.14);
-            --pantone-gold-border: rgba(212, 172, 13, 0.4);
-            --pantone-dark: #2C3E50;
-            --pantone-darker: #1C2833;
-            --pantone-gray-dark: #34495E;
-            --pantone-gray-med: #5D6D7E;
-            --pantone-gray-light: #AEB6BF;
+            --pantone-yellow: #BAA063;
+            --pantone-yellow-light: #C4B282;
+            --pantone-yellow-soft: rgba(186, 160, 99, 0.16);
+            --pantone-yellow-border: rgba(186, 160, 99, 0.45);
+            --pantone-gold: #7A828E;
+            --pantone-gold-soft: rgba(122, 130, 142, 0.16);
+            --pantone-gold-border: rgba(122, 130, 142, 0.42);
+            --pantone-dark: #38353B;
+            --pantone-darker: #434B57;
+            --pantone-gray-dark: #4A474C;
+            --pantone-gray-med: #787479;
+            --pantone-gray-light: #B5B2AA;
 
-            --bg-canvas: #F2F4F8;
-            --bg-card: #FFFFFF;
+            --bg-canvas: var(--color-bg);
+            --bg-card: var(--color-surface);
             --bg-card-alt: #F8FAFC;
-            --border-ui: #E2E8F0;
+            --border-ui: var(--color-border);
             --border-subtle: #EDF2F7;
-            --text-dark: #2E2A2F;
-            --text-muted: #5D6D7E;
+            --text-dark: var(--color-text);
+            --text-muted: var(--color-text-muted);
 
             --success: #10B981;
             --warning: #F59E0B;
             --danger: #EF4444;
 
-            --shadow-sm: 0 1px 3px rgba(28, 40, 51, 0.06), 0 1px 2px rgba(28, 40, 51, 0.04);
-            --shadow-md: 0 4px 6px -1px rgba(28, 40, 51, 0.08), 0 2px 4px -1px rgba(28, 40, 51, 0.04);
-            --shadow-lg: 0 10px 15px -3px rgba(28, 40, 51, 0.12), 0 4px 6px -2px rgba(28, 40, 51, 0.06);
+            --shadow-sm: 0 1px 3px rgba(56, 53, 59, 0.06), 0 1px 2px rgba(56, 53, 59, 0.04);
+            --shadow-md: 0 4px 6px -1px rgba(56, 53, 59, 0.08), 0 2px 4px -1px rgba(56, 53, 59, 0.04);
+            --shadow-lg: 0 10px 15px -3px rgba(56, 53, 59, 0.12), 0 4px 6px -2px rgba(56, 53, 59, 0.06);
 
             --radius-sm: 8px;
             --radius-md: 12px;
@@ -106,9 +121,9 @@
 
         /* HEADER */
         .dashboard-header {
-            background: linear-gradient(135deg, var(--pantone-dark) 0%, var(--pantone-darker) 100%);
+            background: var(--color-header-gradient);
             border: 1px solid rgba(255, 255, 255, 0.08);
-            border-left: 6px solid var(--pantone-yellow);
+            border-left: 6px solid var(--color-primary);
             border-radius: 12px;
             padding: 22px 28px;
             display: flex;
@@ -119,7 +134,7 @@
             box-shadow: var(--shadow-lg);
             position: relative;
             overflow: hidden;
-            color: #FFFFFF;
+            color: var(--color-header-text);
         }
 
         .dashboard-header::before {
@@ -129,7 +144,7 @@
             left: 0;
             right: 0;
             height: 3px;
-            background: linear-gradient(90deg, var(--pantone-yellow), var(--pantone-gold), var(--chart-pewter-blue));
+            background: linear-gradient(90deg, var(--color-primary), var(--color-secondary), var(--pantone-yellow-light));
         }
 
         .header-title-group {
@@ -156,7 +171,7 @@
             font-size: 1.45rem;
             font-weight: 800;
             letter-spacing: -0.02em;
-            color: #FFFFFF;
+            color: var(--color-header-text);
             display: flex;
             align-items: center;
             gap: 12px;
@@ -170,16 +185,16 @@
             text-transform: uppercase;
             padding: 4px 10px;
             border-radius: 6px;
-            background: rgba(82, 122, 154, 0.25);
-            color: #E2E8F0;
-            border: 1px solid rgba(124, 149, 168, 0.45);
+            background: rgba(186, 160, 99, 0.20);
+            color: var(--color-header-subtext);
+            border: 1px solid rgba(226, 213, 181, 0.40);
         }
 
         .header-subtitle {
             font-size: 0.86rem;
-            color: var(--pantone-gray-light);
+            color: var(--color-header-subtext);
             margin-top: 4px;
-            font-weight: 400;
+            font-weight: 500;
         }
 
         .header-actions {
@@ -258,28 +273,28 @@
 
         .btn-primary {
             background: linear-gradient(135deg, var(--pantone-yellow) 0%, var(--pantone-yellow-light) 100%);
-            border: 1px solid rgba(244, 208, 63, 0.6);
-            color: var(--pantone-darker);
+            border: 1px solid rgba(186, 160, 99, 0.65);
+            color: #FFFFFF;
             font-weight: 700;
-            box-shadow: 0 2px 6px rgba(244, 208, 63, 0.35);
+            box-shadow: 0 2px 6px rgba(186, 160, 99, 0.35);
         }
 
         .btn-primary:hover {
-            background: linear-gradient(135deg, var(--pantone-yellow-light) 0%, var(--pantone-gold) 100%);
-            color: var(--pantone-darker);
-            border-color: var(--pantone-gold);
+            background: linear-gradient(135deg, var(--pantone-yellow-light) 0%, var(--pantone-yellow) 100%);
+            color: #FFFFFF;
+            border-color: var(--pantone-yellow-light);
         }
 
         .btn-excel {
-            background: #F0FDF4;
-            border: 1px solid #86EFAC;
-            color: #166534;
+            background: rgba(122, 130, 142, 0.24);
+            border: 1px solid rgba(226, 213, 181, 0.38);
+            color: #FFFFFF;
             font-weight: 700;
         }
 
         .btn-excel:hover {
-            background: #166534;
-            border-color: #166534;
+            background: var(--color-secondary);
+            border-color: var(--color-secondary);
             color: #FFFFFF;
         }
 
@@ -398,9 +413,9 @@
         }
 
         .subplanta-pill.selected {
-            background: rgba(58, 91, 120, 0.14);
-            border-color: var(--chart-steel-blue);
-            color: var(--chart-slate-navy);
+            background: rgba(186, 160, 99, 0.18);
+            border-color: var(--color-secondary);
+            color: var(--color-heading);
             font-weight: 700;
         }
 
@@ -440,8 +455,8 @@
 
         .week-combobox-trigger:hover,
         .week-combobox-wrapper.open .week-combobox-trigger {
-            border-color: var(--chart-pewter-blue);
-            box-shadow: 0 0 0 3px rgba(82, 122, 154, 0.14);
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(186, 160, 99, 0.18);
         }
 
         .week-combobox-trigger-left {
@@ -505,8 +520,8 @@
         }
 
         .week-combobox-search-input:focus {
-            border-color: var(--chart-pewter-blue);
-            box-shadow: 0 0 0 2px rgba(82, 122, 154, 0.14);
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 2px rgba(186, 160, 99, 0.18);
         }
 
         .week-combobox-actions {
@@ -520,16 +535,16 @@
             font-weight: 600;
             padding: 4px 9px;
             border-radius: 5px;
-            border: 1px solid #CBD5E1;
+            border: 1px solid var(--border-ui);
             background: #FFFFFF;
-            color: var(--chart-slate-navy);
+            color: var(--color-heading);
             cursor: pointer;
             transition: all 0.15s ease;
         }
 
         .week-combo-action-btn:hover {
-            background: #E6EEF6;
-            border-color: var(--chart-pewter-blue);
+            background: var(--pantone-yellow-soft);
+            border-color: var(--color-secondary);
         }
 
         .week-combobox-list {
@@ -556,13 +571,13 @@
         }
 
         .week-combobox-item:hover {
-            background: #F1F5F9;
+            background: rgba(186, 160, 99, 0.10);
         }
 
         .week-combobox-item.checked {
-            background: #EBF2F8;
+            background: var(--pantone-yellow-soft);
             font-weight: 600;
-            color: var(--chart-slate-navy);
+            color: var(--color-heading);
         }
 
         .week-combobox-item-left {
@@ -574,7 +589,7 @@
         .week-combobox-item input[type="checkbox"] {
             width: 15px;
             height: 15px;
-            accent-color: var(--chart-steel-blue);
+            accent-color: var(--color-heading);
             cursor: pointer;
         }
 
@@ -594,7 +609,7 @@
         }
 
         .week-pill.selected .pill-badge-count {
-            background: rgba(244, 208, 63, 0.22);
+            background: rgba(186, 160, 99, 0.22);
             color: var(--pantone-yellow);
             font-weight: 700;
         }
@@ -833,8 +848,14 @@
             border-bottom: 3px solid var(--pantone-yellow);
         }
 
+        .matrix-table th:first-child {
+            width: 100%;
+        }
+
         .matrix-table th.num-col,
         .matrix-table td.num-cell {
+            width: 1%;
+            white-space: nowrap;
             text-align: right;
             font-variant-numeric: tabular-nums;
             font-family: 'JetBrains Mono', 'Inter', monospace;
@@ -865,7 +886,7 @@
         }
 
         .level-2:hover td {
-            background-color: rgba(244, 208, 63, 0.08) !important;
+            background-color: rgba(186, 160, 99, 0.08) !important;
         }
 
         .level-3 td {
@@ -874,14 +895,14 @@
         }
 
         .level-3:hover td {
-            background-color: rgba(244, 208, 63, 0.08) !important;
+            background-color: rgba(186, 160, 99, 0.08) !important;
         }
 
         /* DIVISIONES ENTRE GRUPOS DE COLUMNAS EN LA MATRIZ */
         .matrix-table th.col-group-com-start,
         .matrix-table th.col-group-dist-start,
         .matrix-table th.col-group-prog-start {
-            border-left: 2px solid rgba(244, 208, 63, 0.35) !important;
+            border-left: 2px solid rgba(186, 160, 99, 0.45) !important;
         }
 
         .matrix-table td.col-group-com-start,
@@ -915,17 +936,16 @@
         }
 
         .tag-subplanta {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            padding: 3px 10px;
-            border-radius: 6px;
-            font-size: 0.78rem;
+            display: inline;
+            padding: 0;
+            border: none;
+            border-radius: 0;
+            background: transparent;
+            box-shadow: none;
+            font-size: 0.8rem;
             font-weight: 700;
             text-transform: uppercase;
-            background: var(--bg-card-alt);
-            color: var(--pantone-dark);
-            border: 1px solid var(--border-ui);
+            color: var(--color-heading);
         }
 
         .sku-code-badge {
@@ -951,7 +971,7 @@
             bottom: 24px;
             right: 24px;
             background: var(--pantone-darker);
-            border: 1px solid rgba(244, 208, 63, 0.4);
+            border: 1px solid rgba(186, 160, 99, 0.45);
             border-radius: 8px;
             padding: 12px 20px;
             display: flex;
@@ -1181,7 +1201,7 @@
 
         <!-- KPIs COMPARATIVOS -->
         <section class="kpi-grid">
-            <div class="kpi-card" style="--kpi-accent: var(--chart-slate-navy);">
+            <div class="kpi-card" style="--kpi-accent: #BAA063;">
                 <span class="kpi-label">Producción Real Total (T_Produccion)</span>
                 <div class="kpi-value" id="kpiRealVal">0.00<span class="kpi-unit">kg</span></div>
                 <div class="kpi-footer">
@@ -1190,7 +1210,7 @@
                 </div>
             </div>
 
-            <div class="kpi-card" style="--kpi-accent: var(--chart-cerulean-slate);">
+            <div class="kpi-card" style="--kpi-accent: #7A828E;">
                 <span class="kpi-label">Vs Proyección Comercial (T_DemandaPy)</span>
                 <div class="kpi-value" id="kpiPctComercial">0.0<span class="kpi-unit">%</span></div>
                 <div class="kpi-footer">
@@ -1199,7 +1219,7 @@
                 </div>
             </div>
 
-            <div class="kpi-card" style="--kpi-accent: var(--isg-slate-med);">
+            <div class="kpi-card" style="--kpi-accent: #948E88;">
                 <span class="kpi-label">Vs Pedido Distribución (T_Distribucion)</span>
                 <div class="kpi-value" id="kpiPctDistribucion">0.0<span class="kpi-unit">%</span></div>
                 <div class="kpi-footer">
@@ -1208,7 +1228,7 @@
                 </div>
             </div>
 
-            <div class="kpi-card" style="--kpi-accent: var(--isg-slate-cool);">
+            <div class="kpi-card" style="--kpi-accent: #A89F91;">
                 <span class="kpi-label">Vs Programa Producción (T_ResProd_Py_DB)</span>
                 <div class="kpi-value" id="kpiPctPrograma">0.0<span class="kpi-unit">%</span></div>
                 <div class="kpi-footer">
@@ -1294,7 +1314,7 @@
                     <thead id="theadMatriz">
                         <tr>
                             <th style="min-width:240px;">Semana / SubPlanta / CódigoCorto - Nombre</th>
-                            <th class="num-col" style="color:var(--pantone-yellow);">Prod. Real (kg)</th>
+                            <th class="num-col" style="color:var(--color-header-subtext);">Prod. Real (kg)</th>
                             <th class="num-col th-com col-group-com-start">Proy. Comercial (kg)</th>
                             <th class="num-col th-com">% Cumpl. Com.</th>
                             <th class="num-col th-dist col-group-dist-start">Ped. Distribución (kg)</th>
@@ -1323,14 +1343,15 @@
 
     <script>
         // =========================================================================
-        // 🎨 PALETA DEL TEMA (tema_colores_industrial_slate_blue.json)
+        // 🎨 PALETA DEL TEMA: PANTONE INDUSTRIAL PALETTE (Bronce Mate, Piedra Taupe y Pizarra Suave)
+        //    chartColors: ["#BAA063", "#7A828E", "#948E88", "#A89F91", "#878994", "#C4B282", "#B5B2AA", "#6B727D"]
         // =========================================================================
         const THEME_SLATE_BLUE = {
             comparativoCuatroSeries: [
-                { serie: 1, label: 'Producción Real', backgroundColor: 'rgba(44, 66, 87, 0.92)', borderColor: '#1E2F3F', hoverBackgroundColor: '#1E2F3F' },
-                { serie: 2, label: 'Proyección Comercial', backgroundColor: 'rgba(72, 111, 145, 0.88)', borderColor: '#365773', hoverBackgroundColor: '#365773' },
-                { serie: 3, label: 'Pedido Distribución', backgroundColor: 'rgba(93, 109, 126, 0.88)', borderColor: '#465360', hoverBackgroundColor: '#465360' },
-                { serie: 4, label: 'Prog. Producción', backgroundColor: 'rgba(133, 146, 158, 0.85)', borderColor: '#68737D', hoverBackgroundColor: '#68737D' }
+                { serie: 1, label: 'Producción Real', backgroundColor: '#BAA063', borderColor: '#9A824C', hoverBackgroundColor: '#C4B282' },
+                { serie: 2, label: 'Proyección Comercial', backgroundColor: '#7A828E', borderColor: '#6B727D', hoverBackgroundColor: '#6B727D' },
+                { serie: 3, label: 'Pedido Distribución', backgroundColor: '#948E88', borderColor: '#787479', hoverBackgroundColor: '#787479' },
+                { serie: 4, label: 'Prog. Producción', backgroundColor: '#A89F91', borderColor: '#878994', hoverBackgroundColor: '#878994' }
             ]
         };
 
@@ -1454,7 +1475,7 @@
             if (typeof ChartDataLabels !== 'undefined') {
                 Chart.register(ChartDataLabels);
             }
-            Chart.defaults.color = '#5D6D7E';
+            Chart.defaults.color = '#787479';
             Chart.defaults.font.family = "'Inter', sans-serif";
         }
 
@@ -2196,14 +2217,14 @@
                             labels: {
                                 boxWidth: 14,
                                 font: { weight: 600, size: 11 },
-                                color: '#2E2A2F'
+                                color: '#38353B'
                             }
                         },
                         tooltip: {
-                            backgroundColor: '#1C2833',
-                            titleColor: '#F4D03F',
+                            backgroundColor: '#38353B',
+                            titleColor: '#E2D5B5',
                             bodyColor: '#FFFFFF',
-                            borderColor: '#34495E',
+                            borderColor: '#BAA063',
                             borderWidth: 1,
                             padding: 10,
                             callbacks: {
@@ -2217,11 +2238,11 @@
                             }
                         },
                         datalabels: {
-                            display: true,
+                            display: () => window.innerWidth > 768,
                             anchor: 'end',
                             align: 'top',
                             offset: 2,
-                            color: '#2E2A2F',
+                            color: '#38353B',
                             font: {
                                 family: "'Inter', sans-serif",
                                 weight: '700',
@@ -2239,12 +2260,12 @@
                     scales: {
                         x: {
                             grid: { display: false },
-                            ticks: { font: { weight: 600, size: 10.5 }, color: '#5D6D7E' }
+                            ticks: { font: { weight: 600, size: 10.5 }, color: '#787479' }
                         },
                         y: {
                             beginAtZero: true,
                             grid: { color: '#E2E8F0' },
-                            ticks: { callback: v => `${v.toLocaleString('es-PE')} ${unidadGrafico}`, color: '#5D6D7E' }
+                            ticks: { callback: v => `${v.toLocaleString('es-PE')} ${unidadGrafico}`, color: '#787479' }
                         }
                     }
                 }

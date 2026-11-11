@@ -13,8 +13,6 @@ namespace ApiDesposte.Controllers.Excel
     /// </summary>
     [ApiController]
     [Route("api/[controller]")]
-    [Route("api/Cumplimientos_Jorge")]
-    [Route("api/cumplimientos-jorge")]
     public class CumplimientosJorgeController : ControllerBase
     {
         private readonly ILogger<CumplimientosJorgeController> _logger;

@@ -18,7 +18,6 @@ public class CostosProduccionController : ControllerBase
     }
 
     // Endpoint principal: Obtener todos los costos de producción con búsqueda y filtros opcionales
-    [HttpGet("listar")]
     [HttpGet]
     public async Task<IActionResult> ObtenerCostosProduccion(
         [FromQuery] int? anio = null,

@@ -22,50 +22,66 @@
 
     <style>
         /* =========================================================================
-           🎨 PALETA PANTONE INDUSTRIAL
+           🎨 TEMA: PANTONE INDUSTRIAL PALETTE (Bronce Mate, Piedra Taupe y Pizarra Suave)
            ========================================================================= */
         :root {
-            --pantone-yellow: #F4D03F;
-            --pantone-yellow-light: #F8CC5A;
-            --pantone-yellow-soft: rgba(244, 208, 63, 0.16);
-            --pantone-yellow-border: rgba(244, 208, 63, 0.45);
-            --pantone-gold: #BAA063;
-            --pantone-gold-soft: rgba(186, 160, 99, 0.16);
-            --pantone-gold-border: rgba(186, 160, 99, 0.4);
-            --pantone-dark: #2E2A2F;
-            --pantone-darker: #252C37;
-            --pantone-gray-dark: #605C5E;
-            --pantone-gray-med: #878994;
-            --pantone-gray-light: #CDCAC0;
+            /* Variables Oficiales del Tema */
+            --color-header-bg: #38353B;
+            --color-header-gradient: linear-gradient(135deg, #38353B 0%, #434B57 100%);
+            --color-header-text: #FFFFFF;
+            --color-header-subtext: #E2D5B5;
+            --color-heading: #38353B;
+            --color-text: #4A474C;
+            --color-text-muted: #787479;
+            --color-primary: #BAA063;
+            --color-secondary: #7A828E;
+            --color-accent: #BAA063;
+            --color-bg: #F2F4F8;
+            --color-surface: #FFFFFF;
+            --color-border: #E2E8F0;
+
+            --pantone-yellow: #BAA063;
+            --pantone-yellow-light: #C4B282;
+            --pantone-yellow-soft: rgba(186, 160, 99, 0.16);
+            --pantone-yellow-border: rgba(186, 160, 99, 0.45);
+            --pantone-gold: #7A828E;
+            --pantone-gold-soft: rgba(122, 130, 142, 0.16);
+            --pantone-gold-border: rgba(122, 130, 142, 0.42);
+            --pantone-dark: #38353B;
+            --pantone-darker: #434B57;
+            --pantone-gray-dark: #4A474C;
+            --pantone-gray-med: #787479;
+            --pantone-gray-light: #B5B2AA;
             --pantone-bg: #F2F4F8;
             --pantone-card: #FFFFFF;
             --pantone-card-alt: #F8FAFC;
             --pantone-border: #E2E8F0;
             --pantone-border-subtle: #EDF2F7;
-            --table-accent: #F4D03F;
+            --table-accent: #BAA063;
 
             /* Mapeo de compatibilidad con variables */
-            --navy-peony: #2E2A2F;
-            --cyan-blue: #F4D03F;
-            --cool-blue: #CDCAC0;
-            --blue-sapphire: #252C37;
-            --foggy-dew: #CDCAC0;
-            --lagoon: #BAA063;
-            --teal-blue: #605C5E;
+            --navy-peony: #38353B;
+            --cyan-blue: #BAA063;
+            --cool-blue: #B5B2AA;
+            --blue-sapphire: #434B57;
+            --foggy-dew: #B5B2AA;
+            --lagoon: #7A828E;
+            --teal-blue: #4A474C;
             --aegean-blue: #878994;
-            --semana-custom: #2E2A2F;
+            --semana-custom: #38353B;
 
             --bg-canvas: #F2F4F8;
             --bg-card: #FFFFFF;
             --border-ui: #E2E8F0;
-            --text-dark: #2E2A2F;
-            --text-muted: #605C5E;
+            --text-heading: #38353B;
+            --text-dark: #4A474C;
+            --text-muted: #787479;
             --success: #10B981;
             --warning: #F59E0B;
             --danger: #EF4444;
-            --shadow-sm: 0 1px 3px rgba(46, 42, 47, 0.06), 0 1px 2px rgba(46, 42, 47, 0.04);
-            --shadow-md: 0 4px 6px -1px rgba(46, 42, 47, 0.08), 0 2px 4px -1px rgba(46, 42, 47, 0.04);
-            --shadow-lg: 0 10px 15px -3px rgba(46, 42, 47, 0.1), 0 4px 6px -2px rgba(46, 42, 47, 0.05);
+            --shadow-sm: 0 1px 3px rgba(56, 53, 59, 0.06), 0 1px 2px rgba(56, 53, 59, 0.04);
+            --shadow-md: 0 4px 6px -1px rgba(56, 53, 59, 0.08), 0 2px 4px -1px rgba(56, 53, 59, 0.04);
+            --shadow-lg: 0 10px 15px -3px rgba(56, 53, 59, 0.12), 0 4px 6px -2px rgba(56, 53, 59, 0.06);
 
             --radius-sm: 8px;
             --radius-md: 12px;
@@ -96,9 +112,9 @@
 
         /* HEADER */
         .dashboard-header {
-            background: linear-gradient(135deg, var(--pantone-dark) 0%, var(--pantone-darker) 100%);
+            background: var(--color-header-gradient);
             border: 1px solid rgba(255, 255, 255, 0.08);
-            border-left: 6px solid var(--pantone-yellow);
+            border-left: 6px solid var(--color-primary);
             border-radius: 12px;
             padding: 22px 28px;
             display: flex;
@@ -109,7 +125,7 @@
             box-shadow: var(--shadow-lg);
             position: relative;
             overflow: hidden;
-            color: #FFFFFF;
+            color: var(--color-header-text);
         }
 
         .dashboard-header::before {
@@ -119,7 +135,7 @@
             left: 0;
             right: 0;
             height: 3px;
-            background: linear-gradient(90deg, var(--pantone-yellow), var(--pantone-gold), var(--pantone-yellow-light));
+            background: linear-gradient(90deg, var(--color-primary), var(--color-secondary), var(--pantone-yellow-light));
         }
 
         .header-title-group {
@@ -146,7 +162,7 @@
             font-size: 1.45rem;
             font-weight: 800;
             letter-spacing: -0.02em;
-            color: #FFFFFF;
+            color: var(--color-header-text);
             display: flex;
             align-items: center;
             gap: 12px;
@@ -160,14 +176,14 @@
             text-transform: uppercase;
             padding: 4px 10px;
             border-radius: 6px;
-            background: var(--pantone-yellow-soft);
-            color: var(--pantone-yellow);
-            border: 1px solid var(--pantone-yellow-border);
+            background: rgba(186, 160, 99, 0.20);
+            color: var(--color-header-subtext);
+            border: 1px solid rgba(226, 213, 181, 0.40);
         }
 
         .header-subtitle {
             font-size: 0.86rem;
-            color: var(--pantone-gray-light);
+            color: var(--color-header-subtext);
             margin-top: 4px;
             font-weight: 400;
         }
@@ -248,16 +264,16 @@
 
         .btn-primary {
             background: linear-gradient(135deg, var(--pantone-yellow) 0%, var(--pantone-yellow-light) 100%);
-            border: 1px solid rgba(244, 208, 63, 0.6);
-            color: var(--pantone-dark);
+            border: 1px solid rgba(186, 160, 99, 0.65);
+            color: #FFFFFF;
             font-weight: 700;
-            box-shadow: 0 2px 6px rgba(244, 208, 63, 0.35);
+            box-shadow: 0 2px 6px rgba(186, 160, 99, 0.35);
         }
 
         .btn-primary:hover {
-            background: linear-gradient(135deg, var(--pantone-yellow-light) 0%, var(--pantone-gold) 100%);
-            color: var(--pantone-dark);
-            border-color: var(--pantone-gold);
+            background: linear-gradient(135deg, var(--pantone-yellow-light) 0%, var(--pantone-yellow) 100%);
+            color: #FFFFFF;
+            border-color: var(--pantone-yellow-light);
         }
 
         .btn-excel {
@@ -1098,7 +1114,7 @@
 
         <!-- KPIs COMPARATIVOS -->
         <section class="kpi-grid">
-            <div class="kpi-card" style="--kpi-accent: var(--pantone-dark);">
+            <div class="kpi-card" style="--kpi-accent: #BAA063;">
                 <span class="kpi-label">Producción Real Total</span>
                 <div class="kpi-value" id="kpiRealVal">0.00<span class="kpi-unit">kg</span></div>
                 <div class="kpi-footer">
@@ -1107,7 +1123,7 @@
                 </div>
             </div>
 
-            <div class="kpi-card" style="--kpi-accent: var(--pantone-yellow);">
+            <div class="kpi-card" style="--kpi-accent: #7A828E;">
                 <span class="kpi-label">Vs Proyección Comercial</span>
                 <div class="kpi-value" id="kpiPctComercial">0.0<span class="kpi-unit">%</span></div>
                 <div class="kpi-footer">
@@ -1116,7 +1132,7 @@
                 </div>
             </div>
 
-            <div class="kpi-card" style="--kpi-accent: var(--pantone-gold);">
+            <div class="kpi-card" style="--kpi-accent: #948E88;">
                 <span class="kpi-label">Vs Pedido Distribución</span>
                 <div class="kpi-value" id="kpiPctDistribucion">0.0<span class="kpi-unit">%</span></div>
                 <div class="kpi-footer">
@@ -1125,7 +1141,7 @@
                 </div>
             </div>
 
-            <div class="kpi-card" style="--kpi-accent: var(--pantone-gray-dark);">
+            <div class="kpi-card" style="--kpi-accent: #A89F91;">
                 <span class="kpi-label">Vs Programa Producción</span>
                 <div class="kpi-value" id="kpiPctPrograma">0.0<span class="kpi-unit">%</span></div>
                 <div class="kpi-footer">
@@ -1172,7 +1188,7 @@
                     <thead>
                         <tr>
                             <th style="min-width:240px;">Semana / Grupo</th>
-                            <th class="num-col" style="color:var(--pantone-yellow);">Prod. Real (kg)</th>
+                            <th class="num-col" style="color:var(--color-header-subtext);">Prod. Real (kg)</th>
                             <th class="num-col th-com col-group-com-start">Proy. Comercial (kg)</th>
                             <th class="num-col th-com">% Cumpl. Com.</th>
                             <th class="num-col th-dist col-group-dist-start">Ped. Distribución (kg)</th>
@@ -1280,7 +1296,7 @@
             if (typeof ChartDataLabels !== 'undefined') {
                 Chart.register(ChartDataLabels);
             }
-            Chart.defaults.color = '#605C5E';
+            Chart.defaults.color = '#787479';
             Chart.defaults.font.family = "'Inter', sans-serif";
         }
 
@@ -1707,10 +1723,10 @@
                 data: {
                     labels: semanas.map(s => `Semana ${s}`),
                     datasets: [
-                        { label: 'Producción Real', data: dReal, backgroundColor: 'rgba(44, 66, 87, 0.92)', borderColor: '#1E2F3F', hoverBackgroundColor: '#1E2F3F', borderWidth: 1, borderRadius: 4 },
-                        { label: 'Proyección Comercial', data: dCom, backgroundColor: 'rgba(72, 111, 145, 0.88)', borderColor: '#365773', hoverBackgroundColor: '#365773', borderWidth: 1, borderRadius: 4 },
-                        { label: 'Pedido Distribución', data: dDist, backgroundColor: 'rgba(93, 109, 126, 0.88)', borderColor: '#465360', hoverBackgroundColor: '#465360', borderWidth: 1, borderRadius: 4 },
-                        { label: 'Prog. Producción', data: dProg, backgroundColor: 'rgba(133, 146, 158, 0.85)', borderColor: '#68737D', hoverBackgroundColor: '#68737D', borderWidth: 1, borderRadius: 4 }
+                        { label: 'Producción Real', data: dReal, backgroundColor: '#BAA063', borderColor: '#9A824C', hoverBackgroundColor: '#C4B282', borderWidth: 1, borderRadius: 4 },
+                        { label: 'Proyección Comercial', data: dCom, backgroundColor: '#7A828E', borderColor: '#6B727D', hoverBackgroundColor: '#6B727D', borderWidth: 1, borderRadius: 4 },
+                        { label: 'Pedido Distribución', data: dDist, backgroundColor: '#948E88', borderColor: '#787479', hoverBackgroundColor: '#787479', borderWidth: 1, borderRadius: 4 },
+                        { label: 'Prog. Producción', data: dProg, backgroundColor: '#A89F91', borderColor: '#878994', hoverBackgroundColor: '#878994', borderWidth: 1, borderRadius: 4 }
                     ]
                 },
                 options: {
@@ -1728,20 +1744,26 @@
                             labels: {
                                 boxWidth: 14,
                                 font: { weight: 600, size: 11 },
-                                color: '#2E2A2F'
+                                color: '#38353B'
                             }
                         },
                         tooltip: {
+                            backgroundColor: '#38353B',
+                            titleColor: '#E2D5B5',
+                            bodyColor: '#FFFFFF',
+                            borderColor: '#BAA063',
+                            borderWidth: 1,
+                            padding: 10,
                             callbacks: {
                                 label: ctx => ` ${ctx.dataset.label}: ${ctx.raw.toLocaleString('es-PE')} ${unidadGrafico}`
                             }
                         },
                         datalabels: {
-                            display: true,
+                            display: () => window.innerWidth > 768,
                             anchor: 'end',
                             align: 'top',
                             offset: 2,
-                            color: '#2E2A2F',
+                            color: '#38353B',
                             font: {
                                 family: "'Inter', sans-serif",
                                 weight: '700',
@@ -1759,12 +1781,12 @@
                     scales: {
                         x: {
                             grid: { display: false },
-                            ticks: { font: { weight: 600 }, color: '#605C5E' }
+                            ticks: { font: { weight: 600 }, color: '#787479' }
                         },
                         y: {
                             beginAtZero: true,
                             grid: { color: '#E2E8F0' },
-                            ticks: { callback: v => `${v.toLocaleString('es-PE')} ${unidadGrafico}`, color: '#605C5E' }
+                            ticks: { callback: v => `${v.toLocaleString('es-PE')} ${unidadGrafico}`, color: '#787479' }
                         }
                     }
                 }

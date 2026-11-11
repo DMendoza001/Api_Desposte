@@ -1596,7 +1596,7 @@
                             pointHoverBorderColor: '#F4D03F',
                             pointHoverBorderWidth: 3,
                             datalabels: {
-                                display: true,
+                                display: () => window.innerWidth > 768,
                                 align: 'top',
                                 offset: 4,
                                 color: '#FFFFFF',
@@ -1895,6 +1895,9 @@
                                     return ` ${context.label}: ${val} SKUs (${pct}%)`;
                                 }
                             }
+                        },
+                        datalabels: {
+                            display: () => window.innerWidth > 768
                         }
                     }
                 }

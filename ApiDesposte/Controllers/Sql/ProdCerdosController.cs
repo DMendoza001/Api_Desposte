@@ -13,8 +13,6 @@ namespace ApiDesposte.Controllers.Sql
     /// </summary>
     [ApiController]
     [Route("api/[controller]")]
-    [Route("api/InformeProdCerdos")]
-    [Route("api/Sp_Informe_Prod_Cerdos")]
     public class ProdCerdosController : ControllerBase
     {
         private readonly string _connectionString;
@@ -77,7 +75,6 @@ namespace ApiDesposte.Controllers.Sql
         /// y retorna únicamente los datos del SP sin columnas adicionales.
         /// </summary>
         [HttpGet]
-        [HttpGet("listar")]
         public async Task<IActionResult> ObtenerInformeProdCerdos(
             [FromQuery] string? fecha1 = null,
             [FromQuery] string? fecha2 = null,

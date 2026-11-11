@@ -24,39 +24,61 @@
 
     <style>
         /* =========================================================================
-           🎨 PALETA: SLATE STEEL & AERONAVAL LIGHT (PaletaAzules_SlateSteel_Light.json)
-           Azul pizarra (#334155 / #475569), azul marino profundo (#1E293B / #0F172A),
-           lienzo (#F8FAFC / #FFFFFF), bordes (#E2E8F0), acentos acero (#475569 / #64748B).
+           🎨 TEMA: PANTONE INDUSTRIAL PALETTE (Bronce Mate, Piedra Taupe y Pizarra Suave)
            ========================================================================= */
         :root {
-            --bg-app: #F8FAFC;
+            /* Variables Oficiales del Tema */
+            --color-header-bg: #38353B;
+            --color-header-gradient: linear-gradient(135deg, #38353B 0%, #434B57 100%);
+            --color-header-text: #FFFFFF;
+            --color-header-subtext: #E2D5B5;
+            --color-heading: #38353B;
+            --color-text: #4A474C;
+            --color-text-muted: #787479;
+            --color-primary: #BAA063;
+            --color-secondary: #7A828E;
+            --color-accent: #BAA063;
+            --color-bg: #F2F4F8;
+            --color-surface: #FFFFFF;
+            --color-border: #E2E8F0;
+
+            --pantone-yellow: #BAA063;
+            --pantone-yellow-light: #C4B282;
+            --pantone-gold: #7A828E;
+            --pantone-dark: #38353B;
+            --pantone-darker: #434B57;
+            --pantone-gray-dark: #4A474C;
+            --pantone-gray-med: #787479;
+            --pantone-gray-light: #B5B2AA;
+
+            --bg-app: #F2F4F8;
             --bg-surface: #FFFFFF;
-            --bg-elevated: #F1F5F9;
+            --bg-elevated: #F8F9FB;
             --bg-hover: #E2E8F0;
             --border-ui: #E2E8F0;
-            --border-subtle: #F1F5F9;
-            --border-strong: #94A3B8;
+            --border-subtle: #EDF2F7;
+            --border-strong: #B5B2AA;
 
-            --text-heading: #1E293B;
-            --text-primary: #334155;
-            --text-secondary: #475569;
-            --text-muted: #64748B;
+            --text-heading: #38353B;
+            --text-primary: #4A474C;
+            --text-secondary: #787479;
+            --text-muted: #787479;
             --text-inverse: #FFFFFF;
 
-            --primary: #334155;
-            --primary-hover: #1E293B;
-            --primary-active: #0F172A;
-            --secondary: #475569;
-            --accent: #475569;
-            --accent-hover: #334155;
-            --accent-soft: #F1F5F9;
-            --accent-text: #1E293B;
-            --accent-border: #CBD5E1;
+            --primary: #38353B;
+            --primary-hover: #434B57;
+            --primary-active: #38353B;
+            --secondary: #7A828E;
+            --accent: #BAA063;
+            --accent-hover: #C4B282;
+            --accent-soft: rgba(186, 160, 99, 0.16);
+            --accent-text: #38353B;
+            --accent-border: rgba(186, 160, 99, 0.45);
 
-            --header-from: #1E293B;
-            --header-to: #334155;
-            --header-line: #64748B;
-            --header-muted: #94A3B8;
+            --header-from: #38353B;
+            --header-to: #434B57;
+            --header-line: #BAA063;
+            --header-muted: #E2D5B5;
             --header-text: #FFFFFF;
 
             --color-sobra: #059669;
@@ -69,7 +91,7 @@
             --color-falta-text: #9F1239;
             --color-falta-border: #FECDD3;
 
-            --shadow-card: 0 1px 3px 0 rgba(15, 23, 42, 0.08), 0 1px 2px -1px rgba(15, 23, 42, 0.04);
+            --shadow-card: 0 1px 3px 0 rgba(56, 53, 59, 0.08), 0 1px 2px -1px rgba(56, 53, 59, 0.04);
             --radius-md: 12px;
             --radius-sm: 8px;
         }
@@ -106,8 +128,8 @@
            CABECERA PRINCIPAL
            ========================================================================= */
         .dashboard-header {
-            background: linear-gradient(135deg, var(--header-from) 0%, var(--header-to) 100%);
-            border: 1px solid var(--border-ui);
+            background: var(--color-header-gradient);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: var(--radius-md);
             padding: 14px 22px;
             display: flex;
@@ -115,8 +137,9 @@
             justify-content: space-between;
             flex-wrap: wrap;
             gap: 14px;
-            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.15);
-            border-left: 6px solid var(--header-line);
+            box-shadow: 0 4px 16px rgba(56, 53, 59, 0.16);
+            border-left: 6px solid var(--color-primary);
+            color: var(--color-header-text);
         }
 
         .header-title-group {
@@ -129,12 +152,12 @@
             width: 44px;
             height: 44px;
             border-radius: 10px;
-            background: rgba(255, 255, 255, 0.12);
-            border: 1px solid rgba(148, 163, 184, 0.35);
+            background: rgba(186, 160, 99, 0.16);
+            border: 1px solid rgba(186, 160, 99, 0.45);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--header-muted);
+            color: var(--color-primary);
             font-size: 1.3rem;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
@@ -142,7 +165,7 @@
         .header-title {
             font-size: 1.25rem;
             font-weight: 800;
-            color: var(--header-text);
+            color: var(--color-header-text);
             letter-spacing: -0.02em;
             display: flex;
             align-items: center;
@@ -152,16 +175,16 @@
 
         .header-subtitle {
             font-size: 0.82rem;
-            color: var(--header-muted);
+            color: var(--color-header-subtext);
             margin-top: 2px;
         }
 
         .badge-tag {
             font-size: 0.72rem;
             font-weight: 800;
-            background: var(--accent-soft);
-            color: var(--accent-text);
-            border: 1px solid var(--accent-border);
+            background: rgba(186, 160, 99, 0.22);
+            color: var(--color-header-subtext);
+            border: 1px solid rgba(226, 213, 181, 0.40);
             padding: 3px 10px;
             border-radius: 999px;
             text-transform: uppercase;
@@ -236,14 +259,15 @@
         }
 
         .btn-primary {
-            background: #0F172A;
+            background: linear-gradient(135deg, var(--pantone-yellow) 0%, var(--pantone-yellow-light) 100%);
             color: #FFFFFF;
-            border-color: #0F172A;
+            border-color: rgba(186, 160, 99, 0.65);
         }
 
         .btn-primary:hover {
-            background: var(--primary);
+            background: linear-gradient(135deg, var(--pantone-yellow-light) 0%, var(--pantone-yellow) 100%);
             color: #FFFFFF;
+            border-color: var(--pantone-yellow-light);
         }
 
         .btn-excel {
@@ -626,15 +650,15 @@
         }
 
         .badge-mp-chip.si {
-            background: #F1F5F9;
-            color: #1E293B;
-            border: 1px solid #CBD5E1;
+            background: rgba(186, 160, 99, 0.20);
+            color: #38353B;
+            border: 1px solid rgba(186, 160, 99, 0.45);
         }
 
         .badge-mp-chip.no {
-            background: #F8FAFC;
-            color: #64748B;
-            border: 1px solid #E2E8F0;
+            background: rgba(122, 130, 142, 0.14);
+            color: #4A474C;
+            border: 1px solid rgba(122, 130, 142, 0.35);
         }
 
         /* =========================================================================
@@ -743,7 +767,7 @@
             letter-spacing: 0.04em;
             padding: 8px 10px;
             text-align: left;
-            border-bottom: 2px solid #64748B;
+            border-bottom: 2px solid var(--color-primary);
             white-space: nowrap;
         }
 
@@ -753,8 +777,8 @@
 
         table.matrix-table thead th.th-esc-header {
             text-align: center;
-            background: #1E293B;
-            border-left: 2px solid #475569;
+            background: #434B57;
+            border-left: 2px solid #7A828E;
         }
 
         table.matrix-table thead th.th-sobra {
@@ -784,9 +808,9 @@
         }
 
         tr.level-1 {
-            background: #F1F5F9;
+            background: #E8EBF0;
             font-weight: 700;
-            color: #1E293B;
+            color: #38353B;
         }
 
         tr.level-1:hover {
@@ -794,19 +818,19 @@
         }
 
         tr.level-2 {
-            background: #F8FAFC;
+            background: #F3F5F8;
             font-weight: 600;
-            color: #334155;
+            color: #4A474C;
         }
 
         tr.level-2:hover {
-            background: #F1F5F9;
+            background: #ECEEF2;
         }
 
         tr.level-mp {
             background: #FFFFFF;
             font-weight: 600;
-            color: #334155;
+            color: #4A474C;
         }
 
         tr.level-mp:hover {
@@ -816,11 +840,11 @@
         tr.level-3 {
             background: #FFFFFF;
             font-size: 0.77rem;
-            color: #334155;
+            color: #4A474C;
         }
 
         tr.level-3:hover {
-            background: #F1F5F9;
+            background: #F2F4F8;
         }
 
         .toggle-icon {
@@ -857,13 +881,13 @@
         }
 
         .tag-subplanta {
-            background: #F1F5F9;
-            color: #1E293B;
+            background: #F2F4F8;
+            color: #38353B;
             padding: 2px 8px;
             border-radius: 4px;
             font-weight: 800;
             font-size: 0.72rem;
-            border: 1px solid #CBD5E1;
+            border: 1px solid #E2E8F0;
         }
 
         /* TOAST */
@@ -871,7 +895,7 @@
             position: fixed;
             bottom: 24px;
             right: 24px;
-            background: #1E293B;
+            background: #38353B;
             color: #FFFFFF;
             padding: 12px 18px;
             border-radius: 8px;
@@ -885,7 +909,7 @@
             opacity: 0;
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             pointer-events: none;
-            border-left: 4px solid #64748B;
+            border-left: 4px solid #BAA063;
         }
 
         .toast-notification.show {
@@ -930,7 +954,7 @@
                 <div>
                     <div class="header-title">
                         <span>Balance de Sobrantes y Faltantes por Escenario y MP</span>
-                        <span class="badge-tag">Slate Steel Light</span>
+                        <span class="badge-tag">Pantone Industrial</span>
                     </div>
                     <div class="header-subtitle">
                         Análisis comparativo de los 3 Escenarios (3500, 4200 y 2300) con discriminación de Materia Prima (MP: Sí / No)
@@ -1048,25 +1072,25 @@
                     <thead>
                         <tr>
                             <th rowspan="2" style="min-width: 250px; vertical-align: middle;">Semana / SubPlanta / MP / SKU</th>
-                            <th colspan="3" class="th-esc-header" style="border-left: 3px solid #1E293B;">Escenario 3500</th>
-                            <th colspan="3" class="th-esc-header" style="border-left: 3px solid #334155;">Escenario 4200</th>
-                            <th colspan="3" class="th-esc-header" style="border-left: 3px solid #64748B;">Escenario 2300</th>
+                            <th colspan="3" class="th-esc-header" style="border-left: 3px solid #BAA063;">Escenario 3500</th>
+                            <th colspan="3" class="th-esc-header" style="border-left: 3px solid #7A828E;">Escenario 4200</th>
+                            <th colspan="3" class="th-esc-header" style="border-left: 3px solid #948E88;">Escenario 2300</th>
                         </tr>
                         <tr>
                             <!-- 3500 -->
-                            <th class="num-col th-falta" style="border-left: 3px solid #1E293B;">Falta (kg)</th>
+                            <th class="num-col th-falta" style="border-left: 3px solid #BAA063;">Falta (kg)</th>
                             <th class="num-col th-sobra">Sobra (kg)</th>
-                            <th class="num-col" style="background:#1E293B; color:#FFFFFF;">Dif. Neta</th>
+                            <th class="num-col" style="background:#38353B; color:#E2D5B5;">Dif. Neta</th>
 
                             <!-- 4200 -->
-                            <th class="num-col th-falta" style="border-left: 3px solid #334155;">Falta (kg)</th>
+                            <th class="num-col th-falta" style="border-left: 3px solid #7A828E;">Falta (kg)</th>
                             <th class="num-col th-sobra">Sobra (kg)</th>
-                            <th class="num-col" style="background:#334155; color:#FFFFFF;">Dif. Neta</th>
+                            <th class="num-col" style="background:#434B57; color:#FFFFFF;">Dif. Neta</th>
 
                             <!-- 2300 -->
-                            <th class="num-col th-falta" style="border-left: 3px solid #64748B;">Falta (kg)</th>
+                            <th class="num-col th-falta" style="border-left: 3px solid #948E88;">Falta (kg)</th>
                             <th class="num-col th-sobra">Sobra (kg)</th>
-                            <th class="num-col" style="background:#475569; color:#FFFFFF;">Dif. Neta</th>
+                            <th class="num-col" style="background:#4A474C; color:#FFFFFF;">Dif. Neta</th>
                         </tr>
                     </thead>
                     <tbody id="tbodyMatrizTripartita">
@@ -1207,7 +1231,7 @@
 
         function initChartDefaults() {
             if (typeof ChartDataLabels !== 'undefined') Chart.register(ChartDataLabels);
-            Chart.defaults.color = '#64748B';
+            Chart.defaults.color = '#787479';
             Chart.defaults.font.family = "'Inter', sans-serif";
         }
 
@@ -1563,9 +1587,9 @@
             container.innerHTML = '';
 
             const coloresEscenario = {
-                '3500': '#1E293B', // Slate Navy Profundo
-                '4200': '#334155', // Slate Steel Primario
-                '2300': '#64748B'  // Muted Slate Acero
+                '3500': '#BAA063', // Bronce Mate Primario
+                '4200': '#7A828E', // Pizarra Suave Secundario
+                '2300': '#948E88'  // Piedra Taupe
             };
 
             ESCENARIOS_OBJETIVO.forEach(esc => {
@@ -1689,9 +1713,9 @@
 
             const datasets = [];
             const configEscenarios = [
-                { esc: '3500', label: 'Esc. 3500', colorSobra: 'rgba(5, 150, 105, 0.95)', colorFalta: 'rgba(225, 29, 72, 0.95)' },
-                { esc: '4200', label: 'Esc. 4200', colorSobra: 'rgba(5, 150, 105, 0.65)', colorFalta: 'rgba(225, 29, 72, 0.65)' },
-                { esc: '2300', label: 'Esc. 2300', colorSobra: 'rgba(71, 85, 105, 0.85)', colorFalta: 'rgba(100, 116, 139, 0.65)' }
+                { esc: '3500', label: 'Esc. 3500', colorSobra: '#BAA063', colorFalta: '#C4B282' },
+                { esc: '4200', label: 'Esc. 4200', colorSobra: '#7A828E', colorFalta: '#878994' },
+                { esc: '2300', label: 'Esc. 2300', colorSobra: '#948E88', colorFalta: '#A89F91' }
             ];
 
             configEscenarios.forEach(cfg => {
@@ -1740,9 +1764,15 @@
                     plugins: {
                         legend: {
                             position: 'top',
-                            labels: { boxWidth: 12, font: { weight: 600, size: 10.5 }, color: '#1E293B' }
+                            labels: { boxWidth: 12, font: { weight: 600, size: 10.5 }, color: '#38353B' }
                         },
                         tooltip: {
+                            backgroundColor: '#38353B',
+                            titleColor: '#E2D5B5',
+                            bodyColor: '#FFFFFF',
+                            borderColor: '#BAA063',
+                            borderWidth: 1,
+                            padding: 10,
                             callbacks: {
                                 label: ctx => ` ${ctx.dataset.label}: ${Math.abs(ctx.raw).toLocaleString('es-PE')} ${unidadGrafico}`
                             }
@@ -1752,12 +1782,12 @@
                     scales: {
                         x: {
                             grid: { display: false },
-                            ticks: { color: '#475569' }
+                            ticks: { color: '#787479' }
                         },
                         y: {
                             grid: { color: '#E2E8F0' },
                             ticks: {
-                                color: '#64748B',
+                                color: '#787479',
                                 callback: v => `${Math.abs(v).toLocaleString('es-PE')} ${unidadGrafico}`
                             }
                         }

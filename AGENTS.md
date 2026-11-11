@@ -31,6 +31,7 @@ Todos los archivos `.html` en `Docu_Paginas/` deben seguir el estándar de dise�
 - Aplicar `min-width: 0` tanto en hijos de **CSS Grid** como de **Flexbox** (`.dashboard-container > *`, `.kpi-card`, `.chart-card`, `.matrix-card`) para evitar que tablas anchas o gráficos desborden la pantalla.
 - Mantener las 4 tarjetas KPI en una sola fila en laptops (`repeat(4, minmax(0, 1fr))` o `minmax(185px, 1fr)`, nunca `minmax(260px, 1fr)`).
 - Activar la densidad compacta de laptop desde **`@media screen and (max-width: 1600px)`** (para cubrir laptops Full HD 1920x1080 con escala de Windows al 125% = `1536px`, además de 150% y 1366x768) y adaptar filtros, gráficos y columnas fijas en tablets (`<= 980px`) y celulares (`<= 768px`).
+- **Etiquetas de datos en gráficos (`datalabels`) en celular:** En los gráficos que ya tengan etiquetas de datos (`chartjs-plugin-datalabels`), ocultarlas en pantallas móviles (`display: () => window.innerWidth > 768`) para evitar superposición de textos, conservándolas en el resto de pantallas (`> 768px`) únicamente en los gráficos que ya las tenían.
 
 ### 5. Matrices Jerárquicas sin Iconos Decorativos (Regla Obligatoria)
 Toda tabla o matriz jerárquica de los dashboards en `Docu_Paginas/` debe mostrar sus etiquetas como **texto plano**:
@@ -39,3 +40,17 @@ Toda tabla o matriz jerárquica de los dashboards en `Docu_Paginas/` debe mostra
 - **Limpieza por CSS:** las decoraciones se anulan con reglas de hoja de estilos, sin modificar la lógica que genera las filas.
 - **Jerarquía por estructura:** la profundidad se comunica con sangría, peso tipográfico y color, no con iconos repetidos en cada fila.
 - **Reparto de anchos:** la columna de jerarquía absorbe el espacio sobrante y las columnas numéricas se ajustan a su contenido, para que el nombre de la fila se muestre completo.
+
+### 6. Ruta Canónica Única por Controlador y Endpoint en la API .NET (Regla Obligatoria)
+Todo controlador en `ApiDesposte/Controllers/` debe exponer **una única ruta canónica** por controlador y por método de acción (estándar REST / OpenAPI):
+- **Nombre de clase alineado al archivo:** La clase `<Nombre>Controller : ControllerBase` debe coincidir con el nombre del archivo `<Nombre>Controller.cs`.
+- **Un solo `[Route]` por controlador:** Usar únicamente `[Route("api/[controller]")]` en la clase (sin apilar alias legacy ni rutas duplicadas sobre el mismo controlador).
+- **Un solo atributo de verbo HTTP por acción:** Cada método endpoint debe tener un único atributo de ruta/verbo (ej. un solo `[HttpGet]` o `[HttpGet("subruta")]`), evitando duplicar `[HttpGet]`, `[HttpGet("listar")]`, `[HttpGet("datos")]` sobre el mismo método.
+- **Consumo directo desde el Frontend:** El dashboard HTML debe apuntar su `APP_CONFIG.controllerPath` directamente a esa ruta canónica única.
+
+### 7. Botón de Exportación de Data Plana para Fuentes SQL Server (Regla Obligatoria)
+Todo dashboard en `Docu_Paginas/` cuya fuente de datos provenga de SQL Server (controladores en `ApiDesposte/Controllers/Sql/`) debe seguir estrictamente lo definido en [.agents/rules/exportar-data-plana-sql.md](file:///.agents/rules/exportar-data-plana-sql.md):
+- **Carga de SheetJS:** Incluir `<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>` en el `<head>`.
+- **Preservación de data plana:** Almacenar en una variable de memoria (`rawSqlData` / `registrosCrudos`) el array de objetos original devuelto por la API .NET tal cual viene de SQL Server, sin filtros ni modificaciones.
+- **Botón en barra de herramientas / cabecera:** Exponer un botón visible y accesible (`Data Plana SQL (.xlsx)` o `Exportar Data Plana SP`) con icono descriptivo y validación cuando no haya datos cargados.
+- **Descarga estándar con SheetJS:** Implementar la función de exportación (`exportarDataPlanaSQL()`) convirtiendo los datos planos a hoja Excel con `XLSX.utils.json_to_sheet(rawSqlData)` y descargando el archivo `.xlsx` con nombre estandarizado `Data_Plana_SQL_<Modulo>_<RangoFechas>.xlsx`.

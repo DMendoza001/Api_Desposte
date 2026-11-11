@@ -6,7 +6,6 @@ namespace ApiDesposte.Controllers.Excel
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Route("api/cumplimiento-ptc-tablas")]
     public class CumplimientoPtcTablasController : ControllerBase
     {
         // Mapeo oficial de Hojas y Tablas en Cumplimiento_PTC.xlsm

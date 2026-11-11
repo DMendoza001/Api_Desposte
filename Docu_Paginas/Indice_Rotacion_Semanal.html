@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -21,54 +21,69 @@
 
   <style>
     /* =========================================================================
-       🎨 PALETA PANTONE INDUSTRIAL
+       🎨 PALETA PANTONE INDUSTRIAL (Bronce Mate, Piedra Taupe y Pizarra Suave)
        ========================================================================= */
     :root {
-      --pantone-yellow: #F4D03F;
-      --pantone-yellow-light: #F8CC5A;
-      --pantone-gold: #BAA063;
-      --pantone-dark: #2E2A2F;
-      --pantone-darker: #252C37;
-      --pantone-gray-dark: #605C5E;
-      --pantone-gray-med: #878994;
-      --pantone-gray-light: #CDCAC0;
+      /* Variables Oficiales del Tema */
+      --color-header-bg: #38353B;
+      --color-header-gradient: linear-gradient(135deg, #38353B 0%, #434B57 100%);
+      --color-header-text: #FFFFFF;
+      --color-header-subtext: #E2D5B5;
+      --color-heading: #38353B;
+      --color-text: #4A474C;
+      --color-text-muted: #787479;
+      --color-primary: #BAA063;
+      --color-secondary: #7A828E;
+      --color-accent: #BAA063;
+      --color-bg: #F2F4F8;
+      --color-surface: #FFFFFF;
+      --color-border: #E2E8F0;
+
+      /* Escala Pantone Industrial */
+      --pantone-yellow: #BAA063;
+      --pantone-yellow-light: #C4B282;
+      --pantone-gold: #7A828E;
+      --pantone-dark: #38353B;
+      --pantone-darker: #434B57;
+      --pantone-gray-dark: #4A474C;
+      --pantone-gray-med: #787479;
+      --pantone-gray-light: #B5B2AA;
       --pantone-bg: #F2F4F8;
       --pantone-card: #FFFFFF;
       --pantone-border: #E2E8F0;
-      --table-accent: #F4D03F;
+      --table-accent: #BAA063;
 
       /* Estructura y Paleta */
-      --header-bg: #2E2A2F;
-      --header-teal: #2E2A2F;
+      --header-bg: #38353B;
+      --header-teal: #38353B;
       --bg-body: #F2F4F8;
       --bg-card: #FFFFFF;
       --border-card: #E2E8F0;
       --border-light: #EDF2F7;
 
       /* Series y Colores Temáticos */
-      --color-primary: #2E2A2F;
-      --color-primary-dark: #252C37;
-      --color-primary-light: rgba(244, 208, 63, 0.16);
-      --color-amber: #F4D03F;
-      --color-amber-light: rgba(244, 208, 63, 0.2);
-      --color-indigo: #BAA063;
-      --color-indigo-light: rgba(186, 160, 99, 0.2);
+      --color-primary-dark: #434B57;
+      --color-primary-light: rgba(186, 160, 99, 0.16);
+      --color-amber: #BAA063;
+      --color-amber-light: rgba(186, 160, 99, 0.2);
+      --color-indigo: #7A828E;
+      --color-indigo-light: rgba(122, 130, 142, 0.2);
       --color-emerald: #10B981;
       --color-emerald-light: rgba(16, 185, 129, 0.15);
       --color-rose: #EF4444;
       --color-rose-light: rgba(239, 68, 68, 0.15);
 
       /* Tipografía y Textos */
-      --text-main: #2E2A2F;
-      --text-secondary: #605C5E;
-      --text-muted: #878994;
-      --text-light: #CDCAC0;
+      --text-main: #4A474C;
+      --text-secondary: #4A474C;
+      --text-muted: #787479;
+      --text-light: #E2D5B5;
 
       /* Sombras Suaves */
-      --shadow-xs: 0 1px 2px 0 rgba(46, 42, 47, 0.04);
-      --shadow-sm: 0 2px 4px 0 rgba(46, 42, 47, 0.06);
-      --shadow-md: 0 4px 12px -2px rgba(46, 42, 47, 0.08), 0 2px 6px -1px rgba(46, 42, 47, 0.04);
-      --shadow-lg: 0 12px 24px -4px rgba(46, 42, 47, 0.12), 0 4px 8px -2px rgba(46, 42, 47, 0.04);
+      --shadow-xs: 0 1px 2px 0 rgba(56, 53, 59, 0.04);
+      --shadow-sm: 0 2px 4px 0 rgba(56, 53, 59, 0.06);
+      --shadow-md: 0 4px 12px -2px rgba(56, 53, 59, 0.08), 0 2px 6px -1px rgba(56, 53, 59, 0.04);
+      --shadow-lg: 0 12px 24px -4px rgba(56, 53, 59, 0.12), 0 4px 8px -2px rgba(56, 53, 59, 0.04);
       --radius-sm: 6px;
       --radius-md: 10px;
       --radius-lg: 14px;
@@ -124,7 +139,7 @@
       right: -40px;
       width: 180px;
       height: 180px;
-      background: radial-gradient(circle, rgba(244, 208, 63, 0.08) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(186, 160, 99, 0.12) 0%, transparent 70%);
       border-radius: 50%;
       pointer-events: none;
     }
@@ -136,11 +151,12 @@
       display: flex;
       align-items: center;
       gap: 12px;
+      color: var(--color-header-text);
     }
 
     .header-info p {
       font-size: 0.88rem;
-      color: var(--pantone-gray-light);
+      color: var(--color-header-subtext);
       margin-top: 5px;
       font-weight: 400;
       max-width: 760px;
@@ -252,7 +268,7 @@
     .filter-group select:focus,
     .filter-group input[type="text"]:focus {
       border-color: var(--pantone-yellow);
-      box-shadow: 0 0 0 3px rgba(244, 208, 63, 0.25);
+      box-shadow: 0 0 0 3px rgba(186, 160, 99, 0.25);
     }
 
     .btn-actions {
@@ -392,7 +408,7 @@
 
     .search-input-wrap input:focus {
       border-color: var(--pantone-yellow);
-      box-shadow: 0 0 0 3px rgba(244, 208, 63, 0.2);
+      box-shadow: 0 0 0 3px rgba(186, 160, 99, 0.2);
     }
 
     .search-icon {
@@ -431,7 +447,7 @@
 
     .kpi-card.destacado {
       border-top-color: var(--pantone-yellow);
-      background: linear-gradient(180deg, #FFFFFF 0%, rgba(244, 208, 63, 0.05) 100%);
+      background: linear-gradient(180deg, #FFFFFF 0%, rgba(186, 160, 99, 0.06) 100%);
     }
 
     .kpi-card.indigo {
@@ -473,14 +489,14 @@
     .kpi-value {
       font-size: 1.85rem;
       font-weight: 800;
-      color: var(--text-main);
+      color: var(--color-heading);
       letter-spacing: -0.03em;
       line-height: 1.15;
       font-variant-numeric: tabular-nums;
     }
 
     .kpi-value.amber {
-      color: #B45309;
+      color: #8E753F;
     }
 
     .kpi-value.teal {
@@ -607,14 +623,14 @@
     }
 
     .btn-toggle-view:hover {
-      background: rgba(244, 208, 63, 0.15);
+      background: rgba(186, 160, 99, 0.15);
       color: var(--pantone-dark);
       border-color: var(--pantone-yellow);
     }
 
     .btn-toggle-view.active {
       background: var(--pantone-dark);
-      color: var(--pantone-yellow);
+      color: var(--color-header-subtext);
       border-color: var(--pantone-dark);
       box-shadow: var(--shadow-xs);
     }
@@ -646,7 +662,7 @@
 
     .semana-ceco-select-wrap select:focus {
       border-color: var(--pantone-yellow);
-      box-shadow: 0 0 0 3px rgba(244, 208, 63, 0.2);
+      box-shadow: 0 0 0 3px rgba(186, 160, 99, 0.2);
     }
 
     /* ==================== TABS DE TABLAS DE DETALLE ==================== */
@@ -678,7 +694,7 @@
 
     .tab-btn:hover {
       color: var(--pantone-dark);
-      background: rgba(244, 208, 63, 0.08);
+      background: rgba(186, 160, 99, 0.1);
     }
 
     .tab-btn.active {
@@ -785,7 +801,7 @@
     }
 
     tbody tr:hover {
-      background: rgba(244, 208, 63, 0.08);
+      background: rgba(186, 160, 99, 0.08);
     }
 
     tbody td {
@@ -838,9 +854,9 @@
     }
 
     .badge-alerta {
-      background: rgba(244, 208, 63, 0.18);
-      color: #8C6B00;
-      border: 1px solid rgba(244, 208, 63, 0.6);
+      background: rgba(186, 160, 99, 0.18);
+      color: #7A6332;
+      border: 1px solid rgba(186, 160, 99, 0.55);
     }
 
     .badge-critico {
@@ -999,6 +1015,10 @@
         </button>
         <button class="btn-accent" id="btnExportar" onclick="exportarExcel()" disabled>
           <span>📥</span> Exportar Excel
+        </button>
+        <button class="btn-accent" id="btnExportarPlana" onclick="exportarDataPlanaSQL()" disabled
+          title="Exportar la data plana en Excel (.xlsx) tal cual viene de SQL Server">
+          <span>📄</span> Data Plana SQL (.xlsx)
         </button>
         <button class="btn-reset" onclick="resetFiltros()">
           <span>↺</span> Reestablecer
@@ -1330,40 +1350,41 @@
     };
 
     // =========================================================================
-    // 🎨 PALETA DE ESTILOS: Pantone Industrial Palette
+    // 🎨 PALETA DE ESTILOS: Pantone Industrial Palette (Bronce Mate, Piedra Taupe y Pizarra Suave)
     // =========================================================================
     const PANTONE_THEME = {
       name: "Pantone Industrial Palette",
       dataColors: [
-        "#F4D03F",
-        "#2E2A2F",
-        "#CDCAC0",
-        "#605C5E",
         "#BAA063",
-        "#252C37",
+        "#7A828E",
+        "#948E88",
+        "#A89F91",
         "#878994",
-        "#F8CC5A"
+        "#C4B282",
+        "#B5B2AA",
+        "#6B727D"
       ],
       background: "#F2F4F8",
-      foreground: "#2E2A2F",
-      tableAccent: "#F4D03F",
+      foreground: "#38353B",
+      tableAccent: "#BAA063",
+      headerSubtext: "#E2D5B5",
       // Elementos de soporte y armonía
       card: "#FFFFFF",
       grid: "#E2E8F0",
-      textMuted: "#605C5E",
+      textMuted: "#787479",
       white: "#FFFFFF"
     };
 
     // Alias retrocompatible
     const PALETA_UI = {
       yellow: PANTONE_THEME.dataColors[0],
-      dark: PANTONE_THEME.dataColors[1],
-      grayLight: PANTONE_THEME.dataColors[2],
-      grayDark: PANTONE_THEME.dataColors[3],
-      gold: PANTONE_THEME.dataColors[4],
-      darker: PANTONE_THEME.dataColors[5],
-      grayMed: PANTONE_THEME.dataColors[6],
-      yellowLight: PANTONE_THEME.dataColors[7],
+      dark: PANTONE_THEME.foreground,
+      grayLight: PANTONE_THEME.dataColors[6],
+      grayDark: "#4A474C",
+      gold: PANTONE_THEME.dataColors[1],
+      darker: "#434B57",
+      grayMed: PANTONE_THEME.dataColors[4],
+      yellowLight: PANTONE_THEME.dataColors[5],
       tableAccent: PANTONE_THEME.tableAccent,
       grid: PANTONE_THEME.grid,
       text: PANTONE_THEME.foreground,
@@ -1537,6 +1558,7 @@
 
       document.getElementById('busquedaTabla').value = '';
       document.getElementById('btnExportar').disabled = true;
+      if (document.getElementById('btnExportarPlana')) document.getElementById('btnExportarPlana').disabled = true;
 
       destruirTodosLosGraficos();
       reiniciarKpis();
@@ -1898,6 +1920,9 @@
       renderTablaDetalle();
 
       document.getElementById('btnExportar').disabled = registrosProcesados.length === 0;
+      if (document.getElementById('btnExportarPlana')) {
+        document.getElementById('btnExportarPlana').disabled = !registrosCrudos || registrosCrudos.length === 0;
+      }
     }
 
     function renderKPIs() {
@@ -1962,8 +1987,8 @@
 
       // Área sutil y elegante con degradado del tema Pantone Industrial
       const gradientYellow = ctx.createLinearGradient(0, 0, 0, 320);
-      gradientYellow.addColorStop(0, 'rgba(244, 208, 63, 0.35)');
-      gradientYellow.addColorStop(1, 'rgba(244, 208, 63, 0.02)');
+      gradientYellow.addColorStop(0, 'rgba(186, 160, 99, 0.35)');
+      gradientYellow.addColorStop(1, 'rgba(186, 160, 99, 0.02)');
 
       chartGeneralEvolucion = new Chart(ctx, {
         type: 'bar',
@@ -1974,7 +1999,7 @@
               type: 'line',
               label: 'Índice de Rotación (%)',
               data: dataIr,
-              borderColor: PANTONE_THEME.tableAccent, // #F4D03F
+              borderColor: PANTONE_THEME.dataColors[0], // #BAA063
               backgroundColor: gradientYellow,
               borderWidth: 3,
               fill: true,
@@ -1982,9 +2007,9 @@
               pointRadius: 5,
               pointHoverRadius: 7,
               pointBackgroundColor: '#FFFFFF',
-              pointBorderColor: PANTONE_THEME.foreground, // #2E2A2F
+              pointBorderColor: PANTONE_THEME.foreground, // #38353B
               pointBorderWidth: 2.5,
-              pointHoverBackgroundColor: PANTONE_THEME.dataColors[7], // #F8CC5A
+              pointHoverBackgroundColor: PANTONE_THEME.dataColors[5], // #C4B282
               pointHoverBorderColor: PANTONE_THEME.foreground,
               yAxisID: 'y'
             },
@@ -1992,10 +2017,10 @@
               type: 'bar',
               label: 'Personal Retirado (Bajas)',
               data: dataRet,
-              backgroundColor: 'rgba(58, 91, 120, 0.88)', // Azul Acero Plomizo (#3A5B78)
-              borderColor: '#2C4760',
+              backgroundColor: PANTONE_THEME.dataColors[1], // #7A828E
+              borderColor: PANTONE_THEME.dataColors[7], // #6B727D
               borderWidth: 1,
-              hoverBackgroundColor: '#2C4257', // Deep Slate Navy
+              hoverBackgroundColor: '#434B57',
               borderRadius: 6,
               barThickness: 24,
               yAxisID: 'y1'
@@ -2017,12 +2042,12 @@
               }
             },
             tooltip: {
-              backgroundColor: PANTONE_THEME.foreground,
-              titleColor: PANTONE_THEME.tableAccent,
+              backgroundColor: '#38353B',
+              titleColor: '#E2D5B5',
               titleFont: { family: 'Inter', weight: '700', size: 13 },
               bodyFont: { family: 'Inter', size: 12 },
               bodyColor: '#FFFFFF',
-              borderColor: PANTONE_THEME.dataColors[4], // #BAA063
+              borderColor: '#BAA063',
               borderWidth: 1,
               padding: 12,
               boxPadding: 6,
@@ -2046,15 +2071,15 @@
               position: 'left',
               beginAtZero: true,
               grid: { color: PANTONE_THEME.grid },
-              ticks: { callback: v => `${v}%`, font: { family: 'Inter', weight: '600', size: 11 }, color: PANTONE_THEME.dataColors[4] },
-              title: { display: true, text: 'Índice de Rotación General (%)', font: { family: 'Inter', weight: '700', size: 12 }, color: PANTONE_THEME.dataColors[4] }
+              ticks: { callback: v => `${v}%`, font: { family: 'Inter', weight: '600', size: 11 }, color: PANTONE_THEME.dataColors[0] },
+              title: { display: true, text: 'Índice de Rotación General (%)', font: { family: 'Inter', weight: '700', size: 12 }, color: PANTONE_THEME.dataColors[0] }
             },
             y1: {
               type: 'linear',
               position: 'right',
               beginAtZero: true,
               grid: { drawOnChartArea: false },
-              ticks: { precision: 0, font: { family: 'Inter', weight: '600', size: 11 }, color: PANTONE_THEME.foreground },
+              ticks: { precision: 0, font: { family: 'Inter', weight: '600', size: 11 }, color: PANTONE_THEME.textMuted },
               title: { display: true, text: 'Personal Retirado (Bajas)', font: { family: 'Inter', weight: '700', size: 12 }, color: PANTONE_THEME.foreground }
             }
           }
@@ -2074,22 +2099,15 @@
       const labelsRanking = cecosOrdenados.map(c => `${c.cecosCod} · ${c.nCentroCosto}`);
       const dataRanking = cecosOrdenados.map(c => Number(c.indiceRotacionAcum.toFixed(2)));
 
-      // Escala gradual de Azules Plomizos y Plomos Pizarra para barras por CECO
-      const paletaAzulesPlomos = [
-        'rgba(44, 66, 87, 0.92)', 'rgba(53, 83, 110, 0.90)', 'rgba(62, 98, 130, 0.90)',
-        'rgba(72, 111, 145, 0.88)', 'rgba(82, 122, 154, 0.88)', 'rgba(52, 73, 94, 0.90)',
-        'rgba(91, 127, 149, 0.88)', 'rgba(74, 96, 116, 0.88)', 'rgba(99, 130, 154, 0.86)',
-        'rgba(93, 109, 126, 0.88)', 'rgba(110, 138, 159, 0.86)', 'rgba(108, 122, 137, 0.86)',
-        'rgba(124, 149, 168, 0.85)', 'rgba(133, 146, 158, 0.85)', 'rgba(149, 165, 178, 0.85)'
-      ];
+      // Escala Pantone Industrial (Bronce Mate, Piedra Taupe y Pizarra Suave) para barras por CECO
+      const paletaAzulesPlomos = PANTONE_THEME.dataColors;
       const bordesAzulesPlomos = [
-        '#1E2F3F', '#263D52', '#2E4B64', '#365773', '#3E617D',
-        '#253544', '#456376', '#374857', '#4B6578', '#465360',
-        '#546C7E', '#525D69', '#5F7485', '#68737D', '#758591'
+        '#9A824C', '#6B727D', '#787479', '#878994',
+        '#6B727D', '#BAA063', '#948E88', '#434B57'
       ];
       const coloresRanking = cecosOrdenados.map((_, i) => paletaAzulesPlomos[i % paletaAzulesPlomos.length]);
       const bordesRanking = cecosOrdenados.map((_, i) => bordesAzulesPlomos[i % bordesAzulesPlomos.length]);
-      const hoverColoresRanking = cecosOrdenados.map(() => '#2C4760');
+      const hoverColoresRanking = cecosOrdenados.map(() => '#38353B');
 
       const ctxR = document.getElementById('chartCecosRanking').getContext('2d');
       chartCecosRanking = new Chart(ctxR, {
@@ -2114,12 +2132,12 @@
           plugins: {
             legend: { display: false },
             tooltip: {
-              backgroundColor: PANTONE_THEME.foreground,
-              titleColor: PANTONE_THEME.tableAccent,
+              backgroundColor: '#38353B',
+              titleColor: '#E2D5B5',
               titleFont: { family: 'Inter', weight: '700', size: 13 },
               bodyFont: { family: 'Inter', size: 12 },
               bodyColor: '#FFFFFF',
-              borderColor: PANTONE_THEME.dataColors[4],
+              borderColor: '#BAA063',
               borderWidth: 1,
               padding: 12,
               callbacks: {
@@ -2139,7 +2157,7 @@
             x: {
               beginAtZero: true,
               grid: { color: PANTONE_THEME.grid },
-              ticks: { callback: v => `${v}%`, font: { family: 'Inter', weight: '600', size: 11 }, color: PANTONE_THEME.foreground },
+              ticks: { callback: v => `${v}%`, font: { family: 'Inter', weight: '600', size: 11 }, color: PANTONE_THEME.textMuted },
               title: { display: true, text: 'Índice de Rotación Acumulado (%)', font: { family: 'Inter', weight: '700', size: 12 }, color: PANTONE_THEME.foreground }
             },
             y: {
@@ -2414,6 +2432,36 @@
       busquedaTextoActual = document.getElementById('busquedaTabla').value.trim();
       renderTablaSemanas();
       renderTablaDetalle();
+    }
+
+    // =========================================================================
+    // 📄 EXPORTACIÓN DATA PLANA SQL (.xlsx)
+    // =========================================================================
+    function exportarDataPlanaSQL() {
+      if (typeof XLSX === 'undefined') {
+        mostrarToast('⚠️ La librería SheetJS no está cargada. Verifique su conexión a internet.');
+        return;
+      }
+      if (!registrosCrudos || registrosCrudos.length === 0) {
+        mostrarToast('ℹ️ No hay datos planos de SQL Server para exportar.');
+        return;
+      }
+
+      mostrarToast('⏳ Generando Data Plana SQL...', 2000);
+
+      const fIni = document.getElementById('fechaInicio')?.value || '';
+      const fFin = document.getElementById('fechaFin')?.value || '';
+      const rangoStr = (fIni && fFin) 
+        ? `_${fIni.replace(/-/g, '')}_al_${fFin.replace(/-/g, '')}` 
+        : `_${new Date().toISOString().slice(0, 10).replace(/-/g, '')}`;
+
+      const libro = XLSX.utils.book_new();
+      const wsPlana = XLSX.utils.json_to_sheet(registrosCrudos);
+      XLSX.utils.book_append_sheet(libro, wsPlana, 'Data_Plana_SQL');
+
+      const nombreArchivo = `Data_Plana_SQL_Indice_Rotacion${rangoStr}.xlsx`;
+      XLSX.writeFile(libro, nombreArchivo);
+      mostrarToast(`📄 Data Plana SQL exportada (${registrosCrudos.length.toLocaleString('es-PE')} filas)`);
     }
 
     // =========================================================================

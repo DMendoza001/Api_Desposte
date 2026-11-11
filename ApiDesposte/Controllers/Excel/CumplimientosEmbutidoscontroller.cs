@@ -265,8 +265,6 @@ namespace ApiDesposte.Controllers.Excel
         /// <param name="recargar">Fuerza la recarga del archivo Excel evitando el caché en memoria</param>
         /// <returns>Lista de registros de la tabla T_Cumplientos</returns>
         [HttpGet]
-        [HttpGet("datos")]
-        [HttpGet("listar")]
         public IActionResult ObtenerCumplimientosEmbutidos(
             [FromQuery] string? semana = null,
             [FromQuery] string? codigo = null,

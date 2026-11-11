@@ -38,3 +38,4 @@ Al igual que `config.js`, el diseño responsive opera de forma dual:
 5. **Adaptación Móvil (`@media screen and (max-width: 768px)`):**
    - Filtros (`select`, `input`, `.week-combobox-wrapper`, botones) al `100%` de ancho (`min-width: 0`).
    - En tablas con primera columna fija (`.sticky-col` o `th:first-child / td:first-child`), desactivar o limitar en móvil su ancho (`min-width: 130px; max-width: 200px; white-space: normal;`) para permitir deslizar las columnas numéricas cómodamente.
+   - **Etiquetas de datos en gráficos (`datalabels`):** En aquellos gráficos que ya cuenten con etiquetas de datos visibles (`chartjs-plugin-datalabels`), ocultarlas automáticamente en pantallas de celular (`<= 768px`) usando `display: () => window.innerWidth > 768` para evitar que los textos se sobrepongan por el ancho reducido, conservándolas visibles en tablets, laptops y monitores (`> 768px`). Los gráficos que no llevan etiquetas no deben agregarlas.

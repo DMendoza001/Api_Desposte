@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -1414,6 +1414,22 @@
                     <div class="metric-row"><span class="metric-key">Dif. Ensacado-Marinado:</span><span
                             class="metric-val" id="detDifEnsacadoMarinado">--</span></div>
                 </div>
+
+                <!-- Tarjeta Desposte - Cabezas -->
+                <div class="sub-card">
+                    <div class="sub-card-header">
+                        <span class="sub-card-title">🐷 Desposte - Cabezas</span>
+                        <span class="kpi-badge badge-yellow" id="badgeDetalleCabezas">Cabezas</span>
+                    </div>
+                    <div class="metric-row"><span class="metric-key">Prod. Corte primario:</span><span class="metric-val"
+                            id="detProdCortePrimario">0</span></div>
+                    <div class="metric-row"><span class="metric-key">Saldo Cabeza Linea:</span><span class="metric-val"
+                            id="detSaldoCabezaLinea">0</span></div>
+                    <div class="metric-row"><span class="metric-key">Prod. Tercer corte:</span><span class="metric-val"
+                            id="detProdTercerCorte">0</span></div>
+                    <div class="metric-row"><span class="metric-key">Saldo de cabezas sin procesar:</span><span
+                            class="metric-val" id="detSaldoSinProcesar" style="font-weight: 800; color: var(--pantone-dark);">0</span></div>
+                </div>
             </div>
         </div>
 
@@ -1566,7 +1582,7 @@
             return bases;
         }
 
-        APP_CONFIG.controllerPath = "/api/informe-diario";
+        APP_CONFIG.controllerPath = "/api/InformeDiario";
         APP_CONFIG.timeoutMs = 25000;
 
         // Estado global de la aplicación
@@ -1911,8 +1927,11 @@
             const hhCongelado = horarios.filter(r => normalizarTexto(r.AREA).includes('CONGELADO'))
                 .reduce((acc, r) => acc + (Number(r['HORAS HOMBRE (HH)']) || 0), 0);
 
-            // Producción Desposte
-            const rowsDesposte = produccion.filter(r => normalizarTexto(r.AREA).includes('DESPOSTE'));
+            // Producción Desposte (Excluyendo Cabezas para mantener métrica de canales)
+            const rowsDesposte = produccion.filter(r => 
+                normalizarTexto(r.AREA).includes('DESPOSTE') && 
+                !normalizarTexto(r.CONCEPTO).includes('CABEZA')
+            );
             const progDesposte = rowsDesposte.reduce((acc, r) => acc + (Number(r.PROGRAMA) || 0), 0);
             const prodDesposte = rowsDesposte.reduce((acc, r) => acc + (Number(r.PRODUCCIÓN) || 0), 0);
             const cumplDesposteNum = progDesposte > 0 ? (prodDesposte / progDesposte) * 100 : 0;
@@ -1990,7 +2009,11 @@
                 unidadTexto = 'Unidades';
                 unidadCorta = 'Un';
 
-                const rowsDesposte = (produccion || []).filter(r => normalizarTexto(r.AREA).includes('DESPOSTE'));
+                // Filtrar registros de DESPOSTE excluyendo los conceptos de CABEZAS para no distorsionar el gráfico de barras
+                const rowsDesposte = (produccion || []).filter(r => 
+                    normalizarTexto(r.AREA).includes('DESPOSTE') && 
+                    !normalizarTexto(r.CONCEPTO).includes('CABEZA')
+                );
                 const progTotal = rowsDesposte.reduce((acc, r) => acc + (Number(r.PROGRAMA) || 0), 0);
                 const prodTotal = rowsDesposte.reduce((acc, r) => acc + (Number(r.PRODUCCIÓN) || 0), 0);
                 const cumpl = progTotal > 0 ? ((prodTotal / progTotal) * 100).toFixed(2) + '%' : '--%';
@@ -2086,6 +2109,7 @@
                             }
                         },
                         datalabels: {
+                            display: () => window.innerWidth > 768,
                             anchor: 'end',
                             align: 'top',
                             offset: 4,
@@ -2350,8 +2374,11 @@
 
         // 7. Sección de Producción Detalle
         function renderizarSeccionProduccionDetalle(produccion, horarios) {
-            // Desposte
-            const rowsDesposte = produccion.filter(r => normalizarTexto(r.AREA).includes('DESPOSTE'));
+            // Desposte (Canales/Cerdos - excluye conceptos de Cabezas)
+            const rowsDesposte = produccion.filter(r => 
+                normalizarTexto(r.AREA).includes('DESPOSTE') && 
+                !normalizarTexto(r.CONCEPTO).includes('CABEZA')
+            );
             const progDesposte = rowsDesposte.reduce((acc, r) => acc + (Number(r.PROGRAMA) || 0), 0);
             const prodDesposte = rowsDesposte.reduce((acc, r) => acc + (Number(r.PRODUCCIÓN) || 0), 0);
             const hhDesposte = horarios.filter(r => normalizarTexto(r.AREA).includes('DESPOSTE'))
@@ -2365,6 +2392,38 @@
             document.getElementById('badgeDetalleDesposte').innerText = `${cumplDesposte}%`;
             document.getElementById('detProductivDesposte').innerText = `${prodDesposteHH} Un/HH`;
             document.getElementById('detHhDesposte').innerText = `${hhDesposte.toFixed(1)} HH`;
+
+            // Desposte - Cabezas (Apartado Especial)
+            const rowCortePrimario = produccion.find(r => 
+                normalizarTexto(r.CONCEPTO).includes('CABEZA') && 
+                (normalizarTexto(r.CONCEPTO).includes('P.CORTE') || normalizarTexto(r.CONCEPTO).includes('CORTE PRIMARIO') || normalizarTexto(r.CONCEPTO).includes('PRIMARIO'))
+            );
+            const rowSaldoLinea = produccion.find(r => 
+                normalizarTexto(r.CONCEPTO).includes('CABEZA') && 
+                (normalizarTexto(r.CONCEPTO).includes('LINEA') || normalizarTexto(r.CONCEPTO).includes('SALDO')) &&
+                !normalizarTexto(r.CONCEPTO).includes('SIN PROCESAR')
+            );
+            const rowTercerCorte = produccion.find(r => 
+                normalizarTexto(r.CONCEPTO).includes('CABEZA') && 
+                (normalizarTexto(r.CONCEPTO).includes('SIN PROCESAR') || normalizarTexto(r.CONCEPTO).includes('TERCER CORTE') || normalizarTexto(r.CONCEPTO).includes('TERCER'))
+            );
+
+            const prodCortePrimario = rowCortePrimario ? (Number(rowCortePrimario.PRODUCCIÓN) || Number(rowCortePrimario.PROGRAMA) || 0) : 0;
+            const saldoCabezaLinea = rowSaldoLinea ? (Number(rowSaldoLinea.PRODUCCIÓN) || Number(rowSaldoLinea.PROGRAMA) || 0) : 0;
+            const prodTercerCorte = rowTercerCorte ? (Number(rowTercerCorte.PRODUCCIÓN) || Number(rowTercerCorte.PROGRAMA) || 0) : 0;
+            const saldoSinProcesar = saldoCabezaLinea - prodTercerCorte;
+
+            const elDetPrimario = document.getElementById('detProdCortePrimario');
+            if (elDetPrimario) elDetPrimario.innerText = formatearNumero(prodCortePrimario);
+
+            const elDetSaldoLinea = document.getElementById('detSaldoCabezaLinea');
+            if (elDetSaldoLinea) elDetSaldoLinea.innerText = formatearNumero(saldoCabezaLinea);
+
+            const elDetTercer = document.getElementById('detProdTercerCorte');
+            if (elDetTercer) elDetTercer.innerText = formatearNumero(prodTercerCorte);
+
+            const elDetSaldoSinProc = document.getElementById('detSaldoSinProcesar');
+            if (elDetSaldoSinProc) elDetSaldoSinProc.innerText = formatearNumero(saldoSinProcesar);
 
             // Chuletas
             const rowsChuletas = produccion.filter(r => normalizarTexto(r.AREA).includes('CHULETAS'));
@@ -2639,7 +2698,10 @@
                 .reduce((acc, r) => acc + (Number(r['HORAS HOMBRE (HH)']) || 0), 0);
 
             // Desposte (Un)
-            const rowsDesposte = produccion.filter(r => normalizarTexto(r.AREA).includes('DESPOSTE'));
+            const rowsDesposte = produccion.filter(r => 
+                normalizarTexto(r.AREA).includes('DESPOSTE') && 
+                !normalizarTexto(r.CONCEPTO).includes('CABEZA')
+            );
             const progDesposte = rowsDesposte.reduce((acc, r) => acc + (Number(r.PROGRAMA) || 0), 0);
             const prodDesposte = rowsDesposte.reduce((acc, r) => acc + (Number(r.PRODUCCIÓN) || 0), 0);
             const cumplDesposte = progDesposte > 0 ? ((prodDesposte / progDesposte) * 100).toFixed(2) : "0.00";
@@ -2649,7 +2711,25 @@
             txt += `- Programa: ${formatearNumero(progDesposte)}\n`;
             txt += `- Producción: ${formatearNumero(prodDesposte)}\n`;
             txt += `- Cumplimiento: ${cumplDesposte}%\n`;
-            txt += `- Productividad: ${prodDesposteHH} Un/HH\n\n`;
+            txt += `- Productividad: ${prodDesposteHH} Un/HH\n`;
+
+            // Saldo de cabezas sin Procesar en Desposte
+            const rowSaldoLineaW = produccion.find(r => 
+                normalizarTexto(r.CONCEPTO).includes('CABEZA') && 
+                (normalizarTexto(r.CONCEPTO).includes('LINEA') || normalizarTexto(r.CONCEPTO).includes('SALDO')) &&
+                !normalizarTexto(r.CONCEPTO).includes('SIN PROCESAR')
+            );
+            const rowTercerCorteW = produccion.find(r => 
+                normalizarTexto(r.CONCEPTO).includes('CABEZA') && 
+                (normalizarTexto(r.CONCEPTO).includes('SIN PROCESAR') || normalizarTexto(r.CONCEPTO).includes('TERCER CORTE') || normalizarTexto(r.CONCEPTO).includes('TERCER'))
+            );
+            if (rowSaldoLineaW || rowTercerCorteW) {
+                const saldoLineaW = rowSaldoLineaW ? (Number(rowSaldoLineaW.PRODUCCIÓN) || Number(rowSaldoLineaW.PROGRAMA) || 0) : 0;
+                const tercerCorteW = rowTercerCorteW ? (Number(rowTercerCorteW.PRODUCCIÓN) || Number(rowTercerCorteW.PROGRAMA) || 0) : 0;
+                const saldoSinProcW = saldoLineaW - tercerCorteW;
+                txt += `- Saldo de cabezas sin Procesar: ${formatearNumero(saldoSinProcW)}\n`;
+            }
+            txt += `\n`;
 
             // Chuletas (Kg)
             const rowsChuletas = produccion.filter(r => normalizarTexto(r.AREA).includes('CHULETAS'));

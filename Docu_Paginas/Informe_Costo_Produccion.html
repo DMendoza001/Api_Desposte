@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -12,52 +12,68 @@
         rel="stylesheet">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SheetJS para exportar a Excel (.xlsx) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         /* =========================================================================
-           🎨 PALETA PANTONE INDUSTRIAL
+           🎨 PALETA PANTONE INDUSTRIAL (Bronce Mate, Piedra Taupe y Pizarra Suave)
            ========================================================================= */
         :root {
-            --pantone-yellow: #F4D03F;
-            --pantone-yellow-light: #F8CC5A;
-            --pantone-gold: #BAA063;
-            --pantone-dark: #2E2A2F;
-            --pantone-darker: #252C37;
-            --pantone-gray-dark: #605C5E;
-            --pantone-gray-med: #878994;
-            --pantone-gray-light: #CDCAC0;
+            --color-header-bg: #38353B;
+            --color-header-gradient: linear-gradient(135deg, #38353B 0%, #434B57 100%);
+            --color-header-text: #FFFFFF;
+            --color-header-subtext: #E2D5B5;
+            --color-heading: #38353B;
+            --color-text: #4A474C;
+            --color-text-muted: #787479;
+            --color-primary: #BAA063;
+            --color-secondary: #7A828E;
+            --color-accent: #BAA063;
+            --color-bg: #F2F4F8;
+            --color-surface: #FFFFFF;
+            --color-border: #E2E8F0;
+
+            --pantone-yellow: #BAA063;
+            --pantone-yellow-light: #C4B282;
+            --pantone-gold: #7A828E;
+            --pantone-dark: #38353B;
+            --pantone-darker: #434B57;
+            --pantone-gray-dark: #4A474C;
+            --pantone-gray-med: #787479;
+            --pantone-gray-light: #B5B2AA;
             --pantone-bg: #F2F4F8;
             --pantone-card: #FFFFFF;
             --pantone-border: #E2E8F0;
-            --table-accent: #F4D03F;
+            --table-accent: #BAA063;
 
             /* Paleta de Colores Solicitada */
-            --c-dark-slate: #2E2A2F;
-            --c-soft-blue: #BAA063;
-            --c-slate-blue: #605C5E;
-            --c-teal-deep: #252C37;
-            --c-sage-ice: #CDCAC0;
-            --c-mint-green: #F4D03F;
-            --c-sky-teal: #F8CC5A;
+            --c-dark-slate: #38353B;
+            --c-soft-blue: #7A828E;
+            --c-slate-blue: #4A474C;
+            --c-teal-deep: #434B57;
+            --c-sage-ice: #E2D5B5;
+            --c-mint-green: #BAA063;
+            --c-sky-teal: #C4B282;
             --c-warm-sage: #878994;
 
             /* Variables de Interfaz */
-            --primary: #2E2A2F;
-            --primary-dark: #252C37;
-            --secondary: #605C5E;
-            --accent: #F4D03F;
-            --highlight: #BAA063;
+            --primary: #38353B;
+            --primary-dark: #434B57;
+            --secondary: #7A828E;
+            --accent: #BAA063;
+            --highlight: #7A828E;
             --bg-light: #F2F4F8;
             --card-bg: #FFFFFF;
             --border-color: #E2E8F0;
-            --text-main: #2E2A2F;
-            --text-muted: #605C5E;
+            --text-main: #4A474C;
+            --text-muted: #787479;
             --up-color: #EF4444;
             --up-bg: rgba(239, 68, 68, 0.12);
             --down-color: #10B981;
             --down-bg: rgba(16, 185, 129, 0.12);
-            --shadow-sm: 0 2px 4px rgba(46, 42, 47, 0.05);
-            --shadow-md: 0 4px 12px rgba(46, 42, 47, 0.08);
-            --shadow-lg: 0 10px 25px rgba(46, 42, 47, 0.12);
+            --shadow-sm: 0 2px 4px rgba(56, 53, 59, 0.05);
+            --shadow-md: 0 4px 12px rgba(56, 53, 59, 0.08);
+            --shadow-lg: 0 10px 25px rgba(56, 53, 59, 0.12);
             --radius-sm: 6px;
             --radius-md: 10px;
             --radius-lg: 16px;
@@ -79,8 +95,8 @@
 
         /* Top Header */
         .header-container {
-            background: linear-gradient(135deg, var(--c-dark-slate) 0%, var(--c-teal-deep) 100%);
-            color: white;
+            background: var(--color-header-gradient);
+            color: var(--color-header-text);
             padding: 24px 30px;
             border-radius: var(--radius-lg);
             margin-bottom: 24px;
@@ -116,11 +132,12 @@
             font-weight: 800;
             letter-spacing: -0.5px;
             margin-bottom: 4px;
+            color: var(--color-header-text);
         }
 
         .header-title p {
             font-size: 13px;
-            color: var(--c-sage-ice);
+            color: var(--color-header-subtext);
             font-weight: 400;
         }
 
@@ -157,8 +174,8 @@
         }
 
         .btn-header {
-            background: var(--c-sky-teal);
-            color: var(--c-dark-slate);
+            background: var(--color-primary);
+            color: #FFFFFF;
             border: none;
             padding: 8px 16px;
             border-radius: var(--radius-sm);
@@ -172,7 +189,8 @@
         }
 
         .btn-header:hover {
-            background: white;
+            background: var(--c-sky-teal);
+            color: var(--c-dark-slate);
             transform: translateY(-1px);
         }
 
@@ -206,14 +224,14 @@
         }
 
         .tab-btn:hover {
-            color: var(--c-teal-deep);
-            background: rgba(137, 165, 204, 0.12);
+            color: var(--c-dark-slate);
+            background: rgba(186, 160, 99, 0.12);
         }
 
         .tab-btn.active {
-            background: var(--c-teal-deep);
+            background: var(--c-dark-slate);
             color: white;
-            box-shadow: 0 2px 8px rgba(11, 102, 121, 0.3);
+            box-shadow: 0 2px 8px rgba(56, 53, 59, 0.28);
         }
 
         /* KPIs / Summary Grid */
@@ -232,7 +250,7 @@
             box-shadow: var(--shadow-sm);
             position: relative;
             overflow: hidden;
-            border-left: 4px solid var(--c-teal-deep);
+            border-left: 4px solid var(--color-primary);
             transition: transform 0.2s, box-shadow 0.2s;
         }
 
@@ -242,15 +260,15 @@
         }
 
         .kpi-card.accent-1 {
-            border-left-color: var(--c-teal-deep);
+            border-left-color: var(--color-primary);
         }
 
         .kpi-card.accent-2 {
-            border-left-color: var(--c-soft-blue);
+            border-left-color: var(--color-secondary);
         }
 
         .kpi-card.accent-3 {
-            border-left-color: var(--c-mint-green);
+            border-left-color: #948E88;
         }
 
         .kpi-card.accent-4 {
@@ -335,13 +353,14 @@
         }
 
         .btn-filter.btn-primary {
-            background: var(--c-teal-deep);
+            background: var(--color-primary);
             color: white;
-            border-color: var(--c-teal-deep);
+            border-color: var(--color-primary);
         }
 
         .btn-filter.btn-primary:hover {
-            background: #084c5a;
+            background: var(--c-dark-slate);
+            border-color: var(--c-dark-slate);
         }
 
         .filter-row {
@@ -378,14 +397,14 @@
         }
 
         .form-control:focus {
-            border-color: var(--c-teal-deep);
-            box-shadow: 0 0 0 3px rgba(11, 102, 121, 0.15);
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(186, 160, 99, 0.18);
         }
 
         /* Specific Configuration Sub-bar based on Active Mode */
         .mode-config-bar {
-            background: rgba(137, 165, 204, 0.1);
-            border: 1px solid var(--c-sage-ice);
+            background: rgba(186, 160, 99, 0.08);
+            border: 1px solid rgba(186, 160, 99, 0.35);
             border-radius: var(--radius-md);
             padding: 14px 18px;
             margin-top: 16px;
@@ -398,11 +417,11 @@
         .mode-config-bar .mode-tag {
             font-size: 12px;
             font-weight: 700;
-            color: var(--c-teal-deep);
+            color: var(--c-dark-slate);
             background: white;
             padding: 4px 10px;
             border-radius: 4px;
-            border: 1px solid var(--c-sage-ice);
+            border: 1px solid rgba(186, 160, 99, 0.45);
         }
 
         /* Content Container */
@@ -475,7 +494,7 @@
         }
 
         table.cost-table th.header-period {
-            background-color: #273444;
+            background-color: var(--c-teal-deep);
             text-align: center;
             font-weight: 700;
         }
@@ -499,7 +518,7 @@
         }
 
         table.cost-table tbody tr:hover {
-            background-color: #EBF3F8 !important;
+            background-color: rgba(186, 160, 99, 0.10) !important;
             cursor: pointer;
         }
 
@@ -522,10 +541,10 @@
         }
 
         .code-short {
-            background: rgba(11, 102, 121, 0.1);
-            color: var(--c-teal-deep);
+            background: rgba(186, 160, 99, 0.15);
+            color: var(--c-dark-slate);
             font-weight: 700;
-            border: 1px solid rgba(11, 102, 121, 0.2);
+            border: 1px solid rgba(186, 160, 99, 0.38);
         }
 
         .product-name {
@@ -822,8 +841,11 @@
             <button class="btn-header" onclick="recargarDatos()">
                 🔄 Actualizar
             </button>
-            <button class="btn-header" onclick="exportarExcel()">
-                📥 Exportar Excel
+            <button class="btn-header" id="btnExportarPlana" onclick="exportarDataPlanaSQL()" title="Exportar la data plana en Excel (.xlsx) tal cual viene de SQL Server">
+                📄 Data Plana SQL (.xlsx)
+            </button>
+            <button class="btn-header" onclick="exportarExcel()" title="Exportar vista comparativa actual">
+                📥 Exportar Vista
             </button>
             <button class="btn-header" onclick="copiarTabla()">
                 📋 Copiar Tabla
@@ -1054,7 +1076,7 @@
             return bases;
         }
 
-        APP_CONFIG.rutaListar = "/api/costosproduccion/listar";
+        APP_CONFIG.rutaListar = "/api/CostosProduccion";
         APP_CONFIG.timeoutMs = 20000;
 
         // Generación de Endpoints API apuntando al nombre del equipo
@@ -1062,19 +1084,21 @@
             return generarBasesApi().map(base => `${base}${rutaRelativa}`);
         }
 
-        // Paleta de Colores
+        // Paleta de Colores (Pantone Industrial Palette: Bronce Mate, Piedra Taupe y Pizarra Suave)
         const PALETTE = {
-            darkSlate: "#3A4758",
-            softBlue: "#89A5CC",
-            slateBlue: "#647F93",
-            tealDeep: "#0B6679",
-            sageIce: "#9EBEC3",
-            mintGreen: "#98C7BB",
-            skyTeal: "#76B1C7",
-            warmSage: "#CACDC3"
+            darkSlate: "#38353B",
+            softBlue: "#7A828E",
+            slateBlue: "#948E88",
+            tealDeep: "#BAA063",
+            sageIce: "#A89F91",
+            mintGreen: "#878994",
+            skyTeal: "#C4B282",
+            warmSage: "#B5B2AA",
+            pewterDark: "#6B727D"
         };
 
         // Estado Global de la Aplicación
+        let rawSqlData = [];
         let rawData = [];
         let filteredArticles = [];
         let currentMode = "contiguo"; // contiguo, interanual, matriz, graficos
@@ -1123,6 +1147,7 @@
                     if (res.ok) {
                         const data = await res.json();
                         if (Array.isArray(data) && data.length > 0) {
+                            rawSqlData = data;
                             rawData = normalizarDatos(data);
                             const urlObj = new URL(url, window.location.href);
                             actualizarEstadoAPI("online", `API en Línea (${urlObj.host}) - ${data.length} reg.`);
@@ -1137,6 +1162,7 @@
             }
 
             if (!dataCargada) {
+                rawSqlData = [];
                 rawData = [];
                 actualizarEstadoAPI("offline", `Sin conexión con ${APP_CONFIG.servidor}`);
                 mostrarToast(`❌ No se pudo conectar a la API en ${APP_CONFIG.servidor} (Puertos 8080/5000).`, "error");
@@ -1638,7 +1664,7 @@
             const busqueda = document.getElementById("filtroNombre")?.value.trim() || "";
             if (!busqueda) return texto;
             const regex = new RegExp(`(${busqueda})`, "gi");
-            return texto.replace(regex, `<mark style="background: rgba(122, 177, 199, 0.4); padding: 0 2px; border-radius: 2px;">$1</mark>`);
+            return texto.replace(regex, `<mark style="background: rgba(186, 160, 99, 0.35); padding: 0 2px; border-radius: 2px;">$1</mark>`);
         }
 
         // 8. Paginación
@@ -1776,13 +1802,13 @@
                 }
             });
 
-            // Top 10 Alzas (Azul Acero Plomizo)
+            // Top 10 Alzas (Bronce Mate)
             const topAlzas = [...articulosConVar].filter(x => x.varFinal > 0).sort((a, b) => b.varFinal - a.varFinal).slice(0, 10);
-            renderizarBarChart("chartTopAlzas", topAlzas, "#2C4760", "rgba(58, 91, 120, 0.90)");
+            renderizarBarChart("chartTopAlzas", topAlzas, "#BAA063", "rgba(186, 160, 99, 0.90)");
 
-            // Top 10 Bajas (Plomo Pizarra Azulado)
+            // Top 10 Bajas (Pizarra Suave)
             const topBajas = [...articulosConVar].filter(x => x.varFinal < 0).sort((a, b) => a.varFinal - b.varFinal).slice(0, 10);
-            renderizarBarChart("chartTopBajas", topBajas, "#525D69", "rgba(108, 122, 137, 0.86)");
+            renderizarBarChart("chartTopBajas", topBajas, "#7A828E", "rgba(122, 130, 142, 0.88)");
 
             // Gráfico de Tendencia Histórica de los 5 Artículos más relevantes
             renderizarTendenciaHistorica();
@@ -1818,6 +1844,11 @@
                     plugins: {
                         legend: { display: false },
                         tooltip: {
+                            backgroundColor: '#38353B',
+                            titleColor: '#E2D5B5',
+                            bodyColor: '#FFFFFF',
+                            borderColor: '#BAA063',
+                            borderWidth: 1,
                             callbacks: {
                                 label: (c) => ` Variación: ${c.raw.toFixed(2)}%`
                             }
@@ -1826,12 +1857,13 @@
                     scales: {
                         x: {
                             ticks: {
+                                color: '#787479',
                                 callback: v => v + '%'
                             },
-                            grid: { color: '#E8EEF2' }
+                            grid: { color: '#E2E8F0' }
                         },
                         y: {
-                            ticks: { font: { size: 10 } },
+                            ticks: { color: '#4A474C', font: { size: 10 } },
                             grid: { display: false }
                         }
                     }
@@ -1851,7 +1883,7 @@
             // Tomar los primeros 5 artículos de la lista filtrada
             const articulosMuestra = filteredArticles.slice(0, 5);
             const datasets = [];
-            const colores = [PALETTE.tealDeep, PALETTE.slateBlue, PALETTE.softBlue, PALETTE.skyTeal, "#E67E22"];
+            const colores = ["#BAA063", "#7A828E", "#948E88", "#A89F91", "#878994", "#C4B282", "#B5B2AA", "#6B727D"];
 
             articulosMuestra.forEach((art, idx) => {
                 const dataPoints = allPeriods.map(p => art.costosPorPeriodo[p] || null);
@@ -1879,18 +1911,24 @@
                     maintainAspectRatio: false,
                     interaction: { mode: 'index', intersect: false },
                     plugins: {
-                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
+                        legend: { position: 'bottom', labels: { color: '#4A474C', boxWidth: 12, font: { size: 11 } } },
                         tooltip: {
+                            backgroundColor: '#38353B',
+                            titleColor: '#E2D5B5',
+                            bodyColor: '#FFFFFF',
+                            borderColor: '#BAA063',
+                            borderWidth: 1,
                             callbacks: {
                                 label: (c) => ` ${c.dataset.label}: S/ ${c.raw != null ? c.raw.toFixed(2) : '-'}`
                             }
                         }
                     },
                     scales: {
-                        x: { grid: { color: '#E8EEF2' }, ticks: { font: { size: 11 } } },
+                        x: { grid: { color: '#E2E8F0' }, ticks: { color: '#4A474C', font: { size: 11 } } },
                         y: {
-                            grid: { color: '#E8EEF2' },
+                            grid: { color: '#E2E8F0' },
                             ticks: {
+                                color: '#787479',
                                 callback: v => 'S/ ' + v.toFixed(2),
                                 font: { size: 11 }
                             }
@@ -1940,11 +1978,11 @@
                         label: 'Costo de Producción (S/)',
                         data: costos,
                         borderColor: PALETTE.tealDeep,
-                        backgroundColor: PALETTE.sageIce + '55',
+                        backgroundColor: 'rgba(186, 160, 99, 0.20)',
                         borderWidth: 2.5,
                         fill: true,
                         tension: 0.25,
-                        pointBackgroundColor: PALETTE.tealDeep,
+                        pointBackgroundColor: PALETTE.darkSlate,
                         pointRadius: 4,
                         pointHoverRadius: 7
                     }]
@@ -1955,16 +1993,21 @@
                     plugins: {
                         legend: { display: false },
                         tooltip: {
+                            backgroundColor: '#38353B',
+                            titleColor: '#E2D5B5',
+                            bodyColor: '#FFFFFF',
+                            borderColor: '#BAA063',
+                            borderWidth: 1,
                             callbacks: {
                                 label: (c) => ` Costo: S/ ${c.raw.toFixed(4)}`
                             }
                         }
                     },
                     scales: {
-                        x: { grid: { color: '#E8EEF2' } },
+                        x: { grid: { color: '#E2E8F0' }, ticks: { color: '#4A474C' } },
                         y: {
-                            grid: { color: '#E8EEF2' },
-                            ticks: { callback: v => 'S/ ' + v.toFixed(2) }
+                            grid: { color: '#E2E8F0' },
+                            ticks: { color: '#787479', callback: v => 'S/ ' + v.toFixed(2) }
                         }
                     }
                 }
@@ -2005,6 +2048,27 @@
         }
 
         // 13. Exportación y Portapapeles
+        function exportarDataPlanaSQL() {
+            if (typeof XLSX === 'undefined') {
+                mostrarToast("⚠️ La librería SheetJS no está disponible", "error");
+                return;
+            }
+            if (!rawSqlData || rawSqlData.length === 0) {
+                mostrarToast("⚠️ No hay datos de SQL Server cargados para exportar", "error");
+                return;
+            }
+            mostrarToast("⏳ Generando Excel de Data Plana...", "info");
+
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.json_to_sheet(rawSqlData);
+            XLSX.utils.book_append_sheet(wb, ws, "Data_Plana_SQL");
+
+            const hoy = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+            const nombreArchivo = `Data_Plana_SQL_Costos_Produccion_${hoy}.xlsx`;
+            XLSX.writeFile(wb, nombreArchivo);
+            mostrarToast(`📄 Data Plana SQL exportada (${rawSqlData.length.toLocaleString('es-PE')} filas)`, "success");
+        }
+
         function exportarExcel() {
             if (filteredArticles.length === 0) {
                 mostrarToast("No hay registros para exportar", "error");

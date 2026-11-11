@@ -1,4 +1,4 @@
-﻿using ClosedXML.Excel;
+using ClosedXML.Excel;
 using Microsoft.AspNetCore.Mvc;
 using System.IO;
 
@@ -6,7 +6,6 @@ namespace ApiDesposte.Controllers.Excel
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Route("api/informe-diario")]
     public class InformeDiarioController : ControllerBase
     {
         // Mapeo de las 6 Hojas y Tablas del Excel

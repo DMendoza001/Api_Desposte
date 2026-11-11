@@ -24,48 +24,64 @@
     <style>
         /* =========================================================================
            🎨 VARIABLES DEL TEMA (Pantone Industrial Palette)
-           Palette:
-           #F4D03F (Yellow/Table Accent), #2E2A2F (Foreground/Dark Charcoal),
-           #CDCAC0 (Warm Light Gray), #605C5E (Medium Industrial Gray),
-           #BAA063 (Muted Gold), #252C37 (Deep Slate Navy),
-           #878994 (Cool Slate Gray), #F8CC5A (Bright Industrial Yellow),
-           #F2F4F8 (Background App)
+           Bronce Mate (#BAA063), Piedra Taupe (#948E88 / #A89F91) y Pizarra Suave (#7A828E / #38353B)
            ========================================================================= */
         :root {
-            --pantone-yellow: #F4D03F;
-            --pantone-yellow-bright: #F8CC5A;
-            --pantone-gold: #BAA063;
-            --pantone-dark: #2E2A2F;
-            --pantone-deep-navy: #252C37;
-            --pantone-gray-med: #605C5E;
+            /* Variables Oficiales del Tema */
+            --color-header-bg: #38353B;
+            --color-header-gradient: linear-gradient(135deg, #38353B 0%, #434B57 100%);
+            --color-header-text: #FFFFFF;
+            --color-header-subtext: #E2D5B5;
+            --color-heading: #38353B;
+            --color-text: #4A474C;
+            --color-text-muted: #787479;
+            --color-primary: #BAA063;
+            --color-secondary: #7A828E;
+            --color-accent: #BAA063;
+            --color-bg: #F2F4F8;
+            --color-surface: #FFFFFF;
+            --color-border: #E2E8F0;
+
+            --pantone-yellow: #BAA063;
+            --pantone-yellow-light: #C4B282;
+            --pantone-yellow-bright: #C4B282;
+            --pantone-gold: #7A828E;
+            --pantone-dark: #38353B;
+            --pantone-darker: #434B57;
+            --pantone-deep-navy: #434B57;
+            --pantone-gray-dark: #4A474C;
+            --pantone-gray-med: #787479;
             --pantone-gray-slate: #878994;
-            --pantone-gray-light: #CDCAC0;
+            --pantone-gray-light: #B5B2AA;
 
-            --isg-slate-dark: #252C37;
-            --isg-slate-med: #605C5E;
+            --isg-gold-bright: #BAA063;
+            --isg-slate-dark: #38353B;
+            --isg-slate-med: #7A828E;
             --isg-slate-cool: #878994;
-            --isg-slate-light: #CDCAC0;
+            --isg-slate-light: #B5B2AA;
 
-            --chart-slate-navy: #252C37;
-            --chart-steel-blue: #605C5E;
-            --chart-cerulean-slate: #878994;
+            --chart-slate-navy: #38353B;
+            --chart-steel-blue: #7A828E;
+            --chart-cerulean-slate: #948E88;
+            --chart-pewter-blue: #A89F91;
 
             --bg-app: #F2F4F8;
             --bg-surface: #FFFFFF;
             --bg-elevated: #F8F9FB;
             --bg-hover: #ECEEF2;
-            --border-ui: #D7DAE0;
+            --border-ui: #E2E8F0;
 
-            --text-primary: #2E2A2F;
-            --text-secondary: #605C5E;
-            --text-muted: #878994;
+            --text-heading: #38353B;
+            --text-primary: #4A474C;
+            --text-secondary: #787479;
+            --text-muted: #787479;
 
             --success: #3D6B58;
             --warning: #BAA063;
             --danger: #B84A4A;
             --info: #878994;
 
-            --shadow-card: 0 2px 10px -2px rgba(46, 42, 47, 0.08), 0 1px 4px -1px rgba(46, 42, 47, 0.04);
+            --shadow-card: 0 2px 10px -2px rgba(56, 53, 59, 0.08), 0 1px 4px -1px rgba(56, 53, 59, 0.04);
             --radius-md: 12px;
             --radius-sm: 8px;
         }
@@ -97,8 +113,8 @@
            HEADER PRINCIPAL
            ========================================================================= */
         .dashboard-header {
-            background: var(--bg-surface);
-            border: 1px solid var(--border-ui);
+            background: var(--color-header-gradient);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: var(--radius-md);
             padding: 16px 24px;
             display: flex;
@@ -106,8 +122,9 @@
             justify-content: space-between;
             flex-wrap: wrap;
             gap: 16px;
-            box-shadow: var(--shadow-card);
-            border-left: 6px solid var(--chart-slate-navy);
+            box-shadow: 0 6px 18px rgba(56, 53, 59, 0.16);
+            border-left: 6px solid var(--color-primary);
+            color: var(--color-header-text);
         }
 
         .header-title-group {
@@ -120,20 +137,21 @@
             width: 46px;
             height: 46px;
             border-radius: 10px;
-            background: linear-gradient(135deg, var(--chart-slate-navy), var(--chart-cerulean-slate));
+            background: rgba(186, 160, 99, 0.16);
+            border: 1px solid rgba(186, 160, 99, 0.45);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--pantone-yellow);
+            color: var(--color-primary);
             font-weight: 800;
             font-size: 1.2rem;
-            box-shadow: 0 4px 10px rgba(44, 66, 87, 0.25);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
 
         .header-title {
             font-size: 1.3rem;
             font-weight: 800;
-            color: var(--pantone-dark);
+            color: var(--color-header-text);
             letter-spacing: -0.02em;
             display: flex;
             align-items: center;
@@ -144,9 +162,9 @@
         .badge-tag {
             font-size: 0.72rem;
             font-weight: 700;
-            background: rgba(72, 111, 145, 0.14);
-            color: var(--chart-slate-navy);
-            border: 1px solid rgba(72, 111, 145, 0.3);
+            background: rgba(186, 160, 99, 0.20);
+            color: var(--color-header-subtext);
+            border: 1px solid rgba(226, 213, 181, 0.40);
             padding: 3px 9px;
             border-radius: 999px;
             text-transform: uppercase;
@@ -155,7 +173,7 @@
 
         .header-subtitle {
             font-size: 0.83rem;
-            color: var(--text-secondary);
+            color: var(--color-header-subtext);
             margin-top: 2px;
         }
 
@@ -174,9 +192,9 @@
             border-radius: 999px;
             font-size: 0.78rem;
             font-weight: 600;
-            background: var(--bg-elevated);
-            border: 1px solid var(--border-ui);
-            color: var(--text-secondary);
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--color-header-text);
         }
 
         .status-dot {
@@ -233,14 +251,16 @@
         }
 
         .btn-primary {
-            background: var(--chart-slate-navy);
+            background: linear-gradient(135deg, var(--pantone-yellow) 0%, var(--pantone-yellow-light) 100%);
             color: #FFFFFF;
-            border-color: var(--chart-slate-navy);
+            border-color: rgba(186, 160, 99, 0.65);
+            font-weight: 700;
         }
 
         .btn-primary:hover {
-            background: var(--chart-steel-blue);
-            border-color: var(--chart-steel-blue);
+            background: linear-gradient(135deg, var(--pantone-yellow-light) 0%, var(--pantone-yellow) 100%);
+            border-color: var(--pantone-yellow-light);
+            color: #FFFFFF;
         }
 
         .btn-excel {
@@ -819,18 +839,18 @@
         }
 
         table.matrix-table thead th.th-prog {
-            background: #252C37;
-            color: #F8CC5A;
+            background: #38353B;
+            color: #E2D5B5;
         }
 
         table.matrix-table thead th.th-com {
-            background: #605C5E;
+            background: #434B57;
             color: #F2F4F8;
         }
 
         table.matrix-table thead th.th-dif {
-            background: #2E2A2F;
-            color: #F4D03F;
+            background: #4A474C;
+            color: #E2D5B5;
         }
 
         table.matrix-table thead th.th-falta {
@@ -1054,15 +1074,15 @@
         }
 
         .page-tab-btn.active {
-            background: linear-gradient(135deg, #2E2A2F 0%, #252C37 100%);
+            background: var(--color-header-gradient);
             color: #FFFFFF;
             border-color: var(--pantone-yellow);
-            box-shadow: 0 4px 12px rgba(37, 44, 55, 0.25);
+            box-shadow: 0 4px 12px rgba(56, 53, 59, 0.25);
         }
 
         .page-tab-btn.active .page-tab-badge {
             background: var(--pantone-yellow);
-            color: var(--pantone-dark);
+            color: #FFFFFF;
         }
 
         .page-tab-badge {
@@ -1070,8 +1090,8 @@
             font-weight: 800;
             padding: 2px 8px;
             border-radius: 999px;
-            background: rgba(244, 208, 63, 0.18);
-            color: #8D7400;
+            background: rgba(186, 160, 99, 0.18);
+            color: #787479;
         }
 
         .page-view-section {
@@ -1174,10 +1194,10 @@
         }
 
         tr.total-row td {
-            background: #2C4257 !important;
+            background: #38353B !important;
             color: #FFFFFF !important;
             font-weight: 800 !important;
-            border-top: 2px solid #1C2833;
+            border-top: 2px solid #434B57;
         }
 
         .tag-escenario {
@@ -1673,7 +1693,7 @@
         <div id="vistaPaginaGeneral" class="page-view-section">
             <!-- KPIs COMPARATIVOS (3 TABLAS: T_ResProd_Py_DB, T_DemandaPy, T_CodigoRelacion) -->
             <section class="kpi-grid">
-                <div class="kpi-card" style="--kpi-accent: var(--chart-slate-navy);">
+                <div class="kpi-card" style="--kpi-accent: #BAA063;">
                     <span class="kpi-label">Programa Producción (T_ResProd_Py_DB)</span>
                     <div class="kpi-value" id="kpiProgVal">0.00<span class="kpi-unit">kg</span></div>
                     <div class="kpi-footer">
@@ -1682,7 +1702,7 @@
                     </div>
                 </div>
 
-                <div class="kpi-card" style="--kpi-accent: var(--chart-cerulean-slate);">
+                <div class="kpi-card" style="--kpi-accent: #7A828E;">
                     <span class="kpi-label">Proyección Comercial (T_DemandaPy)</span>
                     <div class="kpi-value" id="kpiDemandaVal">0.00<span class="kpi-unit">kg</span></div>
                     <div class="kpi-footer">
@@ -1691,7 +1711,7 @@
                     </div>
                 </div>
 
-                <div class="kpi-card" style="--kpi-accent: var(--isg-slate-med);">
+                <div class="kpi-card" style="--kpi-accent: #948E88;">
                     <span class="kpi-label">% Cumplimiento (Prog. Prod vs Demanda)</span>
                     <div class="kpi-value" id="kpiPctCumplimiento">0.00<span class="kpi-unit">%</span></div>
                     <div class="kpi-footer">
@@ -1700,7 +1720,7 @@
                     </div>
                 </div>
 
-                <div class="kpi-card" style="--kpi-accent: var(--isg-slate-cool);">
+                <div class="kpi-card" style="--kpi-accent: #A89F91;">
                     <span class="kpi-label">Diferencia Neta (Prog. Prod - Demanda)</span>
                     <div class="kpi-value" id="kpiDifVal">0.00<span class="kpi-unit">kg</span></div>
                     <div class="kpi-footer">
@@ -2037,25 +2057,26 @@
     <script>
         // =========================================================================
         // 🎨 PALETA DEL TEMA (Pantone Industrial Palette)
+        //    Bronce Mate, Piedra Taupe y Pizarra Suave
         // =========================================================================
         const THEME_PANTONE_INDUSTRIAL = {
             name: "Pantone Industrial Palette",
             dataColors: [
-                "#F4D03F",
-                "#2E2A2F",
-                "#CDCAC0",
-                "#605C5E",
                 "#BAA063",
-                "#252C37",
+                "#7A828E",
+                "#948E88",
+                "#A89F91",
                 "#878994",
-                "#F8CC5A"
+                "#C4B282",
+                "#B5B2AA",
+                "#6B727D"
             ],
             background: "#F2F4F8",
-            foreground: "#2E2A2F",
-            tableAccent: "#F4D03F",
+            foreground: "#38353B",
+            tableAccent: "#BAA063",
             comparativoSeries: [
-                { serie: 1, label: 'Prog. Producción (T_ResProd_Py_DB)', backgroundColor: '#252C37', borderColor: '#2E2A2F', hoverBackgroundColor: '#2E2A2F' },
-                { serie: 2, label: 'Proyección Comercial (T_DemandaPy)', backgroundColor: '#878994', borderColor: '#605C5E', hoverBackgroundColor: '#605C5E' }
+                { serie: 1, label: 'Prog. Producción (T_ResProd_Py_DB)', backgroundColor: '#BAA063', borderColor: '#9A824C', hoverBackgroundColor: '#C4B282' },
+                { serie: 2, label: 'Proyección Comercial (T_DemandaPy)', backgroundColor: '#7A828E', borderColor: '#6B727D', hoverBackgroundColor: '#6B727D' }
             ]
         };
 
@@ -2209,7 +2230,7 @@
             if (typeof ChartDataLabels !== 'undefined') {
                 Chart.register(ChartDataLabels);
             }
-            Chart.defaults.color = '#5D6D7E';
+            Chart.defaults.color = '#787479';
             Chart.defaults.font.family = "'Inter', sans-serif";
         }
 
@@ -2975,27 +2996,27 @@
                             label: '% Cumplimiento',
                             data: dPct,
                             yAxisID: 'yPct',
-                            borderColor: '#F4D03F',
-                            backgroundColor: 'rgba(244, 208, 63, 0.22)',
-                            pointBackgroundColor: '#2E2A2F',
-                            pointBorderColor: '#F4D03F',
-                            pointHoverBackgroundColor: '#F8CC5A',
-                            pointHoverBorderColor: '#2E2A2F',
+                            borderColor: '#38353B',
+                            backgroundColor: 'rgba(56, 53, 59, 0.16)',
+                            pointBackgroundColor: '#38353B',
+                            pointBorderColor: '#E2D5B5',
+                            pointHoverBackgroundColor: '#BAA063',
+                            pointHoverBorderColor: '#38353B',
                             borderWidth: 2.5,
                             pointRadius: 5,
                             pointHoverRadius: 7,
                             tension: 0.25,
                             order: 0,
                             datalabels: {
-                                display: true,
+                                display: () => window.innerWidth > 768,
                                 align: 'top',
                                 anchor: 'end',
                                 offset: 6,
-                                backgroundColor: '#2E2A2F',
-                                borderColor: '#F4D03F',
+                                backgroundColor: '#38353B',
+                                borderColor: '#BAA063',
                                 borderWidth: 1,
                                 borderRadius: 4,
-                                color: '#F4D03F',
+                                color: '#E2D5B5',
                                 padding: { top: 2, bottom: 2, left: 5, right: 5 },
                                 font: {
                                     family: "'Inter', sans-serif",
@@ -3043,14 +3064,14 @@
                             labels: {
                                 boxWidth: 14,
                                 font: { weight: 600, size: 11 },
-                                color: '#2E2A2F'
+                                color: '#38353B'
                             }
                         },
                         tooltip: {
-                            backgroundColor: '#1C2833',
-                            titleColor: '#F4D03F',
+                            backgroundColor: '#38353B',
+                            titleColor: '#E2D5B5',
                             bodyColor: '#FFFFFF',
-                            borderColor: '#34495E',
+                            borderColor: '#BAA063',
                             borderWidth: 1,
                             padding: 10,
                             callbacks: {
@@ -3069,11 +3090,11 @@
                             }
                         },
                         datalabels: {
-                            display: true,
+                            display: () => window.innerWidth > 768,
                             anchor: 'end',
                             align: 'top',
                             offset: 2,
-                            color: '#2E2A2F',
+                            color: '#38353B',
                             font: {
                                 family: "'Inter', sans-serif",
                                 weight: '700',
@@ -3091,14 +3112,14 @@
                     scales: {
                         x: {
                             grid: { display: false },
-                            ticks: { font: { weight: 600, size: 11 }, color: '#605C5E' }
+                            ticks: { font: { weight: 600, size: 11 }, color: '#787479' }
                         },
                         y: {
                             type: 'linear',
                             position: 'left',
                             beginAtZero: true,
-                            grid: { color: '#E2E5EB' },
-                            ticks: { callback: v => `${v.toLocaleString('es-PE')} ${unidadGrafico}`, color: '#605C5E' }
+                            grid: { color: '#E2E8F0' },
+                            ticks: { callback: v => `${v.toLocaleString('es-PE')} ${unidadGrafico}`, color: '#787479' }
                         },
                         yPct: {
                             type: 'linear',

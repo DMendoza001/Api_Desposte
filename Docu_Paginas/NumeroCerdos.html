@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -21,40 +21,54 @@
 
     <style>
         /* =========================================================================
-           🎨 PALETA PANTONE INDUSTRIAL
+           🎨 PALETA PANTONE INDUSTRIAL (Bronce Mate, Piedra Taupe y Pizarra Suave)
            ========================================================================= */
         :root {
-            --pantone-yellow: #F4D03F;
-            --pantone-yellow-light: #F8CC5A;
-            --pantone-gold: #BAA063;
-            --pantone-dark: #2E2A2F;
-            --pantone-darker: #252C37;
-            --pantone-gray-dark: #605C5E;
-            --pantone-gray-med: #878994;
-            --pantone-gray-light: #CDCAC0;
+            --color-header-bg: #38353B;
+            --color-header-gradient: linear-gradient(135deg, #38353B 0%, #434B57 100%);
+            --color-header-text: #FFFFFF;
+            --color-header-subtext: #E2D5B5;
+            --color-heading: #38353B;
+            --color-text: #4A474C;
+            --color-text-muted: #787479;
+            --color-primary: #BAA063;
+            --color-secondary: #7A828E;
+            --color-accent: #BAA063;
+            --color-bg: #F2F4F8;
+            --color-surface: #FFFFFF;
+            --color-border: #E2E8F0;
+
+            --pantone-yellow: #BAA063;
+            --pantone-yellow-light: #C4B282;
+            --pantone-gold: #7A828E;
+            --pantone-dark: #38353B;
+            --pantone-darker: #434B57;
+            --pantone-gray-dark: #4A474C;
+            --pantone-gray-med: #787479;
+            --pantone-gray-light: #B5B2AA;
             --pantone-bg: #F2F4F8;
             --pantone-card: #FFFFFF;
             --pantone-border: #E2E8F0;
-            --table-accent: #F4D03F;
+            --table-accent: #BAA063;
 
             /* Fondos y Estructura */
-            --header-teal: #252C37;
-            --bg-dark-navy: #2E2A2F;
-            --sidebar-dark: #252C37;
+            --header-teal: #38353B;
+            --bg-dark-navy: #38353B;
+            --sidebar-dark: #434B57;
             --bg-dashboard: #F2F4F8;
             --bg-card: #FFFFFF;
 
             /* Series de Datos y Gráficos */
-            --chart-primary-teal: #F4D03F;
-            --chart-dark-teal: #BAA063;
-            --chart-sage: #CDCAC0;
-            --chart-indigo: #252C37;
+            --chart-primary-teal: #BAA063;
+            --chart-dark-teal: #7A828E;
+            --chart-sage: #948E88;
+            --chart-indigo: #434B57;
 
             /* Acento y Contornos */
-            --accent-yellow: #F4D03F;
+            --accent-yellow: #BAA063;
             --border-card: #E2E8F0;
-            --text-dark: #2E2A2F;
-            --text-muted: #605C5E;
+            --text-dark: #4A474C;
+            --text-muted: #787479;
             --success: #10B981;
             --danger: #EF4444;
         }
@@ -76,15 +90,15 @@
 
         /* Encabezado Principal */
         .header {
-            background: linear-gradient(135deg, var(--pantone-dark) 0%, var(--pantone-darker) 100%);
-            color: #FFFFFF;
+            background: var(--color-header-gradient);
+            color: var(--color-header-text);
             padding: 1.15rem 2rem;
             display: flex;
             flex-wrap: wrap;
             justify-content: space-between;
             align-items: center;
             gap: 1rem;
-            box-shadow: 0 4px 10px rgba(46, 42, 47, 0.12);
+            box-shadow: 0 4px 10px rgba(56, 53, 59, 0.14);
             border-bottom: 3px solid var(--pantone-yellow);
         }
 
@@ -95,11 +109,12 @@
             display: flex;
             align-items: center;
             gap: 0.6rem;
+            color: var(--color-header-text);
         }
 
         .header-title p {
             font-size: 0.82rem;
-            color: var(--chart-sage);
+            color: var(--color-header-subtext);
             margin-top: 0.2rem;
             font-weight: 500;
             display: flex;
@@ -156,7 +171,7 @@
         select:focus,
         input[type="number"]:focus {
             border-color: var(--accent-yellow);
-            box-shadow: 0 0 0 2px rgba(245, 185, 33, 0.3);
+            box-shadow: 0 0 0 2px rgba(186, 160, 99, 0.35);
         }
 
         .btn-refresh {
@@ -347,11 +362,11 @@
         }
 
         th {
-            background-color: #EEF3F6;
-            color: var(--header-teal);
+            background-color: #38353B;
+            color: #FFFFFF;
             padding: 0.75rem 0.85rem;
             font-weight: 700;
-            border-bottom: 2px solid var(--border-card);
+            border-bottom: 2px solid var(--accent-yellow);
             text-transform: uppercase;
             font-size: 0.74rem;
             letter-spacing: 0.03em;
@@ -364,7 +379,7 @@
         }
 
         tr:hover td {
-            background-color: #F8FAFC;
+            background-color: rgba(186, 160, 99, 0.08);
         }
 
         .badge {
@@ -377,14 +392,14 @@
         }
 
         .badge-critical {
-            background-color: #FEF3C7;
-            color: #92400E;
+            background-color: rgba(186, 160, 99, 0.18);
+            color: #38353B;
             border: 1px solid var(--accent-yellow);
         }
 
         .badge-secondary {
-            background-color: #E0F2FE;
-            color: var(--chart-dark-teal);
+            background-color: rgba(122, 130, 142, 0.15);
+            color: var(--text-dark);
             border: 1px solid var(--chart-sage);
         }
 
@@ -409,20 +424,20 @@
         }
 
         tr.row-selected {
-            background-color: rgba(0, 130, 153, 0.08) !important;
+            background-color: rgba(186, 160, 99, 0.10) !important;
         }
 
         tr.row-selected td {
-            border-bottom-color: rgba(0, 130, 153, 0.22);
+            border-bottom-color: rgba(186, 160, 99, 0.28);
         }
 
         tr.row-selected:hover td {
-            background-color: rgba(0, 130, 153, 0.15) !important;
+            background-color: rgba(186, 160, 99, 0.16) !important;
         }
 
         .btn-reset-selection {
-            background: rgba(14, 79, 99, 0.08);
-            border: 1px solid var(--chart-sage);
+            background: rgba(186, 160, 99, 0.12);
+            border: 1px solid var(--accent-yellow);
             color: var(--header-teal);
             padding: 0.35rem 0.75rem;
             border-radius: 0.35rem;
@@ -552,11 +567,11 @@
                     <span>Evolución Semanal de Cerdos Requeridos</span>
                     <span style="display:inline-flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
                         <span id="badgeModoCalculo" class="badge"
-                            style="background:#E0F2FE; color:#0369A1; font-size:0.73rem; border:1px solid #BAE6FD; font-weight:600; text-transform:none;">
+                            style="background:rgba(122, 130, 142, 0.16); color:#38353B; font-size:0.73rem; border:1px solid #7A828E; font-weight:600; text-transform:none;">
                             🛡️ Cuellos de Botella (Auto)
                         </span>
                         <span id="badgePromedioCerdos" class="badge"
-                            style="background:#E0F2FE; color:#0369A1; font-size:0.75rem; border:1px solid #BAE6FD; font-weight:700; text-transform:none;">
+                            style="background:rgba(186, 160, 99, 0.16); color:#38353B; font-size:0.75rem; border:1px solid rgba(186, 160, 99, 0.45); font-weight:700; text-transform:none;">
                             Promedio: <strong id="lblPromedioCerdos">-</strong> cerdos/sem
                         </span>
                     </span>
@@ -928,14 +943,14 @@
             const badgeModo = document.getElementById("badgeModoCalculo");
             if (badgeModo) {
                 if (esPersonalizado) {
-                    badgeModo.style.backgroundColor = "#FEF3C7";
-                    badgeModo.style.color = "#92400E";
-                    badgeModo.style.borderColor = "#F5B921";
+                    badgeModo.style.backgroundColor = "rgba(186, 160, 99, 0.22)";
+                    badgeModo.style.color = "#38353B";
+                    badgeModo.style.borderColor = "#BAA063";
                     badgeModo.textContent = "⚡ Cálculo Dinámico (Personalizado)";
                 } else {
-                    badgeModo.style.backgroundColor = "#E0F2FE";
-                    badgeModo.style.color = "#0369A1";
-                    badgeModo.style.borderColor = "#BAE6FD";
+                    badgeModo.style.backgroundColor = "rgba(122, 130, 142, 0.16)";
+                    badgeModo.style.color = "#38353B";
+                    badgeModo.style.borderColor = "#7A828E";
                     badgeModo.textContent = "🛡️ Cuellos de Botella (Auto)";
                 }
             }
@@ -1029,7 +1044,7 @@
             const dataValues = semanas.map(s => Math.round(cerdosMap[s] || 0));
             const backgroundColors = semanas.map(s => {
                 if (!cerdosMap[s] || cerdosMap[s] <= 0) return "#CBD5E1";
-                return (selected !== "ALL" && selected === s) ? "#2C4257" : "rgba(58, 91, 120, 0.88)";
+                return (selected !== "ALL" && selected === s) ? "#BAA063" : "rgba(122, 130, 142, 0.88)";
             });
 
             // Actualizar etiqueta badge en la cabecera del gráfico
@@ -1047,10 +1062,10 @@
                             type: "line",
                             label: "Tendencia Cerdos",
                             data: dataValues,
-                            borderColor: "#F5B921",
+                            borderColor: "#BAA063",
                             borderWidth: 2.5,
-                            pointBackgroundColor: "#F5B921",
-                            pointBorderColor: "#071F36",
+                            pointBackgroundColor: "#BAA063",
+                            pointBorderColor: "#38353B",
                             pointBorderWidth: 1.5,
                             pointRadius: 4.5,
                             fill: false,
@@ -1081,10 +1096,10 @@
                             backgroundColor: backgroundColors,
                             borderRadius: 4,
                             datalabels: {
-                                display: true,
+                                display: () => window.innerWidth > 768,
                                 anchor: 'end',
                                 align: 'top',
-                                color: '#071F36',
+                                color: '#38353B',
                                 font: {
                                     weight: '700',
                                     size: 11
@@ -1107,12 +1122,17 @@
                     plugins: {
                         legend: {
                             labels: {
-                                color: "#1E293B",
+                                color: "#4A474C",
                                 font: { weight: '600', size: 11 }
                             }
                         },
                         tooltip: {
                             enabled: true,
+                            backgroundColor: "#38353B",
+                            titleColor: "#E2D5B5",
+                            bodyColor: "#FFFFFF",
+                            borderColor: "#BAA063",
+                            borderWidth: 1,
                             callbacks: {
                                 label: function (context) {
                                     const index = context.dataIndex;
@@ -1129,12 +1149,12 @@
                     },
                     scales: {
                         x: {
-                            ticks: { color: "#1E293B", font: { weight: '600' } },
-                            grid: { color: "#BAC8D3", drawBorder: false }
+                            ticks: { color: "#4A474C", font: { weight: '600' } },
+                            grid: { color: "#E2E8F0", drawBorder: false }
                         },
                         y: {
-                            ticks: { color: "#64748B" },
-                            grid: { color: "#BAC8D3", drawBorder: false },
+                            ticks: { color: "#787479" },
+                            grid: { color: "#E2E8F0", drawBorder: false },
                             grace: '10%'
                         }
                     }
@@ -1157,12 +1177,14 @@
             const totalVolumen = values.reduce((a, b) => a + b, 0);
 
             const themeColors = [
-                "#008299", // Primary Teal
-                "#F5B921", // Accent Yellow
-                "#0E4F63", // Header Teal
-                "#5066A6", // Chart Indigo
-                "#6C9E9F", // Chart Sage
-                "#005766"  // Dark Teal
+                "#BAA063",
+                "#7A828E",
+                "#948E88",
+                "#A89F91",
+                "#878994",
+                "#C4B282",
+                "#B5B2AA",
+                "#6B727D"
             ];
 
             if (chartDoughnutInstance) chartDoughnutInstance.destroy();
@@ -1185,13 +1207,20 @@
                         legend: {
                             position: "right",
                             labels: {
-                                color: "#1E293B",
+                                color: "#4A474C",
                                 boxWidth: 12,
                                 font: { size: 10, weight: '600' }
                             }
                         },
+                        tooltip: {
+                            backgroundColor: "#38353B",
+                            titleColor: "#E2D5B5",
+                            bodyColor: "#FFFFFF",
+                            borderColor: "#BAA063",
+                            borderWidth: 1
+                        },
                         datalabels: {
-                            display: true,
+                            display: () => window.innerWidth > 768,
                             color: '#FFFFFF',
                             font: {
                                 weight: 'bold',
@@ -1232,9 +1261,9 @@
                 return Math.round(selected === "ALL" ? (aggregated[l].cerdosEq / aggregated[l].count) : aggregated[l].cerdosEq);
             });
 
-            // El corte determinante se resalta en azul pizarra profundo, los demás en plomo azulado
-            const barColors = labels.map(l => l.includes("COSTILLAR") ? "rgba(44, 66, 87, 0.92)" : "rgba(108, 122, 137, 0.86)");
-            const barBorders = labels.map(l => l.includes("COSTILLAR") ? "#1E2F3F" : "#525D69");
+            // El corte determinante se resalta en Bronce Mate, los demás en Pizarra Suave
+            const barColors = labels.map(l => l.includes("COSTILLAR") ? "rgba(186, 160, 99, 0.92)" : "rgba(122, 130, 142, 0.86)");
+            const barBorders = labels.map(l => l.includes("COSTILLAR") ? "#BAA063" : "#7A828E");
 
             if (chartCortesInstance) chartCortesInstance.destroy();
 
@@ -1248,13 +1277,13 @@
                         backgroundColor: barColors,
                         borderColor: barBorders,
                         borderWidth: 1,
-                        hoverBackgroundColor: "#243B50",
+                        hoverBackgroundColor: "#38353B",
                         borderRadius: 4,
                         datalabels: {
-                            display: true,
+                            display: () => window.innerWidth > 768,
                             anchor: 'end',
                             align: 'right',
-                            color: '#071F36',
+                            color: '#38353B',
                             font: {
                                 weight: 'bold',
                                 size: 11
@@ -1277,21 +1306,28 @@
                     plugins: {
                         legend: {
                             labels: {
-                                color: "#1E293B",
+                                color: "#4A474C",
                                 font: { weight: '600', size: 11 }
                             }
                         },
-                        tooltip: { enabled: true }
+                        tooltip: {
+                            enabled: true,
+                            backgroundColor: "#38353B",
+                            titleColor: "#E2D5B5",
+                            bodyColor: "#FFFFFF",
+                            borderColor: "#BAA063",
+                            borderWidth: 1
+                        }
                     },
                     scales: {
                         x: {
-                            ticks: { color: "#64748B" },
-                            grid: { color: "#BAC8D3", drawBorder: false },
+                            ticks: { color: "#787479" },
+                            grid: { color: "#E2E8F0", drawBorder: false },
                             grace: '10%'
                         },
                         y: {
-                            ticks: { color: "#1E293B", font: { weight: '600' } },
-                            grid: { color: "#BAC8D3", drawBorder: false }
+                            ticks: { color: "#4A474C", font: { weight: '600' } },
+                            grid: { color: "#E2E8F0", drawBorder: false }
                         }
                     }
                 }
@@ -1317,9 +1353,9 @@
                 if (isSelected && isBottleneck) {
                     badgeHtml = `<span class="badge badge-critical" title="Cuello de botella seleccionado para el plan">Cuello de Botella ★</span>`;
                 } else if (isSelected) {
-                    badgeHtml = `<span class="badge" style="background:#0E4F63; color:#FFFFFF; border:1px solid #005766;" title="Corte seleccionado manualmente por el usuario">Seleccionado ✓</span>`;
+                    badgeHtml = `<span class="badge" style="background:#38353B; color:#FFFFFF; border:1px solid #434B57;" title="Corte seleccionado manualmente por el usuario">Seleccionado ✓</span>`;
                 } else if (isBottleneck) {
-                    badgeHtml = `<span class="badge" style="background:#FEF3C7; color:#92400E; border:1px dashed #F5B921; opacity:0.75;" title="Cuello de botella no seleccionado actualmente">Cuello de Botella</span>`;
+                    badgeHtml = `<span class="badge" style="background:rgba(186, 160, 99, 0.16); color:#38353B; border:1px dashed #BAA063; opacity:0.85;" title="Cuello de botella no seleccionado actualmente">Cuello de Botella</span>`;
                 } else {
                     badgeHtml = `<span class="badge badge-secondary">Excedente</span>`;
                 }
@@ -1342,7 +1378,7 @@
                     <td class="num-align">${formatNumber(d.piezas)}</td>
                     <td class="num-align">${d.factor}</td>
                     <td class="num-align">
-                        <strong style="color: ${isSelected ? '#0E4F63' : 'inherit'}; font-weight: ${isSelected ? '800' : '600'}; font-size: ${isSelected ? '0.92rem' : 'inherit'};">
+                        <strong style="color: ${isSelected ? '#38353B' : 'inherit'}; font-weight: ${isSelected ? '800' : '600'}; font-size: ${isSelected ? '0.92rem' : 'inherit'};">
                             ${formatNumber(d.nCerdos)}
                         </strong>
                     </td>

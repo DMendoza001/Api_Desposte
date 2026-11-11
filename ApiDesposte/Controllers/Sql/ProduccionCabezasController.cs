@@ -7,10 +7,8 @@ using System.Globalization;
 namespace ApiDesposte.Controllers.Sql
 {
     [ApiController]
-    [Route("api/[controller]")]                          // Alias corto: /api/ProdCabezas (fallback de dashboards)
-    [Route("api/ProduccionCabezasController")]            // Ruta nueva con el nombre corregido
-    [Route("api/ProduccionCabezasControlles")]            // Alias legacy: mantiene compatibilidad con consumidores externos (Excel/Power Query). Eliminar cuando ya nadie la use.
-    public class ProdCabezasController : ControllerBase
+    [Route("api/[controller]")]
+    public class ProduccionCabezasController : ControllerBase
     {
         private readonly string _connectionString;
 
@@ -19,7 +17,7 @@ namespace ApiDesposte.Controllers.Sql
         private static readonly object _cacheLock = new();
         private static readonly TimeSpan CacheDuracion = TimeSpan.FromMinutes(15);
 
-        public ProdCabezasController(IConfiguration configuration)
+        public ProduccionCabezasController(IConfiguration configuration)
         {
             _connectionString = configuration.GetConnectionString("SqlDesposte")
                 ?? throw new InvalidOperationException("No se encontró la cadena de conexión 'SqlDesposte' en appsettings.json");

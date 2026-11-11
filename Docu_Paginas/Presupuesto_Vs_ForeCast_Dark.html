@@ -13,44 +13,60 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         /* =========================================================================
-           🎨 PALETA PANTONE INDUSTRIAL (Dark Edition)
+           🎨 PALETA PANTONE INDUSTRIAL (Bronce Mate, Piedra Taupe y Pizarra Suave)
            ========================================================================= */
         :root {
-            --pantone-yellow: #F4D03F;
-            --pantone-yellow-light: #F8CC5A;
-            --pantone-gold: #BAA063;
-            --pantone-dark: #2E2A2F;
-            --pantone-darker: #252C37;
-            --pantone-gray-dark: #605C5E;
-            --pantone-gray-med: #878994;
-            --pantone-gray-light: #CDCAC0;
-            --table-accent: #F4D03F;
+            /* Variables Oficiales del Tema */
+            --color-header-bg: #38353B;
+            --color-header-gradient: linear-gradient(135deg, #38353B 0%, #434B57 100%);
+            --color-header-text: #FFFFFF;
+            --color-header-subtext: #E2D5B5;
+            --color-heading: #38353B;
+            --color-text: #4A474C;
+            --color-text-muted: #787479;
+            --color-primary: #BAA063;
+            --color-secondary: #7A828E;
+            --color-accent: #BAA063;
+            --color-bg: #F2F4F8;
+            --color-surface: #FFFFFF;
+            --color-border: #E2E8F0;
 
-            --bg-main: #252C37;
-            --bg-card: #2E2A2F;
-            --border-card: #3D393E;
-            --accent-cyan: #F4D03F;
-            --accent-blue: #BAA063;
-            --accent-gold: #F8CC5A;
-            --accent-orange: #CDCAC0;
-            --text-primary: #FFFFFF;
-            --text-secondary: #CDCAC0;
+            /* Escala Pantone Industrial */
+            --pantone-yellow: #BAA063;
+            --pantone-yellow-light: #C4B282;
+            --pantone-gold: #7A828E;
+            --pantone-dark: #38353B;
+            --pantone-darker: #434B57;
+            --pantone-gray-dark: #4A474C;
+            --pantone-gray-med: #787479;
+            --pantone-gray-light: #B5B2AA;
+            --table-accent: #BAA063;
+
+            --bg-main: #F2F4F8;
+            --bg-card: #FFFFFF;
+            --border-card: #E2E8F0;
+            --accent-cyan: #BAA063;
+            --accent-blue: #7A828E;
+            --accent-gold: #C4B282;
+            --accent-orange: #EF4444;
+            --text-primary: #4A474C;
+            --text-secondary: #787479;
 
             /* Variables Semánticas y Compatibilidad */
             --border-color: var(--border-card);
-            --primary-cyan: var(--accent-cyan);
+            --primary-cyan: #8E753F;
             --secondary-teal: var(--accent-blue);
-            --dark-teal: #1F252E;
+            --dark-teal: #38353B;
             --text-light: var(--text-primary);
             --text-muted: var(--text-secondary);
 
-            --budget-color: var(--accent-blue);
-            --forecast-color: var(--accent-cyan);
+            --budget-color: #7A828E;
+            --forecast-color: #BAA063;
             --positive: #10B981;
             --negative: #EF4444;
-            --orange: var(--accent-gold);
+            --orange: #C4B282;
             --neutral: var(--text-secondary);
-            --glow: rgba(244, 208, 63, 0.25);
+            --glow: rgba(186, 160, 99, 0.25);
         }
 
         * {
@@ -62,13 +78,12 @@
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background-color: var(--bg-main);
-            background-image: radial-gradient(circle at 50% 0%, #2E2A2F 0%, #252C37 75%);
             color: var(--text-primary);
             padding: 24px;
             min-height: 100vh;
         }
 
-        /* Scrollbars elegantes en tema oscuro */
+        /* Scrollbars elegantes */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -79,7 +94,7 @@
         }
 
         ::-webkit-scrollbar-thumb {
-            background: var(--border-card);
+            background: #B5B2AA;
             border-radius: 4px;
         }
 
@@ -87,48 +102,56 @@
             background: var(--accent-blue);
         }
 
-        /* Header */
+        /* Header Banner */
         .header {
+            background: linear-gradient(135deg, #38353B 0%, #434B57 100%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-left: 6px solid var(--color-primary);
+            color: var(--color-header-text);
+            padding: 20px 26px;
+            border-radius: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
-            border-bottom: 1px solid var(--border-card);
-            padding-bottom: 16px;
             flex-wrap: wrap;
             gap: 14px;
+            box-shadow: 0 10px 15px -3px rgba(56, 53, 59, 0.12), 0 4px 6px -2px rgba(56, 53, 59, 0.06);
         }
 
         .header h1 {
-            color: var(--text-primary);
+            color: var(--color-header-text);
             font-size: 21px;
             font-weight: 800;
             letter-spacing: 0.3px;
             display: flex;
             align-items: center;
             gap: 10px;
+            flex-wrap: wrap;
         }
 
         .header h1 span.highlight {
-            color: var(--accent-cyan);
-            text-shadow: 0 0 12px rgba(72, 178, 207, 0.4);
+            color: var(--color-header-subtext);
         }
 
         .header .badge {
-            background: rgba(72, 178, 207, 0.12);
-            color: var(--accent-cyan);
+            background: rgba(186, 160, 99, 0.22);
+            color: var(--color-header-subtext);
             font-size: 12px;
             padding: 5px 12px;
             border-radius: 20px;
             font-weight: 700;
-            border: 1px solid rgba(72, 178, 207, 0.35);
-            box-shadow: 0 0 10px rgba(72, 178, 207, 0.15);
+            border: 1px solid rgba(186, 160, 99, 0.45);
+        }
+
+        .header #lblRegistros {
+            color: var(--color-header-subtext) !important;
         }
 
         /* Banner de Estado */
         #statusBanner {
-            background: var(--bg-card);
-            color: var(--accent-cyan);
+            background: rgba(186, 160, 99, 0.14);
+            color: var(--color-heading);
             padding: 11px 18px;
             border-radius: 8px;
             margin-bottom: 20px;
@@ -137,8 +160,8 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            border: 1px solid var(--border-card);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), 0 0 10px rgba(72, 178, 207, 0.05);
+            border: 1px solid rgba(186, 160, 99, 0.4);
+            box-shadow: 0 2px 6px rgba(56, 53, 59, 0.06);
         }
 
         @keyframes spin {
@@ -158,7 +181,7 @@
             border: 1px solid var(--border-card);
             margin-bottom: 24px;
             align-items: flex-end;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+            box-shadow: 0 4px 6px -1px rgba(56, 53, 59, 0.06);
         }
 
         .filter-group {
@@ -170,7 +193,7 @@
         .filter-group label {
             font-size: 11px;
             font-weight: 700;
-            color: var(--accent-cyan);
+            color: var(--color-heading);
             text-transform: uppercase;
             letter-spacing: 0.6px;
         }
@@ -182,7 +205,7 @@
             border-radius: 6px;
             border: 1px solid var(--border-card);
             outline: none;
-            background-color: var(--bg-main);
+            background-color: #FFFFFF;
             color: var(--text-primary);
             min-width: 160px;
             font-weight: 500;
@@ -193,38 +216,36 @@
         .filter-group select:focus,
         .filter-group input:focus {
             border-color: var(--accent-cyan);
-            box-shadow: 0 0 10px rgba(72, 178, 207, 0.25);
+            box-shadow: 0 0 0 3px rgba(186, 160, 99, 0.2);
         }
 
         .filter-group.primary-filter select {
-            background-color: #0d2242;
-            border-color: var(--accent-blue);
+            background-color: rgba(186, 160, 99, 0.12);
+            border-color: var(--accent-cyan);
             font-weight: 700;
-            color: var(--accent-cyan);
+            color: var(--color-heading);
         }
 
         .btn-reset {
             padding: 8px 18px;
             font-size: 12px;
-            border: 1px solid var(--accent-blue);
+            border: 1px solid var(--accent-cyan);
             border-radius: 20px;
-            background: rgba(32, 103, 136, 0.2);
+            background: rgba(186, 160, 99, 0.14);
             cursor: pointer;
-            color: var(--accent-cyan);
+            color: var(--color-heading);
             font-weight: 700;
             height: 36px;
             display: inline-flex;
             align-items: center;
             gap: 6px;
             transition: all 0.25s ease;
-            box-shadow: 0 0 10px rgba(72, 178, 207, 0.1);
         }
 
         .btn-reset:hover {
-            background: var(--accent-cyan);
-            color: var(--bg-main);
-            border-color: var(--accent-cyan);
-            box-shadow: 0 0 15px rgba(72, 178, 207, 0.4);
+            background: var(--color-header-bg);
+            color: #FFFFFF;
+            border-color: var(--color-header-bg);
             transform: translateY(-1px);
         }
 
@@ -243,7 +264,7 @@
             border-radius: 10px;
             border: 1px solid var(--border-card);
             border-left: 4px solid var(--accent-cyan);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+            box-shadow: 0 2px 6px rgba(56, 53, 59, 0.06);
             position: relative;
             overflow: hidden;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -251,7 +272,7 @@
 
         .kpi-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), 0 0 15px rgba(72, 178, 207, 0.12);
+            box-shadow: 0 8px 16px rgba(56, 53, 59, 0.10);
         }
 
         .kpi-title {
@@ -265,7 +286,7 @@
         .kpi-value {
             font-size: 22px;
             font-weight: 800;
-            color: var(--text-primary);
+            color: var(--color-heading);
             margin-top: 6px;
             font-variant-numeric: tabular-nums;
         }
@@ -278,13 +299,11 @@
         }
 
         .kpi-positive {
-            color: var(--accent-cyan) !important;
-            text-shadow: 0 0 8px rgba(72, 178, 207, 0.3);
+            color: #10B981 !important;
         }
 
         .kpi-negative {
-            color: var(--accent-orange) !important;
-            text-shadow: 0 0 8px rgba(229, 90, 54, 0.3);
+            color: #EF4444 !important;
         }
 
         /* Grid del Dashboard */
@@ -303,14 +322,14 @@
             background-color: var(--bg-card);
             border-radius: 10px;
             padding: 20px 22px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+            box-shadow: 0 4px 6px -1px rgba(56, 53, 59, 0.06);
             border: 1px solid var(--border-card);
         }
 
         .card h3 {
             font-size: 14.5px;
             margin-bottom: 16px;
-            color: var(--text-primary);
+            color: var(--color-heading);
             font-weight: 700;
             border-bottom: 1px solid var(--border-card);
             padding-bottom: 10px;
@@ -350,20 +369,20 @@
         table.matrix-table th {
             position: sticky;
             top: 0;
-            background-color: var(--border-card);
-            color: var(--accent-cyan);
+            background-color: var(--pantone-dark);
+            color: #FFFFFF;
             padding: 10px 12px;
             font-weight: 700;
             z-index: 3;
             font-size: 11px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            border-bottom: 2px solid var(--border-card);
+            border-bottom: 2px solid var(--accent-cyan);
         }
 
         table.matrix-table td {
             padding: 8px 11px;
-            border-bottom: 1px solid rgba(26, 51, 88, 0.5);
+            border-bottom: 1px solid var(--border-card);
             font-variant-numeric: tabular-nums;
         }
 
@@ -374,43 +393,43 @@
 
         /* Estilos Jerárquicos */
         .row-partida {
-            background-color: #12243e !important;
-            color: var(--accent-cyan) !important;
+            background: linear-gradient(90deg, #38353B 0%, #434B57 100%) !important;
+            color: var(--color-header-subtext) !important;
             font-weight: 700;
+            cursor: pointer;
+            user-select: none;
+            border-top: 1px solid #4A474C;
+            transition: background 0.15s ease;
+        }
+
+        .row-partida:hover {
+            background: linear-gradient(90deg, #2D2A30 0%, #38353B 100%) !important;
+        }
+
+        .row-grupo {
+            background-color: #F2F4F8 !important;
+            color: var(--color-heading) !important;
+            font-weight: 600;
             cursor: pointer;
             user-select: none;
             border-top: 1px solid var(--border-card);
             transition: background 0.15s ease;
         }
 
-        .row-partida:hover {
-            background-color: #173052 !important;
-        }
-
-        .row-grupo {
-            background-color: #0d1e38 !important;
-            color: #E2E8F0 !important;
-            font-weight: 600;
-            cursor: pointer;
-            user-select: none;
-            border-top: 1px solid rgba(26, 51, 88, 0.4);
-            transition: background 0.15s ease;
-        }
-
         .row-grupo:hover {
-            background-color: #132a4d !important;
+            background-color: rgba(186, 160, 99, 0.14) !important;
         }
 
         .row-clase {
-            background-color: var(--bg-main) !important;
+            background-color: #FFFFFF !important;
             font-size: 11.5px;
-            color: var(--text-secondary);
+            color: var(--text-primary);
             transition: background 0.15s ease;
         }
 
         .row-clase:hover {
-            background-color: #0e203c !important;
-            color: var(--text-primary);
+            background-color: rgba(186, 160, 99, 0.08) !important;
+            color: var(--color-heading);
         }
 
         /* Botón de Expansión / Contracción */
@@ -421,8 +440,8 @@
             width: 17px;
             height: 17px;
             margin-right: 8px;
-            background: var(--bg-main);
-            border: 1px solid var(--accent-blue);
+            background: rgba(186, 160, 99, 0.18);
+            border: 1px solid rgba(186, 160, 99, 0.5);
             border-radius: 4px;
             font-size: 11px;
             line-height: 1;
@@ -433,10 +452,15 @@
             transition: all 0.2s;
         }
 
+        .row-grupo .toggle-btn {
+            background: rgba(122, 130, 142, 0.16);
+            border-color: rgba(122, 130, 142, 0.45);
+            color: var(--color-heading);
+        }
+
         .toggle-btn:hover {
             background: var(--accent-cyan);
-            color: var(--bg-main);
-            box-shadow: 0 0 8px rgba(72, 178, 207, 0.4);
+            color: #FFFFFF;
         }
 
         .btn-matriz-ctrl {
@@ -444,28 +468,32 @@
             font-size: 11.5px;
             font-weight: 700;
             border: 1px solid var(--border-card);
-            background: var(--bg-main);
+            background: #FFFFFF;
             border-radius: 6px;
             cursor: pointer;
             transition: all 0.2s;
-            color: var(--accent-cyan);
+            color: var(--color-heading);
             display: inline-flex;
             align-items: center;
             gap: 5px;
         }
 
         .btn-matriz-ctrl:hover {
-            background: var(--accent-blue);
-            color: var(--text-primary);
-            border-color: var(--accent-cyan);
+            background: var(--color-header-bg);
+            color: #FFFFFF;
+            border-color: var(--color-header-bg);
         }
 
         .subtotal-badge {
             font-size: 11px;
-            color: var(--text-secondary);
+            color: #B5B2AA;
             margin-left: 6px;
             font-weight: normal;
             font-style: italic;
+        }
+
+        .row-grupo .subtotal-badge {
+            color: var(--text-secondary);
         }
 
         .badge-diff {
@@ -477,19 +505,19 @@
         }
 
         .badge-positive {
-            background-color: rgba(72, 178, 207, 0.15);
-            color: var(--accent-cyan);
-            border: 1px solid rgba(72, 178, 207, 0.35);
+            background-color: rgba(16, 185, 129, 0.14);
+            color: #047857;
+            border: 1px solid rgba(16, 185, 129, 0.35);
         }
 
         .badge-negative {
-            background-color: rgba(229, 90, 54, 0.15);
-            color: var(--accent-orange);
-            border: 1px solid rgba(229, 90, 54, 0.35);
+            background-color: rgba(239, 68, 68, 0.14);
+            color: #B91C1C;
+            border: 1px solid rgba(239, 68, 68, 0.35);
         }
 
         .badge-neutral {
-            background-color: rgba(138, 162, 190, 0.12);
+            background-color: rgba(122, 130, 142, 0.14);
             color: var(--text-secondary);
             border: 1px solid var(--border-card);
         }
@@ -500,36 +528,35 @@
             left: 0;
             z-index: 2;
             background-color: inherit;
-            box-shadow: 3px 0 6px rgba(0, 0, 0, 0.3);
+            box-shadow: 2px 0 4px rgba(56, 53, 59, 0.06);
         }
 
         table.matrix-table-mes th {
             padding: 8px 10px;
             text-align: center;
-            border: 1px solid rgba(26, 51, 88, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.12);
         }
 
         table.matrix-table-mes th.sticky-col {
             z-index: 5;
-            background-color: var(--border-card);
+            background-color: var(--pantone-dark);
             text-align: left;
             border-right: 2px solid var(--accent-cyan);
         }
 
         .header-mes-group {
-            background-color: #17375e !important;
+            background-color: #38353B !important;
             color: #FFFFFF !important;
             font-weight: 800;
             font-size: 12px;
             letter-spacing: 0.8px;
-            border-left: 2px solid var(--border-card) !important;
-            border-right: 2px solid var(--border-card) !important;
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+            border-left: 2px solid rgba(255, 255, 255, 0.18) !important;
+            border-right: 2px solid rgba(255, 255, 255, 0.18) !important;
         }
 
         .header-total-group {
-            background-color: #143254 !important;
-            color: var(--accent-cyan) !important;
+            background-color: #434B57 !important;
+            color: var(--color-header-subtext) !important;
             font-weight: 800;
             font-size: 12px;
             letter-spacing: 0.8px;
@@ -537,21 +564,21 @@
         }
 
         .sub-col-header {
-            background-color: var(--bg-card) !important;
-            color: var(--text-secondary) !important;
+            background-color: #4A474C !important;
+            color: #E2D5B5 !important;
             font-size: 11px;
             font-weight: 600;
             padding: 6px 8px !important;
-            border-right: 1px solid rgba(26, 51, 88, 0.6);
+            border-right: 1px solid rgba(255, 255, 255, 0.12);
         }
 
         .sub-col-total {
-            background-color: #112644 !important;
+            background-color: #38353B !important;
             color: var(--accent-cyan) !important;
             font-size: 11px;
             font-weight: 700;
             padding: 6px 8px !important;
-            border-right: 1px solid rgba(26, 51, 88, 0.6);
+            border-right: 1px solid rgba(255, 255, 255, 0.12);
         }
 
         .border-left-group {
@@ -559,26 +586,26 @@
         }
 
         .row-partida .sticky-col {
-            background-color: #12243e !important;
+            background-color: #38353B !important;
         }
 
         .row-grupo .sticky-col {
-            background-color: #0d1e38 !important;
+            background-color: #F2F4F8 !important;
         }
 
         .row-clase .sticky-col {
-            background-color: var(--bg-main) !important;
+            background-color: #FFFFFF !important;
         }
 
         .row-clase:hover .sticky-col {
-            background-color: #0e203c !important;
+            background-color: #FBF9F4 !important;
         }
 
         .loading-overlay {
             text-align: center;
             padding: 35px;
             font-size: 14px;
-            color: var(--accent-cyan);
+            color: var(--color-heading);
             font-weight: 600;
         }
 
@@ -586,16 +613,16 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            background: var(--bg-main);
+            background: rgba(186, 160, 99, 0.14);
             padding: 5px 12px;
             border-radius: 6px;
-            border: 1px solid var(--border-card);
+            border: 1px solid rgba(186, 160, 99, 0.4);
         }
 
         .control-pill label {
             font-size: 11.5px;
             font-weight: 700;
-            color: var(--accent-cyan);
+            color: var(--color-heading);
         }
 
         .control-pill select {
@@ -1060,25 +1087,25 @@
         }
 
         function formatMonto(val, esBold = false) {
-            if (!val || Math.abs(Math.round(val)) === 0) return `<span style="color: var(--border-card);">-</span>`;
+            if (!val || Math.abs(Math.round(val)) === 0) return `<span style="color: var(--pantone-gray-light);">-</span>`;
             const txt = 'S/ ' + Math.round(val).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
             return esBold ? `<b>${txt}</b>` : txt;
         }
 
         function formatVariacion(val, esBold = false) {
-            if (!val || Math.abs(Math.round(val)) === 0) return `<span style="color: var(--border-card);">-</span>`;
+            if (!val || Math.abs(Math.round(val)) === 0) return `<span style="color: var(--pantone-gray-light);">-</span>`;
             const rounded = Math.round(val);
             const signo = rounded > 0 ? '+' : '';
             const txt = signo + 'S/ ' + rounded.toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-            const color = rounded > 0 ? 'var(--accent-cyan)' : 'var(--accent-orange)';
+            const color = rounded > 0 ? 'var(--positive)' : 'var(--negative)';
             return `<span style="color: ${color}; font-weight: ${esBold ? '700' : '600'};">${txt}</span>`;
         }
 
         function formatPct(pct, esBold = false) {
-            if (!pct || Math.abs(pct) < 0.005) return `<span style="color: var(--border-card);">0.0%</span>`;
+            if (!pct || Math.abs(pct) < 0.005) return `<span style="color: var(--pantone-gray-light);">0.0%</span>`;
             const signo = pct > 0 ? '+' : '';
             const txt = signo + pct.toFixed(1) + '%';
-            const color = pct > 0 ? 'var(--accent-cyan)' : 'var(--accent-orange)';
+            const color = pct > 0 ? 'var(--positive)' : 'var(--negative)';
             return `<span style="color: ${color}; font-weight: ${esBold ? '700' : '600'};">${txt}</span>`;
         }
 
@@ -1192,18 +1219,18 @@
                         {
                             label: 'Presupuesto (Base)',
                             data: presupuestos,
-                            backgroundColor: 'rgba(115, 128, 142, 0.85)',
-                            borderColor: '#85929E',
-                            hoverBackgroundColor: '#5D6D7E',
+                            backgroundColor: '#7A828E',
+                            borderColor: '#6B727D',
+                            hoverBackgroundColor: '#434B57',
                             borderWidth: 1,
                             borderRadius: 5
                         },
                         {
                             label: 'ForeCast (Proyectado)',
                             data: forecasts,
-                            backgroundColor: 'rgba(72, 111, 145, 0.90)',
-                            borderColor: '#5B7F95',
-                            hoverBackgroundColor: '#3E6282',
+                            backgroundColor: '#BAA063',
+                            borderColor: '#9A824C',
+                            hoverBackgroundColor: '#C4B282',
                             borderWidth: 1,
                             borderRadius: 5
                         }
@@ -1219,14 +1246,14 @@
                             labels: {
                                 boxWidth: 12,
                                 font: { size: 11, family: 'Inter', weight: '600' },
-                                color: '#8AA2BE'
+                                color: '#38353B'
                             }
                         },
                         tooltip: {
-                            backgroundColor: '#0D1E3A',
-                            titleColor: '#48B2CF',
+                            backgroundColor: '#38353B',
+                            titleColor: '#E2D5B5',
                             bodyColor: '#FFFFFF',
-                            borderColor: '#1A3358',
+                            borderColor: '#BAA063',
                             borderWidth: 1,
                             padding: 10,
                             callbacks: {
@@ -1238,12 +1265,12 @@
                     },
                     scales: {
                         x: {
-                            grid: { color: 'rgba(26, 51, 88, 0.4)', drawBorder: false },
-                            ticks: { font: { size: 10.5, family: 'Inter' }, color: '#8AA2BE' }
+                            grid: { color: '#E2E8F0', drawBorder: false },
+                            ticks: { font: { size: 10.5, family: 'Inter' }, color: '#787479' }
                         },
                         y: {
-                            grid: { color: 'rgba(26, 51, 88, 0.4)', drawBorder: false },
-                            ticks: { font: { size: 10.5, family: 'Inter' }, color: '#8AA2BE' }
+                            grid: { color: '#E2E8F0', drawBorder: false },
+                            ticks: { font: { size: 10.5, family: 'Inter' }, color: '#787479' }
                         }
                     }
                 }
@@ -1347,8 +1374,8 @@
                         <span><b>${pObj.nombre}</b></span>
                         <span class="subtotal-badge">(${Object.keys(pObj.grupos).length} grupos)</span>
                     </td>
-                    <td class="num-col"><b>${formatMonto(pObj.presupuesto)}</b></td>
-                    <td class="num-col" style="color: var(--primary-cyan);"><b>${formatMonto(pObj.forecast)}</b></td>
+                    <td class="num-col" style="color: #FFFFFF;"><b>${formatMonto(pObj.presupuesto)}</b></td>
+                    <td class="num-col" style="color: var(--color-header-subtext);"><b>${formatMonto(pObj.forecast)}</b></td>
                     <td class="num-col"><span class="badge-diff ${pBadgeClass}">${pDiffSign}${formatMonto(pVar)}</span></td>
                     <td class="num-col"><b>${formatPct(pPctVar, true)}</b></td>
                 `;
@@ -1543,16 +1570,18 @@
             const tree = construirArbolJerarquico(datosFiltradosActuales);
             const partidasOrdenadas = Object.values(tree).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es', { numeric: true }));
 
-            function generarCeldasMes(pres, fc, esSubtotal, bgCol = '') {
+            function generarCeldasMes(pres, fc, esSubtotal, bgCol = '', esPartida = false) {
                 const { variacion, pct } = calcularVariacionYPct(pres, fc);
                 let html = '';
+                const fcColor = esPartida ? 'var(--color-header-subtext)' : 'var(--primary-cyan)';
+                const presColor = esPartida ? 'color: #FFFFFF;' : '';
                 subCols.forEach((sc, j) => {
                     const styleBg = bgCol ? `background-color: ${bgCol};` : '';
                     const extraClass = (j === 0) ? ' border-left-group' : '';
                     if (sc.key === 'pres') {
-                        html += `<td class="num-col${extraClass}" style="${styleBg}">${formatMonto(pres, esSubtotal)}</td>`;
+                        html += `<td class="num-col${extraClass}" style="${styleBg} ${presColor}">${formatMonto(pres, esSubtotal)}</td>`;
                     } else if (sc.key === 'fc') {
-                        html += `<td class="num-col${extraClass}" style="${styleBg} color: var(--primary-cyan);">${formatMonto(fc, esSubtotal)}</td>`;
+                        html += `<td class="num-col${extraClass}" style="${styleBg} color: ${fcColor};">${formatMonto(fc, esSubtotal)}</td>`;
                     } else if (sc.key === 'var') {
                         html += `<td class="num-col${extraClass}" style="${styleBg}">${formatVariacion(variacion, esSubtotal)}</td>`;
                     } else if (sc.key === 'pct') {
@@ -1578,11 +1607,11 @@
                     const fc = pObj.mesesFc[mIdx] || 0;
                     totPresPartida += pres;
                     totFcPartida += fc;
-                    htmlMeses += generarCeldasMes(pres, fc, true);
+                    htmlMeses += generarCeldasMes(pres, fc, true, '', true);
                 });
 
                 // Celdas Total Partida
-                const celdasTotalPartida = generarCeldasMes(totPresPartida, totFcPartida, true, '#1A3358');
+                const celdasTotalPartida = generarCeldasMes(totPresPartida, totFcPartida, true, '#434B57', true);
 
                 trPartida.innerHTML = `
                     <td class="sticky-col">
@@ -1618,7 +1647,7 @@
                     });
 
                     // Celdas Total Grupo
-                    const celdasTotalGrupo = generarCeldasMes(totPresGrupo, totFcGrupo, true, '#143254');
+                    const celdasTotalGrupo = generarCeldasMes(totPresGrupo, totFcGrupo, true, '#E2E8F0');
 
                     trGrupo.innerHTML = `
                         <td class="sticky-col" style="padding-left: 24px;">
@@ -1651,7 +1680,7 @@
                         });
 
                         // Celdas Total Clase
-                        const celdasTotalClase = generarCeldasMes(totPresClase, totFcClase, false, '#0D1E3A');
+                        const celdasTotalClase = generarCeldasMes(totPresClase, totFcClase, false, '#F8FAFC');
 
                         trClase.innerHTML = `
                             <td class="sticky-col" style="padding-left: 48px;">

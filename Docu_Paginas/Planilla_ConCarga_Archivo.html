@@ -11,31 +11,47 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         /* =========================================================================
-           🎨 PALETA PANTONE INDUSTRIAL
+           🎨 PALETA PANTONE INDUSTRIAL (Bronce Mate, Piedra Taupe y Pizarra Suave)
            ========================================================================= */
         :root {
-            --pantone-yellow: #F4D03F;
-            --pantone-yellow-light: #F8CC5A;
-            --pantone-gold: #BAA063;
-            --pantone-dark: #2E2A2F;
-            --pantone-darker: #252C37;
-            --pantone-gray-dark: #605C5E;
-            --pantone-gray-med: #878994;
-            --pantone-gray-light: #CDCAC0;
+            /* Variables Oficiales del Tema */
+            --color-header-bg: #38353B;
+            --color-header-gradient: linear-gradient(135deg, #38353B 0%, #434B57 100%);
+            --color-header-text: #FFFFFF;
+            --color-header-subtext: #E2D5B5;
+            --color-heading: #38353B;
+            --color-text: #4A474C;
+            --color-text-muted: #787479;
+            --color-primary: #BAA063;
+            --color-secondary: #7A828E;
+            --color-accent: #BAA063;
+            --color-bg: #F2F4F8;
+            --color-surface: #FFFFFF;
+            --color-border: #E2E8F0;
+
+            /* Escala Pantone Industrial */
+            --pantone-yellow: #BAA063;
+            --pantone-yellow-light: #C4B282;
+            --pantone-gold: #7A828E;
+            --pantone-dark: #38353B;
+            --pantone-darker: #434B57;
+            --pantone-gray-dark: #4A474C;
+            --pantone-gray-med: #787479;
+            --pantone-gray-light: #B5B2AA;
             --pantone-bg: #F2F4F8;
             --pantone-card: #FFFFFF;
             --pantone-border: #E2E8F0;
-            --table-accent: #F4D03F;
+            --table-accent: #BAA063;
 
             --bg-main: #F2F4F8;
             --bg-card: #FFFFFF;
             --border-card: #E2E8F0;
             --color-he: #BAA063;
-            --color-bono: #F4D03F;
-            --color-fer: #878994;
+            --color-bono: #7A828E;
+            --color-fer: #948E88;
             --color-alert: #EF4444;
-            --text-primary: #2E2A2F;
-            --text-muted: #605C5E;
+            --text-primary: #4A474C;
+            --text-muted: #787479;
         }
 
         * {
@@ -52,26 +68,31 @@
         }
 
         header {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-card);
-            padding: 20px;
-            border-radius: 8px;
+            background: var(--color-header-gradient);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-left: 6px solid var(--color-primary);
+            color: #FFFFFF;
+            padding: 20px 24px;
+            border-radius: 10px;
             margin-bottom: 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             gap: 15px;
+            box-shadow: 0 10px 15px -3px rgba(56, 53, 59, 0.12), 0 4px 6px -2px rgba(56, 53, 59, 0.06);
         }
 
         header h1 {
             font-size: 1.5rem;
-            font-weight: 600;
+            font-weight: 700;
+            color: var(--color-header-text);
         }
 
         header p {
             font-size: 0.85rem;
-            color: var(--text-muted);
+            color: var(--color-header-subtext);
+            margin-top: 3px;
         }
 
         .actions-header {
@@ -183,6 +204,7 @@
         .kpi-value {
             font-size: 1.5rem;
             font-weight: bold;
+            color: var(--color-heading);
         }
 
         /* Gráficos */
@@ -209,7 +231,7 @@
         .chart-card h3 {
             font-size: 1rem;
             margin-bottom: 15px;
-            color: var(--text-primary);
+            color: var(--color-heading);
         }
 
         .chart-container {
@@ -264,6 +286,7 @@
             position: sticky;
             top: 0;
             z-index: 5;
+            border-bottom: 2px solid var(--color-primary);
         }
 
         td {
@@ -272,7 +295,7 @@
         }
 
         tr:hover {
-            background-color: rgba(244, 208, 63, 0.12);
+            background-color: rgba(186, 160, 99, 0.12);
         }
     </style>
     <link rel="stylesheet" href="responsive.css?v=2">
@@ -539,6 +562,17 @@
             document.getElementById('kpiTotalBruto').textContent = 'S/ ' + impBruto.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             document.getElementById('kpiIncidencia').textContent = incidencia + '%';
 
+            // Paleta Pantone Industrial (Bronce Mate, Piedra Taupe y Pizarra Suave)
+            const CHART_COLORS = ['#BAA063', '#7A828E', '#948E88', '#A89F91', '#878994', '#C4B282', '#B5B2AA', '#6B727D'];
+            const TOOLTIP_THEME = {
+                backgroundColor: '#38353B',
+                titleColor: '#E2D5B5',
+                bodyColor: '#FFFFFF',
+                borderColor: '#BAA063',
+                borderWidth: 1,
+                padding: 10
+            };
+
             // Chart 1: Tipo HE
             if (chTipo) chTipo.destroy();
             chTipo = new Chart(document.getElementById('chartTipoHE'), {
@@ -547,10 +581,19 @@
                     labels: ['HE 25%', 'HE 35%', 'Doble/Descanso', 'Feriado'],
                     datasets: [{
                         data: [sumH25.toFixed(1), sumH35.toFixed(1), sumHdob.toFixed(1), sumHFer.toFixed(1)],
-                        backgroundColor: ['#5C7CFA', '#10B981', '#F59E0B', '#EF4444']
+                        backgroundColor: ['#BAA063', '#7A828E', '#948E88', '#A89F91'],
+                        borderColor: '#FFFFFF',
+                        borderWidth: 2
                     }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#fff' } } } }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right', labels: { color: '#38353B', font: { weight: '600' } } },
+                        tooltip: TOOLTIP_THEME
+                    }
+                }
             });
 
             // Chart 2: Ceco
@@ -569,9 +612,9 @@
                     datasets: [{
                         label: 'Gasto HE (S/)',
                         data: Object.values(cecoGroup),
-                        backgroundColor: 'rgba(72, 111, 145, 0.88)',
-                        borderColor: '#527A9A',
-                        hoverBackgroundColor: '#3E6282',
+                        backgroundColor: '#7A828E',
+                        borderColor: '#6B727D',
+                        hoverBackgroundColor: '#38353B',
                         borderWidth: 1,
                         borderRadius: 4
                     }]
@@ -579,10 +622,10 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
+                    plugins: { legend: { display: false }, tooltip: TOOLTIP_THEME },
                     scales: {
-                        x: { ticks: { color: '#94A3B8' } },
-                        y: { ticks: { color: '#94A3B8' } }
+                        x: { grid: { display: false }, ticks: { color: '#787479' } },
+                        y: { grid: { color: '#E2E8F0' }, ticks: { color: '#787479' } }
                     }
                 }
             });
@@ -603,8 +646,11 @@
                     datasets: [{
                         label: 'Gasto HE (S/)',
                         data: Object.values(semGroup),
-                        borderColor: '#5C7CFA',
-                        backgroundColor: 'rgba(92, 124, 250, 0.2)',
+                        borderColor: '#BAA063',
+                        backgroundColor: 'rgba(186, 160, 99, 0.2)',
+                        pointBackgroundColor: '#FFFFFF',
+                        pointBorderColor: '#38353B',
+                        pointHoverBackgroundColor: '#C4B282',
                         fill: true,
                         tension: 0.3
                     }]
@@ -612,10 +658,10 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
+                    plugins: { legend: { display: false }, tooltip: TOOLTIP_THEME },
                     scales: {
-                        x: { ticks: { color: '#94A3B8' } },
-                        y: { ticks: { color: '#94A3B8' } }
+                        x: { grid: { display: false }, ticks: { color: '#787479' } },
+                        y: { grid: { color: '#E2E8F0' }, ticks: { color: '#787479' } }
                     }
                 }
             });
@@ -638,14 +684,9 @@
                     datasets: [{
                         label: 'Total Horas Extras',
                         data: sortedTop.map(x => x[1].toFixed(2)),
-                        backgroundColor: [
-                            'rgba(53, 83, 110, 0.90)', 'rgba(62, 98, 130, 0.90)', 'rgba(72, 111, 145, 0.88)',
-                            'rgba(82, 122, 154, 0.88)', 'rgba(91, 127, 149, 0.88)', 'rgba(74, 96, 116, 0.88)',
-                            'rgba(99, 130, 154, 0.86)', 'rgba(93, 109, 126, 0.88)', 'rgba(110, 138, 159, 0.86)',
-                            'rgba(124, 149, 168, 0.85)'
-                        ],
-                        borderColor: '#456376',
-                        hoverBackgroundColor: '#2C4760',
+                        backgroundColor: sortedTop.map((_, i) => CHART_COLORS[i % CHART_COLORS.length]),
+                        borderColor: '#6B727D',
+                        hoverBackgroundColor: '#38353B',
                         borderWidth: 1,
                         borderRadius: 4
                     }]
@@ -654,10 +695,10 @@
                     indexAxis: 'y',
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
+                    plugins: { legend: { display: false }, tooltip: TOOLTIP_THEME },
                     scales: {
-                        x: { ticks: { color: '#94A3B8' } },
-                        y: { ticks: { color: '#94A3B8' } }
+                        x: { grid: { color: '#E2E8F0' }, ticks: { color: '#787479' } },
+                        y: { grid: { display: false }, ticks: { color: '#38353B', font: { weight: '500' } } }
                     }
                 }
             });

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -26,49 +26,54 @@
 
   <style>
     /* =========================================================================
-       🎨 PALETA: INDUSTRIAL SLATE & GOLD
+       🎨 PALETA: PANTONE INDUSTRIAL PALETTE (Bronce Mate, Piedra Taupe y Pizarra Suave)
        ========================================================================= */
     :root {
-      /* Tokens Oficiales: Industrial Slate & Gold */
-      --isg-gold-bright: #F4D03F;
-      /* 01. Vivid Gold / Yellow */
-      --isg-slate-dark: #34495E;
-      /* 02. Dark Slate Plomo */
-      --isg-slate-med: #5D6D7E;
-      /* 03. Medium Slate Plomo */
-      --isg-slate-cool: #85929E;
-      /* 04. Cool Slate Plomo */
-      --isg-slate-deep: #2C3E50;
-      /* 05. Midnight Slate Plomo */
-      --isg-gold-rich: #D4AC0D;
-      /* 06. Rich Industrial Gold */
-      --isg-slate-charcoal: #1C2833;
-      /* 07. Charcoal Slate Antracita */
-      --isg-slate-silver: #AEB6BF;
-      /* 08. Silver Slate Plomo */
-      --isg-slate-stone: #7F8C8D;
-      /* 09. Stone Gray Plomo */
-      --isg-gold-bronze: #B7950B;
-      /* 10. Dark Bronze Gold */
+      /* Variables Oficiales del Tema */
+      --color-header-bg: #38353B;
+      --color-header-gradient: linear-gradient(135deg, #38353B 0%, #434B57 100%);
+      --color-header-text: #FFFFFF;
+      --color-header-subtext: #E2D5B5;
+      --color-heading: #38353B;
+      --color-text: #4A474C;
+      --color-text-muted: #787479;
+      --color-primary: #BAA063;
+      --color-secondary: #7A828E;
+      --color-accent: #BAA063;
+      --color-bg: #F2F4F8;
+      --color-surface: #FFFFFF;
+      --color-border: #E2E8F0;
+
+      /* Tokens Oficiales: Pantone Industrial Palette */
+      --isg-gold-bright: #BAA063;
+      --isg-slate-dark: #4A474C;
+      --isg-slate-med: #7A828E;
+      --isg-slate-cool: #878994;
+      --isg-slate-deep: #38353B;
+      --isg-gold-rich: #BAA063;
+      --isg-slate-charcoal: #434B57;
+      --isg-slate-silver: #B5B2AA;
+      --isg-slate-stone: #948E88;
+      --isg-gold-bronze: #C4B282;
 
       /* Roles Estructurales */
       --bg-canvas: #F2F4F8;
-      --text-dark: #2E2A2F;
-      --table-accent: #F4D03F;
+      --text-dark: #4A474C;
+      --table-accent: #BAA063;
 
       /* Mapeos funcionales */
-      --pantone-yellow: #F4D03F;
-      --pantone-yellow-light: #F8CC5A;
-      --pantone-yellow-soft: rgba(244, 208, 63, 0.16);
-      --pantone-yellow-border: rgba(244, 208, 63, 0.45);
-      --pantone-gold: #D4AC0D;
-      --pantone-gold-soft: rgba(212, 172, 13, 0.16);
-      --pantone-gold-border: rgba(212, 172, 13, 0.4);
-      --pantone-dark: #2C3E50;
-      --pantone-darker: #1C2833;
-      --pantone-gray-dark: #34495E;
-      --pantone-gray-med: #5D6D7E;
-      --pantone-gray-light: #AEB6BF;
+      --pantone-yellow: #BAA063;
+      --pantone-yellow-light: #C4B282;
+      --pantone-yellow-soft: rgba(186, 160, 99, 0.16);
+      --pantone-yellow-border: rgba(186, 160, 99, 0.45);
+      --pantone-gold: #7A828E;
+      --pantone-gold-soft: rgba(122, 130, 142, 0.16);
+      --pantone-gold-border: rgba(122, 130, 142, 0.42);
+      --pantone-dark: #38353B;
+      --pantone-darker: #434B57;
+      --pantone-gray-dark: #4A474C;
+      --pantone-gray-med: #787479;
+      --pantone-gray-light: #B5B2AA;
       --pantone-bg: #F2F4F8;
       --pantone-card: #FFFFFF;
       --pantone-card-alt: #F8FAFC;
@@ -76,24 +81,24 @@
       --pantone-border-subtle: #EDF2F7;
 
       /* Mapeo de compatibilidad */
-      --navy-peony: #2C3E50;
-      --cyan-blue: #F4D03F;
-      --cool-blue: #AEB6BF;
-      --blue-sapphire: #1C2833;
-      --foggy-dew: #AEB6BF;
-      --lagoon: #D4AC0D;
-      --teal-blue: #5D6D7E;
-      --aegean-blue: #34495E;
+      --navy-peony: #38353B;
+      --cyan-blue: #BAA063;
+      --cool-blue: #B5B2AA;
+      --blue-sapphire: #434B57;
+      --foggy-dew: #B5B2AA;
+      --lagoon: #7A828E;
+      --teal-blue: #787479;
+      --aegean-blue: #4A474C;
 
       --bg-card: #FFFFFF;
       --border-ui: #E2E8F0;
-      --text-muted: #5D6D7E;
+      --text-muted: #787479;
       --success: #10B981;
       --warning: #F59E0B;
       --danger: #EF4444;
-      --shadow-sm: 0 1px 3px rgba(28, 40, 51, 0.06), 0 1px 2px rgba(28, 40, 51, 0.04);
-      --shadow-md: 0 4px 6px -1px rgba(28, 40, 51, 0.08), 0 2px 4px -1px rgba(28, 40, 51, 0.04);
-      --shadow-lg: 0 10px 15px -3px rgba(28, 40, 51, 0.12), 0 4px 6px -2px rgba(28, 40, 51, 0.06);
+      --shadow-sm: 0 1px 3px rgba(56, 53, 59, 0.06), 0 1px 2px rgba(56, 53, 59, 0.04);
+      --shadow-md: 0 4px 6px -1px rgba(56, 53, 59, 0.08), 0 2px 4px -1px rgba(56, 53, 59, 0.04);
+      --shadow-lg: 0 10px 15px -3px rgba(56, 53, 59, 0.12), 0 4px 6px -2px rgba(56, 53, 59, 0.06);
     }
 
     * {
@@ -117,10 +122,10 @@
 
     /* Header */
     .header-banner {
-      background: linear-gradient(135deg, var(--pantone-dark) 0%, var(--pantone-darker) 100%);
+      background: var(--color-header-gradient);
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-left: 6px solid var(--pantone-yellow);
-      color: #FFFFFF;
+      color: var(--color-header-text);
       padding: 22px 28px;
       border-radius: 12px;
       margin-bottom: 22px;
@@ -152,12 +157,12 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      color: #FFFFFF;
+      color: var(--color-header-text);
     }
 
     .header-info p {
       font-size: 0.88rem;
-      color: var(--pantone-gray-light);
+      color: var(--color-header-subtext);
       margin-top: 4px;
       margin-bottom: 0;
       font-weight: 400;
@@ -303,8 +308,8 @@
 
     .btn-primary-action {
       background: linear-gradient(135deg, var(--pantone-yellow) 0%, var(--pantone-yellow-light) 100%);
-      border: 1px solid rgba(244, 208, 63, 0.6);
-      color: var(--pantone-dark);
+      border: 1px solid rgba(186, 160, 99, 0.6);
+      color: #FFFFFF;
       padding: 9px 18px;
       border-radius: 8px;
       cursor: pointer;
@@ -313,13 +318,13 @@
       display: inline-flex;
       align-items: center;
       gap: 7px;
-      box-shadow: 0 2px 6px rgba(244, 208, 63, 0.35);
+      box-shadow: 0 2px 6px rgba(186, 160, 99, 0.35);
       transition: all 0.2s ease;
     }
 
     .btn-primary-action:hover:not(:disabled) {
       background: linear-gradient(135deg, var(--pantone-yellow-light) 0%, var(--pantone-gold) 100%);
-      color: var(--pantone-dark);
+      color: #FFFFFF;
       border-color: var(--pantone-gold);
       transform: translateY(-1px);
       box-shadow: 0 4px 10px rgba(186, 160, 99, 0.4);
@@ -524,7 +529,7 @@
       background: var(--pantone-dark);
       color: var(--pantone-yellow);
       border-color: var(--pantone-yellow);
-      box-shadow: 0 2px 6px rgba(44, 62, 80, 0.35);
+      box-shadow: 0 2px 6px rgba(56, 53, 59, 0.35);
     }
 
     .tab-badge {
@@ -538,7 +543,7 @@
     }
 
     .matrix-tab-btn.active .tab-badge {
-      background: rgba(244, 208, 63, 0.25);
+      background: rgba(186, 160, 99, 0.25);
       color: var(--pantone-yellow);
     }
 
@@ -635,9 +640,9 @@
     .btn-excel-flat:hover:not(:disabled) {
       background: var(--pantone-yellow);
       border-color: var(--pantone-yellow);
-      color: var(--pantone-dark);
+      color: #FFFFFF;
       transform: translateY(-1px);
-      box-shadow: 0 2px 6px rgba(244, 208, 63, 0.35);
+      box-shadow: 0 2px 6px rgba(186, 160, 99, 0.35);
     }
 
     /* Tabla */
@@ -669,7 +674,7 @@
 
     /* Fila Nivel 1: PERIODO */
     .row-periodo {
-      background: linear-gradient(90deg, #1C2833 0%, #2C3E50 100%) !important;
+      background: linear-gradient(90deg, #38353B 0%, #434B57 100%) !important;
       color: #FFFFFF !important;
       font-weight: 700;
       cursor: pointer;
@@ -678,11 +683,11 @@
     }
 
     .row-periodo:hover {
-      background: linear-gradient(90deg, #151E27 0%, #1C2833 100%) !important;
+      background: linear-gradient(90deg, #2D2A30 0%, #38353B 100%) !important;
     }
 
     .row-periodo td {
-      border-bottom: 1px solid #34495E;
+      border-bottom: 1px solid #434B57;
       padding: 11px 14px;
     }
 
@@ -711,7 +716,7 @@
     }
 
     .row-tipo:hover {
-      background-color: rgba(244, 208, 63, 0.12) !important;
+      background-color: rgba(186, 160, 99, 0.12) !important;
     }
 
     .row-tipo td {
@@ -750,7 +755,7 @@
     }
 
     .row-chuleta:hover {
-      background-color: rgba(244, 208, 63, 0.08) !important;
+      background-color: rgba(186, 160, 99, 0.08) !important;
     }
 
     .row-chuleta td {
@@ -783,7 +788,7 @@
     }
 
     .row-plantilla:hover {
-      background-color: rgba(244, 208, 63, 0.06) !important;
+      background-color: rgba(186, 160, 99, 0.06) !important;
     }
 
     .row-plantilla td {
@@ -905,7 +910,7 @@
 
     .badge-mid {
       background-color: var(--pantone-yellow-soft);
-      color: #854D0E;
+      color: #38353B;
       border: 1px solid var(--pantone-yellow-border);
     }
 
@@ -922,7 +927,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(37, 44, 55, 0.6);
+      background: rgba(56, 53, 59, 0.6);
       backdrop-filter: blur(4px);
       display: flex;
       flex-direction: column;
@@ -1244,28 +1249,26 @@
        ========================================================================= -->
   <script>
     // =========================================================================
-    // 🎨 PALETA DE ESTILOS: Industrial Slate & Gold
+    // 🎨 PALETA DE ESTILOS: Pantone Industrial Palette
     // =========================================================================
     const INDUSTRIAL_SLATE_GOLD = {
-      name: "Industrial Slate & Gold",
+      name: "Pantone Industrial Palette",
       dataColors: [
-        "#F4D03F",
-        "#34495E",
-        "#5D6D7E",
-        "#85929E",
-        "#2C3E50",
-        "#D4AC0D",
-        "#1C2833",
-        "#AEB6BF",
-        "#7F8C8D",
-        "#B7950B"
+        "#BAA063",
+        "#7A828E",
+        "#948E88",
+        "#A89F91",
+        "#878994",
+        "#C4B282",
+        "#B5B2AA",
+        "#6B727D"
       ],
       background: "#F2F4F8",
-      foreground: "#2E2A2F",
-      tableAccent: "#F4D03F",
+      foreground: "#38353B",
+      tableAccent: "#BAA063",
       card: "#FFFFFF",
       grid: "#E2E8F0",
-      textMuted: "#5D6D7E",
+      textMuted: "#787479",
       white: "#FFFFFF"
     };
 
@@ -1273,58 +1276,57 @@
     const PANTONE_THEME = INDUSTRIAL_SLATE_GOLD;
 
     // =========================================================================
-    // 📊 PALETA GRÁFICA: AZULES PLOMIZOS (SLATE BLUE) Y PLOMOS INDUSTRIALES
-    // Tonos desaturados de acero y pizarra que armonizan con Industrial Slate & Gold
+    // 📊 PALETA GRÁFICA: BRONCE MATE, PIEDRA TAUPE Y PIZARRA SUAVE
     // =========================================================================
     const GRAFICOS_PALETA = {
-      // Escala gradual de Azules con tendencia al Plomo y Grises Pizarra (Top 15 Plantillas)
+      // Escala gradual para Top 15 Plantillas usando chartColors del tema
       rankingPlantillas: [
-        "rgba(44, 66, 87, 0.92)",   // 01. Deep Slate Navy (#2C4257)
-        "rgba(53, 83, 110, 0.90)",  // 02. Muted Steel Blue (#35536E)
-        "rgba(62, 98, 130, 0.90)",  // 03. Industrial Slate Blue (#3E6282)
-        "rgba(72, 111, 145, 0.88)", // 04. Smoky Cerulean Slate (#486F91)
-        "rgba(82, 122, 154, 0.88)", // 05. Blue-Gray Pewter (#527A9A)
-        "rgba(52, 73, 94, 0.90)",   // 06. Dark Slate Plomo (#34495E)
-        "rgba(91, 127, 149, 0.88)", // 07. Cool Steel Slate (#5B7F95)
-        "rgba(74, 96, 116, 0.88)",  // 08. Medium Slate Blue-Gray (#4A6074)
-        "rgba(99, 130, 154, 0.86)", // 09. Muted Air Force Slate (#63829A)
-        "rgba(93, 109, 126, 0.88)", // 10. Cool Slate Plomo (#5D6D7E)
-        "rgba(110, 138, 159, 0.86)",// 11. Dusty Blue-Slate (#6E8A9F)
-        "rgba(108, 122, 137, 0.86)",// 12. Balanced Pewter Plomo (#6C7A89)
-        "rgba(124, 149, 168, 0.85)",// 13. Mist Blue-Gray (#7C95A8)
-        "rgba(133, 146, 158, 0.85)",// 14. Silver Slate Plomo (#85929E)
-        "rgba(149, 165, 178, 0.85)" // 15. Pale Metallic Slate (#95A5B2)
+        "rgba(186, 160, 99, 0.92)",  // 01. #BAA063 Bronce Mate
+        "rgba(122, 130, 142, 0.90)", // 02. #7A828E Pizarra Suave
+        "rgba(148, 142, 136, 0.90)", // 03. #948E88 Piedra Taupe
+        "rgba(168, 159, 145, 0.88)", // 04. #A89F91 Taupe Cálido
+        "rgba(135, 137, 148, 0.88)", // 05. #878994 Plomo Neutro
+        "rgba(196, 178, 130, 0.90)", // 06. #C4B282 Bronce Claro
+        "rgba(181, 178, 170, 0.88)", // 07. #B5B2AA Piedra Clara
+        "rgba(107, 114, 125, 0.88)", // 08. #6B727D Pizarra Media
+        "rgba(186, 160, 99, 0.84)",  // 09. #BAA063
+        "rgba(122, 130, 142, 0.84)", // 10. #7A828E
+        "rgba(148, 142, 136, 0.84)", // 11. #948E88
+        "rgba(168, 159, 145, 0.84)", // 12. #A89F91
+        "rgba(135, 137, 148, 0.84)", // 13. #878994
+        "rgba(196, 178, 130, 0.84)", // 14. #C4B282
+        "rgba(181, 178, 170, 0.84)"  // 15. #B5B2AA
       ],
       rankingPlantillasBorder: [
-        "#1E2F3F",
-        "#263D52",
-        "#2E4B64",
-        "#365773",
-        "#3E617D",
-        "#253544",
-        "#456376",
-        "#374857",
-        "#4B6578",
-        "#465360",
-        "#546C7E",
-        "#525D69",
-        "#5F7485",
-        "#68737D",
-        "#758591"
+        "#BAA063",
+        "#7A828E",
+        "#948E88",
+        "#A89F91",
+        "#878994",
+        "#C4B282",
+        "#B5B2AA",
+        "#6B727D",
+        "#BAA063",
+        "#7A828E",
+        "#948E88",
+        "#A89F91",
+        "#878994",
+        "#C4B282",
+        "#B5B2AA"
       ],
-      // Gráfico de Evolución Temporal (Línea Gold + Barras en Plomo Pizarra y Azul Plomizo)
+      // Gráfico de Evolución Temporal (Línea Bronce Mate + Barras en Piedra Taupe y Pizarra Suave)
       temporal: {
-        rendimientoLine: "#F4D03F",                    // 01. Vivid Gold (contraste principal)
-        rendimientoFill: "rgba(58, 91, 120, 0.12)",    // Sombreado sutil en azul pizarra
-        rendimientoPoint: "#1C2833",                   // Charcoal Slate
-        rendimientoPointBorder: "#F4D03F",
-        rendimientoHoverPoint: "#D4AC0D",              // Rich Gold
-        kilosOrigenBar: "rgba(115, 128, 142, 0.85)",   // Plomo Pizarra Neutro (#73808E)
-        kilosOrigenBorder: "#5D6D7E",                  // Borde Plomo Medio (#5D6D7E)
-        kilosOrigenHover: "#475569",                   // Hover Plomo Oscuro (#475569)
-        kilosResultadoBar: "rgba(58, 91, 120, 0.90)",  // Azul Acero Plomizo (#3A5B78)
-        kilosResultadoBorder: "#2C4760",               // Borde Azul Pizarra (#2C4760)
-        kilosResultadoHover: "#243B50"                 // Hover Azul Pizarra Profundo (#243B50)
+        rendimientoLine: "#BAA063",
+        rendimientoFill: "rgba(186, 160, 99, 0.14)",
+        rendimientoPoint: "#38353B",
+        rendimientoPointBorder: "#BAA063",
+        rendimientoHoverPoint: "#C4B282",
+        kilosOrigenBar: "rgba(148, 142, 136, 0.85)",
+        kilosOrigenBorder: "#948E88",
+        kilosOrigenHover: "#787479",
+        kilosResultadoBar: "rgba(122, 130, 142, 0.90)",
+        kilosResultadoBorder: "#7A828E",
+        kilosResultadoHover: "#6B727D"
       }
     };
 
@@ -1360,6 +1362,7 @@
     let apiBaseActiva = null;
     let cargando = false;
     let reporteGenerado = false;
+    let rawSqlData = [];
     let rawData = [];
     let datosFiltrados = [];
 
@@ -1537,6 +1540,7 @@
             const json = await res.json();
             const items = Array.isArray(json) ? json : (json.datos || []);
 
+            rawSqlData = items;
             rawData = items.map(mapearDiccionarioAItem);
             reporteGenerado = true;
 
@@ -1977,12 +1981,12 @@
           maintainAspectRatio: false,
           interaction: { mode: 'index', intersect: false },
           plugins: {
-            legend: { position: 'top', labels: { boxWidth: 12, color: '#2E2A2F', font: { family: 'Inter', size: 11, weight: '600' } } },
+            legend: { position: 'top', labels: { boxWidth: 12, color: '#4A474C', font: { family: 'Inter', size: 11, weight: '600' } } },
             tooltip: {
-              backgroundColor: '#1C2833',
-              titleColor: '#F4D03F',
+              backgroundColor: '#38353B',
+              titleColor: '#E2D5B5',
               bodyColor: '#FFFFFF',
-              borderColor: 'rgba(244, 208, 63, 0.4)',
+              borderColor: '#BAA063',
               borderWidth: 1,
               padding: 10,
               callbacks: {
@@ -1999,19 +2003,19 @@
             y: {
               beginAtZero: true,
               max: 100,
-              ticks: { callback: v => v + '%', color: '#5D6D7E', font: { family: 'Inter', size: 10 } },
-              title: { display: true, text: 'Rendimiento %', color: '#2E2A2F', font: { family: 'Inter', size: 11, weight: '600' } },
+              ticks: { callback: v => v + '%', color: '#787479', font: { family: 'Inter', size: 10 } },
+              title: { display: true, text: 'Rendimiento %', color: '#38353B', font: { family: 'Inter', size: 11, weight: '600' } },
               grid: { color: '#E2E8F0' }
             },
             y1: {
               beginAtZero: true,
               position: 'right',
               grid: { drawOnChartArea: false },
-              ticks: { callback: v => Number(v).toLocaleString('es-PE'), color: '#5D6D7E', font: { family: 'Inter', size: 10 } },
-              title: { display: true, text: 'Kilos (kg)', color: '#2E2A2F', font: { family: 'Inter', size: 11, weight: '600' } }
+              ticks: { callback: v => Number(v).toLocaleString('es-PE'), color: '#787479', font: { family: 'Inter', size: 10 } },
+              title: { display: true, text: 'Kilos (kg)', color: '#38353B', font: { family: 'Inter', size: 11, weight: '600' } }
             },
             x: {
-              ticks: { color: '#5D6D7E', font: { family: 'Inter', size: 10 } },
+              ticks: { color: '#4A474C', font: { family: 'Inter', size: 10 } },
               grid: { display: false }
             }
           }
@@ -2043,10 +2047,10 @@
       const labels = planMetrics.map(p => p.name.length > 22 ? p.name.substring(0, 22) + "..." : p.name);
       const dataRend = planMetrics.map(p => Math.round(p.metricas.rendimiento * 100) / 100);
 
-      // Armonización en gama de Azules Plomizos y Plomos Industriales (Slate Blue & Pewter)
+      // Armonización en gama de Bronce Mate, Piedra Taupe y Pizarra Suave
       const coloresRanking = planMetrics.map((_, i) => GRAFICOS_PALETA.rankingPlantillas[i % GRAFICOS_PALETA.rankingPlantillas.length]);
       const bordesRanking = planMetrics.map((_, i) => GRAFICOS_PALETA.rankingPlantillasBorder[i % GRAFICOS_PALETA.rankingPlantillasBorder.length]);
-      const hoverColoresRanking = planMetrics.map(() => "#2C4760"); // Azul Pizarra profundo al interactuar
+      const hoverColoresRanking = planMetrics.map(() => "#38353B");
 
       if (chartPlantillasObj) chartPlantillasObj.destroy();
 
@@ -2062,7 +2066,7 @@
             borderColor: bordesRanking,
             borderWidth: 1.5,
             hoverBackgroundColor: hoverColoresRanking,
-            hoverBorderColor: "#1E2F3F",
+            hoverBorderColor: "#BAA063",
             borderRadius: 6,
             barThickness: 18
           }]
@@ -2074,12 +2078,12 @@
           plugins: {
             legend: { display: false },
             tooltip: {
-              backgroundColor: "#1C2833",
-              titleColor: "#F4D03F",
+              backgroundColor: "#38353B",
+              titleColor: "#E2D5B5",
               titleFont: { family: 'Inter', weight: '700', size: 12 },
               bodyFont: { family: 'Inter', size: 11 },
               bodyColor: '#FFFFFF',
-              borderColor: "#34495E",
+              borderColor: "#BAA063",
               borderWidth: 1,
               padding: 10,
               callbacks: {
@@ -2103,7 +2107,7 @@
               grid: { color: PANTONE_THEME.grid }
             },
             y: {
-              ticks: { color: PANTONE_THEME.foreground, font: { family: 'Inter', weight: '600', size: 10 } },
+              ticks: { color: '#4A474C', font: { family: 'Inter', weight: '600', size: 10 } },
               grid: { display: false }
             }
           }
@@ -2505,54 +2509,24 @@
     }
 
     function exportarDataPlanaExcel() {
-      if (datosFiltrados.length === 0) {
+      const dataAExportar = (rawSqlData && rawSqlData.length > 0) ? rawSqlData : datosFiltrados;
+      if (!dataAExportar || dataAExportar.length === 0) {
         mostrarToast("⚠️ No hay datos para exportar", 3000);
         return;
       }
 
       mostrarToast("⏳ Generando Data Plana SP...", 2000);
 
-      const filas = datosFiltrados.map(d => {
-        const y = d.FechaOrden.getFullYear();
-        const m = String(d.FechaOrden.getMonth() + 1).padStart(2, '0');
-        const day = String(d.FechaOrden.getDate()).padStart(2, '0');
-        const fechaStr = `${y}-${m}-${day}`;
-
-        return {
-          "FechaOrden": fechaStr,
-          "Tipo": d.Tipo,
-          "TipoChuleta": d.TipoChuleta,
-          "Plantilla": d.Plantilla,
-          "NPlantilla": d.NPlantilla,
-          "Plantilla - NPlantilla": `${d.Plantilla} - ${d.NPlantilla}`,
-          "Ttra": d.Ttra,
-          "NTtra": d.NTtra,
-          "Producto": d.Producto,
-          "CodigoCorto": d.CodigoCorto,
-          "Nombre": d.Nombre,
-          "TipoInforme": d.TipoInforme,
-          "Unidades": Math.round(d.Unidades * 100) / 100,
-          "Kilos": Math.round(d.Kilos * 100) / 100,
-          "CostoTotal": Math.round(d.CostoTotal * 100) / 100,
-          "VentaTotal": Math.round(d.VentaTotal * 100) / 100
-        };
-      });
-
       const fIni = document.getElementById('fechaInicio')?.value || '';
       const fFin = document.getElementById('fechaFin')?.value || '';
-      const rangoStr = (fIni && fFin) ? `_${fIni.replace(/-/g, '')}_a_${fFin.replace(/-/g, '')}` : `_${new Date().toISOString().slice(0, 10).replace(/-/g, '')}`;
-      const nombreArchivo = `Data_Plana_Sp_Informe_Prod_Chuletas${rangoStr}.xlsx`;
+      const rangoStr = (fIni && fFin) ? `_${fIni.replace(/-/g, '')}_al_${fFin.replace(/-/g, '')}` : `_${new Date().toISOString().slice(0, 10).replace(/-/g, '')}`;
+      const nombreArchivo = `Data_Plana_SQL_Sp_Informe_Prod_Chuletas${rangoStr}.xlsx`;
 
       const wb = XLSX.utils.book_new();
-      const ws = XLSX.utils.json_to_sheet(filas);
-      ws['!cols'] = [
-        { wch: 13 }, { wch: 18 }, { wch: 16 }, { wch: 10 }, { wch: 32 }, { wch: 38 },
-        { wch: 8 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 36 }, { wch: 14 },
-        { wch: 12 }, { wch: 14 }, { wch: 14 }, { wch: 14 }
-      ];
-      XLSX.utils.book_append_sheet(wb, ws, "Sp_Informe_Prod_Chuletas");
+      const ws = XLSX.utils.json_to_sheet(dataAExportar);
+      XLSX.utils.book_append_sheet(wb, ws, "Data_Plana_SQL");
       XLSX.writeFile(wb, nombreArchivo);
-      mostrarToast(`📄 Data Plana del SP descargada (${filas.length} filas)`);
+      mostrarToast(`📄 Data Plana SQL descargada (${dataAExportar.length.toLocaleString('es-PE')} filas)`, 3500);
     }
 
     // =========================================================================

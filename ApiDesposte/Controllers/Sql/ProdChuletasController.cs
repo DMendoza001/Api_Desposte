@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Data;
@@ -82,8 +82,6 @@ namespace ApiDesposte.Controllers.Sql
         /// Por defecto usa: '2026-01-01T00:00:00' hasta '2026-08-31T23:59:59'
         /// </summary>
         [HttpGet]
-        [HttpGet("listar")]
-        [HttpGet("informe")]
         public async Task<IActionResult> ObtenerInformeProdChuletas(
             [FromQuery] string? fechaInicio = null,
             [FromQuery] string? fechaFin = null,
