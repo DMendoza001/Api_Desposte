@@ -360,7 +360,7 @@
       gap: 6px;
     }
 
-    .filter-group label {
+    .filter-group > label {
       font-size: 0.78rem;
       font-weight: 700;
       text-transform: uppercase;
@@ -368,7 +368,7 @@
       color: var(--pantone-dark);
     }
 
-    .filter-group input {
+    .filter-group > input {
       border: 1px solid var(--border-ui);
       padding: 9px 13px;
       border-radius: 8px;
@@ -381,7 +381,7 @@
       transition: all 0.2s ease;
     }
 
-    .filter-group input:focus {
+    .filter-group > input:focus {
       border-color: var(--pantone-gold);
       box-shadow: 0 0 0 3px var(--pantone-yellow-soft);
     }
@@ -633,6 +633,134 @@
 
     .periodo-option input {
       cursor: pointer;
+    }
+
+    /* =========================================================================
+       🗓️ FILTRO DE AÑO (botones) Y FILTRO DE SEMANAS ISO (combobox vista Diario)
+       ========================================================================= */
+    .anio-btn-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .anio-btn {
+      border: 1px solid var(--border-ui);
+      background: #FFFFFF;
+      color: var(--pantone-dark);
+      padding: 9px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      min-width: 64px;
+      transition: all 0.2s ease;
+    }
+
+    .anio-btn:hover {
+      border-color: var(--pantone-gold);
+      background: var(--color-hover-tint);
+    }
+
+    .anio-btn.active {
+      background: linear-gradient(135deg, var(--pantone-yellow) 0%, var(--pantone-yellow-light) 100%);
+      border-color: rgba(186, 160, 99, 0.6);
+      color: #FFFFFF;
+      box-shadow: 0 2px 6px rgba(186, 160, 99, 0.35);
+    }
+
+    .is-hidden {
+      display: none !important;
+    }
+
+    /* Cabecera del combobox de semanas: modo de selección única / múltiple */
+    .semana-modo-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 2px 4px 8px;
+      margin-bottom: 6px;
+      border-bottom: 1px solid var(--border-ui);
+    }
+
+    .semana-modo-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: var(--text-muted);
+    }
+
+    .semana-modo-group {
+      display: inline-flex;
+      border: 1px solid var(--border-ui);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .semana-modo-btn {
+      border: none;
+      background: #FFFFFF;
+      color: var(--pantone-dark);
+      font-size: 0.74rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      cursor: pointer;
+    }
+
+    .semana-modo-btn+.semana-modo-btn {
+      border-left: 1px solid var(--border-ui);
+    }
+
+    .semana-modo-btn.active {
+      background: var(--pantone-yellow-soft);
+      color: var(--pantone-dark);
+    }
+
+    .semana-todas {
+      border-bottom: 1px dashed var(--border-ui);
+      margin-bottom: 4px;
+      padding-bottom: 6px;
+    }
+
+    .semana-vacio {
+      padding: 8px 6px;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    #semanaSelectedText {
+      display: inline-block;
+      max-width: 240px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      vertical-align: bottom;
+    }
+
+    /* El combobox de semanas vive en el panel superior de filtros */
+    #semanasFilterGroup .periodo-dropdown-btn {
+      min-width: 190px;
+      justify-content: space-between;
+    }
+
+    #semanaDropdownContent {
+      min-width: 240px;
+    }
+
+    /* Los checkboxes del combobox no heredan los estilos de los inputs del panel
+       de filtros definidos en responsive.css (.filter-group input). */
+    #semanasFilterGroup .periodo-option input[type="checkbox"] {
+      width: 16px !important;
+      min-width: 16px !important;
+      max-width: 16px !important;
+      flex: 0 0 auto !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      box-shadow: none !important;
+      accent-color: var(--pantone-dark);
     }
 
     .matrix-toolbar {
@@ -1015,6 +1143,12 @@
         margin-bottom: 14px;
       }
 
+      .anio-btn {
+        padding: 8px 11px;
+        font-size: 0.8rem;
+        min-width: 56px;
+      }
+
       .kpi-container {
         gap: 10px;
         margin-bottom: 14px;
@@ -1181,9 +1315,21 @@
         padding: 12px 14px;
       }
 
-      .filter-group input {
+      .filter-group > input {
         min-width: 0;
         width: 100%;
+      }
+
+      .anio-btn-group {
+        width: 100%;
+      }
+
+      .anio-btn {
+        flex: 1 1 68px;
+      }
+
+      #semanaSelectedText {
+        max-width: 100%;
       }
 
       .btn-action-group {
@@ -1377,6 +1523,29 @@
             <input type="date" id="fechaFin">
           </div>
 
+          <!-- Filtro de Año mediante botones (aplica a Diario / Semanal / Mensual / Anual) -->
+          <div class="filter-group">
+            <label><i class="fa-regular fa-calendar-check me-1"></i> Año:</label>
+            <div class="anio-btn-group" id="anioBtnGroup">
+              <button type="button" class="anio-btn active" onclick="seleccionarAnio('ALL')"
+                title="Sin filtro de año">Todos</button>
+            </div>
+          </div>
+
+          <!-- Filtro de Semanas ISO: selección única o múltiple (sólo sub-página Diario) -->
+          <div class="filter-group is-hidden" id="semanasFilterGroup">
+            <label><i class="fa-solid fa-calendar-week me-1"></i> Semanas:</label>
+            <div class="periodo-multiselect-box">
+              <button type="button" class="periodo-dropdown-btn" onclick="toggleSemanaDropdown()">
+                <span id="semanaSelectedText">Todas las semanas</span>
+                <i class="fa-solid fa-chevron-down"></i>
+              </button>
+              <div class="periodo-dropdown-content" id="semanaDropdownContent">
+                <!-- Opciones dinámicas -->
+              </div>
+            </div>
+          </div>
+
           <div class="btn-action-group">
             <button class="btn-primary-action" id="btnConsultar" onclick="consultarReporte()">
               <span>🚀 Generar Reporte</span>
@@ -1456,6 +1625,7 @@
                     </div>
                   </div>
                 </div>
+
               </div>
             </div>
 
@@ -1526,6 +1696,14 @@
     // Periodos Seleccionados en el Multiselect
     let periodosSeleccionados = new Set();
     let periodosDisponiblesOrdenados = [];
+
+    // Filtro de Año (botones, aplica a las 4 sub-páginas) y filtro de Semanas ISO
+    // (combobox con selección única / múltiple, exclusivo de la sub-página Diario)
+    let anioSeleccionado = "ALL";
+    let modoSemanaSeleccion = "multiple";   // 'unica' | 'multiple'
+    let semanasFiltroSeleccionadas = new Set();
+    let semanasDisponiblesOrdenadas = [];
+    const MAX_DIAS_DETALLE = 31;            // tope de días visibles al filtrar semanas
 
     const ORDEN_NIVELES = ["CORTE PRIMARIO", "LINEA DE CABEZA", "TERCER CORTE", "SALDO PENDIENTE"];
     const collapsedNiveles = new Set();
@@ -1604,10 +1782,13 @@
     });
 
     window.addEventListener('click', function (e) {
-      const multiselectBox = document.querySelector('.periodo-multiselect-box');
-      if (multiselectBox && !multiselectBox.contains(e.target)) {
-        document.getElementById('periodoDropdownContent').classList.remove('show');
-      }
+      // Cierra cualquier combobox multiselect (Periodos y Semanas) al hacer clic fuera
+      document.querySelectorAll('.periodo-multiselect-box').forEach(box => {
+        if (!box.contains(e.target)) {
+          const contenido = box.querySelector('.periodo-dropdown-content');
+          if (contenido) contenido.classList.remove('show');
+        }
+      });
     });
 
     async function consultarReporte() {
@@ -1675,6 +1856,9 @@
 
     function aplicarFiltrosLocales() {
       datosFiltrados = [...rawData];
+      actualizarVisibilidadFiltroSemanas();
+      renderBotonesAnio();
+      reconstruirOpcionesSemanas();
       calcularKPIs();
       actualizarBadgesSegmentadores();
       actualizarGraficoTemporal();
@@ -1764,14 +1948,217 @@
       return key;
     }
 
+    // =========================================================================
+    // 🗓️ FILTRO DE AÑO (botones, 4 sub-páginas) + FILTRO DE SEMANAS ISO (Diario)
+    //   - El año elegido acota KPIs, gráfico, periodos y matriz del dashboard.
+    //   - En la sub-página Diario las semanas marcadas (única o múltiple) acotan
+    //     los días disponibles antes de poblar la matriz (detalle diario).
+    // =========================================================================
+    function obtenerAnioVista(fecha) {
+      // La vista semanal agrupa por año ISO-8601, por lo que su filtro de año usa
+      // el mismo criterio para no mezclar semanas de diciembre / enero.
+      return modoMatrizActivo === 'semanal' ? getYearOfISOWeek(fecha) : fecha.getFullYear();
+    }
+
+    function obtenerSemanaKey(fecha) {
+      return `${getYearOfISOWeek(fecha)}-S${String(getWeekOfYearISO(fecha)).padStart(2, '0')}`;
+    }
+
+    function obtenerDatosPorAnio() {
+      if (anioSeleccionado === 'ALL') return datosFiltrados;
+      return datosFiltrados.filter(d => String(obtenerAnioVista(d.FechaOrden)) === anioSeleccionado);
+    }
+
+    function obtenerDatosVista() {
+      const base = obtenerDatosPorAnio();
+      if (modoMatrizActivo !== 'diario' || semanasFiltroSeleccionadas.size === 0) return base;
+      return base.filter(d => semanasFiltroSeleccionadas.has(obtenerSemanaKey(d.FechaOrden)));
+    }
+
+    function renderBotonesAnio() {
+      const contenedor = document.getElementById('anioBtnGroup');
+      if (!contenedor) return;
+
+      const anios = new Set();
+      datosFiltrados.forEach(d => anios.add(String(obtenerAnioVista(d.FechaOrden))));
+      const aniosOrdenados = Array.from(anios).sort();
+
+      // Si el año elegido ya no existe en la data cargada se vuelve a "Todos"
+      if (anioSeleccionado !== 'ALL' && !aniosOrdenados.includes(anioSeleccionado)) {
+        anioSeleccionado = 'ALL';
+      }
+
+      let html = `<button type="button" class="anio-btn ${anioSeleccionado === 'ALL' ? 'active' : ''}"
+        onclick="seleccionarAnio('ALL')" title="Sin filtro de año">Todos</button>`;
+
+      aniosOrdenados.forEach(anio => {
+        html += `<button type="button" class="anio-btn ${anioSeleccionado === anio ? 'active' : ''}"
+          onclick="seleccionarAnio('${anio}')">${anio}</button>`;
+      });
+
+      contenedor.innerHTML = html;
+    }
+
+    function seleccionarAnio(anio) {
+      anioSeleccionado = String(anio);
+      renderBotonesAnio();
+      refrescarVistaFiltros();
+      mostrarToast(anioSeleccionado === 'ALL' ? '📅 Año: todos los disponibles' : `📅 Año: ${anioSeleccionado}`, 1800);
+    }
+
+    function refrescarVistaFiltros() {
+      reconstruirOpcionesSemanas();
+      calcularKPIs();
+      actualizarBadgesSegmentadores();
+      actualizarGraficoTemporal();
+      reconstruirOpcionesMultiselectPeriodos();
+      renderMatrizJerarquica();
+    }
+
+    function actualizarVisibilidadFiltroSemanas() {
+      const grupo = document.getElementById('semanasFilterGroup');
+      if (!grupo) return;
+      grupo.classList.toggle('is-hidden', modoMatrizActivo !== 'diario');
+    }
+
+    function reconstruirOpcionesSemanas() {
+      const semanas = new Set();
+      obtenerDatosPorAnio().forEach(d => semanas.add(obtenerSemanaKey(d.FechaOrden)));
+      // Orden de mayor a menor: la semana más reciente aparece primero en el combobox
+      semanasDisponiblesOrdenadas = Array.from(semanas).sort().reverse();
+
+      // Se descartan las semanas marcadas que ya no pertenecen al rango / año vigente
+      Array.from(semanasFiltroSeleccionadas).forEach(sem => {
+        if (!semanas.has(sem)) semanasFiltroSeleccionadas.delete(sem);
+      });
+
+      renderOpcionesDropdownSemanas();
+    }
+
+    function renderOpcionesDropdownSemanas() {
+      const contenedor = document.getElementById('semanaDropdownContent');
+      if (!contenedor) return;
+
+      const sinFiltro = semanasFiltroSeleccionadas.size === 0;
+
+      let html = `
+        <div class="semana-modo-row">
+          <span class="semana-modo-label">Selección:</span>
+          <div class="semana-modo-group">
+            <button type="button" class="semana-modo-btn ${modoSemanaSeleccion === 'unica' ? 'active' : ''}"
+              onclick="cambiarModoSemana('unica')" title="Permite elegir una sola semana">Única</button>
+            <button type="button" class="semana-modo-btn ${modoSemanaSeleccion === 'multiple' ? 'active' : ''}"
+              onclick="cambiarModoSemana('multiple')" title="Permite elegir varias semanas">Múltiple</button>
+          </div>
+        </div>
+        <label class="periodo-option semana-todas">
+          <input type="checkbox" ${sinFiltro ? 'checked' : ''} onchange="onTodasSemanasChange()">
+          <span>Todas las semanas</span>
+        </label>
+      `;
+
+      if (semanasDisponiblesOrdenadas.length === 0) {
+        html += `<div class="semana-vacio">Sin semanas disponibles en el rango consultado.</div>`;
+      }
+
+      semanasDisponiblesOrdenadas.forEach(semana => {
+        const checked = semanasFiltroSeleccionadas.has(semana) ? 'checked' : '';
+        html += `
+          <label class="periodo-option">
+            <input type="checkbox" value="${semana}" ${checked} onchange="onSemanaChange(this)">
+            <span>${etiquetaPeriodo(semana, 'semanal')}</span>
+          </label>
+        `;
+      });
+
+      contenedor.innerHTML = html;
+      actualizarTextoSemanas();
+    }
+
+    function toggleSemanaDropdown() {
+      const contenido = document.getElementById('semanaDropdownContent');
+      if (contenido) contenido.classList.toggle('show');
+    }
+
+    function cambiarModoSemana(modo) {
+      modoSemanaSeleccion = modo;
+      // En modo "Única" se conserva solamente la última semana marcada
+      if (modoSemanaSeleccion === 'unica' && semanasFiltroSeleccionadas.size > 1) {
+        const ultima = Array.from(semanasFiltroSeleccionadas).sort().pop();
+        semanasFiltroSeleccionadas.clear();
+        if (ultima) semanasFiltroSeleccionadas.add(ultima);
+        renderOpcionesDropdownSemanas();
+        sincronizarVistaSemanas();
+        return;
+      }
+      renderOpcionesDropdownSemanas();
+    }
+
+    function onSemanaChange(checkbox) {
+      const semana = checkbox.value;
+      if (modoSemanaSeleccion === 'unica') {
+        // Selección única: se reemplaza la semana marcada anteriormente
+        semanasFiltroSeleccionadas.clear();
+        if (checkbox.checked) semanasFiltroSeleccionadas.add(semana);
+        renderOpcionesDropdownSemanas();
+      } else {
+        // Selección múltiple: se agrega o quita sin tocar las demás
+        if (checkbox.checked) semanasFiltroSeleccionadas.add(semana);
+        else semanasFiltroSeleccionadas.delete(semana);
+        actualizarTextoSemanas();
+      }
+      sincronizarVistaSemanas();
+    }
+
+    function onTodasSemanasChange() {
+      // "Todas las semanas" equivale a no aplicar filtro de semana
+      semanasFiltroSeleccionadas.clear();
+      renderOpcionesDropdownSemanas();
+      sincronizarVistaSemanas();
+    }
+
+    function actualizarTextoSemanas() {
+      const btnTxt = document.getElementById('semanaSelectedText');
+      if (!btnTxt) return;
+
+      const total = semanasDisponiblesOrdenadas.length;
+      const seleccionadas = semanasFiltroSeleccionadas.size;
+
+      if (seleccionadas === 0) {
+        btnTxt.textContent = 'Todas las semanas';
+      } else if (seleccionadas === total) {
+        btnTxt.textContent = `Todas (${total})`;
+      } else if (seleccionadas === 1) {
+        btnTxt.textContent = etiquetaPeriodo(Array.from(semanasFiltroSeleccionadas)[0], 'semanal');
+      } else {
+        btnTxt.textContent = `${seleccionadas} semanas`;
+      }
+
+      // Sincroniza el check "Todas las semanas" con el estado real del filtro
+      const chkTodas = document.querySelector('#semanaDropdownContent .semana-todas input');
+      if (chkTodas) chkTodas.checked = seleccionadas === 0;
+    }
+
+    function sincronizarVistaSemanas() {
+      calcularKPIs();
+      actualizarGraficoTemporal();
+      reconstruirOpcionesMultiselectPeriodos();
+      renderMatrizJerarquica();
+    }
+
     function reconstruirOpcionesMultiselectPeriodos() {
       const setP = new Set();
-      datosFiltrados.forEach(d => setP.add(obtenerPeriodoKey(d.FechaOrden, modoMatrizActivo)));
+      obtenerDatosVista().forEach(d => setP.add(obtenerPeriodoKey(d.FechaOrden, modoMatrizActivo)));
       periodosDisponiblesOrdenados = Array.from(setP).sort();
 
       periodosSeleccionados.clear();
-      const ultimos4 = periodosDisponiblesOrdenados.slice(-4);
-      ultimos4.forEach(p => periodosSeleccionados.add(p));
+      // Con semanas marcadas en la sub-página Diario se muestran todos los días de
+      // esas semanas (con tope MAX_DIAS_DETALLE para no generar una matriz
+      // inmanejable); en el resto de vistas se mantiene "últimos 4 periodos".
+      const limite = (modoMatrizActivo === 'diario' && semanasFiltroSeleccionadas.size > 0)
+        ? Math.min(periodosDisponiblesOrdenados.length, MAX_DIAS_DETALLE)
+        : 4;
+      periodosDisponiblesOrdenados.slice(-limite).forEach(p => periodosSeleccionados.add(p));
 
       renderOpcionesDropdownPeriodos();
     }
@@ -1831,6 +2218,13 @@
       const activeBtn = document.getElementById(`sideTab${modo.charAt(0).toUpperCase() + modo.slice(1)}`);
       if (activeBtn) activeBtn.classList.add('active');
 
+      // El combobox de semanas sólo aplica a la sub-página Diario
+      actualizarVisibilidadFiltroSemanas();
+      // El año puede variar entre vistas (la semanal usa año ISO-8601)
+      renderBotonesAnio();
+      reconstruirOpcionesSemanas();
+      calcularKPIs();
+      actualizarBadgesSegmentadores();
       actualizarGraficoTemporal();
       reconstruirOpcionesMultiselectPeriodos();
       renderMatrizJerarquica();
@@ -1845,6 +2239,10 @@
       inicializarFechas();
       nivelFiltroMatriz = "ALL";
       document.getElementById('matrixNivelFilter').value = "ALL";
+      // Se limpian los filtros de año y de semanas
+      anioSeleccionado = "ALL";
+      modoSemanaSeleccion = "multiple";
+      semanasFiltroSeleccionadas.clear();
       cambiarModoMatriz("semanal");
       if (rawData.length > 0) aplicarFiltrosLocales();
       mostrarToast("↺ Filtros reestablecidos");
@@ -1855,7 +2253,8 @@
       let saldoUnd = 0, saldoKg = 0;
       let resultadoUnd = 0, resultadoKg = 0;
 
-      datosFiltrados.forEach(d => {
+      // Los KPIs respetan el filtro de año y, en Diario, el filtro de semanas
+      obtenerDatosVista().forEach(d => {
         if (d.Nivel === "CORTE PRIMARIO" && (d.NTtra === "ORIGEN" || d.CodigoCorto === "05829" || d.Producto === "040508029")) {
           origenUnd += d.Unidades;
           origenKg += d.Kilos;
@@ -1887,20 +2286,23 @@
     }
 
     function actualizarBadgesSegmentadores() {
-      document.getElementById('sideBadgeDiario').textContent = new Set(datosFiltrados.map(d => obtenerPeriodoKey(d.FechaOrden, 'diario'))).size;
-      document.getElementById('sideBadgeSemanal').textContent = new Set(datosFiltrados.map(d => obtenerPeriodoKey(d.FechaOrden, 'semanal'))).size;
-      document.getElementById('sideBadgeMensual').textContent = new Set(datosFiltrados.map(d => obtenerPeriodoKey(d.FechaOrden, 'mensual'))).size;
-      document.getElementById('sideBadgeAnual').textContent = new Set(datosFiltrados.map(d => obtenerPeriodoKey(d.FechaOrden, 'anual'))).size;
+      // Los badges muestran cuántos periodos existen por vista dentro del año elegido
+      const base = obtenerDatosPorAnio();
+      document.getElementById('sideBadgeDiario').textContent = new Set(base.map(d => obtenerPeriodoKey(d.FechaOrden, 'diario'))).size;
+      document.getElementById('sideBadgeSemanal').textContent = new Set(base.map(d => obtenerPeriodoKey(d.FechaOrden, 'semanal'))).size;
+      document.getElementById('sideBadgeMensual').textContent = new Set(base.map(d => obtenerPeriodoKey(d.FechaOrden, 'mensual'))).size;
+      document.getElementById('sideBadgeAnual').textContent = new Set(base.map(d => obtenerPeriodoKey(d.FechaOrden, 'anual'))).size;
     }
 
     function actualizarGraficoTemporal() {
-      if (datosFiltrados.length === 0) {
+      const datosVista = obtenerDatosVista();
+      if (datosVista.length === 0) {
         if (chartTemporalObj) { chartTemporalObj.destroy(); chartTemporalObj = null; }
         return;
       }
 
       const groups = {};
-      datosFiltrados.forEach(item => {
+      datosVista.forEach(item => {
         const key = obtenerPeriodoKey(item.FechaOrden);
         if (!groups[key]) groups[key] = { primarioUnd: 0, saldoUnd: 0 };
 
@@ -2001,9 +2403,10 @@
       const thead = document.querySelector('#matrixTable thead');
       if (!tbody) return;
 
-      let dataMatriz = datosFiltrados;
+      const datosVista = obtenerDatosVista();
+      let dataMatriz = datosVista;
       if (nivelFiltroMatriz !== "ALL") {
-        dataMatriz = datosFiltrados.filter(d => d.Nivel === nivelFiltroMatriz);
+        dataMatriz = datosVista.filter(d => d.Nivel === nivelFiltroMatriz);
       }
 
       const periodosActivos = periodosDisponiblesOrdenados.filter(p => periodosSeleccionados.has(p));
