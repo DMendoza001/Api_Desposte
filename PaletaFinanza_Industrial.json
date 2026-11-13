@@ -1,0 +1,57 @@
+{
+  "name": "Pantone Industrial Palette",
+  "category": "Finanzas Clásica",
+  "tagline": "Bronce Mate, Piedra Taupe y Pizarra Suave",
+  "target": "html",
+  "themeMode": "light",
+  "isDark": false,
+  "headerBanner": {
+    "rule": "Siempre fondo oscuro de la paleta aplicada y texto blanco o color claro armónico",
+    "background": "#38353B",
+    "gradient": "linear-gradient(135deg, #38353B 0%, #434B57 100%)",
+    "textColor": "#FFFFFF",
+    "subtextColor": "#E2D5B5"
+  },
+  "typography": {
+    "headingColor": "#38353B",
+    "textColor": "#4A474C",
+    "textMuted": "#787479",
+    "headerText": "#FFFFFF",
+    "headerSubtext": "#E2D5B5"
+  },
+  "colors": {
+    "primary": "#BAA063",
+    "secondary": "#7A828E",
+    "accent": "#BAA063",
+    "background": "#F2F4F8",
+    "surface": "#FFFFFF",
+    "border": "#E2E8F0",
+    "headerBg": "#38353B",
+    "headerGradient": "linear-gradient(135deg, #38353B 0%, #434B57 100%)"
+  },
+  "chartColors": [
+    "#BAA063",
+    "#7A828E",
+    "#948E88",
+    "#A89F91",
+    "#878994",
+    "#C4B282",
+    "#B5B2AA",
+    "#6B727D"
+  ],
+  "cssVariables": {
+    "--color-header-bg": "#38353B",
+    "--color-header-gradient": "linear-gradient(135deg, #38353B 0%, #434B57 100%)",
+    "--color-header-text": "#FFFFFF",
+    "--color-header-subtext": "#E2D5B5",
+    "--color-heading": "#38353B",
+    "--color-text": "#4A474C",
+    "--color-text-muted": "#787479",
+    "--color-primary": "#BAA063",
+    "--color-secondary": "#7A828E",
+    "--color-accent": "#BAA063",
+    "--color-bg": "#F2F4F8",
+    "--color-surface": "#FFFFFF",
+    "--color-border": "#E2E8F0"
+  }
+}

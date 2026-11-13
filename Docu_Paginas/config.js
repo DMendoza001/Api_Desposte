@@ -9,7 +9,7 @@ var GLOBAL_CONFIG = {
     // 🏢 Oficina: "RAEVSALL001"
     // 🏠 Casa / Local: "localhost" o el nombre de tu máquina
     //RAEVFINL016
-    servidor: "RAEVFINL016",
+    servidor: "RAEVSALL001",
 
     // Puertos a los que intentará conectarse en orden de prioridad
     puertos: [8080, 5000]
