@@ -1002,6 +1002,39 @@
       margin-right: 6px;
     }
 
+    /* =========================================================================
+       🟡 CÓDIGO 05829 (CABEZAS - PRODUCTO 040508029): SOMBRA AMARILLA TENUE
+       Resalta la fila de cabezas dentro de la matriz con el dorado de la paleta
+       (--pantone-yellow #BAA063) sin competir con los niveles.
+       - El tinte va en el <tr> para que la 1ª columna sticky (que hereda el
+         background) conserve el mismo tono.
+       - El halo va en cada <td> porque box-shadow sobre <tr> no es consistente
+         entre navegadores; se usa inset para que la sombra quede contenida.
+       ========================================================================= */
+    .matrix-table tr.row-destacado-05829 {
+      background-color: rgba(186, 160, 99, 0.14) !important;
+    }
+
+    .matrix-table tr.row-destacado-05829 > td {
+      background-color: rgba(186, 160, 99, 0.14) !important;
+      box-shadow: inset 0 0 0 1px rgba(186, 160, 99, 0.28),
+        inset 0 0 14px rgba(186, 160, 99, 0.22);
+    }
+
+    .matrix-table tr.row-destacado-05829:hover > td {
+      background-color: rgba(186, 160, 99, 0.22) !important;
+      box-shadow: inset 0 0 0 1px rgba(186, 160, 99, 0.40),
+        inset 0 0 16px rgba(186, 160, 99, 0.28);
+    }
+
+    .matrix-table tr.row-destacado-05829 .producto-code {
+      background: #FFFFFF;
+      border-color: rgba(186, 160, 99, 0.55);
+      color: var(--color-heading);
+      box-shadow: 0 0 0 3px rgba(186, 160, 99, 0.20),
+        0 2px 6px rgba(186, 160, 99, 0.25);
+    }
+
     .tree-toggle-icon {
       display: inline-flex;
       align-items: center;
@@ -1607,8 +1640,9 @@
                     <option value="ALL">-- Todos los Niveles --</option>
                     <option value="CORTE PRIMARIO">1. CORTE PRIMARIO</option>
                     <option value="LINEA DE CABEZA">2. LINEA DE CABEZA</option>
-                    <option value="TERCER CORTE">3. TERCER CORTE</option>
-                    <option value="SALDO PENDIENTE">4. SALDO PENDIENTE</option>
+                    <option value="CONGELADO DIRECTO">3. CONGELADO DIRECTO</option>
+                    <option value="TERCER CORTE">4. TERCER CORTE</option>
+                    <option value="SALDO PENDIENTE">5. SALDO PENDIENTE</option>
                   </select>
                 </div>
 
@@ -1705,7 +1739,15 @@
     let semanasDisponiblesOrdenadas = [];
     const MAX_DIAS_DETALLE = 31;            // tope de días visibles al filtrar semanas
 
-    const ORDEN_NIVELES = ["CORTE PRIMARIO", "LINEA DE CABEZA", "TERCER CORTE", "SALDO PENDIENTE"];
+    // Orden de presentación de los niveles en la matriz jerárquica.
+    // ❄️ "CONGELADO DIRECTO" es un nivel que entrega el SP
+    // (dbo.Sp_Informe_Prduccion_Cabezas) y se muestra justo ENCIMA de TERCER CORTE.
+    const ORDEN_NIVELES = ["CORTE PRIMARIO", "LINEA DE CABEZA", "CONGELADO DIRECTO", "TERCER CORTE", "SALDO PENDIENTE"];
+
+    // 🟡 Código de cabezas que se resalta con sombra amarilla tenue en la matriz
+    //    (código corto en el SP: 05829 / código de producto: 040508029)
+    const CODIGO_CABEZAS = "05829";
+    const PRODUCTO_CABEZAS = "040508029";
     const collapsedNiveles = new Set();
     const collapsedNTtras = new Set();
     const collapsedTiposDesposte = new Set();
@@ -1835,6 +1877,19 @@
       mostrarCargando(false);
     }
 
+    // Normaliza el texto del nivel que entrega el SP para que variantes de
+    // escritura (espacios dobles, guiones o sufijos) caigan siempre en la misma
+    // clave y la matriz las agrupe en el bloque correcto.
+    function normalizarNivel(valor) {
+      const nivel = (valor || 'DESCONOCIDO').toString().trim().toUpperCase().replace(/\s+/g, ' ');
+      // ❄️ El SP puede devolver "CONGELADO-DIRECTO" o "CONGELADO DIRECTO (CD)"
+      if (nivel.startsWith('CONGELADO')) {
+        const compacto = nivel.replace(/[\s\-_]+/g, ' ');
+        if (compacto.includes('CONGELADO DIRECTO')) return 'CONGELADO DIRECTO';
+      }
+      return nivel;
+    }
+
     function mapearItemCabezas(d) {
       const fechaRaw = d.fechaOrden || d.FechaOrden || d.fecha || d.Fecha;
       let dt = new Date(fechaRaw);
@@ -1843,7 +1898,7 @@
       return {
         FechaOrden: dt,
         Ttra: Number(d.ttra ?? d.Ttra) || 0,
-        Nivel: (d.nivel || d.Nivel || 'DESCONOCIDO').toString().trim().toUpperCase(),
+        Nivel: normalizarNivel(d.nivel || d.Nivel),
         NTtra: (d.ntTra || d.nttra || d.nTtra || d.NTtra || 'RESULTADO').toString().trim().toUpperCase(),
         Producto: (d.producto || d.Producto || '').toString().trim(),
         CodigoCorto: (d.codigoCorto || d.CodigoCorto || '').toString().trim(),
@@ -2254,6 +2309,8 @@
       let resultadoUnd = 0, resultadoKg = 0;
 
       // Los KPIs respetan el filtro de año y, en Diario, el filtro de semanas
+      // (❄️ CONGELADO DIRECTO entra como resultado procesado, igual que
+      //  LINEA DE CABEZA y TERCER CORTE, porque proviene del SP como nivel propio)
       obtenerDatosVista().forEach(d => {
         if (d.Nivel === "CORTE PRIMARIO" && (d.NTtra === "ORIGEN" || d.CodigoCorto === "05829" || d.Producto === "040508029")) {
           origenUnd += d.Unidades;
@@ -2594,8 +2651,12 @@
                   productosOrdenados.forEach((pGrupo) => {
                     const periodosMetricasProd = sumarMétricasPorPeriodo(pGrupo.rows);
 
+                    // 🟡 Cabezas (05829 / 040508029): fila con sombra amarilla tenue
+                    const esCodigoCabezas = (pGrupo.codigoCorto === CODIGO_CABEZAS ||
+                      pGrupo.productoCodigo === PRODUCTO_CABEZAS);
+
                     html += `
-                      <tr class="row-producto">
+                      <tr class="row-producto${esCodigoCabezas ? ' row-destacado-05829' : ''}">
                         <td style="padding-left: 72px; position: sticky; left: 0; z-index: 5; background-color: inherit;">
                           <span class="producto-code">${pGrupo.codigoCorto || pGrupo.productoCodigo}</span>
                           <span class="producto-nombre">${pGrupo.nombre}</span>
