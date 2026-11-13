@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indicadores N3 - Tendencia Semanal</title>
+
+    <!-- Configuración compartida de conexión a la API y diseño responsive -->
+    <link rel="stylesheet" href="responsive.css?v=3">
+    <script src="config.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+    <style>
+        /* =========================================================================
+           🎨 PALETA: Pantone Industrial (PaletaFinanza_Industrial.json)
+           ========================================================================= */
+        :root {
+            --color-header-bg: #38353B;
+            --color-header-gradient: linear-gradient(135deg, #38353B 0%, #434B57 100%);
+            --color-header-text: #FFFFFF;
+            --color-header-subtext: #E2D5B5;
+            --color-heading: #38353B;
+            --color-text: #4A474C;
+            --color-text-muted: #787479;
+            --color-primary: #BAA063;
+            --color-secondary: #7A828E;
+            --color-accent: #BAA063;
+            --color-bg: #F2F4F8;
+            --color-surface: #FFFFFF;
+            --color-border: #E2E8F0;
+            --color-primary-soft: rgba(186, 160, 99, 0.14);
+            --radius: 10px;
+            --shadow: 0 1px 3px rgba(56, 53, 59, 0.08), 0 1px 2px rgba(56, 53, 59, 0.04);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 16px 22px;
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background: var(--color-bg);
+            color: var(--color-text);
+            font-size: 14px;
+        }
+
+        .dashboard-container {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+
+        .dashboard-container > * { min-width: 0; }
+
+        /* ---------- Cabecera ---------- */
+        .header-banner {
+            background: var(--color-header-gradient);
+            color: var(--color-header-text);
+            border-radius: var(--radius);
+            padding: 18px 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .header-banner > * { min-width: 0; }
+        .header-banner h1 { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.01em; }
+        .header-banner p { margin: 4px 0 0; color: var(--color-header-subtext); font-size: 13px; }
+
+        .header-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+        .status-pill {
+            font-size: 12px;
+            padding: 5px 10px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--color-header-subtext);
+            white-space: nowrap;
+        }
+
+        .status-pill.ok { color: #FFFFFF; }
+        .status-pill.error { background: rgba(255, 255, 255, 0.18); color: #FFFFFF; }
+
+        .btn {
+            font: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 8px;
+            padding: 8px 14px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: background 0.15s ease, border-color 0.15s ease;
+        }
+
+        .btn-header {
+            background: var(--color-primary);
+            color: var(--color-header-bg);
+        }
+
+        .btn-header:hover { background: #C9B27A; }
+        .btn:focus-visible, .area-tab:focus-visible, select:focus-visible {
+            outline: 2px solid var(--color-primary);
+            outline-offset: 2px;
+        }
+
+        /* ---------- Filtros ---------- */
+        .filters-card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .filters-card > * { min-width: 0; }
+
+        .area-tabs {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .area-tab {
+            font: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--color-border);
+            background: var(--color-surface);
+            color: var(--color-text);
+            cursor: pointer;
+        }
+
+        .area-tab:hover { border-color: var(--color-primary); }
+
+        .area-tab.active {
+            background: var(--color-header-bg);
+            border-color: var(--color-header-bg);
+            color: #FFFFFF;
+        }
+
+        .area-tab .count {
+            font-weight: 500;
+            color: var(--color-text-muted);
+            margin-left: 4px;
+        }
+
+        .area-tab.active .count { color: var(--color-header-subtext); }
+
+        .filter-group { display: flex; align-items: center; gap: 8px; }
+
+        .filter-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--color-text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        select {
+            font: inherit;
+            font-size: 13px;
+            padding: 7px 10px;
+            border-radius: 8px;
+            border: 1px solid var(--color-border);
+            background: var(--color-surface);
+            color: var(--color-heading);
+            min-width: 110px;
+        }
+
+        /* ---------- KPIs ---------- */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .kpi-grid > * { min-width: 0; }
+
+        .kpi-card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-top: 3px solid var(--color-primary);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 14px 18px;
+            min-width: 0;
+        }
+
+        .kpi-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--color-text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .kpi-value {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--color-heading);
+            margin-top: 6px;
+            font-variant-numeric: tabular-nums;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .kpi-sub {
+            font-size: 12px;
+            color: var(--color-text-muted);
+            margin-top: 2px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* ---------- Secciones / familias ---------- */
+        .section-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--color-heading);
+            margin: 6px 0 0;
+            padding-bottom: 6px;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .section-note {
+            font-size: 12px;
+            color: var(--color-text-muted);
+            margin: 4px 0 0;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .charts-grid > * { min-width: 0; }
+
+        .chart-card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 14px 16px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 0;
+        }
+
+        .chart-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .chart-head > * { min-width: 0; }
+
+        .chart-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--color-heading);
+            margin: 0;
+            line-height: 1.3;
+        }
+
+        .chart-unit {
+            font-size: 11px;
+            color: var(--color-text-muted);
+            margin-top: 2px;
+        }
+
+        .chart-last { text-align: right; flex-shrink: 0; }
+
+        .chart-last-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--color-heading);
+            font-variant-numeric: tabular-nums;
+            line-height: 1.1;
+        }
+
+        .chart-last-delta {
+            font-size: 11px;
+            color: var(--color-text-muted);
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+        }
+
+        .chart-box {
+            position: relative;
+            width: 100%;
+            min-width: 0;
+            height: 220px;
+        }
+
+        .chart-foot {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            font-size: 11px;
+            color: var(--color-text-muted);
+            font-variant-numeric: tabular-nums;
+            flex-wrap: wrap;
+        }
+
+        .legend-avg::before {
+            content: "";
+            display: inline-block;
+            width: 14px;
+            border-top: 2px dashed var(--color-secondary);
+            vertical-align: middle;
+            margin-right: 5px;
+        }
+
+        /* ---------- Matriz semanal ---------- */
+        .matrix-card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 14px 16px;
+            min-width: 0;
+        }
+
+        .matrix-card h2 {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--color-heading);
+            margin: 0 0 2px;
+        }
+
+        .table-responsive {
+            width: 100%;
+            max-width: 100%;
+            overflow: auto;
+            max-height: 560px;
+            margin-top: 10px;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+        }
+
+        table.matrix {
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+            font-size: 12px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        table.matrix th,
+        table.matrix td {
+            padding: 6px 10px;
+            border-bottom: 1px solid var(--color-border);
+            white-space: nowrap;
+            text-align: right;
+        }
+
+        table.matrix thead th {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            background: var(--color-header-bg);
+            color: #FFFFFF;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        table.matrix thead th .rango {
+            display: block;
+            font-weight: 400;
+            font-size: 10px;
+            color: var(--color-header-subtext);
+        }
+
+        /* Columna de jerarquía: absorbe el espacio sobrante y queda fija */
+        table.matrix th:first-child,
+        table.matrix td:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 1;
+            text-align: left;
+            width: 100%;
+            min-width: 240px;
+            background: var(--color-surface);
+            border-right: 1px solid var(--color-border);
+        }
+
+        table.matrix thead th:first-child { z-index: 3; background: var(--color-header-bg); }
+
+        /* Jerarquía por estructura: sangría, peso y color (sin iconos) */
+        table.matrix tr.row-family td {
+            font-weight: 700;
+            color: var(--color-heading);
+            background: var(--color-bg);
+        }
+
+        table.matrix tr.row-family td:first-child { background: var(--color-bg); }
+        table.matrix tr.row-ind td:first-child { padding-left: 24px; color: var(--color-text); }
+        table.matrix tr.row-ind.solo td:first-child { padding-left: 10px; font-weight: 600; color: var(--color-heading); }
+        table.matrix td.empty { color: #B5B2AA; }
+        table.matrix tbody tr.row-ind:hover td { background: var(--color-primary-soft); }
+
+        /* ---------- Estados ---------- */
+        .state-box {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+            padding: 40px 20px;
+            text-align: center;
+            color: var(--color-text-muted);
+        }
+
+        .state-box strong { display: block; color: var(--color-heading); font-size: 15px; margin-bottom: 6px; }
+
+        .spinner {
+            width: 28px;
+            height: 28px;
+            border: 3px solid var(--color-border);
+            border-top-color: var(--color-primary);
+            border-radius: 50%;
+            margin: 0 auto 12px;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .hidden { display: none !important; }
+
+        /* =========================================================================
+           📱💻 RESPONSIVE AUTÓNOMO (por si se comparte sin responsive.css)
+           ========================================================================= */
+        @media screen and (max-width: 1600px) {
+            body { padding: 10px 14px; }
+            .header-banner { padding: 14px 18px; }
+            .header-banner h1 { font-size: 19px; }
+            .filters-card { padding: 10px 14px; margin: 0; }
+            .kpi-card { padding: 12px 16px; }
+            .kpi-value { font-size: 22px; }
+            .chart-card { padding: 12px 14px 10px; }
+            .chart-box { height: 200px; }
+            .table-responsive { max-height: 460px; overflow-y: auto; }
+        }
+
+        @media screen and (max-width: 1280px) {
+            .charts-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+
+        @media screen and (max-width: 980px) {
+            .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .chart-box { height: 220px; }
+        }
+
+        @media screen and (max-width: 768px) {
+            body { padding: 8px; }
+            .header-banner { flex-direction: column; align-items: flex-start; }
+            .header-actions { width: 100%; }
+            .header-actions .btn { flex: 1; }
+            .filters-card { flex-direction: column; align-items: stretch; }
+            .area-tabs { width: 100%; }
+            .area-tab { flex: 1 1 auto; }
+            .filter-group { width: 100%; }
+            .filter-group select { flex: 1; width: 100%; min-width: 0; }
+            .kpi-grid { grid-template-columns: 1fr; }
+            .charts-grid { grid-template-columns: 1fr; }
+            .chart-box { height: 220px; }
+            table.matrix th:first-child,
+            table.matrix td:first-child {
+                min-width: 130px;
+                max-width: 200px;
+                white-space: normal;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <header class="header-banner">
+            <div>
+                <h1>Indicadores N3 · Tendencia semanal</h1>
+                <p>Promedio semanal (lunes a domingo) de los valores diarios registrados en BD Indicadores N3</p>
+            </div>
+            <div class="header-actions">
+                <span id="estadoConexion" class="status-pill">Conectando…</span>
+                <button id="btnRecargar" class="btn btn-header" type="button">Recargar datos</button>
+            </div>
+        </header>
+
+        <section class="filters-card" aria-label="Filtros">
+            <div id="areaTabs" class="area-tabs" role="tablist" aria-label="Área"></div>
+            <div class="filter-group">
+                <label for="selAnio">Año</label>
+                <select id="selAnio"></select>
+            </div>
+        </section>
+
+        <div id="estadoCarga" class="state-box">
+            <div class="spinner"></div>
+            <strong>Cargando indicadores…</strong>
+            Leyendo la tabla tblRegistro desde la API.
+        </div>
+
+        <div id="contenido" class="dashboard-container hidden" style="gap:14px;">
+            <section class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-label">Indicadores con datos</div>
+                    <div class="kpi-value" id="kpiIndicadores">–</div>
+                    <div class="kpi-sub" id="kpiIndicadoresSub">&nbsp;</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Semanas con registro</div>
+                    <div class="kpi-value" id="kpiSemanas">–</div>
+                    <div class="kpi-sub" id="kpiSemanasSub">&nbsp;</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Última semana</div>
+                    <div class="kpi-value" id="kpiUltima">–</div>
+                    <div class="kpi-sub" id="kpiUltimaSub">&nbsp;</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Registros diarios</div>
+                    <div class="kpi-value" id="kpiRegistros">–</div>
+                    <div class="kpi-sub" id="kpiRegistrosSub">&nbsp;</div>
+                </div>
+            </section>
+
+            <div id="seccionesGraficos"></div>
+
+            <section class="matrix-card">
+                <h2>Matriz semanal por indicador</h2>
+                <p class="section-note">Promedio de los valores diarios de cada semana. Las celdas con guion no tienen registros.</p>
+                <div class="table-responsive">
+                    <table class="matrix" id="tablaMatriz"></table>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        // =========================================================================
+        // ⚙️ CONFIGURACIÓN DE CONEXIÓN HÍBRIDA A LA API .NET
+        // =========================================================================
+        const APP_CONFIG = {
+            servidor: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.servidor)
+                ? GLOBAL_CONFIG.servidor
+                : "RAEVSALL001",
+            puertos: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.puertos)
+                ? GLOBAL_CONFIG.puertos
+                : [8080, 5000]
+        };
+
+        function generarBasesApi() {
+            if (typeof generarBasesApiGlobal === 'function') {
+                return generarBasesApiGlobal();
+            }
+            const bases = [];
+            for (const puerto of APP_CONFIG.puertos) {
+                bases.push(`http://${APP_CONFIG.servidor}:${puerto}`);
+            }
+            return bases;
+        }
+
+        APP_CONFIG.controllerPath = "/api/IndicadoresN3";
+        APP_CONFIG.timeoutMs = 30000;
+
+        // Estado global de conexión
+        let apiBaseActiva = null;
+
+        // =========================================================================
+        // 🌐 UTILIDADES DE RED Y DETECCIÓN RESILIENTE
+        // =========================================================================
+        async function fetchConTimeout(url, timeoutMs = 10000) {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+                const res = await fetch(url, { signal: controller.signal });
+                clearTimeout(id);
+                return res;
+            } catch (err) {
+                clearTimeout(id);
+                throw err;
+            }
+        }
+
+        async function detectarServidorApi() {
+            const bases = generarBasesApi();
+            for (const base of bases) {
+                try {
+                    const res = await fetchConTimeout(`${base}${APP_CONFIG.controllerPath}`, 3500);
+                    if (res.ok) {
+                        return base;
+                    }
+                } catch (e) {
+                    try {
+                        const pingRes = await fetchConTimeout(`${base}/`, 2000);
+                        if (pingRes.ok) return base;
+                    } catch (errPing) {
+                        // Siguiente candidato
+                    }
+                }
+            }
+            return null;
+        }
+
+        // =========================================================================
+        // 📅 SEMANAS CON INICIO EN LUNES (ISO-8601)
+        // =========================================================================
+        function calcularSemanaConInicioLunes(d) {
+            const copia = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+            const diaOffsetLunes = (copia.getDay() + 6) % 7;
+
+            const lunes = new Date(copia);
+            lunes.setDate(copia.getDate() - diaOffsetLunes);
+
+            const domingo = new Date(lunes);
+            domingo.setDate(lunes.getDate() + 6);
+
+            const dateUtc = new Date(Date.UTC(copia.getFullYear(), copia.getMonth(), copia.getDate()));
+            const diaUtc = dateUtc.getUTCDay() === 0 ? 7 : dateUtc.getUTCDay();
+            dateUtc.setUTCDate(dateUtc.getUTCDate() + 4 - diaUtc);
+            const anoSemana = dateUtc.getUTCFullYear();
+            const inicioAno = new Date(Date.UTC(anoSemana, 0, 1));
+            const numSemana = Math.ceil((((dateUtc - inicioAno) / 86400000) + 1) / 7);
+
+            const pad = n => String(n).padStart(2, '0');
+            const lunesStr = `${lunes.getFullYear()}-${pad(lunes.getMonth() + 1)}-${pad(lunes.getDate())}`;
+            const rangoTexto = `${pad(lunes.getDate())}/${pad(lunes.getMonth() + 1)} al ${pad(domingo.getDate())}/${pad(domingo.getMonth() + 1)}`;
+
+            return { semana: numSemana, anoSemana: anoSemana, lunesFecha: lunesStr, rangoTexto: rangoTexto };
+        }
+
+        // Lunes de la semana ISO `semana` del año `ano`
+        function lunesDeSemanaIso(ano, semana) {
+            const cuatroEnero = new Date(ano, 0, 4);
+            const lunesSem1 = new Date(cuatroEnero);
+            lunesSem1.setDate(cuatroEnero.getDate() - ((cuatroEnero.getDay() + 6) % 7));
+            const lunes = new Date(lunesSem1);
+            lunes.setDate(lunesSem1.getDate() + (semana - 1) * 7);
+            return lunes;
+        }
+
+        const pad2 = n => String(n).padStart(2, '0');
+        const etiquetaSemana = (sem, rango) => `Sem. ${pad2(sem)} (${rango})`;
+
+        // =========================================================================
+        // 🎨 PALETA Y FORMATO
+        // =========================================================================
+        const PALETA = {
+            primary: '#BAA063',
+            secondary: '#7A828E',
+            heading: '#38353B',
+            text: '#4A474C',
+            muted: '#787479',
+            border: '#E2E8F0',
+            chart: ['#BAA063', '#7A828E', '#948E88', '#A89F91', '#878994', '#C4B282', '#B5B2AA', '#6B727D']
+        };
+
+        Chart.defaults.font.family = "'Inter', 'Segoe UI', system-ui, sans-serif";
+        Chart.defaults.font.size = 11;
+        Chart.defaults.color = PALETA.muted;
+
+        const fmtNum = (v, dec) => v == null || isNaN(v)
+            ? '–'
+            : v.toLocaleString('es-PE', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+
+        // Formateador por indicador. Los "%" pueden venir como fracción (0.91) o ya en porcentaje (7.8).
+        function crearFormato(unidad, valores) {
+            const u = (unidad || '').trim();
+            const abs = valores.map(Math.abs).sort((a, b) => a - b);
+            const mediana = abs.length ? abs[Math.floor(abs.length / 2)] : 0;
+
+            if (u === '%') {
+                const esFraccion = mediana <= 1.5;
+                const escala = esFraccion ? 100 : 1;
+                const dec = (mediana * escala) < 2 ? 2 : 1;
+                return {
+                    escala,
+                    valor: v => v == null ? '–' : `${fmtNum(v * escala, dec)}%`,
+                    eje: v => `${fmtNum(v * escala, dec > 1 ? 1 : 0)}%`,
+                    delta: d => `${d >= 0 ? '+' : '−'}${fmtNum(Math.abs(d * escala), dec)} pp`
+                };
+            }
+
+            const dec = mediana >= 100 ? 0 : (mediana >= 10 ? 1 : 2);
+            const suf = u ? ` ${u}` : '';
+            return {
+                escala: 1,
+                valor: v => v == null ? '–' : `${fmtNum(v, dec)}${suf}`,
+                eje: v => fmtNum(v, dec > 1 ? 1 : 0),
+                delta: d => `${d >= 0 ? '+' : '−'}${fmtNum(Math.abs(d), dec)}${suf}`
+            };
+        }
+
+        // Familia del indicador: "Rend. Desposte|L.Pierna" -> "Rend. Desposte"; "OEE Desposte Calidad" -> "OEE Desposte"
+        function obtenerFamilia(nombre) {
+            if (nombre.includes('|')) {
+                const [familia, componente] = nombre.split('|');
+                return { familia: familia.trim(), componente: componente.trim() };
+            }
+            if (/^OEE\s/i.test(nombre)) {
+                const partes = nombre.trim().split(/\s+/);
+                return { familia: partes.slice(0, -1).join(' '), componente: partes[partes.length - 1] };
+            }
+            return { familia: nombre.trim(), componente: null };
+        }
+
+        const escaparHtml = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+        // =========================================================================
+        // 📦 ESTADO
+        // =========================================================================
+        let registrosCrudos = [];   // Datos tal cual llegan de la API
+        let registrosProc = [];     // Registros con semana calculada y Valor numérico
+        let ordenIndicadores = new Map();
+        let estado = { area: null, anio: null };
+        let graficos = [];
+
+        const $ = id => document.getElementById(id);
+
+        function parsearFecha(txt) {
+            if (!txt) return null;
+            const m = String(txt).match(/^(\d{4})-(\d{2})-(\d{2})/);
+            if (!m) return null;
+            return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+        }
+
+        function procesarRegistros(crudos) {
+            ordenIndicadores = new Map();
+            const salida = [];
+            crudos.forEach(r => {
+                const indicador = (r['Indicador'] ?? '').toString().trim();
+                const area = (r['Área'] ?? r['Area'] ?? '').toString().trim();
+                if (!indicador || !area) return;
+
+                const id = r['ID'];
+                if (!ordenIndicadores.has(indicador)) ordenIndicadores.set(indicador, typeof id === 'number' ? id : ordenIndicadores.size + 1000);
+
+                const fecha = parsearFecha(r['Fecha']);
+                const valor = typeof r['Valor'] === 'number' ? r['Valor'] : parseFloat(r['Valor']);
+                if (!fecha || isNaN(valor)) return;
+
+                const sem = calcularSemanaConInicioLunes(fecha);
+                salida.push({
+                    indicador,
+                    area,
+                    unidad: (r['Unidad'] ?? '').toString().trim(),
+                    fecha,
+                    valor,
+                    semana: sem.semana,
+                    anio: sem.anoSemana,
+                    rango: sem.rangoTexto
+                });
+            });
+            return salida;
+        }
+
+        // =========================================================================
+        // 🔌 CARGA DE DATOS
+        // =========================================================================
+        async function cargarDatosDesdeApi(forzar = false) {
+            mostrarCarga('Cargando indicadores…', 'Leyendo la tabla tblRegistro desde la API.');
+            setEstadoConexion('Conectando…', '');
+
+            try {
+                if (!apiBaseActiva) {
+                    apiBaseActiva = await detectarServidorApi();
+                }
+                if (!apiBaseActiva) {
+                    throw new Error(`No se pudo conectar a ${APP_CONFIG.servidor} en puertos ${APP_CONFIG.puertos.join('/')}`);
+                }
+
+                const url = `${apiBaseActiva}${APP_CONFIG.controllerPath}${forzar ? '?recargar=true' : ''}`;
+                const res = await fetchConTimeout(url, APP_CONFIG.timeoutMs);
+                if (!res.ok) {
+                    let detalle = `HTTP ${res.status}`;
+                    try { const j = await res.json(); if (j && j.error) detalle = j.error; } catch (e) { }
+                    throw new Error(detalle);
+                }
+
+                const data = await res.json();
+                if (!Array.isArray(data)) throw new Error('La API no devolvió una lista de registros.');
+
+                registrosCrudos = data;
+                registrosProc = procesarRegistros(registrosCrudos);
+
+                setEstadoConexion(`Conectado · ${new Date().toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })}`, 'ok');
+                inicializarFiltros();
+                renderizar();
+            } catch (err) {
+                apiBaseActiva = null;
+                const msg = err.name === 'AbortError' ? 'La API tardó demasiado en responder.' : err.message;
+                setEstadoConexion('Sin conexión', 'error');
+                mostrarCarga('No se pudieron cargar los indicadores', escaparHtml(msg), true);
+            }
+        }
+
+        function setEstadoConexion(texto, clase) {
+            const el = $('estadoConexion');
+            el.textContent = texto;
+            el.className = `status-pill ${clase}`;
+        }
+
+        function mostrarCarga(titulo, detalle, esError = false) {
+            $('contenido').classList.add('hidden');
+            const box = $('estadoCarga');
+            box.classList.remove('hidden');
+            box.innerHTML = `${esError ? '' : '<div class="spinner"></div>'}<strong>${titulo}</strong>${detalle}`;
+        }
+
+        // =========================================================================
+        // 🎛️ FILTROS
+        // =========================================================================
+        function inicializarFiltros() {
+            const anios = [...new Set(registrosProc.map(r => r.anio))].sort((a, b) => b - a);
+            const selAnio = $('selAnio');
+            selAnio.innerHTML = anios.map(a => `<option value="${a}">${a}</option>`).join('');
+            if (!anios.includes(estado.anio)) estado.anio = anios[0] ?? null;
+            selAnio.value = estado.anio ?? '';
+
+            renderizarTabsArea();
+        }
+
+        function renderizarTabsArea() {
+            const delAnio = registrosProc.filter(r => r.anio === estado.anio);
+            const areasTodas = [...new Set(registrosCrudos.map(r => (r['Área'] ?? r['Area'] ?? '').toString().trim()).filter(Boolean))].sort();
+
+            if (!areasTodas.includes(estado.area)) {
+                // Por defecto: el área con más indicadores con datos en el año
+                const conteo = a => new Set(delAnio.filter(r => r.area === a).map(r => r.indicador)).size;
+                estado.area = [...areasTodas].sort((a, b) => conteo(b) - conteo(a))[0] ?? null;
+            }
+
+            $('areaTabs').innerHTML = areasTodas.map(a => {
+                const n = new Set(delAnio.filter(r => r.area === a).map(r => r.indicador)).size;
+                const activo = a === estado.area;
+                return `<button type="button" class="area-tab${activo ? ' active' : ''}" role="tab" aria-selected="${activo}" data-area="${escaparHtml(a)}">${escaparHtml(a)}<span class="count">${n}</span></button>`;
+            }).join('');
+        }
+
+        $('areaTabs').addEventListener('click', e => {
+            const btn = e.target.closest('.area-tab');
+            if (!btn) return;
+            estado.area = btn.dataset.area;
+            renderizarTabsArea();
+            renderizar();
+        });
+
+        $('selAnio').addEventListener('change', e => {
+            estado.anio = Number(e.target.value);
+            renderizarTabsArea();
+            renderizar();
+        });
+
+        $('btnRecargar').addEventListener('click', () => cargarDatosDesdeApi(true));
+
+        // =========================================================================
+        // 📊 AGREGACIÓN SEMANAL
+        // =========================================================================
+        function construirModelo() {
+            const filas = registrosProc.filter(r => r.anio === estado.anio && r.area === estado.area);
+
+            // Eje de semanas: desde la primera hasta la última semana con datos en el área
+            const semanasConDatos = [...new Set(filas.map(r => r.semana))].sort((a, b) => a - b);
+            const semanas = [];
+            if (semanasConDatos.length) {
+                for (let s = semanasConDatos[0]; s <= semanasConDatos[semanasConDatos.length - 1]; s++) {
+                    const lunes = lunesDeSemanaIso(estado.anio, s);
+                    semanas.push({ semana: s, rango: calcularSemanaConInicioLunes(lunes).rangoTexto });
+                }
+            }
+
+            // Indicadores del área (incluye los que no tienen datos, para informarlos)
+            const indicadoresArea = [...new Set(registrosCrudos
+                .filter(r => (r['Área'] ?? r['Area'] ?? '').toString().trim() === estado.area)
+                .map(r => (r['Indicador'] ?? '').toString().trim())
+                .filter(Boolean))]
+                .sort((a, b) => (ordenIndicadores.get(a) ?? 0) - (ordenIndicadores.get(b) ?? 0));
+
+            const indicadores = indicadoresArea.map(nombre => {
+                const propias = filas.filter(r => r.indicador === nombre);
+                const unidad = propias[0]?.unidad
+                    ?? (registrosCrudos.find(r => (r['Indicador'] ?? '').toString().trim() === nombre)?.['Unidad'] ?? '').toString().trim();
+
+                const porSemana = new Map();
+                propias.forEach(r => {
+                    if (!porSemana.has(r.semana)) porSemana.set(r.semana, []);
+                    porSemana.get(r.semana).push(r.valor);
+                });
+
+                const serie = semanas.map(s => {
+                    const vals = porSemana.get(s.semana);
+                    return vals && vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+                });
+                const dias = semanas.map(s => (porSemana.get(s.semana) || []).length);
+
+                const valoresValidos = serie.filter(v => v != null);
+                const promedio = valoresValidos.length ? valoresValidos.reduce((a, b) => a + b, 0) / valoresValidos.length : null;
+
+                const idxUltima = serie.map((v, i) => v != null ? i : -1).filter(i => i >= 0).pop();
+                const idxPrevia = idxUltima != null
+                    ? serie.map((v, i) => v != null && i < idxUltima ? i : -1).filter(i => i >= 0).pop()
+                    : undefined;
+
+                const { familia, componente } = obtenerFamilia(nombre);
+
+                return {
+                    nombre, familia, componente, unidad, serie, dias, promedio,
+                    idxUltima, idxPrevia,
+                    registros: propias.length,
+                    formato: crearFormato(unidad, propias.map(r => r.valor))
+                };
+            });
+
+            return { filas, semanas, indicadores };
+        }
+
+        // =========================================================================
+        // 🖼️ RENDER
+        // =========================================================================
+        function renderizar() {
+            graficos.forEach(g => g.destroy());
+            graficos = [];
+
+            if (!estado.area || estado.anio == null) {
+                mostrarCarga('Sin datos', 'La tabla tblRegistro no tiene registros con valor.', true);
+                return;
+            }
+
+            const modelo = construirModelo();
+            $('estadoCarga').classList.add('hidden');
+            $('contenido').classList.remove('hidden');
+
+            renderizarKpis(modelo);
+            renderizarGraficos(modelo);
+            renderizarMatriz(modelo);
+        }
+
+        function renderizarKpis({ filas, semanas, indicadores }) {
+            const conDatos = indicadores.filter(i => i.registros > 0);
+            $('kpiIndicadores').textContent = conDatos.length;
+            $('kpiIndicadoresSub').textContent = indicadores.length > conDatos.length
+                ? `de ${indicadores.length} definidos en ${estado.area}`
+                : `${estado.area} · ${estado.anio}`;
+
+            const semanasDatos = [...new Set(filas.map(r => r.semana))];
+            $('kpiSemanas').textContent = semanasDatos.length;
+            $('kpiSemanasSub').textContent = semanas.length
+                ? `Sem. ${pad2(semanas[0].semana)} a Sem. ${pad2(semanas[semanas.length - 1].semana)}`
+                : 'Sin registros en el año';
+
+            const ultima = semanas[semanas.length - 1];
+            $('kpiUltima').textContent = ultima ? `Sem. ${pad2(ultima.semana)}` : '–';
+            const ultimaFecha = filas.reduce((m, r) => (!m || r.fecha > m ? r.fecha : m), null);
+            $('kpiUltimaSub').textContent = ultima
+                ? `${ultima.rango} · último día ${ultimaFecha.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit' })}`
+                : '';
+
+            $('kpiRegistros').textContent = filas.length.toLocaleString('es-PE');
+            $('kpiRegistrosSub').textContent = 'valores diarios en el periodo';
+        }
+
+        function renderizarGraficos({ semanas, indicadores }) {
+            const cont = $('seccionesGraficos');
+            cont.innerHTML = '';
+
+            // Agrupar por familia respetando el orden de la tabla
+            const familias = new Map();
+            indicadores.forEach(ind => {
+                if (!familias.has(ind.familia)) familias.set(ind.familia, []);
+                familias.get(ind.familia).push(ind);
+            });
+
+            const sinDatos = indicadores.filter(i => i.registros === 0);
+
+            // Familias de un solo indicador se agrupan en "Otros indicadores"
+            const bloques = [];
+            const sueltos = [];
+            familias.forEach((items, familia) => {
+                const conDatos = items.filter(i => i.registros > 0);
+                if (!conDatos.length) return;
+                if (items.length > 1) bloques.push({ titulo: familia, items: conDatos });
+                else sueltos.push(...conDatos);
+            });
+            if (sueltos.length) bloques.push({ titulo: 'Otros indicadores', items: sueltos });
+
+            if (!semanas.length) {
+                cont.innerHTML = `<div class="state-box"><strong>Sin registros para ${escaparHtml(estado.area)} en ${estado.anio}</strong>Selecciona otro año o área.</div>`;
+                return;
+            }
+
+            const etiquetas = semanas.map(s => `S${pad2(s.semana)}`);
+
+            bloques.forEach((bloque, bIdx) => {
+                const seccion = document.createElement('section');
+                seccion.style.marginBottom = '14px';
+                seccion.innerHTML = `<h2 class="section-title">${escaparHtml(bloque.titulo)}</h2>`;
+                const grid = document.createElement('div');
+                grid.className = 'charts-grid';
+                grid.style.marginTop = '10px';
+                seccion.appendChild(grid);
+                cont.appendChild(seccion);
+
+                bloque.items.forEach((ind, iIdx) => {
+                    const f = ind.formato;
+                    const ultimo = ind.idxUltima != null ? ind.serie[ind.idxUltima] : null;
+                    const previo = ind.idxPrevia != null ? ind.serie[ind.idxPrevia] : null;
+                    const semUlt = ind.idxUltima != null ? semanas[ind.idxUltima] : null;
+                    const semPrev = ind.idxPrevia != null ? semanas[ind.idxPrevia] : null;
+                    const deltaTxt = (ultimo != null && previo != null)
+                        ? `${f.delta(ultimo - previo)} vs Sem. ${pad2(semPrev.semana)}`
+                        : 'Sin semana previa';
+
+                    const titulo = bloque.titulo === ind.familia && ind.componente ? ind.componente : ind.nombre;
+                    const card = document.createElement('article');
+                    card.className = 'chart-card';
+                    card.innerHTML = `
+                        <div class="chart-head">
+                            <div>
+                                <h3 class="chart-title">${escaparHtml(titulo)}</h3>
+                                <div class="chart-unit">${escaparHtml(ind.unidad || 'Sin unidad')} · Sem. ${semUlt ? pad2(semUlt.semana) : '–'}</div>
+                            </div>
+                            <div class="chart-last">
+                                <div class="chart-last-value">${f.valor(ultimo)}</div>
+                                <div class="chart-last-delta">${deltaTxt}</div>
+                            </div>
+                        </div>
+                        <div class="chart-box"><canvas aria-label="Tendencia semanal de ${escaparHtml(ind.nombre)}" role="img"></canvas></div>
+                        <div class="chart-foot">
+                            <span class="legend-avg">Promedio ${estado.anio}: ${f.valor(ind.promedio)}</span>
+                            <span>${ind.registros} días con dato</span>
+                        </div>`;
+                    grid.appendChild(card);
+
+                    graficos.push(crearGrafico(card.querySelector('canvas'), etiquetas, semanas, ind, PALETA.primary));
+                });
+            });
+
+            if (sinDatos.length) {
+                const nota = document.createElement('p');
+                nota.className = 'section-note';
+                nota.textContent = `Sin datos registrados en ${estado.anio}: ${sinDatos.map(i => i.nombre).join(', ')}.`;
+                cont.appendChild(nota);
+            }
+        }
+
+        function crearGrafico(canvas, etiquetas, semanas, ind, color) {
+            const f = ind.formato;
+            return new Chart(canvas, {
+                type: 'line',
+                data: {
+                    labels: etiquetas,
+                    datasets: [
+                        {
+                            label: ind.nombre,
+                            data: ind.serie,
+                            borderColor: color,
+                            backgroundColor: 'rgba(186, 160, 99, 0.12)',
+                            borderWidth: 2,
+                            pointRadius: 2.5,
+                            pointHoverRadius: 5,
+                            pointBackgroundColor: color,
+                            fill: true,
+                            tension: 0.25,
+                            spanGaps: false
+                        },
+                        {
+                            label: 'Promedio del año',
+                            data: ind.serie.map(() => ind.promedio),
+                            borderColor: PALETA.secondary,
+                            borderWidth: 1.5,
+                            borderDash: [5, 4],
+                            pointRadius: 0,
+                            pointHoverRadius: 0,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: PALETA.heading,
+                            titleColor: '#FFFFFF',
+                            bodyColor: '#E2D5B5',
+                            padding: 10,
+                            displayColors: false,
+                            callbacks: {
+                                title: items => {
+                                    const s = semanas[items[0].dataIndex];
+                                    return etiquetaSemana(s.semana, s.rango);
+                                },
+                                label: item => {
+                                    if (item.datasetIndex === 1) return `Promedio año: ${f.valor(item.raw)}`;
+                                    const dias = ind.dias[item.dataIndex];
+                                    return item.raw == null
+                                        ? 'Sin registros'
+                                        : `Valor: ${f.valor(item.raw)} (${dias} ${dias === 1 ? 'día' : 'días'})`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { maxRotation: 0, autoSkip: true, autoSkipPadding: 8 }
+                        },
+                        y: {
+                            grid: { color: PALETA.border },
+                            border: { display: false },
+                            ticks: { maxTicksLimit: 5, callback: v => f.eje(v) },
+                            grace: '8%'
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderizarMatriz({ semanas, indicadores }) {
+            const tabla = $('tablaMatriz');
+            if (!semanas.length) {
+                tabla.innerHTML = '';
+                return;
+            }
+
+            const head = `<thead><tr><th scope="col">Indicador</th>${semanas.map(s =>
+                `<th scope="col" title="${etiquetaSemana(s.semana, s.rango)}">Sem. ${pad2(s.semana)}<span class="rango">${s.rango}</span></th>`
+            ).join('')}</tr></thead>`;
+
+            const conDatos = indicadores.filter(i => i.registros > 0);
+            const familias = new Map();
+            conDatos.forEach(ind => {
+                if (!familias.has(ind.familia)) familias.set(ind.familia, []);
+                familias.get(ind.familia).push(ind);
+            });
+
+            const celdas = ind => ind.serie.map(v =>
+                v == null ? '<td class="empty">–</td>' : `<td>${ind.formato.valor(v)}</td>`
+            ).join('');
+
+            let body = '';
+            familias.forEach((items, familia) => {
+                const agrupa = items.length > 1 || items[0].componente;
+                if (agrupa) {
+                    body += `<tr class="row-family"><td colspan="${semanas.length + 1}">${escaparHtml(familia)} <span style="font-weight:500;color:var(--color-text-muted)">· ${escaparHtml(items[0].unidad)}</span></td></tr>`;
+                    items.forEach(ind => {
+                        body += `<tr class="row-ind"><td>${escaparHtml(ind.componente || ind.nombre)}</td>${celdas(ind)}</tr>`;
+                    });
+                } else {
+                    const ind = items[0];
+                    body += `<tr class="row-ind solo"><td>${escaparHtml(ind.nombre)} <span style="font-weight:500;color:var(--color-text-muted)">· ${escaparHtml(ind.unidad)}</span></td>${celdas(ind)}</tr>`;
+                }
+            });
+
+            tabla.innerHTML = `${head}<tbody>${body}</tbody>`;
+
+            // Mostrar las semanas más recientes al abrir
+            const wrap = tabla.parentElement;
+            wrap.scrollLeft = wrap.scrollWidth;
+        }
+
+        // =========================================================================
+        // 🚀 INICIO
+        // =========================================================================
+        cargarDatosDesdeApi();
+    </script>
+</body>
+
+</html>

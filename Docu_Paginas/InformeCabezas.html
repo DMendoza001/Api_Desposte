@@ -835,44 +835,73 @@
       max-height: 650px;
     }
 
+    /* =========================================================================
+       🧮 MATRIZ JERÁRQUICA
+       - Encabezado en 2 niveles: periodo (oscuro con filete dorado) y métricas
+         (claro). La 2ª fila queda fija debajo de la 1ª (--thead-r1, por JS).
+       - Separador vertical entre periodos (.grp-start).
+       - Jerarquía por fondo, peso y sangría; etiquetas planas sin decoración.
+       - Los fondos de fila son colores opacos (equivalentes del dorado/gris de la
+         paleta sobre blanco) para que la 1ª columna fija tape lo que se desliza.
+       ========================================================================= */
+    .matrix-card {
+      --mx-nivel-bg: #F0EADD;      /* #BAA063 al 22% sobre blanco */
+      --mx-nivel-line: #DCCDA8;    /* #BAA063 al 45% sobre blanco */
+      --mx-nttra-bg: var(--color-bg);
+      --mx-hover-bg: #F8F6EF;      /* #BAA063 al 10% sobre blanco */
+      --mx-destacado-bg: #F5F2E9;  /* #BAA063 al 14% sobre blanco */
+      --mx-metric-bg: #F7F7F9;
+      --mx-zero: var(--color-gray-300);
+    }
+
     .matrix-table {
       width: 100%;
       border-collapse: separate;
       border-spacing: 0;
-      font-size: 0.84rem;
+      font-size: 0.82rem;
+      color: var(--color-text);
     }
 
     .matrix-table th {
-      background-color: var(--pantone-dark);
-      color: #FFFFFF;
-      padding: 9px 12px;
       position: sticky;
       top: 0;
       z-index: 10;
-      text-align: center;
-      font-weight: 700;
-      font-size: 0.78rem;
+      white-space: nowrap;
+    }
+
+    /* Fila 1: periodos */
+    .matrix-table thead tr:first-child th {
+      background-color: var(--color-header-bg);
+      color: #FFFFFF;
+      padding: 9px 12px;
+      font-size: 0.76rem;
+      font-weight: 600;
       letter-spacing: 0.02em;
-      border-bottom: 1px solid var(--pantone-darker);
-      border-right: 1px solid rgba(255, 255, 255, 0.10);
+      text-align: center;
+      border-bottom: 2px solid var(--color-primary);
     }
 
-    .matrix-table th.periodo-header {
-      background-color: var(--pantone-darker);
-      border-bottom: 2px solid var(--pantone-yellow);
+    .matrix-table thead tr:first-child th.periodo-header {
+      border-left: 1px solid rgba(255, 255, 255, 0.14);
     }
 
+    /* Fila 2: métricas (fija justo debajo de la fila de periodos) */
     .matrix-table th.metric-header {
-      background-color: var(--pantone-dark);
-      font-size: 0.74rem;
-      color: var(--pantone-yellow-light);
-      padding-left: 8px;
-      padding-right: 8px;
+      top: var(--thead-r1, 36px);
+      background-color: var(--mx-metric-bg);
+      color: var(--color-text-muted);
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      text-align: right;
+      padding: 6px 10px;
+      border-bottom: 1px solid var(--color-border);
     }
 
     /* 📐 Reparto de anchos: las columnas numéricas se encogen a su contenido
-       (width: 1% + nowrap + padding compacto) y TODO el espacio sobrante pasa a
-       la 1ª columna, que es la que muestra el código y el nombre del producto. */
+       (width: 1% + nowrap) y TODO el espacio sobrante pasa a la 1ª columna,
+       que es la que muestra el código y el nombre del producto. */
     .matrix-table th.metric-header,
     .matrix-table td.num-col {
       width: 1%;
@@ -880,78 +909,113 @@
     }
 
     .matrix-table td.num-col {
-      padding-left: 8px;
-      padding-right: 8px;
+      padding: 7px 10px;
+      text-align: right;
+    }
+
+    /* Separador entre periodos */
+    .matrix-table .grp-start {
+      border-left: 1px solid var(--color-border);
     }
 
     .matrix-table th.col-jerarquia {
       width: 100%;
       min-width: 310px;
-      position: sticky;
       left: 0;
       z-index: 12;
-      vertical-align: middle;
-      /* El encabezado se alinea con el código/nombre de las filas para que el
-         texto se lea de izquierda a derecha sin quedar flotando al centro. */
+      vertical-align: bottom;
       text-align: left;
       padding-left: 14px;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-header-subtext);
     }
 
+    .num-zero {
+      color: var(--mx-zero);
+    }
+
+    /* % Rend.: barra fina de proporción bajo el número */
+    .matrix-table td.pct-col {
+      background-image: linear-gradient(90deg, var(--color-primary) 0 var(--pct, 0%), var(--color-border) var(--pct, 0%) 100%);
+      background-repeat: no-repeat;
+      background-size: calc(100% - 18px) 2px;
+      background-position: 9px calc(100% - 3px);
+    }
+
+    .matrix-table tr.row-nivel td.pct-col {
+      background-image: none;
+    }
+
+    /* Base de filas: fondo opaco en cada celda (la 1ª columna es sticky) */
+    .matrix-table tbody td {
+      background-color: var(--color-surface) !important;
+      border-bottom: 1px solid var(--color-border);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .matrix-table tbody td:first-child {
+      border-right: 1px solid var(--color-border);
+      white-space: nowrap;
+      padding-top: 7px;
+      padding-bottom: 7px;
+      padding-right: 14px;
+    }
+
+    .matrix-table tbody tr:hover > td {
+      background-color: var(--mx-hover-bg) !important;
+    }
+
+    /* Nivel 1: Nivel (banda dorada clara, mayúsculas) */
     .row-nivel {
-      background: linear-gradient(90deg, var(--pantone-darker) 0%, var(--pantone-dark) 100%) !important;
-      color: #FFFFFF !important;
-      font-weight: 700;
       cursor: pointer;
     }
 
-    .row-nivel td {
-      border-bottom: 1px solid var(--pantone-darker);
-      padding: 10px 14px;
-      border-right: 1px solid rgba(255, 255, 255, 0.05);
+    .matrix-table tr.row-nivel > td {
+      background-color: var(--mx-nivel-bg) !important;
+      color: var(--color-heading);
+      font-weight: 700;
+      border-top: 1px solid var(--mx-nivel-line);
+      border-bottom: 1px solid var(--mx-nivel-line);
+      padding-top: 9px;
+      padding-bottom: 9px;
+    }
+
+    .matrix-table tr.row-nivel > td:first-child {
+      padding-left: 12px;
+      box-shadow: inset 3px 0 0 var(--color-primary);
     }
 
     .nivel-title {
-      font-size: 0.88rem;
-      color: var(--pantone-yellow);
-      letter-spacing: 0.02em;
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--color-heading);
     }
 
+    /* Nivel 2: NTtra (gris de fondo de la paleta, seminegrita) */
     .row-nttra {
-      background-color: var(--color-bg) !important;
-      color: var(--pantone-dark) !important;
-      font-weight: 600;
       cursor: pointer;
     }
 
-    .row-nttra:hover {
-      background-color: var(--color-hover-tint) !important;
+    .matrix-table tr.row-nttra > td {
+      background-color: var(--mx-nttra-bg) !important;
+      color: var(--color-heading);
+      font-weight: 600;
     }
 
-    .row-nttra td {
-      border-bottom: 1px solid var(--color-border);
-      padding: 8px 14px;
-      border-right: 1px solid var(--color-border);
-    }
-
+    /* Nivel 3: TipoDesposte (blanco, seminegrita) */
     .row-desposte {
-      background-color: #FFFFFF !important;
-      color: var(--pantone-dark) !important;
-      font-weight: 600;
       cursor: pointer;
     }
 
-    .row-desposte:hover {
-      background-color: var(--color-hover-tint) !important;
+    .matrix-table tr.row-desposte > td {
+      color: var(--color-heading);
+      font-weight: 600;
     }
 
-    .row-desposte td {
-      border-bottom: 1px solid #E2E8F0;
-      padding: 8px 14px;
-      border-right: 1px solid #E2E8F0;
-    }
-
-    /* Etiquetas planas de la matriz: sin icono, sin fondo, sin borde y sin sombra
-       (mismo criterio visual que .producto-code) */
+    /* Etiquetas planas: sin fondo, borde ni sombra */
     .desposte-badge,
     .nttra-badge {
       display: inline;
@@ -961,99 +1025,88 @@
       background: transparent;
       box-shadow: none;
       text-shadow: none;
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: var(--pantone-dark);
+      font-size: inherit;
+      font-weight: inherit;
+      color: inherit;
     }
 
-    .row-producto {
-      background-color: var(--color-surface) !important;
-      color: var(--pantone-dark);
-    }
-
-    .row-producto:hover {
-      background-color: var(--color-hover-tint) !important;
-    }
-
-    .row-producto:nth-child(even) {
-      background-color: rgba(37, 44, 55, 0.02) !important;
-    }
-
-    .row-producto td {
-      border-bottom: 1px solid var(--color-border);
-      padding: 7px 14px;
-      font-size: 0.82rem;
-      border-right: 1px solid var(--color-border);
+    /* Nivel 4: Producto (texto regular) */
+    .matrix-table tr.row-producto > td {
+      color: var(--color-text);
+      font-weight: 400;
     }
 
     .producto-nombre {
-      font-size: 0.76rem;
+      font-size: 0.8rem;
     }
 
     .producto-code {
-      background: var(--color-bg);
-      color: var(--color-heading);
-      border: 1px solid var(--color-border);
+      display: inline-block;
+      min-width: 3.4em;
+      margin-right: 8px;
+      font-family: 'Consolas', 'SFMono-Regular', monospace;
       font-size: 0.74rem;
-      font-weight: 700;
-      padding: 2px 7px;
-      border-radius: 4px;
-      font-family: monospace;
-      margin-right: 6px;
+      font-weight: 600;
+      color: var(--color-text-muted);
     }
 
     /* =========================================================================
-       🟡 CÓDIGO 05829 (CABEZAS - PRODUCTO 040508029): SOMBRA AMARILLA TENUE
-       Resalta la fila de cabezas dentro de la matriz con el dorado de la paleta
-       (--pantone-yellow #BAA063) sin competir con los niveles.
-       - El tinte va en el <tr> para que la 1ª columna sticky (que hereda el
-         background) conserve el mismo tono.
-       - El halo va en cada <td> porque box-shadow sobre <tr> no es consistente
-         entre navegadores; se usa inset para que la sombra quede contenida.
+       🟡 CÓDIGO 05829 (CABEZAS - PRODUCTO 040508029)
+       Tinte dorado tenue y filete dorado a la izquierda, sin competir con los
+       niveles.
        ========================================================================= */
-    .matrix-table tr.row-destacado-05829 {
-      background-color: rgba(186, 160, 99, 0.14) !important;
+    .matrix-table tr.row-destacado-05829 > td {
+      background-color: var(--mx-destacado-bg) !important;
+      color: var(--color-heading);
     }
 
-    .matrix-table tr.row-destacado-05829 > td {
-      background-color: rgba(186, 160, 99, 0.14) !important;
-      box-shadow: inset 0 0 0 1px rgba(186, 160, 99, 0.28),
-        inset 0 0 14px rgba(186, 160, 99, 0.22);
+    .matrix-table tr.row-destacado-05829 > td:first-child {
+      box-shadow: inset 3px 0 0 var(--color-primary);
     }
 
     .matrix-table tr.row-destacado-05829:hover > td {
-      background-color: rgba(186, 160, 99, 0.22) !important;
-      box-shadow: inset 0 0 0 1px rgba(186, 160, 99, 0.40),
-        inset 0 0 16px rgba(186, 160, 99, 0.28);
+      background-color: var(--mx-nivel-bg) !important;
     }
 
     .matrix-table tr.row-destacado-05829 .producto-code {
-      background: #FFFFFF;
-      border-color: rgba(186, 160, 99, 0.55);
       color: var(--color-heading);
-      box-shadow: 0 0 0 3px rgba(186, 160, 99, 0.20),
-        0 2px 6px rgba(186, 160, 99, 0.25);
+      font-weight: 700;
     }
 
+    /* Único icono permitido: control de expansión/colapso */
     .tree-toggle-icon {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 18px;
-      height: 18px;
-      border-radius: 4px;
-      margin-right: 8px;
-      font-size: 10px;
-      background: var(--pantone-yellow-soft);
-      color: var(--pantone-yellow);
-      border: 1px solid var(--pantone-yellow-border);
+      display: inline-block;
+      width: 14px;
+      margin-right: 6px;
+      font-size: 9px;
+      text-align: center;
+      color: var(--color-secondary);
+      background: none;
+      border: none;
     }
 
-    .row-saldo-pendiente {
-      background-color: rgba(186, 160, 99, 0.16) !important;
-      font-weight: 700 !important;
-      color: #38353B !important;
+    .row-nivel .tree-toggle-icon {
+      color: var(--color-primary);
     }
+
+    .row-saldo-pendiente .nivel-title {
+      color: var(--color-heading);
+    }
+
+    /* Sangría por nivel. Selector más específico + !important porque
+       responsive.css fuerza `padding: 6px 9px !important` en todas las celdas de
+       .matrix-table (<= 1600px), lo que anulaba la sangría inline. */
+    .matrix-card {
+      --mx-ind-1: 10px;
+      --mx-ind-2: 28px;
+      --mx-ind-3: 46px;
+      --mx-ind-4: 64px;
+    }
+
+    table.matrix-table tr.row-nivel > td:first-child { padding-left: var(--mx-ind-1) !important; }
+    table.matrix-table tr.row-nttra > td:first-child { padding-left: var(--mx-ind-2) !important; }
+    table.matrix-table tr.row-desposte > td:first-child { padding-left: var(--mx-ind-3) !important; }
+    table.matrix-table tr.row-producto > td:first-child { padding-left: var(--mx-ind-4) !important; }
 
     .num-col {
       font-variant-numeric: tabular-nums;
@@ -1070,6 +1123,15 @@
 
     .text-gold {
       color: var(--pantone-gold);
+    }
+
+    /* En la matriz el peso y color de los números los define el nivel de la fila */
+    .matrix-table td.text-gold {
+      color: inherit;
+    }
+
+    .matrix-table td.font-bold {
+      font-weight: inherit;
     }
 
     .loading-overlay {
@@ -1440,6 +1502,13 @@
 
       .table-wrapper {
         max-height: 70vh !important;
+      }
+
+      .matrix-card {
+        --mx-ind-1: 8px;
+        --mx-ind-2: 18px;
+        --mx-ind-3: 28px;
+        --mx-ind-4: 38px;
       }
 
       /* Primera columna liberada: permite deslizar la matriz con el dedo */
@@ -2478,7 +2547,7 @@
       periodosActivos.forEach(p => {
         headRow1 += `<th colspan="3" class="periodo-header">${etiquetaPeriodo(p)}</th>`;
         headRow2 += `
-          <th class="metric-header">Unidades</th>
+          <th class="metric-header grp-start">Unidades</th>
           <th class="metric-header">Kilos</th>
           <th class="metric-header">% Rend.</th>
         `;
@@ -2487,7 +2556,14 @@
       headRow1 += `</tr>`;
       headRow2 += `</tr>`;
 
-      if (thead) thead.innerHTML = headRow1 + headRow2;
+      if (thead) {
+        thead.innerHTML = headRow1 + headRow2;
+        // La fila de métricas queda fija justo debajo de la fila de periodos
+        const fila1 = thead.rows[0];
+        if (fila1 && fila1.offsetHeight) {
+          document.getElementById('matrixTable').style.setProperty('--thead-r1', `${fila1.offsetHeight}px`);
+        }
+      }
 
       if (dataMatriz.length === 0 || periodosActivos.length === 0) {
         tbody.innerHTML = `<tr><td colspan="${1 + (periodosActivos.length * 3)}" style="text-align: center; padding: 36px; color: var(--text-muted);">No hay datos o periodos seleccionados.</td></tr>`;
@@ -2546,6 +2622,18 @@
         return mapa;
       };
 
+      // Celdas Unidades / Kilos / % Rend. de un periodo: ceros como "–",
+      // separador al inicio de cada periodo y barra de proporción en % Rend.
+      const celdasPeriodo = (m, pctRend) => {
+        const cero = '<span class="num-zero">–</span>';
+        const pct = Math.max(0, Math.min(100, pctRend));
+        return `
+          <td class="num-col grp-start">${m.und === 0 ? cero : m.und.toLocaleString('es-PE')}</td>
+          <td class="num-col">${Math.round(m.kg) === 0 ? cero : formatKg(m.kg)}</td>
+          <td class="num-col pct-col" style="--pct:${pct.toFixed(1)}%">${pctRend === 0 ? cero : pctRend.toFixed(1) + '%'}</td>
+        `;
+      };
+
       let html = "";
 
       nivelesMap.forEach((nGrupo, nKey) => {
@@ -2566,11 +2654,7 @@
           const m = periodosMetricasNivel[p] || { und: 0, kg: 0 };
           const totalKgPeriodo = totalKilosPeriodosMap[p] || 0;
           const pctRend = totalKgPeriodo > 0 ? (m.kg / totalKgPeriodo) * 100 : 0;
-          return `
-                <td class="text-right num-col">${m.und.toLocaleString('es-PE')}</td>
-                <td class="text-right num-col">${formatKg(m.kg)}</td>
-                <td class="text-right num-col">${pctRend.toFixed(1)}%</td>
-              `;
+          return celdasPeriodo(m, pctRend);
         }).join('')}
           </tr>
         `;
@@ -2600,11 +2684,7 @@
               const m = periodosMetricasNTtra[p] || { und: 0, kg: 0 };
               const kgNivelP = periodosMetricasNivel[p] ? periodosMetricasNivel[p].kg : 0;
               const pctRend = kgNivelP > 0 ? (m.kg / kgNivelP) * 100 : 0;
-              return `
-                    <td class="text-right num-col font-bold">${m.und.toLocaleString('es-PE')}</td>
-                    <td class="text-right num-col font-bold text-gold">${formatKg(m.kg)}</td>
-                    <td class="text-right num-col">${pctRend.toFixed(1)}%</td>
-                  `;
+              return celdasPeriodo(m, pctRend);
             }).join('')}
               </tr>
             `;
@@ -2633,11 +2713,7 @@
                   const m = periodosMetricasTD[p] || { und: 0, kg: 0 };
                   const kgNivelP = periodosMetricasNivel[p] ? periodosMetricasNivel[p].kg : 0;
                   const pctRend = kgNivelP > 0 ? (m.kg / kgNivelP) * 100 : 0;
-                  return `
-                        <td class="text-right num-col font-bold">${m.und.toLocaleString('es-PE')}</td>
-                        <td class="text-right num-col font-bold text-gold">${formatKg(m.kg)}</td>
-                        <td class="text-right num-col">${pctRend.toFixed(1)}%</td>
-                      `;
+                  return celdasPeriodo(m, pctRend);
                 }).join('')}
                   </tr>
                 `;
@@ -2665,11 +2741,7 @@
                       const m = periodosMetricasProd[p] || { und: 0, kg: 0 };
                       const kgNivelP = periodosMetricasNivel[p] ? periodosMetricasNivel[p].kg : 0;
                       const pctRend = kgNivelP > 0 ? (m.kg / kgNivelP) * 100 : 0;
-                      return `
-                            <td class="text-right num-col">${m.und.toLocaleString('es-PE')}</td>
-                            <td class="text-right num-col text-gold">${formatKg(m.kg)}</td>
-                            <td class="text-right num-col">${pctRend.toFixed(1)}%</td>
-                          `;
+                      return celdasPeriodo(m, pctRend);
                     }).join('')}
                       </tr>
                     `;
