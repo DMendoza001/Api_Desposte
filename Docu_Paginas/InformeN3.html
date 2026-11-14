@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Indicadores N3 - Tendencia Semanal</title>
+    <title>Indicadores N3 - Tendencia Semanal y Diaria</title>
 
     <!-- Configuración compartida de conexión a la API y diseño responsive -->
     <link rel="stylesheet" href="responsive.css?v=3">
@@ -13,6 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
 
     <style>
         /* =========================================================================
@@ -57,6 +58,17 @@
         }
 
         .dashboard-container > * { min-width: 0; }
+
+        /* Contenedor interno de KPIs, gráficos y matriz (sin el padding que
+           responsive.css aplica a .dashboard-container) */
+        .content-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            min-width: 0;
+        }
+
+        .content-stack > * { min-width: 0; }
 
         /* ---------- Cabecera ---------- */
         .header-banner {
@@ -106,9 +118,45 @@
         }
 
         .btn-header:hover { background: #C9B27A; }
-        .btn:focus-visible, .area-tab:focus-visible, select:focus-visible {
+
+        .btn:focus-visible, .area-tab:focus-visible, .view-tab:focus-visible, select:focus-visible,
+        .week-btn:focus-visible, .seg-btn:focus-visible, .quick-btn:focus-visible {
             outline: 2px solid var(--color-primary);
             outline-offset: 2px;
+        }
+
+        /* ---------- Pestañas de vista (Semanal / Diario) ---------- */
+        .view-tabs {
+            display: flex;
+            gap: 4px;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .view-tab {
+            font: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 10px 18px;
+            border: none;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -1px;
+            background: transparent;
+            color: var(--color-text-muted);
+            cursor: pointer;
+        }
+
+        .view-tab:hover { color: var(--color-heading); }
+
+        .view-tab.active {
+            color: var(--color-heading);
+            border-bottom-color: var(--color-primary);
+        }
+
+        .view-tab .view-tab-sub {
+            font-weight: 500;
+            font-size: 12px;
+            color: var(--color-text-muted);
+            margin-left: 6px;
         }
 
         /* ---------- Filtros ---------- */
@@ -126,6 +174,13 @@
         }
 
         .filters-card > * { min-width: 0; }
+
+        .filters-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
 
         .area-tabs {
             display: flex;
@@ -163,7 +218,8 @@
 
         .filter-group { display: flex; align-items: center; gap: 8px; }
 
-        .filter-group label {
+        .filter-group label,
+        .filter-group .filter-label {
             font-size: 12px;
             font-weight: 600;
             color: var(--color-text-muted);
@@ -180,6 +236,154 @@
             background: var(--color-surface);
             color: var(--color-heading);
             min-width: 110px;
+        }
+
+        /* ---------- Combobox de semanas ---------- */
+        .week-combobox-wrapper {
+            position: relative;
+        }
+
+        .week-btn {
+            font: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            min-width: 230px;
+            padding: 7px 10px;
+            border-radius: 8px;
+            border: 1px solid var(--color-border);
+            background: var(--color-surface);
+            color: var(--color-heading);
+            cursor: pointer;
+        }
+
+        .week-btn:hover { border-color: var(--color-primary); }
+        .week-btn .chev { color: var(--color-text-muted); font-size: 10px; }
+
+        .week-btn-text {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .week-panel {
+            position: absolute;
+            top: calc(100% + 6px);
+            right: 0;
+            z-index: 50;
+            width: 290px;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+            box-shadow: 0 10px 24px rgba(56, 53, 59, 0.14);
+            padding: 10px;
+        }
+
+        .week-panel[hidden] { display: none; }
+
+        .week-panel-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            padding-bottom: 8px;
+            margin-bottom: 8px;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .week-panel-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--color-text-muted);
+        }
+
+        .seg {
+            display: inline-flex;
+            border: 1px solid var(--color-border);
+            border-radius: 7px;
+            overflow: hidden;
+        }
+
+        .seg-btn {
+            font: inherit;
+            font-size: 12px;
+            font-weight: 600;
+            border: none;
+            padding: 5px 10px;
+            background: var(--color-surface);
+            color: var(--color-text);
+            cursor: pointer;
+        }
+
+        .seg-btn + .seg-btn { border-left: 1px solid var(--color-border); }
+
+        .seg-btn.active {
+            background: var(--color-header-bg);
+            color: #FFFFFF;
+        }
+
+        .quick-row {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+        }
+
+        .quick-btn {
+            font: inherit;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--color-border);
+            background: var(--color-bg);
+            color: var(--color-heading);
+            cursor: pointer;
+        }
+
+        .quick-btn:hover { border-color: var(--color-primary); }
+
+        .week-list {
+            max-height: 280px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+
+        .week-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 8px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            color: var(--color-heading);
+        }
+
+        .week-option:hover { background: var(--color-primary-soft); }
+
+        .week-option input {
+            width: 15px;
+            height: 15px;
+            margin: 0;
+            flex: 0 0 auto;
+            accent-color: var(--color-header-bg);
+            cursor: pointer;
+        }
+
+        .week-option .week-num { font-weight: 600; min-width: 56px; }
+
+        .week-option .week-range {
+            color: var(--color-text-muted);
+            font-size: 12px;
+            font-variant-numeric: tabular-nums;
         }
 
         /* ---------- KPIs ---------- */
@@ -224,6 +428,7 @@
             font-size: 12px;
             color: var(--color-text-muted);
             margin-top: 2px;
+            min-height: 1em;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -331,7 +536,7 @@
             margin-right: 5px;
         }
 
-        /* ---------- Matriz semanal ---------- */
+        /* ---------- Matriz ---------- */
         .matrix-card {
             background: var(--color-surface);
             border: 1px solid var(--color-border);
@@ -384,6 +589,18 @@
             line-height: 1.25;
         }
 
+        /* 2ª fila del encabezado (días): fija debajo de la fila de semanas */
+        table.matrix thead tr + tr th {
+            top: var(--thead-r1, 30px);
+            background: #4A474C;
+            font-weight: 500;
+        }
+
+        table.matrix thead th.week-head {
+            text-align: center;
+            border-bottom: 2px solid var(--color-primary);
+        }
+
         table.matrix thead th .rango {
             display: block;
             font-weight: 400;
@@ -391,9 +608,14 @@
             color: var(--color-header-subtext);
         }
 
+        table.matrix .grp-start { border-left: 1px solid var(--color-border); }
+        table.matrix thead .grp-start { border-left-color: rgba(255, 255, 255, 0.18); }
+
         /* Columna de jerarquía: absorbe el espacio sobrante y queda fija */
-        table.matrix th:first-child,
-        table.matrix td:first-child {
+        /* Sólo la 1ª celda de la 1ª fila del encabezado (en Diario la fila de días
+           también tiene un th:first-child que no debe quedar fijo). */
+        table.matrix thead tr:first-child th:first-child,
+        table.matrix tbody td:first-child {
             position: sticky;
             left: 0;
             z-index: 1;
@@ -404,7 +626,7 @@
             border-right: 1px solid var(--color-border);
         }
 
-        table.matrix thead th:first-child { z-index: 3; background: var(--color-header-bg); }
+        table.matrix thead tr:first-child th:first-child { z-index: 3; background: var(--color-header-bg); }
 
         /* Jerarquía por estructura: sangría, peso y color (sin iconos) */
         table.matrix tr.row-family td {
@@ -417,7 +639,7 @@
         table.matrix tr.row-ind td:first-child { padding-left: 24px; color: var(--color-text); }
         table.matrix tr.row-ind.solo td:first-child { padding-left: 10px; font-weight: 600; color: var(--color-heading); }
         table.matrix td.empty { color: #B5B2AA; }
-        table.matrix tbody tr.row-ind:hover td { background: var(--color-primary-soft); }
+        table.matrix tbody tr.row-ind:hover td { background: #F8F6EF; }
 
         /* ---------- Estados ---------- */
         .state-box {
@@ -474,16 +696,22 @@
             .header-banner { flex-direction: column; align-items: flex-start; }
             .header-actions { width: 100%; }
             .header-actions .btn { flex: 1; }
+            .view-tab { flex: 1; padding: 10px 8px; }
+            .view-tab .view-tab-sub { display: none; }
             .filters-card { flex-direction: column; align-items: stretch; }
+            .filters-right { flex-direction: column; align-items: stretch; gap: 10px; }
             .area-tabs { width: 100%; }
             .area-tab { flex: 1 1 auto; }
             .filter-group { width: 100%; }
             .filter-group select { flex: 1; width: 100%; min-width: 0; }
+            .week-combobox-wrapper { flex: 1; width: 100%; min-width: 0; }
+            .week-btn { width: 100%; min-width: 0; }
+            .week-panel { left: 0; right: 0; width: auto; }
             .kpi-grid { grid-template-columns: 1fr; }
             .charts-grid { grid-template-columns: 1fr; }
             .chart-box { height: 220px; }
-            table.matrix th:first-child,
-            table.matrix td:first-child {
+            table.matrix thead tr:first-child th:first-child,
+            table.matrix tbody td:first-child {
                 min-width: 130px;
                 max-width: 200px;
                 white-space: normal;
@@ -496,8 +724,8 @@
     <div class="dashboard-container">
         <header class="header-banner">
             <div>
-                <h1>Indicadores N3 · Tendencia semanal</h1>
-                <p>Promedio semanal (lunes a domingo) de los valores diarios registrados en BD Indicadores N3</p>
+                <h1>Indicadores N3</h1>
+                <p id="headerSub">Promedio semanal (lunes a domingo) de los valores diarios registrados en BD Indicadores N3</p>
             </div>
             <div class="header-actions">
                 <span id="estadoConexion" class="status-pill">Conectando…</span>
@@ -505,11 +733,47 @@
             </div>
         </header>
 
+        <nav class="view-tabs" role="tablist" aria-label="Vista">
+            <button type="button" class="view-tab active" role="tab" aria-selected="true" data-vista="semanal">
+                Semanal<span class="view-tab-sub">tendencia por semana</span>
+            </button>
+            <button type="button" class="view-tab" role="tab" aria-selected="false" data-vista="diario">
+                Diario<span class="view-tab-sub">detalle por día</span>
+            </button>
+        </nav>
+
         <section class="filters-card" aria-label="Filtros">
             <div id="areaTabs" class="area-tabs" role="tablist" aria-label="Área"></div>
-            <div class="filter-group">
-                <label for="selAnio">Año</label>
-                <select id="selAnio"></select>
+            <div class="filters-right">
+                <div class="filter-group">
+                    <label for="selAnio">Año</label>
+                    <select id="selAnio"></select>
+                </div>
+                <div class="filter-group">
+                    <span class="filter-label" id="lblSemanas">Semanas</span>
+                    <div class="week-combobox-wrapper" id="comboSemanas">
+                        <button type="button" class="week-btn" id="btnSemanas" aria-haspopup="true"
+                            aria-expanded="false" aria-labelledby="lblSemanas btnSemanasTxt">
+                            <span class="week-btn-text" id="btnSemanasTxt">–</span>
+                            <span class="chev" aria-hidden="true">▼</span>
+                        </button>
+                        <div class="week-panel" id="panelSemanas" hidden>
+                            <div class="week-panel-row">
+                                <span class="week-panel-label">Selección</span>
+                                <div class="seg" role="group" aria-label="Modo de selección">
+                                    <button type="button" class="seg-btn" data-modo="unica">Única</button>
+                                    <button type="button" class="seg-btn" data-modo="multiple">Múltiple</button>
+                                </div>
+                            </div>
+                            <div class="quick-row">
+                                <button type="button" class="quick-btn" data-rapido="ultimas" id="btnUltimas">Últimas 12</button>
+                                <button type="button" class="quick-btn" data-rapido="todas" id="btnTodas">Todas</button>
+                                <button type="button" class="quick-btn" data-rapido="ninguna" id="btnLimpiar">Limpiar</button>
+                            </div>
+                            <div class="week-list" id="listaSemanas"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -519,35 +783,35 @@
             Leyendo la tabla tblRegistro desde la API.
         </div>
 
-        <div id="contenido" class="dashboard-container hidden" style="gap:14px;">
+        <div id="contenido" class="content-stack hidden">
             <section class="kpi-grid">
                 <div class="kpi-card">
                     <div class="kpi-label">Indicadores con datos</div>
                     <div class="kpi-value" id="kpiIndicadores">–</div>
-                    <div class="kpi-sub" id="kpiIndicadoresSub">&nbsp;</div>
+                    <div class="kpi-sub" id="kpiIndicadoresSub"></div>
                 </div>
                 <div class="kpi-card">
-                    <div class="kpi-label">Semanas con registro</div>
-                    <div class="kpi-value" id="kpiSemanas">–</div>
-                    <div class="kpi-sub" id="kpiSemanasSub">&nbsp;</div>
+                    <div class="kpi-label" id="kpiPeriodoLbl">Semanas seleccionadas</div>
+                    <div class="kpi-value" id="kpiPeriodo">–</div>
+                    <div class="kpi-sub" id="kpiPeriodoSub"></div>
                 </div>
                 <div class="kpi-card">
-                    <div class="kpi-label">Última semana</div>
+                    <div class="kpi-label" id="kpiUltimaLbl">Última semana</div>
                     <div class="kpi-value" id="kpiUltima">–</div>
-                    <div class="kpi-sub" id="kpiUltimaSub">&nbsp;</div>
+                    <div class="kpi-sub" id="kpiUltimaSub"></div>
                 </div>
                 <div class="kpi-card">
                     <div class="kpi-label">Registros diarios</div>
                     <div class="kpi-value" id="kpiRegistros">–</div>
-                    <div class="kpi-sub" id="kpiRegistrosSub">&nbsp;</div>
+                    <div class="kpi-sub" id="kpiRegistrosSub"></div>
                 </div>
             </section>
 
             <div id="seccionesGraficos"></div>
 
             <section class="matrix-card">
-                <h2>Matriz semanal por indicador</h2>
-                <p class="section-note">Promedio de los valores diarios de cada semana. Las celdas con guion no tienen registros.</p>
+                <h2 id="matrizTitulo">Matriz semanal por indicador</h2>
+                <p class="section-note" id="matrizNota">Promedio de los valores diarios de cada semana. Las celdas con guion no tienen registros.</p>
                 <div class="table-responsive">
                     <table class="matrix" id="tablaMatriz"></table>
                 </div>
@@ -660,6 +924,10 @@
 
         const pad2 = n => String(n).padStart(2, '0');
         const etiquetaSemana = (sem, rango) => `Sem. ${pad2(sem)} (${rango})`;
+        const claveDia = f => `${f.getFullYear()}-${pad2(f.getMonth() + 1)}-${pad2(f.getDate())}`;
+        const ddmm = f => `${pad2(f.getDate())}/${pad2(f.getMonth() + 1)}`;
+        const DIAS_CORTOS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+        const DIAS_LARGOS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
         // =========================================================================
         // 🎨 PALETA Y FORMATO
@@ -677,6 +945,10 @@
         Chart.defaults.font.family = "'Inter', 'Segoe UI', system-ui, sans-serif";
         Chart.defaults.font.size = 11;
         Chart.defaults.color = PALETA.muted;
+        if (typeof ChartDataLabels !== 'undefined') Chart.register(ChartDataLabels);
+
+        // Con muchas columnas se etiqueta un punto de cada N (más el último) para no encimar textos
+        const MAX_ETIQUETAS = 16;
 
         const fmtNum = (v, dec) => v == null || isNaN(v)
             ? '–'
@@ -693,7 +965,7 @@
                 const escala = esFraccion ? 100 : 1;
                 const dec = (mediana * escala) < 2 ? 2 : 1;
                 return {
-                    escala,
+                    etiqueta: v => `${fmtNum(v * escala, 1)}%`,
                     valor: v => v == null ? '–' : `${fmtNum(v * escala, dec)}%`,
                     eje: v => `${fmtNum(v * escala, dec > 1 ? 1 : 0)}%`,
                     delta: d => `${d >= 0 ? '+' : '−'}${fmtNum(Math.abs(d * escala), dec)} pp`
@@ -703,7 +975,7 @@
             const dec = mediana >= 100 ? 0 : (mediana >= 10 ? 1 : 2);
             const suf = u ? ` ${u}` : '';
             return {
-                escala: 1,
+                etiqueta: v => fmtNum(v, dec),
                 valor: v => v == null ? '–' : `${fmtNum(v, dec)}${suf}`,
                 eje: v => fmtNum(v, dec > 1 ? 1 : 0),
                 delta: d => `${d >= 0 ? '+' : '−'}${fmtNum(Math.abs(d), dec)}${suf}`
@@ -728,11 +1000,23 @@
         // =========================================================================
         // 📦 ESTADO
         // =========================================================================
+        // Semanas seleccionadas por defecto en cada vista
+        const SEMANAS_POR_DEFECTO = { semanal: 12, diario: 2 };
+
         let registrosCrudos = [];   // Datos tal cual llegan de la API
         let registrosProc = [];     // Registros con semana calculada y Valor numérico
         let ordenIndicadores = new Map();
-        let estado = { area: null, anio: null };
         let graficos = [];
+
+        const estado = {
+            vista: 'semanal',
+            area: null,
+            anio: null,
+            semanasAnio: [],          // [{ semana, rango }] con datos en el año, ascendente
+            anioDeSeleccion: null,    // año para el que se calcularon las selecciones
+            sel: { semanal: new Set(), diario: new Set() },
+            modo: { semanal: 'multiple', diario: 'multiple' }
+        };
 
         const $ = id => document.getElementById(id);
 
@@ -743,12 +1027,15 @@
             return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
         }
 
+        const areaDe = r => (r['Área'] ?? r['Area'] ?? '').toString().trim();
+        const indicadorDe = r => (r['Indicador'] ?? '').toString().trim();
+
         function procesarRegistros(crudos) {
             ordenIndicadores = new Map();
             const salida = [];
             crudos.forEach(r => {
-                const indicador = (r['Indicador'] ?? '').toString().trim();
-                const area = (r['Área'] ?? r['Area'] ?? '').toString().trim();
+                const indicador = indicadorDe(r);
+                const area = areaDe(r);
                 if (!indicador || !area) return;
 
                 const id = r['ID'];
@@ -764,6 +1051,7 @@
                     area,
                     unidad: (r['Unidad'] ?? '').toString().trim(),
                     fecha,
+                    dia: claveDia(fecha),
                     valor,
                     semana: sem.semana,
                     anio: sem.anoSemana,
@@ -827,7 +1115,7 @@
         }
 
         // =========================================================================
-        // 🎛️ FILTROS
+        // 🎛️ FILTROS: AÑO, ÁREA, VISTA
         // =========================================================================
         function inicializarFiltros() {
             const anios = [...new Set(registrosProc.map(r => r.anio))].sort((a, b) => b - a);
@@ -836,12 +1124,41 @@
             if (!anios.includes(estado.anio)) estado.anio = anios[0] ?? null;
             selAnio.value = estado.anio ?? '';
 
+            prepararSemanasDelAnio();
             renderizarTabsArea();
+        }
+
+        // Semanas con datos en el año (todas las áreas) y selección por defecto de cada vista
+        function prepararSemanasDelAnio() {
+            const nums = [...new Set(registrosProc.filter(r => r.anio === estado.anio).map(r => r.semana))].sort((a, b) => a - b);
+            estado.semanasAnio = nums.map(s => ({
+                semana: s,
+                rango: calcularSemanaConInicioLunes(lunesDeSemanaIso(estado.anio, s)).rangoTexto
+            }));
+
+            const disponibles = new Set(nums);
+            if (estado.anioDeSeleccion !== estado.anio) {
+                aplicarSeleccionPorDefecto('semanal');
+                aplicarSeleccionPorDefecto('diario');
+                estado.anioDeSeleccion = estado.anio;
+            } else {
+                // Recarga del mismo año: conservar la selección vigente
+                ['semanal', 'diario'].forEach(v => {
+                    estado.sel[v] = new Set([...estado.sel[v]].filter(s => disponibles.has(s)));
+                    if (!estado.sel[v].size) aplicarSeleccionPorDefecto(v);
+                });
+            }
+            renderizarFiltroSemanas();
+        }
+
+        function aplicarSeleccionPorDefecto(vista) {
+            const n = estado.modo[vista] === 'unica' ? 1 : SEMANAS_POR_DEFECTO[vista];
+            estado.sel[vista] = new Set(estado.semanasAnio.slice(-n).map(s => s.semana));
         }
 
         function renderizarTabsArea() {
             const delAnio = registrosProc.filter(r => r.anio === estado.anio);
-            const areasTodas = [...new Set(registrosCrudos.map(r => (r['Área'] ?? r['Area'] ?? '').toString().trim()).filter(Boolean))].sort();
+            const areasTodas = [...new Set(registrosCrudos.map(areaDe).filter(Boolean))].sort();
 
             if (!areasTodas.includes(estado.area)) {
                 // Por defecto: el área con más indicadores con datos en el año
@@ -866,59 +1183,225 @@
 
         $('selAnio').addEventListener('change', e => {
             estado.anio = Number(e.target.value);
+            prepararSemanasDelAnio();
             renderizarTabsArea();
             renderizar();
         });
 
+        // Vista activa: la pestaña también se refleja en la URL (#semanal / #diario)
+        function aplicarVista(vista) {
+            estado.vista = vista;
+            document.querySelectorAll('.view-tab').forEach(t => {
+                const activo = t.dataset.vista === estado.vista;
+                t.classList.toggle('active', activo);
+                t.setAttribute('aria-selected', activo);
+            });
+            $('headerSub').textContent = estado.vista === 'semanal'
+                ? 'Promedio semanal (lunes a domingo) de los valores diarios registrados en BD Indicadores N3'
+                : 'Valores diarios registrados en BD Indicadores N3 para las semanas seleccionadas';
+        }
+
+        document.querySelector('.view-tabs').addEventListener('click', e => {
+            const btn = e.target.closest('.view-tab');
+            if (!btn || btn.dataset.vista === estado.vista) return;
+            aplicarVista(btn.dataset.vista);
+            try { history.replaceState(null, '', `#${estado.vista}`); } catch (err) { }
+            abrirPanelSemanas(false);
+            renderizarFiltroSemanas();
+            if (registrosCrudos.length) renderizar();
+        });
+
+        if (location.hash === '#diario') aplicarVista('diario');
+
         $('btnRecargar').addEventListener('click', () => cargarDatosDesdeApi(true));
 
         // =========================================================================
-        // 📊 AGREGACIÓN SEMANAL
+        // 🗓️ FILTRO DE SEMANAS (selección única o múltiple, independiente por vista)
+        // =========================================================================
+        function textoSeleccionSemanas(vista) {
+            const sel = estado.semanasAnio.filter(s => estado.sel[vista].has(s.semana));
+            if (!sel.length) return 'Ninguna semana';
+            if (sel.length === 1) return etiquetaSemana(sel[0].semana, sel[0].rango);
+
+            const indices = sel.map(s => estado.semanasAnio.indexOf(s));
+            const contiguas = indices.every((idx, i) => i === 0 || idx === indices[i - 1] + 1);
+            if (sel.length === estado.semanasAnio.length) return `Todas (${sel.length} semanas)`;
+            return contiguas
+                ? `Sem. ${pad2(sel[0].semana)} a ${pad2(sel[sel.length - 1].semana)} (${sel.length})`
+                : `${sel.length} semanas`;
+        }
+
+        function renderizarFiltroSemanas() {
+            const v = estado.vista;
+            const modo = estado.modo[v];
+            const tipo = modo === 'unica' ? 'radio' : 'checkbox';
+
+            $('btnSemanasTxt').textContent = textoSeleccionSemanas(v);
+            $('lblSemanas').textContent = modo === 'unica' ? 'Semana' : 'Semanas';
+
+            document.querySelectorAll('#panelSemanas .seg-btn').forEach(b => {
+                const activo = b.dataset.modo === modo;
+                b.classList.toggle('active', activo);
+                b.setAttribute('aria-pressed', activo);
+            });
+
+            const n = SEMANAS_POR_DEFECTO[v];
+            $('btnUltimas').textContent = modo === 'unica' ? 'Última semana' : `Últimas ${n}`;
+            $('btnTodas').classList.toggle('hidden', modo === 'unica');
+            $('btnLimpiar').classList.toggle('hidden', modo === 'unica');
+
+            $('listaSemanas').innerHTML = [...estado.semanasAnio].reverse().map(s => `
+                <label class="week-option">
+                    <input type="${tipo}" name="opcionSemana" value="${s.semana}" ${estado.sel[v].has(s.semana) ? 'checked' : ''}>
+                    <span class="week-num">Sem. ${pad2(s.semana)}</span>
+                    <span class="week-range">${s.rango}</span>
+                </label>`).join('');
+        }
+
+        function abrirPanelSemanas(abrir) {
+            $('panelSemanas').hidden = !abrir;
+            $('btnSemanas').setAttribute('aria-expanded', abrir);
+        }
+
+        $('btnSemanas').addEventListener('click', () => abrirPanelSemanas($('panelSemanas').hidden));
+
+        document.addEventListener('click', e => {
+            if (!$('comboSemanas').contains(e.target)) abrirPanelSemanas(false);
+        });
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape' && !$('panelSemanas').hidden) {
+                abrirPanelSemanas(false);
+                $('btnSemanas').focus();
+            }
+        });
+
+        $('listaSemanas').addEventListener('change', e => {
+            const input = e.target;
+            if (!input.matches('input[name="opcionSemana"]')) return;
+            const v = estado.vista;
+            const semana = Number(input.value);
+
+            if (estado.modo[v] === 'unica') {
+                estado.sel[v] = new Set([semana]);
+                abrirPanelSemanas(false);
+            } else if (input.checked) {
+                estado.sel[v].add(semana);
+            } else {
+                estado.sel[v].delete(semana);
+            }
+
+            $('btnSemanasTxt').textContent = textoSeleccionSemanas(v);
+            renderizar();
+        });
+
+        document.querySelector('#panelSemanas .seg').addEventListener('click', e => {
+            const btn = e.target.closest('.seg-btn');
+            if (!btn) return;
+            const v = estado.vista;
+            const modo = btn.dataset.modo;
+            if (modo === estado.modo[v]) return;
+            estado.modo[v] = modo;
+
+            if (modo === 'unica') {
+                // Conservar solo la semana más reciente de la selección
+                const ultima = estado.semanasAnio.filter(s => estado.sel[v].has(s.semana)).pop();
+                estado.sel[v] = new Set(ultima ? [ultima.semana] : []);
+                if (!estado.sel[v].size) aplicarSeleccionPorDefecto(v);
+            }
+            renderizarFiltroSemanas();
+            renderizar();
+        });
+
+        document.querySelector('#panelSemanas .quick-row').addEventListener('click', e => {
+            const btn = e.target.closest('.quick-btn');
+            if (!btn) return;
+            const v = estado.vista;
+            if (btn.dataset.rapido === 'ultimas') aplicarSeleccionPorDefecto(v);
+            if (btn.dataset.rapido === 'todas') estado.sel[v] = new Set(estado.semanasAnio.map(s => s.semana));
+            if (btn.dataset.rapido === 'ninguna') estado.sel[v] = new Set();
+            renderizarFiltroSemanas();
+            renderizar();
+        });
+
+        // =========================================================================
+        // 📊 MODELO: columnas (semanas o días) y series por indicador
         // =========================================================================
         function construirModelo() {
-            const filas = registrosProc.filter(r => r.anio === estado.anio && r.area === estado.area);
+            const vista = estado.vista;
+            const seleccion = estado.sel[vista];
+            const filasArea = registrosProc.filter(r => r.anio === estado.anio && r.area === estado.area);
+            const filas = filasArea.filter(r => seleccion.has(r.semana));
+            const semanasSel = estado.semanasAnio.filter(s => seleccion.has(s.semana));
 
-            // Eje de semanas: desde la primera hasta la última semana con datos en el área
-            const semanasConDatos = [...new Set(filas.map(r => r.semana))].sort((a, b) => a - b);
-            const semanas = [];
-            if (semanasConDatos.length) {
-                for (let s = semanasConDatos[0]; s <= semanasConDatos[semanasConDatos.length - 1]; s++) {
-                    const lunes = lunesDeSemanaIso(estado.anio, s);
-                    semanas.push({ semana: s, rango: calcularSemanaConInicioLunes(lunes).rangoTexto });
-                }
+            // Columnas del eje: una por semana (Semanal) o una por día (Diario)
+            let puntos = [];
+            if (vista === 'semanal') {
+                puntos = semanasSel.map(s => ({
+                    clave: s.semana,
+                    corto: `S${pad2(s.semana)}`,
+                    titulo: etiquetaSemana(s.semana, s.rango),
+                    ref: `Sem. ${pad2(s.semana)}`,
+                    semana: s.semana,
+                    rango: s.rango
+                }));
+            } else {
+                // Días de lunes a domingo de cada semana elegida, hasta el último día con datos del área
+                const ultimaFechaArea = filasArea.reduce((m, r) => (!m || r.fecha > m ? r.fecha : m), null);
+                semanasSel.forEach(s => {
+                    const lunes = lunesDeSemanaIso(estado.anio, s.semana);
+                    for (let d = 0; d < 7; d++) {
+                        const f = new Date(lunes);
+                        f.setDate(lunes.getDate() + d);
+                        if (ultimaFechaArea && f > ultimaFechaArea) break;
+                        puntos.push({
+                            clave: claveDia(f),
+                            corto: ddmm(f),
+                            titulo: `${DIAS_LARGOS[f.getDay()]} ${ddmm(f)}/${f.getFullYear()} · Sem. ${pad2(s.semana)}`,
+                            ref: ddmm(f),
+                            cabecera: `${DIAS_CORTOS[f.getDay()]} ${ddmm(f)}`,
+                            semana: s.semana,
+                            rango: s.rango,
+                            inicioSemana: d === 0
+                        });
+                    }
+                });
             }
+
+            const claveDe = vista === 'semanal' ? (r => r.semana) : (r => r.dia);
 
             // Indicadores del área (incluye los que no tienen datos, para informarlos)
             const indicadoresArea = [...new Set(registrosCrudos
-                .filter(r => (r['Área'] ?? r['Area'] ?? '').toString().trim() === estado.area)
-                .map(r => (r['Indicador'] ?? '').toString().trim())
+                .filter(r => areaDe(r) === estado.area)
+                .map(indicadorDe)
                 .filter(Boolean))]
                 .sort((a, b) => (ordenIndicadores.get(a) ?? 0) - (ordenIndicadores.get(b) ?? 0));
 
             const indicadores = indicadoresArea.map(nombre => {
+                const delAnio = filasArea.filter(r => r.indicador === nombre);
                 const propias = filas.filter(r => r.indicador === nombre);
-                const unidad = propias[0]?.unidad
-                    ?? (registrosCrudos.find(r => (r['Indicador'] ?? '').toString().trim() === nombre)?.['Unidad'] ?? '').toString().trim();
+                const unidad = delAnio[0]?.unidad
+                    ?? (registrosCrudos.find(r => indicadorDe(r) === nombre)?.['Unidad'] ?? '').toString().trim();
 
-                const porSemana = new Map();
+                const porClave = new Map();
                 propias.forEach(r => {
-                    if (!porSemana.has(r.semana)) porSemana.set(r.semana, []);
-                    porSemana.get(r.semana).push(r.valor);
+                    const k = claveDe(r);
+                    if (!porClave.has(k)) porClave.set(k, []);
+                    porClave.get(k).push(r.valor);
                 });
 
-                const serie = semanas.map(s => {
-                    const vals = porSemana.get(s.semana);
+                const serie = puntos.map(p => {
+                    const vals = porClave.get(p.clave);
                     return vals && vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
                 });
-                const dias = semanas.map(s => (porSemana.get(s.semana) || []).length);
+                const dias = puntos.map(p => (porClave.get(p.clave) || []).length);
 
                 const valoresValidos = serie.filter(v => v != null);
                 const promedio = valoresValidos.length ? valoresValidos.reduce((a, b) => a + b, 0) / valoresValidos.length : null;
 
-                const idxUltima = serie.map((v, i) => v != null ? i : -1).filter(i => i >= 0).pop();
-                const idxPrevia = idxUltima != null
-                    ? serie.map((v, i) => v != null && i < idxUltima ? i : -1).filter(i => i >= 0).pop()
-                    : undefined;
+                const conValor = serie.map((v, i) => v != null ? i : -1).filter(i => i >= 0);
+                const idxUltima = conValor.length ? conValor[conValor.length - 1] : null;
+                const idxPrevia = conValor.length > 1 ? conValor[conValor.length - 2] : null;
 
                 const { familia, componente } = obtenerFamilia(nombre);
 
@@ -926,11 +1409,12 @@
                     nombre, familia, componente, unidad, serie, dias, promedio,
                     idxUltima, idxPrevia,
                     registros: propias.length,
-                    formato: crearFormato(unidad, propias.map(r => r.valor))
+                    // La escala del formato se decide con todo el año para que no cambie con la selección
+                    formato: crearFormato(unidad, delAnio.map(r => r.valor))
                 };
             });
 
-            return { filas, semanas, indicadores };
+            return { vista, filas, puntos, semanasSel, indicadores };
         }
 
         // =========================================================================
@@ -954,33 +1438,59 @@
             renderizarMatriz(modelo);
         }
 
-        function renderizarKpis({ filas, semanas, indicadores }) {
+        function renderizarKpis({ vista, filas, semanasSel, indicadores }) {
             const conDatos = indicadores.filter(i => i.registros > 0);
             $('kpiIndicadores').textContent = conDatos.length;
             $('kpiIndicadoresSub').textContent = indicadores.length > conDatos.length
                 ? `de ${indicadores.length} definidos en ${estado.area}`
                 : `${estado.area} · ${estado.anio}`;
 
-            const semanasDatos = [...new Set(filas.map(r => r.semana))];
-            $('kpiSemanas').textContent = semanasDatos.length;
-            $('kpiSemanasSub').textContent = semanas.length
-                ? `Sem. ${pad2(semanas[0].semana)} a Sem. ${pad2(semanas[semanas.length - 1].semana)}`
-                : 'Sin registros en el año';
-
-            const ultima = semanas[semanas.length - 1];
-            $('kpiUltima').textContent = ultima ? `Sem. ${pad2(ultima.semana)}` : '–';
             const ultimaFecha = filas.reduce((m, r) => (!m || r.fecha > m ? r.fecha : m), null);
-            $('kpiUltimaSub').textContent = ultima
-                ? `${ultima.rango} · último día ${ultimaFecha.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit' })}`
-                : '';
+
+            if (vista === 'semanal') {
+                $('kpiPeriodoLbl').textContent = 'Semanas seleccionadas';
+                $('kpiPeriodo').textContent = semanasSel.length || '–';
+                $('kpiPeriodoSub').textContent = semanasSel.length
+                    ? `Sem. ${pad2(semanasSel[0].semana)} a Sem. ${pad2(semanasSel[semanasSel.length - 1].semana)}`
+                    : 'Sin semanas seleccionadas';
+
+                const semUlt = ultimaFecha ? calcularSemanaConInicioLunes(ultimaFecha) : null;
+                $('kpiUltimaLbl').textContent = 'Última semana con datos';
+                $('kpiUltima').textContent = semUlt ? `Sem. ${pad2(semUlt.semana)}` : '–';
+                $('kpiUltimaSub').textContent = semUlt ? `${semUlt.rangoTexto} · último día ${ddmm(ultimaFecha)}` : '';
+            } else {
+                const diasConDato = new Set(filas.map(r => r.dia)).size;
+                $('kpiPeriodoLbl').textContent = 'Días con registro';
+                $('kpiPeriodo').textContent = diasConDato || '–';
+                $('kpiPeriodoSub').textContent = semanasSel.length
+                    ? `en ${semanasSel.length} ${semanasSel.length === 1 ? 'semana' : 'semanas'} seleccionadas`
+                    : 'Sin semanas seleccionadas';
+
+                $('kpiUltimaLbl').textContent = 'Último día con datos';
+                $('kpiUltima').textContent = ultimaFecha ? ddmm(ultimaFecha) : '–';
+                $('kpiUltimaSub').textContent = ultimaFecha
+                    ? `${DIAS_LARGOS[ultimaFecha.getDay()]} · Sem. ${pad2(calcularSemanaConInicioLunes(ultimaFecha).semana)}`
+                    : '';
+            }
 
             $('kpiRegistros').textContent = filas.length.toLocaleString('es-PE');
-            $('kpiRegistrosSub').textContent = 'valores diarios en el periodo';
+            $('kpiRegistrosSub').textContent = 'valores diarios en la selección';
         }
 
-        function renderizarGraficos({ semanas, indicadores }) {
+        function renderizarGraficos({ vista, puntos, indicadores }) {
             const cont = $('seccionesGraficos');
             cont.innerHTML = '';
+
+            if (!puntos.length) {
+                cont.innerHTML = `<div class="state-box"><strong>No hay semanas seleccionadas</strong>Elige una o más semanas en el filtro de Semanas.</div>`;
+                return;
+            }
+
+            const conDatos = indicadores.filter(i => i.registros > 0);
+            if (!conDatos.length) {
+                cont.innerHTML = `<div class="state-box"><strong>Sin registros para ${escaparHtml(estado.area)} en las semanas elegidas</strong>Selecciona otras semanas, otro año u otra área.</div>`;
+                return;
+            }
 
             // Agrupar por familia respetando el orden de la tabla
             const familias = new Map();
@@ -995,21 +1505,14 @@
             const bloques = [];
             const sueltos = [];
             familias.forEach((items, familia) => {
-                const conDatos = items.filter(i => i.registros > 0);
-                if (!conDatos.length) return;
-                if (items.length > 1) bloques.push({ titulo: familia, items: conDatos });
-                else sueltos.push(...conDatos);
+                const conDatosFam = items.filter(i => i.registros > 0);
+                if (!conDatosFam.length) return;
+                if (items.length > 1) bloques.push({ titulo: familia, items: conDatosFam });
+                else sueltos.push(...conDatosFam);
             });
             if (sueltos.length) bloques.push({ titulo: 'Otros indicadores', items: sueltos });
 
-            if (!semanas.length) {
-                cont.innerHTML = `<div class="state-box"><strong>Sin registros para ${escaparHtml(estado.area)} en ${estado.anio}</strong>Selecciona otro año o área.</div>`;
-                return;
-            }
-
-            const etiquetas = semanas.map(s => `S${pad2(s.semana)}`);
-
-            bloques.forEach((bloque, bIdx) => {
+            bloques.forEach(bloque => {
                 const seccion = document.createElement('section');
                 seccion.style.marginBottom = '14px';
                 seccion.innerHTML = `<h2 class="section-title">${escaparHtml(bloque.titulo)}</h2>`;
@@ -1019,15 +1522,15 @@
                 seccion.appendChild(grid);
                 cont.appendChild(seccion);
 
-                bloque.items.forEach((ind, iIdx) => {
+                bloque.items.forEach(ind => {
                     const f = ind.formato;
                     const ultimo = ind.idxUltima != null ? ind.serie[ind.idxUltima] : null;
                     const previo = ind.idxPrevia != null ? ind.serie[ind.idxPrevia] : null;
-                    const semUlt = ind.idxUltima != null ? semanas[ind.idxUltima] : null;
-                    const semPrev = ind.idxPrevia != null ? semanas[ind.idxPrevia] : null;
+                    const pUlt = ind.idxUltima != null ? puntos[ind.idxUltima] : null;
+                    const pPrev = ind.idxPrevia != null ? puntos[ind.idxPrevia] : null;
                     const deltaTxt = (ultimo != null && previo != null)
-                        ? `${f.delta(ultimo - previo)} vs Sem. ${pad2(semPrev.semana)}`
-                        : 'Sin semana previa';
+                        ? `${f.delta(ultimo - previo)} vs ${pPrev.ref}`
+                        : (vista === 'semanal' ? 'Sin semana previa' : 'Sin día previo');
 
                     const titulo = bloque.titulo === ind.familia && ind.componente ? ind.componente : ind.nombre;
                     const card = document.createElement('article');
@@ -1036,38 +1539,41 @@
                         <div class="chart-head">
                             <div>
                                 <h3 class="chart-title">${escaparHtml(titulo)}</h3>
-                                <div class="chart-unit">${escaparHtml(ind.unidad || 'Sin unidad')} · Sem. ${semUlt ? pad2(semUlt.semana) : '–'}</div>
+                                <div class="chart-unit">${escaparHtml(ind.unidad || 'Sin unidad')} · ${pUlt ? pUlt.ref : '–'}</div>
                             </div>
                             <div class="chart-last">
                                 <div class="chart-last-value">${f.valor(ultimo)}</div>
                                 <div class="chart-last-delta">${deltaTxt}</div>
                             </div>
                         </div>
-                        <div class="chart-box"><canvas aria-label="Tendencia semanal de ${escaparHtml(ind.nombre)}" role="img"></canvas></div>
+                        <div class="chart-box"><canvas aria-label="Tendencia ${vista === 'semanal' ? 'semanal' : 'diaria'} de ${escaparHtml(ind.nombre)}" role="img"></canvas></div>
                         <div class="chart-foot">
-                            <span class="legend-avg">Promedio ${estado.anio}: ${f.valor(ind.promedio)}</span>
-                            <span>${ind.registros} días con dato</span>
+                            <span class="legend-avg">Promedio de la selección: ${f.valor(ind.promedio)}</span>
+                            <span>${ind.registros} ${ind.registros === 1 ? 'día' : 'días'} con dato</span>
                         </div>`;
                     grid.appendChild(card);
 
-                    graficos.push(crearGrafico(card.querySelector('canvas'), etiquetas, semanas, ind, PALETA.primary));
+                    graficos.push(crearGrafico(card.querySelector('canvas'), vista, puntos, ind));
                 });
             });
 
             if (sinDatos.length) {
                 const nota = document.createElement('p');
                 nota.className = 'section-note';
-                nota.textContent = `Sin datos registrados en ${estado.anio}: ${sinDatos.map(i => i.nombre).join(', ')}.`;
+                nota.textContent = `Sin datos en las semanas seleccionadas: ${sinDatos.map(i => i.nombre).join(', ')}.`;
                 cont.appendChild(nota);
             }
         }
 
-        function crearGrafico(canvas, etiquetas, semanas, ind, color) {
+        function crearGrafico(canvas, vista, puntos, ind) {
             const f = ind.formato;
+            const color = PALETA.primary;
+            const paso = Math.ceil(puntos.length / MAX_ETIQUETAS);
+            const ultimoIdx = ind.idxUltima;
             return new Chart(canvas, {
                 type: 'line',
                 data: {
-                    labels: etiquetas,
+                    labels: puntos.map(p => p.corto),
                     datasets: [
                         {
                             label: ind.nombre,
@@ -1075,28 +1581,43 @@
                             borderColor: color,
                             backgroundColor: 'rgba(186, 160, 99, 0.12)',
                             borderWidth: 2,
-                            pointRadius: 2.5,
+                            pointRadius: vista === 'diario' ? 3 : 2.5,
                             pointHoverRadius: 5,
                             pointBackgroundColor: color,
                             fill: true,
-                            tension: 0.25,
-                            spanGaps: false
+                            tension: vista === 'diario' ? 0.15 : 0.25,
+                            spanGaps: false,
+                            datalabels: {
+                                // Regla responsive: sin etiquetas en celular (<= 768px)
+                                display: ctx => window.innerWidth > 768
+                                    && ctx.dataset.data[ctx.dataIndex] != null
+                                    && (paso <= 1 || ctx.dataIndex % paso === 0 || ctx.dataIndex === ultimoIdx),
+                                align: 'top',
+                                anchor: 'end',
+                                offset: 2,
+                                clamp: true,
+                                color: PALETA.heading,
+                                font: { size: 10, weight: '600' },
+                                formatter: v => f.etiqueta(v)
+                            }
                         },
                         {
-                            label: 'Promedio del año',
+                            label: 'Promedio de la selección',
                             data: ind.serie.map(() => ind.promedio),
                             borderColor: PALETA.secondary,
                             borderWidth: 1.5,
                             borderDash: [5, 4],
                             pointRadius: 0,
                             pointHoverRadius: 0,
-                            fill: false
+                            fill: false,
+                            datalabels: { display: false }
                         }
                     ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    layout: { padding: { top: 16, right: 8 } },
                     interaction: { mode: 'index', intersect: false },
                     plugins: {
                         legend: { display: false },
@@ -1107,16 +1628,13 @@
                             padding: 10,
                             displayColors: false,
                             callbacks: {
-                                title: items => {
-                                    const s = semanas[items[0].dataIndex];
-                                    return etiquetaSemana(s.semana, s.rango);
-                                },
+                                title: items => puntos[items[0].dataIndex].titulo,
                                 label: item => {
-                                    if (item.datasetIndex === 1) return `Promedio año: ${f.valor(item.raw)}`;
+                                    if (item.datasetIndex === 1) return `Promedio selección: ${f.valor(item.raw)}`;
+                                    if (item.raw == null) return 'Sin registros';
+                                    if (vista === 'diario') return `Valor: ${f.valor(item.raw)}`;
                                     const dias = ind.dias[item.dataIndex];
-                                    return item.raw == null
-                                        ? 'Sin registros'
-                                        : `Valor: ${f.valor(item.raw)} (${dias} ${dias === 1 ? 'día' : 'días'})`;
+                                    return `Valor: ${f.valor(item.raw)} (${dias} ${dias === 1 ? 'día' : 'días'})`;
                                 }
                             }
                         }
@@ -1137,16 +1655,36 @@
             });
         }
 
-        function renderizarMatriz({ semanas, indicadores }) {
+        function renderizarMatriz({ vista, puntos, semanasSel, indicadores }) {
             const tabla = $('tablaMatriz');
-            if (!semanas.length) {
+            $('matrizTitulo').textContent = vista === 'semanal' ? 'Matriz semanal por indicador' : 'Matriz diaria por indicador';
+            $('matrizNota').textContent = vista === 'semanal'
+                ? 'Promedio de los valores diarios de cada semana. Las celdas con guion no tienen registros.'
+                : 'Valor registrado en cada día. Las celdas con guion no tienen registros.';
+
+            if (!puntos.length) {
                 tabla.innerHTML = '';
                 return;
             }
 
-            const head = `<thead><tr><th scope="col">Indicador</th>${semanas.map(s =>
-                `<th scope="col" title="${etiquetaSemana(s.semana, s.rango)}">Sem. ${pad2(s.semana)}<span class="rango">${s.rango}</span></th>`
-            ).join('')}</tr></thead>`;
+            let head;
+            if (vista === 'semanal') {
+                head = `<thead><tr><th scope="col">Indicador</th>${puntos.map(p =>
+                    `<th scope="col" title="${p.titulo}">${p.ref}<span class="rango">${p.rango}</span></th>`
+                ).join('')}</tr></thead>`;
+            } else {
+                // Fila 1: semanas (agrupan sus días). Fila 2: días.
+                const diasPorSemana = new Map();
+                puntos.forEach(p => diasPorSemana.set(p.semana, (diasPorSemana.get(p.semana) || 0) + 1));
+                const fila1 = semanasSel
+                    .filter(s => diasPorSemana.has(s.semana))
+                    .map(s => `<th scope="colgroup" class="week-head grp-start" colspan="${diasPorSemana.get(s.semana)}">${etiquetaSemana(s.semana, s.rango)}</th>`)
+                    .join('');
+                const fila2 = puntos.map(p =>
+                    `<th scope="col" class="${p.inicioSemana ? 'grp-start' : ''}" title="${p.titulo}">${p.cabecera}</th>`
+                ).join('');
+                head = `<thead><tr><th scope="col" rowspan="2">Indicador</th>${fila1}</tr><tr>${fila2}</tr></thead>`;
+            }
 
             const conDatos = indicadores.filter(i => i.registros > 0);
             const familias = new Map();
@@ -1155,15 +1693,18 @@
                 familias.get(ind.familia).push(ind);
             });
 
-            const celdas = ind => ind.serie.map(v =>
-                v == null ? '<td class="empty">–</td>' : `<td>${ind.formato.valor(v)}</td>`
+            const claseCol = i => (vista === 'diario' && puntos[i].inicioSemana) ? ' grp-start' : '';
+            const celdas = ind => ind.serie.map((v, i) =>
+                v == null
+                    ? `<td class="empty${claseCol(i)}">–</td>`
+                    : `<td class="${claseCol(i).trim()}">${ind.formato.valor(v)}</td>`
             ).join('');
 
             let body = '';
             familias.forEach((items, familia) => {
                 const agrupa = items.length > 1 || items[0].componente;
                 if (agrupa) {
-                    body += `<tr class="row-family"><td colspan="${semanas.length + 1}">${escaparHtml(familia)} <span style="font-weight:500;color:var(--color-text-muted)">· ${escaparHtml(items[0].unidad)}</span></td></tr>`;
+                    body += `<tr class="row-family"><td colspan="${puntos.length + 1}">${escaparHtml(familia)} <span style="font-weight:500;color:var(--color-text-muted)">· ${escaparHtml(items[0].unidad)}</span></td></tr>`;
                     items.forEach(ind => {
                         body += `<tr class="row-ind"><td>${escaparHtml(ind.componente || ind.nombre)}</td>${celdas(ind)}</tr>`;
                     });
@@ -1173,9 +1714,17 @@
                 }
             });
 
+            if (!body) {
+                body = `<tr><td colspan="${puntos.length + 1}" style="text-align:center;color:var(--color-text-muted);padding:24px;">Sin registros en la selección.</td></tr>`;
+            }
+
             tabla.innerHTML = `${head}<tbody>${body}</tbody>`;
 
-            // Mostrar las semanas más recientes al abrir
+            // La fila de días queda fija justo debajo de la fila de semanas
+            const fila1 = tabla.tHead && tabla.tHead.rows[0];
+            if (fila1 && fila1.offsetHeight) tabla.style.setProperty('--thead-r1', `${fila1.offsetHeight}px`);
+
+            // Mostrar las columnas más recientes al abrir
             const wrap = tabla.parentElement;
             wrap.scrollLeft = wrap.scrollWidth;
         }
