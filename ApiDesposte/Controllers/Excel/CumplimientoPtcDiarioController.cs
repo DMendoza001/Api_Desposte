@@ -1,7 +1,6 @@
-using ClosedXML.Excel;
+using ApiDesposte.Infraestructura.Excel;
 using Microsoft.AspNetCore.Mvc;
 using System.Globalization;
-using System.IO;
 
 namespace ApiDesposte.Controllers.Excel
 {
@@ -21,6 +20,14 @@ namespace ApiDesposte.Controllers.Excel
             { "T_CodigoRelacion", ("Auxiliares", "T_CodigoRelacion") }
         };
 
+        // Tablas de movimiento que se consolidan (en este orden) y el acumulador de Kilos de cada una
+        private static readonly (string Tabla, string Origen, Action<ConsolidadoAcumulado, double> SumarKilos)[] TablasMovimiento =
+        {
+            ("T_Produccion", "Produccion", (a, kg) => a.KilosProduccion += kg),
+            ("T_ResProd_Py_DB", "ResProd_Py_DB", (a, kg) => a.KilosResProdPyDb += kg),
+            ("T_Distribucion", "Distribucion", (a, kg) => a.KilosDistribucion += kg)
+        };
+
         // Nombres oficiales de campo por concepto (Llave: Fecha + CodigoCorto | Cálculo: Kilos | Auxiliares: SubPlanta)
         private static readonly string[] CamposFecha = { "Fecha" };
         private static readonly string[] CamposCodigoCorto = { "CodigoCorto", "CódigoCorto", "Codigo", "Código" };
@@ -28,11 +35,10 @@ namespace ApiDesposte.Controllers.Excel
         private static readonly string[] CamposNombre = { "Nombre", "Descripcion", "Descripción" };
         private static readonly string[] CamposSubPlanta = { "SubPlanta", "Sub Planta", "Planta" };
 
+        private static readonly string[] FormatosFecha = { "yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss", "yyyy/MM/dd", "dd/MM/yyyy", "d/M/yyyy", "dd-MM-yyyy", "d-M-yyyy" };
+
         // Cache en memoria para optimizar lecturas consecutivas desde el frontend JS
-        private static Dictionary<string, List<Dictionary<string, object?>>>? _cacheTablas = null;
-        private static DateTime _cacheTimestamp = DateTime.MinValue;
-        private static readonly object _cacheLock = new();
-        private static readonly TimeSpan CacheDuracion = TimeSpan.FromSeconds(60);
+        private static readonly CacheTablasExcel Cache = new(TimeSpan.FromSeconds(60));
 
         private string ObtenerRutaExcel()
         {
@@ -40,195 +46,11 @@ namespace ApiDesposte.Controllers.Excel
             return Path.Combine(userProfile, RutaRelativaExcel);
         }
 
-        private XLWorkbook CargarWorkbookEnMemoria(string rutaExcel)
-        {
-            byte[] fileBytes;
-            using (var fileStream = new FileStream(rutaExcel, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
-            using (var ms = new MemoryStream())
-            {
-                fileStream.CopyTo(ms);
-                fileBytes = ms.ToArray();
-            }
-
-            var msModificado = new MemoryStream();
-            msModificado.Write(fileBytes, 0, fileBytes.Length);
-            msModificado.Position = 0;
-
-            try
-            {
-                // Limpieza de PivotTables para evitar conflictos al abrir con ClosedXML
-                using (var doc = DocumentFormat.OpenXml.Packaging.SpreadsheetDocument.Open(msModificado, true))
-                {
-                    if (doc.WorkbookPart != null)
-                    {
-                        foreach (var wsPart in doc.WorkbookPart.WorksheetParts)
-                        {
-                            var pParts = wsPart.PivotTableParts.ToList();
-                            foreach (var p in pParts)
-                            {
-                                wsPart.DeletePart(p);
-                            }
-                        }
-
-                        var pivotCaches = doc.WorkbookPart.PivotTableCacheDefinitionParts.ToList();
-                        foreach (var cache in pivotCaches)
-                        {
-                            doc.WorkbookPart.DeletePart(cache);
-                        }
-
-                        if (doc.WorkbookPart.Workbook != null)
-                        {
-                            doc.WorkbookPart.Workbook.PivotCaches?.Remove();
-                            doc.WorkbookPart.Workbook.Save();
-                        }
-                    }
-                }
-            }
-            catch
-            {
-                msModificado = new MemoryStream(fileBytes);
-            }
-
-            msModificado.Position = 0;
-            return new XLWorkbook(msModificado);
-        }
-
-        /// <summary>
-        /// Lee una tabla estructurada de Excel tal cual está definida en la hoja,
-        /// conservando exactamente sus encabezados y valores originales sin agregar campos calculados.
-        /// </summary>
-        private static List<Dictionary<string, object?>> LeerTablaExcelTalCual(XLWorkbook workbook, string nombreHoja, string nombreTabla)
-        {
-            var registros = new List<Dictionary<string, object?>>();
-
-            if (!workbook.Worksheets.TryGetWorksheet(nombreHoja, out var hoja))
-            {
-                hoja = workbook.Worksheets.FirstOrDefault(w => string.Equals(w.Name.Trim(), nombreHoja.Trim(), StringComparison.OrdinalIgnoreCase));
-            }
-
-            IXLTable? tabla = null;
-
-            if (hoja != null)
-            {
-                try
-                {
-                    tabla = hoja.Table(nombreTabla);
-                }
-                catch
-                {
-                    tabla = hoja.Tables.FirstOrDefault(t => string.Equals(t.Name.Trim(), nombreTabla.Trim(), StringComparison.OrdinalIgnoreCase));
-                }
-            }
-
-            if (tabla == null)
-            {
-                tabla = workbook.Worksheets.SelectMany(w => w.Tables)
-                    .FirstOrDefault(t => string.Equals(t.Name.Trim(), nombreTabla.Trim(), StringComparison.OrdinalIgnoreCase));
-            }
-
-            if (tabla == null)
-            {
-                throw new InvalidOperationException($"No se encontró la tabla '{nombreTabla}' en la hoja '{nombreHoja}'.");
-            }
-
-            var headers = tabla.HeadersRow().Cells().Select(c => c.Value.ToString().Trim()).ToList();
-
-            foreach (var fila in tabla.DataRange.Rows())
-            {
-                if (fila.IsEmpty()) continue;
-
-                var filaDict = new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
-                bool tieneDatos = false;
-
-                for (int i = 0; i < headers.Count; i++)
-                {
-                    string columna = string.IsNullOrWhiteSpace(headers[i]) ? $"Columna_{i + 1}" : headers[i];
-                    object? valor = ObtenerValorCelda(fila.Cell(i + 1));
-                    if (valor != null) tieneDatos = true;
-                    filaDict[columna] = valor;
-                }
-
-                if (tieneDatos)
-                {
-                    registros.Add(filaDict);
-                }
-            }
-
-            return registros;
-        }
-
-        private static object? ObtenerValorCelda(IXLCell celda)
-        {
-            if (celda.IsEmpty()) return null;
-
-            try
-            {
-                switch (celda.DataType)
-                {
-                    case XLDataType.Boolean:
-                        return celda.GetBoolean();
-
-                    case XLDataType.Number:
-                        double num = celda.GetDouble();
-                        if (Math.Abs(num % 1) < double.Epsilon && num >= long.MinValue && num <= long.MaxValue)
-                            return (long)num;
-                        return Math.Round(num, 4);
-
-                    case XLDataType.DateTime:
-                        var dt = celda.GetDateTime();
-                        return dt.TimeOfDay.TotalSeconds == 0
-                            ? dt.ToString("yyyy-MM-dd")
-                            : dt.ToString("yyyy-MM-dd HH:mm:ss");
-
-                    case XLDataType.TimeSpan:
-                        var ts = celda.GetTimeSpan();
-                        return ts.ToString(@"hh\:mm\:ss");
-
-                    default:
-                        var str = celda.Value.ToString().Trim();
-                        return string.IsNullOrEmpty(str) ? null : str;
-                }
-            }
-            catch
-            {
-                var fallback = celda.Value.ToString().Trim();
-                return string.IsNullOrEmpty(fallback) ? null : fallback;
-            }
-        }
-
-        private Dictionary<string, List<Dictionary<string, object?>>> CargarTodasLasTablas(bool forzarRecarga = false)
-        {
-            lock (_cacheLock)
-            {
-                if (!forzarRecarga && _cacheTablas != null && (DateTime.UtcNow - _cacheTimestamp) < CacheDuracion)
-                {
-                    return _cacheTablas;
-                }
-
-                string rutaExcel = ObtenerRutaExcel();
-                if (!System.IO.File.Exists(rutaExcel))
-                {
-                    throw new FileNotFoundException($"No se encontró el archivo Excel en la ruta: {rutaExcel}");
-                }
-
-                using var workbook = CargarWorkbookEnMemoria(rutaExcel);
-
-                var resultado = new Dictionary<string, List<Dictionary<string, object?>>>(StringComparer.OrdinalIgnoreCase);
-
-                foreach (var item in MapeoTablas)
-                {
-                    resultado[item.Key] = LeerTablaExcelTalCual(workbook, item.Value.Hoja, item.Value.Tabla);
-                }
-
-                _cacheTablas = resultado;
-                _cacheTimestamp = DateTime.UtcNow;
-
-                return _cacheTablas;
-            }
-        }
+        private Dictionary<string, List<Dictionary<string, object?>>> CargarTodasLasTablas(bool forzarRecarga = false) =>
+            Cache.Obtener(ObtenerRutaExcel(), MapeoTablas, forzarRecarga);
 
         // =====================================================================
-        // 🔧 UTILIDADES DE NORMALIZACIÓN (Llave: Fecha + CodigoCorto | Cálculo: Kilos)
+        // 🔧 LECTURA DE CAMPOS (el primer nombre de campo con valor gana)
         // =====================================================================
 
         private static string ObtenerTexto(Dictionary<string, object?> fila, params string[] campos)
@@ -271,23 +93,28 @@ namespace ApiDesposte.Controllers.Excel
         {
             foreach (var campo in campos)
             {
-                if (!fila.TryGetValue(campo, out var valor) || valor == null) continue;
-
-                DateTime? fecha = ConvertirFecha(valor);
-                if (fecha.HasValue) return fecha;
+                if (fila.TryGetValue(campo, out var valor) && valor != null && ConvertirFecha(valor) is DateTime fecha)
+                {
+                    return fecha;
+                }
             }
             return null;
         }
 
+        /// <summary>
+        /// Acepta fecha nativa, serial de Excel (numérico o en texto) y los formatos de texto habituales.
+        /// </summary>
         private static DateTime? ConvertirFecha(object valor)
         {
             try
             {
-                if (valor is DateTime dt) return dt.Date;
-
-                if (valor is double d) return DateTime.FromOADate(d).Date;
-                if (valor is long l) return DateTime.FromOADate(l).Date;
-                if (valor is int i) return DateTime.FromOADate(i).Date;
+                switch (valor)
+                {
+                    case DateTime dt: return dt.Date;
+                    case double d: return DateTime.FromOADate(d).Date;
+                    case long l: return DateTime.FromOADate(l).Date;
+                    case int i: return DateTime.FromOADate(i).Date;
+                }
             }
             catch
             {
@@ -297,7 +124,7 @@ namespace ApiDesposte.Controllers.Excel
             string texto = (valor.ToString() ?? "").Trim();
             if (string.IsNullOrWhiteSpace(texto)) return null;
 
-            // Serial numérico de Excel (ej. 46000)
+            // Serial numérico de Excel guardado como texto (ej. "46000")
             if (double.TryParse(texto.Replace(",", "."), NumberStyles.Any, CultureInfo.InvariantCulture, out double serial)
                 && serial > 20000 && serial < 90000)
             {
@@ -305,21 +132,12 @@ namespace ApiDesposte.Controllers.Excel
                 catch { /* continuar con los formatos de texto */ }
             }
 
-            string[] formatos = { "yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss", "yyyy/MM/dd", "dd/MM/yyyy", "d/M/yyyy", "dd-MM-yyyy", "d-M-yyyy" };
-            if (DateTime.TryParseExact(texto, formatos, CultureInfo.InvariantCulture, DateTimeStyles.None, out var exacta))
-            {
+            if (DateTime.TryParseExact(texto, FormatosFecha, CultureInfo.InvariantCulture, DateTimeStyles.None, out var exacta))
                 return exacta.Date;
-            }
 
-            if (DateTime.TryParse(texto, CultureInfo.GetCultureInfo("es-PE"), DateTimeStyles.None, out var fecha))
-            {
+            if (DateTime.TryParse(texto, CultureInfo.GetCultureInfo("es-PE"), DateTimeStyles.None, out var fecha) ||
+                DateTime.TryParse(texto, CultureInfo.InvariantCulture, DateTimeStyles.None, out fecha))
                 return fecha.Date;
-            }
-
-            if (DateTime.TryParse(texto, CultureInfo.InvariantCulture, DateTimeStyles.None, out fecha))
-            {
-                return fecha.Date;
-            }
 
             return null;
         }
@@ -339,15 +157,14 @@ namespace ApiDesposte.Controllers.Excel
         }
 
         /// <summary>
-        /// Calcula el lunes de la semana ISO-8601 (la semana inicia obligatoriamente en LUNES).
+        /// Lunes de la semana ISO-8601 (la semana inicia obligatoriamente en LUNES).
         /// </summary>
-        private static DateTime ObtenerLunes(DateTime fecha)
-        {
-            return fecha.Date.AddDays(-(((int)fecha.DayOfWeek + 6) % 7));
-        }
+        private static DateTime ObtenerLunes(DateTime fecha) =>
+            fecha.Date.AddDays(-(((int)fecha.DayOfWeek + 6) % 7));
 
         /// <summary>
-        /// Construye el catálogo CodigoCorto -> SubPlanta a partir de la tabla Auxiliares (T_CodigoRelacion).
+        /// Catálogo CodigoCorto -> SubPlanta a partir de la tabla Auxiliares (T_CodigoRelacion).
+        /// Si un código se repite, se conserva la primera SubPlanta encontrada.
         /// </summary>
         private static Dictionary<string, string> ConstruirCatalogoSubPlantas(List<Dictionary<string, object?>> codigoRelacion)
         {
@@ -359,7 +176,7 @@ namespace ApiDesposte.Controllers.Excel
                 string subPlanta = ObtenerTexto(fila, CamposSubPlanta);
 
                 if (string.IsNullOrWhiteSpace(codigo) || string.IsNullOrWhiteSpace(subPlanta)) continue;
-                if (!catalogo.ContainsKey(codigo)) catalogo[codigo] = subPlanta;
+                catalogo.TryAdd(codigo, subPlanta);
             }
 
             return catalogo;
@@ -371,8 +188,8 @@ namespace ApiDesposte.Controllers.Excel
 
         private sealed class ConsolidadoAcumulado
         {
-            public DateTime Fecha { get; set; }
-            public string CodigoCorto { get; set; } = "";
+            public DateTime Fecha { get; init; }
+            public string CodigoCorto { get; init; } = "";
             public string Nombre { get; set; } = "";
             public string SubPlanta { get; set; } = "";
             public double KilosProduccion { get; set; }
@@ -383,9 +200,29 @@ namespace ApiDesposte.Controllers.Excel
             public double KilosTotal => KilosProduccion + KilosResProdPyDb + KilosDistribucion;
         }
 
+        /// <summary>
+        /// Totales de Kilos por origen, redondeados a 4 decimales (mismo criterio en todos los resúmenes).
+        /// </summary>
+        private readonly record struct TotalesKilos(double Produccion, double ResProdPyDb, double Distribucion, double Total)
+        {
+            public static TotalesKilos De(IEnumerable<CumplimientoPtcDiarioItemDto> registros)
+            {
+                double prod = 0, res = 0, dist = 0, total = 0;
+                foreach (var r in registros)
+                {
+                    prod += r.KilosProduccion;
+                    res += r.KilosResProdPyDb;
+                    dist += r.KilosDistribucion;
+                    total += r.KilosTotal;
+                }
+                return new TotalesKilos(Math.Round(prod, 4), Math.Round(res, 4), Math.Round(dist, 4), Math.Round(total, 4));
+            }
+        }
+
         private static void AcumularTabla(
             IEnumerable<Dictionary<string, object?>> filas,
             string origen,
+            Action<ConsolidadoAcumulado, double> sumarKilos,
             Dictionary<string, string> catalogoSubPlantas,
             Dictionary<(DateTime Fecha, string Codigo), ConsolidadoAcumulado> acumulados)
         {
@@ -397,50 +234,25 @@ namespace ApiDesposte.Controllers.Excel
                 // La llave obligatoria de las tablas de movimiento es Fecha + CodigoCorto
                 if (!fecha.HasValue || string.IsNullOrWhiteSpace(codigo)) continue;
 
-                double kilos = ObtenerNumero(fila, CamposKilos);
                 string nombre = ObtenerTexto(fila, CamposNombre);
                 string subPlanta = ObtenerTexto(fila, CamposSubPlanta);
-
                 if (string.IsNullOrWhiteSpace(subPlanta) && catalogoSubPlantas.TryGetValue(codigo, out var subPlantaCatalogo))
                 {
                     subPlanta = subPlantaCatalogo;
                 }
 
                 var llave = (fecha.Value.Date, codigo.ToUpperInvariant());
-
                 if (!acumulados.TryGetValue(llave, out var acumulado))
                 {
-                    acumulado = new ConsolidadoAcumulado
-                    {
-                        Fecha = fecha.Value.Date,
-                        CodigoCorto = codigo
-                    };
+                    acumulado = new ConsolidadoAcumulado { Fecha = fecha.Value.Date, CodigoCorto = codigo };
                     acumulados[llave] = acumulado;
                 }
 
-                if (string.IsNullOrWhiteSpace(acumulado.Nombre) && !string.IsNullOrWhiteSpace(nombre))
-                {
-                    acumulado.Nombre = nombre;
-                }
+                // Nombre y SubPlanta: se conserva el primer valor no vacío
+                if (string.IsNullOrWhiteSpace(acumulado.Nombre)) acumulado.Nombre = nombre;
+                if (string.IsNullOrWhiteSpace(acumulado.SubPlanta)) acumulado.SubPlanta = subPlanta;
 
-                if (string.IsNullOrWhiteSpace(acumulado.SubPlanta) && !string.IsNullOrWhiteSpace(subPlanta))
-                {
-                    acumulado.SubPlanta = subPlanta;
-                }
-
-                switch (origen)
-                {
-                    case "Produccion":
-                        acumulado.KilosProduccion += kilos;
-                        break;
-                    case "ResProd_Py_DB":
-                        acumulado.KilosResProdPyDb += kilos;
-                        break;
-                    case "Distribucion":
-                        acumulado.KilosDistribucion += kilos;
-                        break;
-                }
-
+                sumarKilos(acumulado, ObtenerNumero(fila, CamposKilos));
                 acumulado.Origenes.Add(origen);
             }
         }
@@ -456,25 +268,24 @@ namespace ApiDesposte.Controllers.Excel
             var catalogoSubPlantas = ConstruirCatalogoSubPlantas(tablas["T_CodigoRelacion"]);
             var acumulados = new Dictionary<(DateTime Fecha, string Codigo), ConsolidadoAcumulado>();
 
-            AcumularTabla(tablas["T_Produccion"], "Produccion", catalogoSubPlantas, acumulados);
-            AcumularTabla(tablas["T_ResProd_Py_DB"], "ResProd_Py_DB", catalogoSubPlantas, acumulados);
-            AcumularTabla(tablas["T_Distribucion"], "Distribucion", catalogoSubPlantas, acumulados);
+            foreach (var (tabla, origen, sumarKilos) in TablasMovimiento)
+            {
+                AcumularTabla(tablas[tabla], origen, sumarKilos, catalogoSubPlantas, acumulados);
+            }
 
             return acumulados.Values
                 .OrderBy(a => a.Fecha)
                 .ThenBy(a => a.CodigoCorto, StringComparer.OrdinalIgnoreCase)
                 .Select(a =>
                 {
-                    int semana = ISOWeek.GetWeekOfYear(a.Fecha);
-                    int anioSemana = ISOWeek.GetYear(a.Fecha);
                     DateTime lunes = ObtenerLunes(a.Fecha);
                     DateTime domingo = lunes.AddDays(6);
 
                     return new CumplimientoPtcDiarioItemDto
                     {
                         Fecha = a.Fecha.ToString("yyyy-MM-dd"),
-                        Semana = semana,
-                        AnioSemana = anioSemana,
+                        Semana = ISOWeek.GetWeekOfYear(a.Fecha),
+                        AnioSemana = ISOWeek.GetYear(a.Fecha),
                         Lunes = lunes.ToString("yyyy-MM-dd"),
                         Domingo = domingo.ToString("yyyy-MM-dd"),
                         RangoSemana = $"{lunes:dd/MM} al {domingo:dd/MM}",
@@ -491,6 +302,14 @@ namespace ApiDesposte.Controllers.Excel
                 .ToList();
         }
 
+        /// <summary>
+        /// Lista separada por comas -> conjunto normalizado (mayúsculas) para filtrar.
+        /// </summary>
+        private static HashSet<string> ListaFiltro(string valores, Func<string, string> normalizar) =>
+            valores.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                   .Select(v => normalizar(v).ToUpperInvariant())
+                   .ToHashSet();
+
         private static List<CumplimientoPtcDiarioItemDto> AplicarFiltros(
             List<CumplimientoPtcDiarioItemDto> registros,
             DateTime? desde,
@@ -502,6 +321,7 @@ namespace ApiDesposte.Controllers.Excel
         {
             IEnumerable<CumplimientoPtcDiarioItemDto> consulta = registros;
 
+            // Fecha viene como "yyyy-MM-dd", por lo que la comparación ordinal equivale a comparar fechas
             if (desde.HasValue)
             {
                 string desdeTexto = desde.Value.ToString("yyyy-MM-dd");
@@ -514,30 +334,19 @@ namespace ApiDesposte.Controllers.Excel
                 consulta = consulta.Where(r => string.CompareOrdinal(r.Fecha, hastaTexto) <= 0);
             }
 
-            if (semana.HasValue)
-            {
-                consulta = consulta.Where(r => r.Semana == semana.Value);
-            }
-
-            if (anioSemana.HasValue)
-            {
-                consulta = consulta.Where(r => r.AnioSemana == anioSemana.Value);
-            }
+            if (semana.HasValue) consulta = consulta.Where(r => r.Semana == semana.Value);
+            if (anioSemana.HasValue) consulta = consulta.Where(r => r.AnioSemana == anioSemana.Value);
 
             if (!string.IsNullOrWhiteSpace(codigoCorto))
             {
-                var codigosFiltro = codigoCorto.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                                               .Select(c => NormalizarCodigo(c).ToUpperInvariant())
-                                               .ToHashSet();
-                consulta = consulta.Where(r => codigosFiltro.Contains(NormalizarCodigo(r.CodigoCorto).ToUpperInvariant()));
+                var codigos = ListaFiltro(codigoCorto, NormalizarCodigo);
+                consulta = consulta.Where(r => codigos.Contains(NormalizarCodigo(r.CodigoCorto).ToUpperInvariant()));
             }
 
             if (!string.IsNullOrWhiteSpace(subPlanta))
             {
-                var subPlantasFiltro = subPlanta.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                                               .Select(s => s.Trim().ToUpperInvariant())
-                                               .ToHashSet();
-                consulta = consulta.Where(r => subPlantasFiltro.Contains((r.SubPlanta ?? "").Trim().ToUpperInvariant()));
+                var subPlantas = ListaFiltro(subPlanta, s => s.Trim());
+                consulta = consulta.Where(r => subPlantas.Contains((r.SubPlanta ?? "").Trim().ToUpperInvariant()));
             }
 
             return consulta.ToList();
@@ -553,6 +362,7 @@ namespace ApiDesposte.Controllers.Excel
                 .Select(g =>
                 {
                     var primeraFila = g.First();
+                    var kilos = TotalesKilos.De(g);
                     return new CumplimientoPtcSemanaDto
                     {
                         Semana = g.Key.Semana,
@@ -561,10 +371,10 @@ namespace ApiDesposte.Controllers.Excel
                         Lunes = primeraFila.Lunes,
                         Domingo = primeraFila.Domingo,
                         RangoSemana = primeraFila.RangoSemana,
-                        KilosProduccion = Math.Round(g.Sum(r => r.KilosProduccion), 4),
-                        KilosResProdPyDb = Math.Round(g.Sum(r => r.KilosResProdPyDb), 4),
-                        KilosDistribucion = Math.Round(g.Sum(r => r.KilosDistribucion), 4),
-                        KilosTotal = Math.Round(g.Sum(r => r.KilosTotal), 4)
+                        KilosProduccion = kilos.Produccion,
+                        KilosResProdPyDb = kilos.ResProdPyDb,
+                        KilosDistribucion = kilos.Distribucion,
+                        KilosTotal = kilos.Total
                     };
                 })
                 .OrderBy(x => x.AnioSemana)
@@ -576,17 +386,40 @@ namespace ApiDesposte.Controllers.Excel
         {
             return registros
                 .GroupBy(r => string.IsNullOrWhiteSpace(r.SubPlanta) ? "SIN SUBPLANTA" : r.SubPlanta.Trim(), StringComparer.OrdinalIgnoreCase)
-                .Select(g => new CumplimientoPtcSubPlantaDto
+                .Select(g =>
                 {
-                    SubPlanta = g.Key,
-                    Codigos = g.Select(r => r.CodigoCorto).Distinct(StringComparer.OrdinalIgnoreCase).Count(),
-                    KilosProduccion = Math.Round(g.Sum(r => r.KilosProduccion), 4),
-                    KilosResProdPyDb = Math.Round(g.Sum(r => r.KilosResProdPyDb), 4),
-                    KilosDistribucion = Math.Round(g.Sum(r => r.KilosDistribucion), 4),
-                    KilosTotal = Math.Round(g.Sum(r => r.KilosTotal), 4)
+                    var kilos = TotalesKilos.De(g);
+                    return new CumplimientoPtcSubPlantaDto
+                    {
+                        SubPlanta = g.Key,
+                        Codigos = g.Select(r => r.CodigoCorto).Distinct(StringComparer.OrdinalIgnoreCase).Count(),
+                        KilosProduccion = kilos.Produccion,
+                        KilosResProdPyDb = kilos.ResProdPyDb,
+                        KilosDistribucion = kilos.Distribucion,
+                        KilosTotal = kilos.Total
+                    };
                 })
                 .OrderByDescending(x => x.KilosTotal)
                 .ToList();
+        }
+
+        /// <summary>
+        /// Ejecuta la acción traduciendo las excepciones a la respuesta estándar de error.
+        /// </summary>
+        private IActionResult ResponderConManejoDeErrores(Func<IActionResult> accion)
+        {
+            try
+            {
+                return accion();
+            }
+            catch (FileNotFoundException fnfEx)
+            {
+                return NotFound(new { exito = false, error = fnfEx.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { exito = false, error = ex.Message });
+            }
         }
 
         // =====================================================================
@@ -610,32 +443,23 @@ namespace ApiDesposte.Controllers.Excel
             [FromQuery] string? subPlanta = null,
             [FromQuery] bool recargar = false)
         {
-            try
+            if (desde.HasValue && hasta.HasValue && desde.Value.Date > hasta.Value.Date)
             {
-                if (desde.HasValue && hasta.HasValue && desde.Value.Date > hasta.Value.Date)
-                {
-                    return BadRequest(new
-                    {
-                        exito = false,
-                        error = "El parámetro 'desde' no puede ser mayor que el parámetro 'hasta'."
-                    });
-                }
+                return BadRequest(new { exito = false, error = "El parámetro 'desde' no puede ser mayor que el parámetro 'hasta'." });
+            }
 
-                if (semana.HasValue && (semana.Value < 1 || semana.Value > 53))
-                {
-                    return BadRequest(new
-                    {
-                        exito = false,
-                        error = "El parámetro 'semana' debe estar entre 1 y 53."
-                    });
-                }
+            if (semana.HasValue && (semana.Value < 1 || semana.Value > 53))
+            {
+                return BadRequest(new { exito = false, error = "El parámetro 'semana' debe estar entre 1 y 53." });
+            }
 
-                var tablas = CargarTodasLasTablas(recargar);
-                var registros = ConstruirConsolidado(tablas);
-                registros = AplicarFiltros(registros, desde, hasta, semana, anioSemana, codigoCorto, subPlanta);
+            return ResponderConManejoDeErrores(() =>
+            {
+                var registros = AplicarFiltros(
+                    ConstruirConsolidado(CargarTodasLasTablas(recargar)),
+                    desde, hasta, semana, anioSemana, codigoCorto, subPlanta);
 
-                var resumenPorSemana = ConstruirResumenPorSemana(registros);
-                var resumenPorSubPlanta = ConstruirResumenPorSubPlanta(registros);
+                var totales = TotalesKilos.De(registros);
 
                 return Ok(new
                 {
@@ -655,24 +479,16 @@ namespace ApiDesposte.Controllers.Excel
                     },
                     resumen = new
                     {
-                        totalKilosProduccion = Math.Round(registros.Sum(r => r.KilosProduccion), 4),
-                        totalKilosResProdPyDb = Math.Round(registros.Sum(r => r.KilosResProdPyDb), 4),
-                        totalKilosDistribucion = Math.Round(registros.Sum(r => r.KilosDistribucion), 4),
-                        totalKilosGeneral = Math.Round(registros.Sum(r => r.KilosTotal), 4)
+                        totalKilosProduccion = totales.Produccion,
+                        totalKilosResProdPyDb = totales.ResProdPyDb,
+                        totalKilosDistribucion = totales.Distribucion,
+                        totalKilosGeneral = totales.Total
                     },
-                    resumenPorSemana,
-                    resumenPorSubPlanta,
+                    resumenPorSemana = ConstruirResumenPorSemana(registros),
+                    resumenPorSubPlanta = ConstruirResumenPorSubPlanta(registros),
                     registros
                 });
-            }
-            catch (FileNotFoundException fnfEx)
-            {
-                return NotFound(new { exito = false, error = fnfEx.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { exito = false, error = ex.Message });
-            }
+            });
         }
 
         /// <summary>
@@ -683,28 +499,16 @@ namespace ApiDesposte.Controllers.Excel
         [HttpGet("tablas/{nombreTabla}")]
         public IActionResult ObtenerTablaTalCual(string nombreTabla, [FromQuery] bool recargar = false)
         {
-            try
+            if (!MapeoTablas.TryGetValue(nombreTabla.Trim(), out var mapeo))
             {
-                if (!MapeoTablas.TryGetValue(nombreTabla.Trim(), out var mapeo))
+                return BadRequest(new
                 {
-                    return BadRequest(new
-                    {
-                        exito = false,
-                        error = $"La tabla '{nombreTabla}' no está registrada. Valores permitidos: T_Produccion, T_ResProd_Py_DB, T_Distribucion, T_CodigoRelacion."
-                    });
-                }
+                    exito = false,
+                    error = $"La tabla '{nombreTabla}' no está registrada. Valores permitidos: T_Produccion, T_ResProd_Py_DB, T_Distribucion, T_CodigoRelacion."
+                });
+            }
 
-                var tablas = CargarTodasLasTablas(recargar);
-                return Ok(tablas[mapeo.Tabla]);
-            }
-            catch (FileNotFoundException fnfEx)
-            {
-                return NotFound(new { exito = false, error = fnfEx.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { exito = false, error = ex.Message });
-            }
+            return ResponderConManejoDeErrores(() => Ok(CargarTodasLasTablas(recargar)[mapeo.Tabla]));
         }
 
         /// <summary>
@@ -714,17 +518,10 @@ namespace ApiDesposte.Controllers.Excel
         [HttpGet("subplantas")]
         public IActionResult ObtenerCatalogoSubPlantas([FromQuery] bool recargar = false)
         {
-            try
+            return ResponderConManejoDeErrores(() =>
             {
-                var tablas = CargarTodasLasTablas(recargar);
-                var catalogo = ConstruirCatalogoSubPlantas(tablas["T_CodigoRelacion"]);
-
-                var codigos = catalogo
-                    .Select(kv => new CodigoRelacionDto
-                    {
-                        CodigoCorto = kv.Key,
-                        SubPlanta = kv.Value
-                    })
+                var codigos = ConstruirCatalogoSubPlantas(CargarTodasLasTablas(recargar)["T_CodigoRelacion"])
+                    .Select(kv => new CodigoRelacionDto { CodigoCorto = kv.Key, SubPlanta = kv.Value })
                     .OrderBy(c => c.SubPlanta, StringComparer.OrdinalIgnoreCase)
                     .ThenBy(c => c.CodigoCorto, StringComparer.OrdinalIgnoreCase)
                     .ToList();
@@ -742,15 +539,7 @@ namespace ApiDesposte.Controllers.Excel
                     subPlantas,
                     codigos
                 });
-            }
-            catch (FileNotFoundException fnfEx)
-            {
-                return NotFound(new { exito = false, error = fnfEx.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { exito = false, error = ex.Message });
-            }
+            });
         }
     }
 
