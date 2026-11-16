@@ -18,23 +18,6 @@ namespace ApiDesposte.Controllers.Excel
             { "T_CodigoRelacion", ("Auxiliares", "T_CodigoRelacion") }
         };
 
-        // Alias por nombre de hoja o clave corta para facilitar consumo desde JS
-        private static readonly Dictionary<string, string> AliasTablas = new(StringComparer.OrdinalIgnoreCase)
-        {
-            { "produccion", "T_Produccion" },
-            { "t_produccion", "T_Produccion" },
-            { "demandapy", "T_DemandaPy" },
-            { "t_demandapy", "T_DemandaPy" },
-            { "resprod_py_db", "T_ResProd_Py_DB" },
-            { "resprod-py-db", "T_ResProd_Py_DB" },
-            { "t_resprod_py_db", "T_ResProd_Py_DB" },
-            { "distribucion", "T_Distribucion" },
-            { "t_distribucion", "T_Distribucion" },
-            { "auxiliares", "T_CodigoRelacion" },
-            { "codigorelacion", "T_CodigoRelacion" },
-            { "t_codigorelacion", "T_CodigoRelacion" }
-        };
-
         // Cache en memoria para optimizar lecturas consecutivas desde el frontend JS
         private static Dictionary<string, List<Dictionary<string, object?>>>? _cacheTablas = null;
         private static DateTime _cacheTimestamp = DateTime.MinValue;
@@ -262,8 +245,8 @@ namespace ApiDesposte.Controllers.Excel
         }
 
         /// <summary>
-        /// Devuelve una tabla específica tal cual está en el Excel (por nombre de tabla o de hoja:
-        /// T_Produccion | Produccion | T_DemandaPy | DemandaPy | T_ResProd_Py_DB | ResProd_Py_DB | T_Distribucion | Distribucion | T_CodigoRelacion | Auxiliares).
+        /// Devuelve una tabla específica tal cual está en el Excel.
+        /// Valores permitidos (nombre oficial de tabla): T_Produccion | T_DemandaPy | T_ResProd_Py_DB | T_Distribucion | T_CodigoRelacion.
         /// GET /api/CumplimientoPtcTablas/{nombreTabla}
         /// </summary>
         [HttpGet("{nombreTabla}")]
@@ -271,17 +254,17 @@ namespace ApiDesposte.Controllers.Excel
         {
             try
             {
-                if (!AliasTablas.TryGetValue(nombreTabla.Trim(), out var claveTablaOficial))
+                if (!MapeoTablas.TryGetValue(nombreTabla.Trim(), out var mapeo))
                 {
                     return BadRequest(new
                     {
                         exito = false,
-                        error = $"La tabla u hoja '{nombreTabla}' no está registrada. Valores permitidos: T_Produccion, T_DemandaPy, T_ResProd_Py_DB, T_Distribucion, T_CodigoRelacion."
+                        error = $"La tabla '{nombreTabla}' no está registrada. Valores permitidos: T_Produccion, T_DemandaPy, T_ResProd_Py_DB, T_Distribucion, T_CodigoRelacion."
                     });
                 }
 
                 var tablas = CargarTodasLasTablas(recargar);
-                return Ok(tablas[claveTablaOficial]);
+                return Ok(tablas[mapeo.Tabla]);
             }
             catch (FileNotFoundException fnfEx)
             {

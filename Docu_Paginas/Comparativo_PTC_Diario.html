@@ -1,0 +1,2747 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparativo PTC Diario - Producción vs Programa vs Distribución</title>
+
+    <!-- Fuentes Google Fonts: Inter y JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Chart.js y Plugins -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+    <!-- SheetJS para exportar a Excel (.xlsx) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <!-- Configuración compartida de conexión a la API -->
+    <script src="config.js"></script>
+
+    <style>
+        /* =========================================================================
+           🎨 TEMA: PANTONE INDUSTRIAL PALETTE (Bronce Mate, Piedra Taupe y Pizarra Suave)
+           ========================================================================= */
+        :root {
+            --color-header-bg: #38353B;
+            --color-header-gradient: linear-gradient(135deg, #38353B 0%, #434B57 100%);
+            --color-header-text: #FFFFFF;
+            --color-header-subtext: #E2D5B5;
+            --color-heading: #38353B;
+            --color-text: #4A474C;
+            --color-text-muted: #787479;
+            --color-primary: #BAA063;
+            --color-secondary: #7A828E;
+            --color-accent: #BAA063;
+            --color-bg: #F2F4F8;
+            --color-surface: #FFFFFF;
+            --color-border: #E2E8F0;
+
+            /* Tokens complementarios de la paleta */
+            --isg-gold-bronze: #C4B282;
+            --isg-slate-charcoal: #434B57;
+            --isg-slate-stone: #948E88;
+            --isg-slate-silver: #B5B2AA;
+            --isg-stone-taupe: #A89F91;
+            --isg-slate-gray: #6B727D;
+
+            --chart-slate-navy: #38353B;
+            --chart-steel-blue: #7A828E;
+            --chart-cerulean-slate: #948E88;
+            --chart-pewter-blue: #A89F91;
+            --chart-plomo-neutro: #878994;
+            --chart-plomo-pizarra: #B5B2AA;
+
+            --pantone-yellow: #BAA063;
+            --pantone-yellow-light: #C4B282;
+            --pantone-yellow-soft: rgba(186, 160, 99, 0.16);
+            --pantone-yellow-border: rgba(186, 160, 99, 0.45);
+            --pantone-gold: #7A828E;
+            --pantone-dark: #38353B;
+            --pantone-darker: #434B57;
+            --pantone-gray-dark: #4A474C;
+            --pantone-gray-med: #787479;
+            --pantone-gray-light: #B5B2AA;
+
+            --bg-canvas: var(--color-bg);
+            --bg-card: var(--color-surface);
+            --bg-card-alt: #F8FAFC;
+            --text-dark: var(--color-text);
+            --text-muted: var(--color-text-muted);
+            --border-ui: var(--color-border);
+            --radius-sm: 8px;
+            --shadow-sm: 0 1px 3px rgba(56, 53, 59, 0.07), 0 1px 2px rgba(56, 53, 59, 0.04);
+            --shadow-md: 0 8px 20px -6px rgba(56, 53, 59, 0.18);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-canvas);
+            color: var(--text-dark);
+            padding: 18px 24px 26px;
+            line-height: 1.45;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .dashboard-container {
+            max-width: 1920px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* ============================ HEADER ============================ */
+        .dashboard-header {
+            background: var(--color-header-gradient);
+            color: var(--color-header-text);
+            border-radius: 14px;
+            padding: 20px 26px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 18px;
+            flex-wrap: wrap;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+        }
+
+        .dashboard-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--color-primary), var(--color-secondary), var(--isg-gold-bronze));
+        }
+
+        .header-title-group {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            min-width: 0;
+        }
+
+        .header-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            background: var(--pantone-yellow-soft);
+            border: 1px solid var(--pantone-yellow-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--pantone-yellow);
+            flex-shrink: 0;
+        }
+
+        .header-title {
+            font-size: 1.42rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: var(--color-header-text);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .badge-tag {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            border-radius: 6px;
+            background: rgba(186, 160, 99, 0.20);
+            color: var(--color-header-subtext);
+            border: 1px solid rgba(226, 213, 181, 0.40);
+        }
+
+        .header-subtitle {
+            font-size: 0.84rem;
+            color: var(--color-header-subtext);
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 0.78rem;
+            padding: 6px 14px;
+            border-radius: 9999px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #FFFFFF;
+            font-weight: 600;
+        }
+
+        .status-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background-color: var(--pantone-gray-med);
+            display: inline-block;
+        }
+
+        .status-dot.online {
+            background-color: #10B981;
+            box-shadow: 0 0 8px #10B981;
+        }
+
+        .status-dot.loading {
+            background-color: var(--pantone-yellow);
+            animation: pulse 1s infinite alternate;
+        }
+
+        .status-dot.error {
+            background-color: #EF4444;
+        }
+
+        @keyframes pulse {
+            from { opacity: 0.4; }
+            to { opacity: 1; }
+        }
+
+        /* ============================ BOTONES ============================ */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid var(--border-ui);
+            background: #FFFFFF;
+            color: var(--pantone-dark);
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .btn:hover {
+            background: var(--bg-card-alt);
+            border-color: var(--chart-pewter-blue);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--pantone-yellow) 0%, var(--pantone-yellow-light) 100%);
+            border: 1px solid rgba(186, 160, 99, 0.65);
+            color: #FFFFFF;
+            font-weight: 700;
+            box-shadow: 0 2px 6px rgba(186, 160, 99, 0.35);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--pantone-yellow-light) 0%, var(--pantone-yellow) 100%);
+            color: #FFFFFF;
+        }
+
+        .btn-excel {
+            background: rgba(122, 130, 142, 0.24);
+            border: 1px solid rgba(226, 213, 181, 0.38);
+            color: #FFFFFF;
+            font-weight: 700;
+        }
+
+        .btn-excel:hover {
+            background: var(--color-secondary);
+            border-color: var(--color-secondary);
+            color: #FFFFFF;
+        }
+
+        .btn-icon {
+            padding: 7px 11px;
+            font-size: 0.78rem;
+        }
+
+        /* ============================ TARJETAS BASE ============================ */
+        .card,
+        .chart-card,
+        .matrix-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-ui);
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+            min-width: 0;
+        }
+
+        .card {
+            padding: 18px 22px;
+        }
+
+        /* ============================ FILTROS ============================ */
+        .filter-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .filter-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--pantone-dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: -0.01em;
+        }
+
+        .filter-quick-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .filter-quick-btn {
+            background: var(--bg-card-alt);
+            border: 1px solid var(--border-ui);
+            color: var(--text-muted);
+            padding: 6px 13px;
+            border-radius: 6px;
+            font-size: 0.77rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            font-family: inherit;
+        }
+
+        .filter-quick-btn:hover {
+            color: var(--text-dark);
+            background: #EEF2F6;
+            border-color: var(--chart-pewter-blue);
+        }
+
+        .filter-quick-btn.active {
+            background: var(--chart-slate-navy);
+            border-color: var(--chart-slate-navy);
+            color: #FFFFFF;
+        }
+
+        .filter-quick-btn.active-subplanta {
+            background: var(--chart-steel-blue);
+            border-color: var(--chart-slate-navy);
+            color: #FFFFFF;
+        }
+
+        .divider-ui {
+            border-top: 1px solid var(--border-ui);
+            margin: 10px 0;
+        }
+
+        /* SELECTOR DE LA SEMANA DE ANÁLISIS (una sola semana) */
+        .week-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 560px);
+            align-items: end;
+            gap: 12px;
+        }
+
+        .compare-select-box {
+            min-width: 0;
+        }
+
+        .compare-select-box label {
+            display: block;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .compare-select-box select {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid #CBD5E1;
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--pantone-dark);
+            background: #FFFFFF;
+            font-family: inherit;
+            cursor: pointer;
+            min-width: 0;
+        }
+
+        .compare-select-box select:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(186, 160, 99, 0.18);
+        }
+
+        .compare-hint {
+            display: block;
+            margin-top: 5px;
+            font-size: 0.73rem;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Jerarquía de la matriz: texto plano, sólo tipografía y color */
+        .tag-subplanta {
+            display: inline;
+            padding: 0;
+            border: none;
+            border-radius: 0;
+            background: transparent;
+            box-shadow: none;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--color-heading);
+        }
+
+        .sku-code-badge {
+            display: inline-block;
+            background: var(--bg-card-alt);
+            color: var(--pantone-dark);
+            border: 1px solid var(--border-ui);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 5px;
+            margin-right: 8px;
+        }
+
+        .sku-name-text {
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        /* Nivel Día: texto plano, sin fondo ni borde decorativo */
+        .day-label {
+            display: inline;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.01em;
+            color: var(--color-heading);
+        }
+
+        /* PÍLDORAS SUBPLANTA */
+        .subplanta-pills-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            max-height: 150px;
+            overflow-y: auto;
+            padding: 4px 2px;
+        }
+
+        .subplanta-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            background: #FFFFFF;
+            border: 1px solid var(--border-ui);
+            color: var(--text-dark);
+            transition: all 0.15s ease;
+            user-select: none;
+        }
+
+        .subplanta-pill:hover {
+            border-color: var(--chart-pewter-blue);
+            background: var(--bg-card-alt);
+        }
+
+        .subplanta-pill.selected {
+            background: rgba(186, 160, 99, 0.18);
+            border-color: var(--color-secondary);
+            color: var(--color-heading);
+            font-weight: 700;
+        }
+
+        .selection-summary-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px solid var(--border-ui);
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .selection-summary-bar b {
+            color: var(--pantone-dark);
+        }
+
+        /* ============================ KPI GRID ============================ */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .kpi-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-ui);
+            border-top: 4px solid var(--kpi-accent, var(--chart-slate-navy));
+            border-radius: 10px;
+            padding: 16px 20px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 0;
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--chart-pewter-blue);
+            box-shadow: var(--shadow-md);
+        }
+
+        .kpi-label {
+            font-size: 0.73rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .kpi-value {
+            font-size: 1.65rem;
+            font-weight: 800;
+            color: var(--pantone-darker);
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+        }
+
+        .kpi-unit {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .kpi-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.75rem;
+            color: var(--pantone-gray-dark);
+            padding-top: 6px;
+            border-top: 1px solid var(--border-ui);
+            font-weight: 500;
+            flex-wrap: wrap;
+        }
+
+        .badge-kpi {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.74rem;
+            font-family: 'JetBrains Mono', 'Inter', monospace;
+            text-align: center;
+            min-width: 52px;
+            background: #EDF2F7;
+            color: var(--pantone-dark);
+        }
+
+        .badge-good {
+            background-color: #DCFCE7 !important;
+            color: #166534 !important;
+            border: 1px solid #86EFAC !important;
+        }
+
+        .badge-mid {
+            background-color: var(--pantone-yellow-soft) !important;
+            color: #854D0E !important;
+            border: 1px solid var(--pantone-yellow-border) !important;
+        }
+
+        .badge-low {
+            background-color: #FEE2E2 !important;
+            color: #991B1B !important;
+            border: 1px solid #FCA5A5 !important;
+        }
+
+        .val-positive {
+            color: #166534 !important;
+            font-weight: 700;
+        }
+
+        .val-negative {
+            color: #991B1B !important;
+            font-weight: 700;
+        }
+
+        /* ============================ GRÁFICOS ============================ */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .chart-card {
+            padding: 18px 20px;
+        }
+
+        .chart-top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-ui);
+        }
+
+        .chart-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            color: var(--pantone-dark);
+            text-transform: uppercase;
+        }
+
+        .chart-sub {
+            font-size: 0.74rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+            font-weight: 500;
+        }
+
+        .chart-box {
+            position: relative;
+            width: 100%;
+            min-width: 0;
+            height: 320px;
+            margin-top: 12px;
+        }
+
+        .unit-toggle {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            background: #E5E9F0;
+            padding: 3px 4px;
+            border-radius: 8px;
+            border: 1px solid var(--border-ui);
+        }
+
+        .unit-toggle .filter-quick-btn {
+            padding: 3px 9px;
+            font-size: 0.72rem;
+        }
+
+        /* Selector de vista de la matriz: Semanal / Diaria */
+        .matrix-actions .unit-toggle {
+            flex-shrink: 0;
+        }
+
+        .matrix-actions .unit-toggle .filter-quick-btn {
+            padding: 6px 13px;
+            font-size: 0.78rem;
+        }
+
+        /* ============================ MATRIZ ============================ */
+        .matrix-card {
+            padding: 18px 20px;
+        }
+
+        .matrix-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .matrix-toolbar-left {
+            min-width: 0;
+        }
+
+        .matrix-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #FFFFFF;
+            border: 1px solid var(--border-ui);
+            padding: 8px 14px;
+            border-radius: 8px;
+            width: 300px;
+            max-width: 100%;
+            transition: all 0.2s ease;
+        }
+
+        .search-box:focus-within {
+            border-color: var(--pantone-gold);
+            box-shadow: 0 0 0 3px var(--pantone-yellow-soft);
+        }
+
+        .search-box input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-dark);
+            font-size: 0.84rem;
+            width: 100%;
+            font-family: inherit;
+        }
+
+        .table-responsive {
+            width: 100%;
+            max-width: 100%;
+            max-height: 540px;
+            overflow-x: auto;
+            overflow-y: auto;
+            border: 1px solid var(--border-ui);
+            border-radius: 8px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .matrix-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 0.84rem;
+            text-align: left;
+        }
+
+        .matrix-table th {
+            background-color: var(--pantone-dark);
+            color: #FFFFFF;
+            font-weight: 700;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            padding: 9px 11px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            white-space: nowrap;
+            border-bottom: 3px solid var(--pantone-yellow);
+        }
+
+        .matrix-table th:first-child {
+            width: 100%;
+        }
+
+        /* Encabezado de una sola fila: jerarquía + grupos de origen */
+        .matrix-table thead th {
+            height: 40px;
+            vertical-align: middle;
+            text-align: right;
+        }
+
+        .matrix-table thead th.col-hier {
+            text-align: left;
+        }
+
+        /* Divisiones entre grupos de columnas en la matriz */
+        .matrix-table th.col-group-prog-start,
+        .matrix-table th.col-group-dist-start {
+            border-left: 2px solid rgba(186, 160, 99, 0.45) !important;
+        }
+
+        .matrix-table td.col-group-prog-start,
+        .matrix-table td.col-group-dist-start {
+            border-left: 2px solid var(--border-ui) !important;
+        }
+
+        .matrix-table th.num-col,
+        .matrix-table td.num-cell {
+            width: 1%;
+            white-space: nowrap;
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+            font-family: 'JetBrains Mono', 'Inter', monospace;
+        }
+
+        .matrix-table td {
+            padding: 8px 13px;
+            border-bottom: 1px solid var(--border-ui);
+            color: var(--text-dark);
+        }
+
+        .level-1 td {
+            background-color: #F8F9FA !important;
+            color: var(--pantone-dark) !important;
+            font-weight: 700;
+            border-bottom: 2px solid var(--border-ui) !important;
+            border-top: 1px solid var(--border-ui) !important;
+        }
+
+        .level-1:hover td {
+            background-color: var(--pantone-yellow-soft) !important;
+        }
+
+        .level-2 td {
+            background-color: rgba(186, 160, 99, 0.06) !important;
+            color: var(--color-heading) !important;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-ui) !important;
+        }
+
+        .level-2:hover td {
+            background-color: rgba(186, 160, 99, 0.08) !important;
+        }
+
+        /* Único icono permitido: control de expansión / colapso */
+        .toggle-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            border-radius: 5px;
+            background: var(--pantone-yellow-soft);
+            color: var(--pantone-dark);
+            border: 1px solid var(--pantone-yellow-border);
+            font-family: monospace;
+            font-size: 0.8rem;
+            font-weight: 800;
+            cursor: pointer;
+            margin-right: 8px;
+            user-select: none;
+            transition: all 0.15s ease;
+            flex-shrink: 0;
+        }
+
+        .toggle-icon:hover {
+            background: var(--pantone-yellow);
+            color: var(--pantone-dark);
+        }
+
+        /* Nivel 3: SubPlanta · Nivel 4: CódigoCorto - Nombre */
+        .level-3 td,
+        .level-4 td {
+            background-color: #FFFFFF !important;
+            color: var(--text-dark) !important;
+        }
+
+        .level-3:hover td,
+        .level-4:hover td {
+            background-color: rgba(186, 160, 99, 0.08) !important;
+        }
+
+        .matrix-empty {
+            padding: 34px 14px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.86rem;
+        }
+
+        /* ============================ PIE Y TOAST ============================ */
+        .page-footer {
+            text-align: center;
+            font-size: 0.74rem;
+            color: var(--text-muted);
+            padding: 6px 0 2px;
+            font-weight: 500;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 22px;
+            right: 22px;
+            background: var(--pantone-dark);
+            color: #FFFFFF;
+            padding: 12px 18px;
+            border-radius: 10px;
+            box-shadow: 0 12px 26px -8px rgba(56, 53, 59, 0.45);
+            opacity: 0;
+            transform: translateY(12px);
+            transition: all 0.25s ease;
+            z-index: 3000;
+            max-width: 400px;
+            font-size: 0.83rem;
+            border-left: 4px solid var(--color-primary);
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Contención de ancho: evita que tablas/gráficos desborden el layout */
+        .dashboard-container > *,
+        .kpi-grid > *,
+        .kpi-card,
+        .card,
+        .chart-card,
+        .matrix-card {
+            min-width: 0;
+        }
+
+        /* ============================ RESPONSIVE (autónomo) ============================ */
+        @media screen and (max-width: 1600px) {
+            body {
+                padding: 10px 14px 20px;
+            }
+
+            .dashboard-container {
+                gap: 12px;
+            }
+
+            .dashboard-header {
+                padding: 14px 18px;
+                gap: 12px;
+            }
+
+            .header-title {
+                font-size: 1.16rem;
+            }
+
+            .card,
+            .chart-card,
+            .matrix-card {
+                padding: 12px 16px;
+            }
+
+            .kpi-value {
+                font-size: 1.3rem;
+            }
+
+            .chart-box {
+                height: 285px;
+            }
+
+            .table-responsive {
+                max-height: 460px;
+            }
+        }
+
+        @media screen and (max-width: 1100px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media screen and (max-width: 980px) {
+            .kpi-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .dashboard-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .header-actions {
+                justify-content: flex-start;
+            }
+
+            .week-grid {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .chart-box {
+                height: 270px;
+            }
+        }
+
+        @media screen and (max-width: 768px) {
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-actions,
+            .search-box,
+            .compare-select-box select {
+                width: 100% !important;
+                min-width: 0 !important;
+                max-width: 100% !important;
+            }
+
+            .filter-quick-actions {
+                width: 100%;
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 6px;
+            }
+
+            .chart-box {
+                height: 235px;
+            }
+
+            .matrix-toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .matrix-actions {
+                width: 100%;
+            }
+
+            .matrix-table th:first-child,
+            .matrix-table td:first-child {
+                min-width: 150px;
+                max-width: 220px;
+                white-space: normal;
+                word-break: break-word;
+            }
+
+            /* Sangrías reducidas en móvil para conservar ancho del nombre */
+            .matrix-table tr.level-2 td:first-child {
+                padding-left: 20px !important;
+            }
+
+            .matrix-table tr.level-3 td:first-child {
+                padding-left: 34px !important;
+            }
+
+            .matrix-table tr.level-4 td:first-child {
+                padding-left: 48px !important;
+            }
+
+            /* El selector Semanal / Diaria ocupa su propia fila en celular */
+            .matrix-actions .unit-toggle {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .matrix-actions .unit-toggle .filter-quick-btn {
+                flex: 1 1 0;
+            }
+
+            .toast {
+                left: 14px;
+                right: 14px;
+                max-width: none;
+                bottom: 14px;
+            }
+        }
+    </style>
+
+    <!-- Hoja de estilos responsive compartida -->
+    <link rel="stylesheet" href="responsive.css?v=3">
+</head>
+<body>
+    <div class="dashboard-container">
+
+        <!-- HEADER -->
+        <header class="dashboard-header">
+            <div class="header-title-group">
+                <div class="header-icon">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 3v18h18"></path>
+                        <path d="m7 15 4-6 4 4 4-7"></path>
+                    </svg>
+                </div>
+                <div>
+                    <div class="header-title">
+                        Comparativo PTC Diario                       
+                    </div>
+                    <div class="header-subtitle">
+                        Comparativo <b>Producción Real</b>,
+                        <b>Programa de Producción</b> y <b>Pedido de Distribución</b>
+                    </div>
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <div class="status-badge" id="apiStatusBadge">
+                    <span class="status-dot"></span>
+                    <span id="apiStatusText">Buscando servidor...</span>
+                </div>
+
+                <button class="btn btn-excel" onclick="exportarComparativo()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Exportar Comparativo (.xlsx)
+                </button>
+
+                <button class="btn btn-primary" onclick="recargarDatosAPI(true)">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+                    </svg>
+                    Actualizar
+                </button>
+            </div>
+        </header>
+
+        <!-- FILTROS: SEMANA DE ANÁLISIS Y SUBPLANTA -->
+        <section class="card">
+            <div class="filter-section-header">
+                <div class="filter-title">1. Semana de análisis (ISO-8601 · Lunes a Domingo)</div>
+                <div class="filter-quick-actions">
+                    <button class="filter-quick-btn active" id="btnQuickLastWeek"
+                        onclick="seleccionarUltimaSemana()">Última semana</button>
+                    <button class="filter-quick-btn" onclick="moverSemana(-1)">&#9664; Semana anterior</button>
+                    <button class="filter-quick-btn" onclick="moverSemana(1)">Semana siguiente &#9654;</button>
+                </div>
+            </div>
+
+            <div class="week-grid">
+                <div class="compare-select-box">
+                    <label for="selectSemana">Semana a comparar</label>
+                    <select id="selectSemana" onchange="cambiarSemana(this.value)"></select>
+                    <span class="compare-hint" id="hintSemana">-</span>
+                </div>
+            </div>
+
+            <div class="divider-ui"></div>
+
+            <div class="filter-section-header">
+                <div class="filter-title" style="color: var(--chart-steel-blue);">2. Filtro por SubPlanta</div>
+                <div class="filter-quick-actions">
+                    <button class="filter-quick-btn active-subplanta" id="btnQuickSpAll"
+                        onclick="seleccionarTodasSubPlantas()">Todas las SubPlantas</button>
+                </div>
+            </div>
+            <div class="subplanta-pills-container" id="subplantaPillsContainer"></div>
+
+            <div class="selection-summary-bar">
+                <span id="selectionSummary">Cargando semanas...</span>
+                <span id="registrosSummary">Sin datos cargados</span>
+            </div>
+        </section>
+
+        <!-- KPIs DE LA MISMA SEMANA POR ORIGEN -->
+        <section class="kpi-grid">
+            <div class="kpi-card" style="--kpi-accent: #BAA063;">
+                <span class="kpi-label">Producción Real · misma semana</span>
+                <div class="kpi-value" id="kpiProduccion">0.00<span class="kpi-unit">kg</span></div>
+                <div class="kpi-footer">
+                    <span id="kpiProduccionDetalle">0 día(s) con registro</span>
+                    <span class="badge-kpi" id="kpiProduccionBadge">Base</span>
+                </div>
+            </div>
+
+            <div class="kpi-card" style="--kpi-accent: #7A828E;">
+                <span class="kpi-label">Programa de Producción · misma semana</span>
+                <div class="kpi-value" id="kpiPrograma">0.00<span class="kpi-unit">kg</span></div>
+                <div class="kpi-footer">
+                    <span id="kpiProgramaDetalle">Brecha vs real: 0.00 kg</span>
+                    <span class="badge-kpi" id="kpiProgramaCobertura">0.0%</span>
+                </div>
+            </div>
+
+            <div class="kpi-card" style="--kpi-accent: #948E88;">
+                <span class="kpi-label">Pedido de Distribución · misma semana</span>
+                <div class="kpi-value" id="kpiDistribucion">0.00<span class="kpi-unit">kg</span></div>
+                <div class="kpi-footer">
+                    <span id="kpiDistribucionDetalle">Brecha vs real: 0.00 kg</span>
+                    <span class="badge-kpi" id="kpiDistribucionCobertura">0.0%</span>
+                </div>
+            </div>
+
+            <div class="kpi-card" style="--kpi-accent: #38353B;">
+                <span class="kpi-label">Brecha Programa vs Pedido de Distribución</span>
+                <div class="kpi-value" id="kpiBrecha">0.00<span class="kpi-unit">kg</span></div>
+                <div class="kpi-footer">
+                    <span id="kpiBrechaDetalle">Prog.: 0.00 kg · Dist.: 0.00 kg</span>
+                    <span class="badge-kpi" id="kpiBrechaPct">0.0%</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- GRÁFICOS COMPARATIVOS DE LA MISMA SEMANA -->
+        <section class="charts-grid">
+            <article class="chart-card">
+                <div class="chart-top-bar">
+                    <div>
+                        <div class="chart-title">Misma semana: Real vs Programa vs Distribución</div>
+                        <div class="chart-sub" id="chartSemanaSub">Kilos consolidados de la semana seleccionada</div>
+                    </div>
+                    <div class="unit-toggle">
+                        <button class="filter-quick-btn active" id="btnUnidadTn"
+                            onclick="cambiarUnidadGrafico('Tn')">Tn</button>
+                        <button class="filter-quick-btn" id="btnUnidadKg"
+                            onclick="cambiarUnidadGrafico('Kg')">Kg</button>
+                    </div>
+                </div>
+                <div class="chart-box">
+                    <canvas id="chartSemana"></canvas>
+                </div>
+            </article>
+
+            <article class="chart-card">
+                <div class="chart-top-bar">
+                    <div>
+                        <div class="chart-title">Tres orígenes por SubPlanta</div>
+                        <div class="chart-sub">Misma semana · kilos por SubPlanta seleccionada</div>
+                    </div>
+                </div>
+                <div class="chart-box">
+                    <canvas id="chartSubPlanta"></canvas>
+                </div>
+            </article>
+
+            <article class="chart-card">
+                <div class="chart-top-bar">
+                    <div>
+                        <div class="chart-title">Tendencia diaria de la semana</div>
+                        <div class="chart-sub" id="chartDiarioSub">Lunes a domingo de la semana seleccionada</div>
+                    </div>
+                </div>
+                <div class="chart-box">
+                    <canvas id="chartDiario"></canvas>
+                </div>
+            </article>
+
+            <article class="chart-card">
+                <div class="chart-top-bar">
+                    <div>
+                        <div class="chart-title">Evolución semanal por origen</div>
+                        <div class="chart-sub">Contexto histórico · kilos por semana ISO (Lunes a Domingo)</div>
+                    </div>
+                </div>
+                <div class="chart-box">
+                    <canvas id="chartEvolucion"></canvas>
+                </div>
+            </article>
+        </section>
+
+        <!-- MATRIZ COMPARATIVA JERÁRQUICA DE LA MISMA SEMANA -->
+        <section class="matrix-card">
+            <div class="matrix-toolbar">
+                <div class="matrix-toolbar-left">
+                    <div class="chart-title" id="matrixTitle">Comparativo Semana / Día / SubPlanta / CódigoCorto - Nombre</div>
+                    <div class="chart-sub" id="matrixSubtitle">Misma semana · Detalle por día · Producción Real,
+                        Programa de Producción y Pedido de Distribución</div>
+                </div>
+                <div class="matrix-actions">
+                    <div class="unit-toggle" role="group" aria-label="Vista de la matriz">
+                        <button class="filter-quick-btn" id="btnVistaSemanal"
+                            onclick="cambiarVistaMatriz('semanal')">Semanal</button>
+                        <button class="filter-quick-btn active" id="btnVistaDiaria"
+                            onclick="cambiarVistaMatriz('diaria')">Diaria</button>
+                    </div>
+                    <div class="search-box">
+                        <span style="color: var(--color-text-muted);">&#128269;</span>
+                        <input type="text" id="inputBusquedaMatriz"
+                            placeholder="Buscar día, SubPlanta, código o nombre..." oninput="filtrarMatriz()">
+                    </div>
+                    <button class="btn btn-icon" onclick="expandirTodo(true)">Expandir Todo</button>
+                    <button class="btn btn-icon" onclick="expandirTodo(false)">Colapsar Todo</button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="matrix-table">
+                    <thead>
+                        <tr>
+                            <th class="col-hier" id="matrixHierHeader" style="min-width:260px;">Semana / Día / SubPlanta / CódigoCorto - Nombre</th>
+                            <th class="num-col">Prod. Real (kg)</th>
+                            <th class="num-col col-group-prog-start">Prog. Producción (kg)</th>
+                            <th class="num-col">% Cumpl. Prog.</th>
+                            <th class="num-col col-group-dist-start">Ped. Distribución (kg)</th>
+                            <th class="num-col">% Cumpl. Dist.</th>
+                        </tr>
+                    </thead>
+                    <tbody id="matrixBody">
+                        <tr>
+                            <td colspan="6" class="matrix-empty">Cargando información de la API...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <footer class="page-footer">
+            Fuente: Excel <b>Cumplimiento_PTC_Diario</b> · Endpoint <b>GET /api/CumplimientoPtcDiario</b> ·
+            Comparativo dentro de la <b>misma semana</b>: <b>Producción Real</b> (T_Produccion), <b>Programa de
+                Producción</b> (T_ResProd_Py_DB) y <b>Pedido de Distribución</b> (T_Distribucion) · Matriz con vista
+            <b>Semanal</b> (Semana &rarr; SubPlanta &rarr; CódigoCorto) y vista <b>Diaria</b> (Semana &rarr; Día &rarr;
+            SubPlanta &rarr; CódigoCorto) · Agrupación semanal ISO-8601 con inicio en Lunes · Paleta Finanza Industrial
+        </footer>
+    </div>
+
+    <div class="toast" id="toast"></div>
+    <script>
+        // =========================================================================
+        // ⚙️ CONFIGURACIÓN DE CONEXIÓN HÍBRIDA A LA API .NET
+        // =========================================================================
+        const APP_CONFIG = {
+            servidor: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.servidor)
+                ? GLOBAL_CONFIG.servidor
+                : "RAEVSALL001",
+            puertos: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.puertos)
+                ? GLOBAL_CONFIG.puertos
+                : [8080, 5000],
+            controllerPath: "/api/CumplimientoPtcDiario",
+            timeoutMs: 60000
+        };
+
+        function generarBasesApi() {
+            if (typeof generarBasesApiGlobal === 'function') {
+                return generarBasesApiGlobal();
+            }
+            const bases = [];
+            for (const puerto of APP_CONFIG.puertos) {
+                bases.push(`http://${APP_CONFIG.servidor}:${puerto}`);
+            }
+            return bases;
+        }
+
+        APP_CONFIG.timeoutMs = APP_CONFIG.timeoutMs || 60000;
+
+        let apiBaseActiva = null;
+        let cachedInitialPayload = null;
+
+        async function fetchConTimeout(url, timeoutMs = 10000) {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+                const res = await fetch(url, { signal: controller.signal });
+                clearTimeout(id);
+                return res;
+            } catch (err) {
+                clearTimeout(id);
+                throw err;
+            }
+        }
+
+        async function detectarServidorApi() {
+            const bases = generarBasesApi();
+            for (const base of bases) {
+                try {
+                    const res = await fetchConTimeout(`${base}${APP_CONFIG.controllerPath}`, 3500);
+                    if (res.ok) {
+                        try { cachedInitialPayload = await res.json(); } catch (_) { }
+                        return base;
+                    }
+                } catch (e) {
+                    try {
+                        const pingRes = await fetchConTimeout(`${base}/`, 2500);
+                        if (pingRes.ok) return base;
+                    } catch (errPing) { }
+                }
+            }
+            return null;
+        }
+
+        // =========================================================================
+        // 🗂️ ESTADO GLOBAL DEL DASHBOARD
+        // =========================================================================
+        let registrosCrudos = [];     // Respuesta original de la API (data plana, sin filtros)
+        let registros = [];           // Registros normalizados del comparativo
+        let semanas = [];             // Semanas ISO disponibles (orden ascendente)
+        let subPlantasDisponibles = [];
+        const selectedSubPlantas = new Set();
+
+        let semanaKey = null;         // Semana analizada (los 3 orígenes se comparan dentro de ella)
+        let unidadGrafico = 'Tn';
+        let busquedaMatriz = '';
+        let vistaMatriz = 'diaria';   // 'diaria' = Semana -> Día -> SubPlanta -> SKU · 'semanal' = Semana -> SubPlanta -> SKU
+        const expandidos = new Set();
+        let semanaExpandidaInicial = null;   // Semana para la que ya se aplicó la expansión inicial
+
+        const charts = {
+            semana: null,
+            subplanta: null,
+            diario: null,
+            evolucion: null
+        };
+
+        const ETIQUETAS_ORIGEN = {
+            produccion: 'Producción Real',
+            programa: 'Programa de Producción',
+            distribucion: 'Pedido de Distribución',
+            total: 'Total 3 orígenes'
+        };
+
+        const COLORES = {
+            produccion: '#BAA063',
+            programa: '#7A828E',
+            distribucion: '#948E88',
+            total: '#38353B',
+            grid: 'rgba(122, 130, 142, 0.16)'
+        };
+
+        // =========================================================================
+        // 🔧 UTILIDADES GENERALES
+        // =========================================================================
+        function num(valor) {
+            const n = Number(valor);
+            return isFinite(n) ? n : 0;
+        }
+
+        function pad2(n) {
+            return String(n).padStart(2, '0');
+        }
+
+        function formatKg(valor, decimales = 2) {
+            return num(valor).toLocaleString('es-PE', {
+                minimumFractionDigits: decimales,
+                maximumFractionDigits: decimales
+            });
+        }
+
+        // Cobertura = participación del origen sobre la Producción Real (ratio positivo)
+        function calcularCobertura(numerador, denominador) {
+            if (!denominador) return null;
+            return (numerador / denominador) * 100;
+        }
+
+        function escaparHtml(texto) {
+            return String(texto ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function claveSemana(anio, semana) {
+            return `${anio}-${pad2(semana)}`;
+        }
+
+        // Etiqueta visual obligatoria: Sem. XX (DD/MM al DD/MM)
+        function etiquetaSemana(meta) {
+            return `Sem. ${pad2(meta.semana)} (${meta.rango})`;
+        }
+
+        function fechaLegible(iso) {
+            if (!iso || iso.length < 10) return '-';
+            return `${iso.substring(8, 10)}/${iso.substring(5, 7)}/${iso.substring(0, 4)}`;
+        }
+
+        function mostrarToast(mensaje, icono = 'ℹ️') {
+            const toast = document.getElementById('toast');
+            if (!toast) return;
+            toast.textContent = `${icono} ${mensaje}`;
+            toast.classList.add('show');
+            clearTimeout(mostrarToast._timer);
+            mostrarToast._timer = setTimeout(() => toast.classList.remove('show'), 4500);
+        }
+
+        // =========================================================================
+        // 🔄 CARGA DE DATOS DESDE LA API
+        // =========================================================================
+        document.addEventListener('DOMContentLoaded', async () => {
+            initChartDefaults();
+            await inicializarDashboard();
+        });
+
+        function initChartDefaults() {
+            if (typeof ChartDataLabels !== 'undefined') {
+                Chart.register(ChartDataLabels);
+            }
+            Chart.defaults.color = '#787479';
+            Chart.defaults.font.family = "'Inter', sans-serif";
+        }
+
+        async function inicializarDashboard() {
+            const statusText = document.getElementById('apiStatusText');
+            const statusDot = document.querySelector('.status-dot');
+            statusText.textContent = `Buscando ${APP_CONFIG.servidor}...`;
+            if (statusDot) statusDot.className = 'status-dot loading';
+
+            try {
+                apiBaseActiva = await detectarServidorApi();
+
+                if (!apiBaseActiva) {
+                    throw new Error(`No se pudo conectar a ${APP_CONFIG.servidor} en puertos ${APP_CONFIG.puertos.join('/')}`);
+                }
+
+                const urlObj = new URL(apiBaseActiva);
+                if (statusText) statusText.textContent = `Conectado (${urlObj.host})`;
+                if (statusDot) statusDot.className = 'status-dot online';
+                mostrarToast(`Conectado al servidor en ${urlObj.host}`, '✅');
+                await recargarDatosAPI(false);
+            } catch (err) {
+                console.error('Error al inicializar:', err);
+                if (statusText) statusText.textContent = 'Sin Conexión';
+                if (statusDot) statusDot.className = 'status-dot error';
+                mostrarToast(`Error de conexión: ${err.message}`, '⚠️');
+                renderizarMatriz();
+            }
+        }
+
+        async function recargarDatosAPI(forzar = false) {
+            const statusText = document.getElementById('apiStatusText');
+            try {
+                if (!apiBaseActiva) {
+                    apiBaseActiva = await detectarServidorApi();
+                    if (!apiBaseActiva) {
+                        throw new Error(`No se pudo conectar a ${APP_CONFIG.servidor} en puertos ${APP_CONFIG.puertos.join('/')}`);
+                    }
+                }
+
+                if (statusText) statusText.textContent = forzar ? 'Recargando datos...' : 'Leyendo datos...';
+                let payload = null;
+
+                if (!forzar && cachedInitialPayload) {
+                    payload = cachedInitialPayload;
+                    cachedInitialPayload = null;
+                } else {
+                    const url = `${apiBaseActiva}${APP_CONFIG.controllerPath}${forzar ? '?recargar=true' : ''}`;
+                    const res = await fetchConTimeout(url, APP_CONFIG.timeoutMs);
+                    if (!res.ok) {
+                        let detalle = `HTTP ${res.status}`;
+                        try {
+                            const errorJson = await res.json();
+                            detalle = errorJson.mensaje || errorJson.title || detalle;
+                        } catch (_) { }
+                        throw new Error(detalle);
+                    }
+                    payload = await res.json();
+                }
+
+                if (!payload || payload.exito === false) {
+                    throw new Error((payload && payload.mensaje) || 'La API no devolvió datos válidos');
+                }
+
+                registrosCrudos = Array.isArray(payload.registros) ? payload.registros : [];
+                normalizarDatos(registrosCrudos);
+                construirSemanas();
+                construirPildorasSubPlanta();
+                actualizarVista();
+
+                const urlObj = new URL(apiBaseActiva);
+                if (statusText) statusText.textContent = `En Línea (${urlObj.host})`;
+                const dotOnline = document.querySelector('.status-dot');
+                if (dotOnline) dotOnline.className = 'status-dot online';
+                mostrarToast(`Cargados ${registros.length} registros consolidados`, '✅');
+            } catch (err) {
+                console.error('Error al cargar datos:', err);
+                if (statusText) statusText.textContent = 'Sin datos';
+                const dot = document.querySelector('.status-dot');
+                if (dot) dot.className = 'status-dot error';
+                mostrarToast(`No se pudieron cargar los datos: ${err.message}`, '❌');
+                renderizarMatriz();
+            }
+        }
+
+        // =========================================================================
+        // 🧹 NORMALIZACIÓN Y CONSTRUCCIÓN DE SEMANAS / SUBPLANTAS
+        // =========================================================================
+        function normalizarDatos(data) {
+            registros = (data || []).map(r => {
+                const anio = num(r.anioSemana);
+                const semana = num(r.semana);
+                const produccion = num(r.kilosProduccion);
+                const programa = num(r.kilosResProdPyDb);
+                const distribucion = num(r.kilosDistribucion);
+                const totalApi = num(r.kilosTotal);
+
+                return {
+                    fecha: String(r.fecha || ''),
+                    anio,
+                    semana,
+                    weekKey: claveSemana(anio, semana),
+                    rango: String(r.rangoSemana || ''),
+                    lunes: String(r.lunes || ''),
+                    domingo: String(r.domingo || ''),
+                    codigo: String(r.codigoCorto || '').trim(),
+                    nombre: String(r.nombre || '').trim(),
+                    subPlanta: String(r.subPlanta || '').trim() || 'SIN SUBPLANTA',
+                    produccion,
+                    programa,
+                    distribucion,
+                    total: totalApi || (produccion + programa + distribucion),
+                    origen: String(r.origen || '')
+                };
+            }).filter(r => r.semana > 0 && r.anio > 0);
+        }
+
+        function rangoDesdeFechas(meta) {
+            if (meta.rango) return meta.rango;
+            const fmt = (iso) => {
+                if (!iso || iso.length < 10) return '';
+                return `${iso.substring(8, 10)}/${iso.substring(5, 7)}`;
+            };
+            const l = fmt(meta.lunes);
+            const d = fmt(meta.domingo);
+            return (l && d) ? `${l} al ${d}` : '';
+        }
+
+        function construirSemanas() {
+            const mapa = new Map();
+            registros.forEach(r => {
+                if (!mapa.has(r.weekKey)) {
+                    mapa.set(r.weekKey, {
+                        key: r.weekKey,
+                        anio: r.anio,
+                        semana: r.semana,
+                        lunes: r.lunes,
+                        domingo: r.domingo,
+                        rango: r.rango
+                    });
+                }
+            });
+
+            semanas = [...mapa.values()]
+                .map(meta => {
+                    meta.rango = rangoDesdeFechas(meta);
+                    meta.etiqueta = `Sem. ${pad2(meta.semana)} · ${meta.anio} (${meta.rango})`;
+                    return meta;
+                })
+                .sort((a, b) => a.key.localeCompare(b.key));
+
+            const keys = semanas.map(s => s.key);
+
+            // La semana por defecto es la última que tenga Producción Real registrada
+            if (!keys.includes(semanaKey)) {
+                const conProduccion = semanas
+                    .filter(meta => registros.some(r => r.weekKey === meta.key && r.produccion > 0))
+                    .map(meta => meta.key);
+                const base = conProduccion.length ? conProduccion : keys;
+                semanaKey = base[base.length - 1] || null;
+            }
+
+            construirSelectorSemana();
+        }
+
+        function construirSelectorSemana() {
+            const select = document.getElementById('selectSemana');
+            if (!select) return;
+
+            const opciones = semanas.slice().reverse().map(meta =>
+                `<option value="${meta.key}">${escaparHtml(meta.etiqueta)}</option>`
+            ).join('');
+
+            select.innerHTML = opciones || '<option value="">Sin semanas</option>';
+            if (semanaKey) select.value = semanaKey;
+
+            actualizarHintSemana();
+        }
+
+        function metaSemana(key) {
+            return semanas.find(s => s.key === key) || null;
+        }
+
+        function actualizarHintSemana() {
+            const hint = document.getElementById('hintSemana');
+            if (!hint) return;
+
+            const meta = metaSemana(semanaKey);
+            if (!meta) {
+                hint.textContent = 'Sin semanas disponibles';
+                return;
+            }
+
+            const filas = filasDeSemana(meta.key);
+            const dias = new Set(filas.filter(f => f.fecha).map(f => f.fecha)).size;
+            hint.textContent = `Lunes ${fechaLegible(meta.lunes)} al domingo ${fechaLegible(meta.domingo)} · ` +
+                `${dias} día(s) · ${filas.length} fila(s)`;
+        }
+
+        function cambiarSemana(valor) {
+            if (!valor) return;
+            semanaKey = valor;
+            actualizarHintSemana();
+            actualizarVista();
+        }
+
+        function seleccionarUltimaSemana() {
+            if (semanas.length === 0) return;
+            const conProduccion = semanas.filter(meta =>
+                registros.some(r => r.weekKey === meta.key && r.produccion > 0));
+            const objetivo = conProduccion.length
+                ? conProduccion[conProduccion.length - 1]
+                : semanas[semanas.length - 1];
+
+            semanaKey = objetivo.key;
+            construirSelectorSemana();
+            actualizarVista();
+            mostrarToast(`Semana seleccionada: ${objetivo.etiqueta}`, '📅');
+        }
+
+        function moverSemana(delta) {
+            if (semanas.length === 0) return;
+            const indiceActual = semanas.findIndex(m => m.key === semanaKey);
+            const base = indiceActual === -1 ? semanas.length - 1 : indiceActual;
+            const destino = Math.min(semanas.length - 1, Math.max(0, base + delta));
+            const meta = semanas[destino];
+            if (!meta) return;
+
+            semanaKey = meta.key;
+            construirSelectorSemana();
+            actualizarVista();
+        }
+
+        function cambiarUnidadGrafico(unidad) {
+            unidadGrafico = unidad;
+            const btnTn = document.getElementById('btnUnidadTn');
+            const btnKg = document.getElementById('btnUnidadKg');
+            if (btnTn) btnTn.classList.toggle('active', unidad === 'Tn');
+            if (btnKg) btnKg.classList.toggle('active', unidad === 'Kg');
+            renderizarGraficos();
+        }
+
+        function construirPildorasSubPlanta() {
+            const contenedor = document.getElementById('subplantaPillsContainer');
+            if (!contenedor) return;
+
+            subPlantasDisponibles = [...new Set(registros.map(r => r.subPlanta))].filter(Boolean).sort();
+            if (selectedSubPlantas.size === 0) {
+                subPlantasDisponibles.forEach(sp => selectedSubPlantas.add(sp));
+            }
+
+            contenedor.innerHTML = '';
+            subPlantasDisponibles.forEach(sp => {
+                const boton = document.createElement('button');
+                boton.type = 'button';
+                boton.className = 'subplanta-pill' + (selectedSubPlantas.has(sp) ? ' selected' : '');
+                boton.textContent = sp;
+                boton.addEventListener('click', () => {
+                    if (selectedSubPlantas.has(sp)) {
+                        selectedSubPlantas.delete(sp);
+                    } else {
+                        selectedSubPlantas.add(sp);
+                    }
+                    construirPildorasSubPlanta();
+                    actualizarVista();
+                });
+                contenedor.appendChild(boton);
+            });
+        }
+
+        function seleccionarTodasSubPlantas() {
+            selectedSubPlantas.clear();
+            subPlantasDisponibles.forEach(sp => selectedSubPlantas.add(sp));
+            construirPildorasSubPlanta();
+            actualizarVista();
+        }
+
+        function registrosFiltrados() {
+            if (selectedSubPlantas.size === 0) return registros;
+            return registros.filter(r => selectedSubPlantas.has(r.subPlanta));
+        }
+
+        // =========================================================================
+        // 📐 AGREGACIONES DEL COMPARATIVO (MISMA SEMANA)
+        // =========================================================================
+        function totalesVacios() {
+            return { produccion: 0, programa: 0, distribucion: 0, total: 0, registros: 0 };
+        }
+
+        function acumularTotales(acumulado, fila) {
+            acumulado.produccion += fila.produccion;
+            acumulado.programa += fila.programa;
+            acumulado.distribucion += fila.distribucion;
+            acumulado.total += fila.total;
+            acumulado.registros += 1;
+            return acumulado;
+        }
+
+        function totalesDeFilas(filas) {
+            return filas.reduce((acc, fila) => acumularTotales(acc, fila), totalesVacios());
+        }
+
+        function filasDeSemana(key) {
+            if (!key) return [];
+            return registrosFiltrados().filter(r => r.weekKey === key);
+        }
+
+        function agruparPorSemana(filas) {
+            const mapa = new Map();
+            filas.forEach(fila => {
+                if (!mapa.has(fila.weekKey)) {
+                    const meta = metaSemana(fila.weekKey);
+                    mapa.set(fila.weekKey, {
+                        key: fila.weekKey,
+                        etiqueta: meta ? etiquetaSemana(meta) : `Sem. ${pad2(fila.semana)}`,
+                        totales: totalesVacios()
+                    });
+                }
+                acumularTotales(mapa.get(fila.weekKey).totales, fila);
+            });
+            return [...mapa.values()].sort((a, b) => a.key.localeCompare(b.key));
+        }
+
+        // Agregado semanal por SubPlanta -> CódigoCorto (usado por el gráfico de SubPlanta)
+        function construirDetalleSemana(filas) {
+            const mapa = new Map();
+
+            filas.forEach(fila => {
+                if (!mapa.has(fila.subPlanta)) {
+                    mapa.set(fila.subPlanta, {
+                        subPlanta: fila.subPlanta,
+                        totales: totalesVacios(),
+                        codigos: new Map()
+                    });
+                }
+
+                const grupo = mapa.get(fila.subPlanta);
+                acumularTotales(grupo.totales, fila);
+
+                const clave = fila.codigo || fila.nombre || 'SIN CÓDIGO';
+                if (!grupo.codigos.has(clave)) {
+                    grupo.codigos.set(clave, {
+                        codigo: fila.codigo,
+                        nombre: fila.nombre,
+                        totales: totalesVacios()
+                    });
+                }
+                acumularTotales(grupo.codigos.get(clave).totales, fila);
+            });
+
+            return [...mapa.values()]
+                .map(grupo => ({
+                    subPlanta: grupo.subPlanta,
+                    totales: grupo.totales,
+                    codigos: [...grupo.codigos.values()]
+                        .sort((a, b) => b.totales.produccion - a.totales.produccion)
+                }))
+                .sort((a, b) => b.totales.total - a.totales.total);
+        }
+
+        // Detalle jerárquico Día -> SubPlanta -> CódigoCorto para la semana seleccionada
+        function construirDetalleSemanaPorDia(filas) {
+            const dias = new Map();
+
+            filas.forEach(fila => {
+                const fecha = fila.fecha || '';
+
+                if (!dias.has(fecha)) {
+                    dias.set(fecha, {
+                        fecha,
+                        etiqueta: etiquetaDia(fecha),
+                        totales: totalesVacios(),
+                        subPlantas: new Map()
+                    });
+                }
+
+                const dia = dias.get(fecha);
+                acumularTotales(dia.totales, fila);
+
+                if (!dia.subPlantas.has(fila.subPlanta)) {
+                    dia.subPlantas.set(fila.subPlanta, {
+                        subPlanta: fila.subPlanta,
+                        totales: totalesVacios(),
+                        codigos: new Map()
+                    });
+                }
+
+                const grupo = dia.subPlantas.get(fila.subPlanta);
+                acumularTotales(grupo.totales, fila);
+
+                const clave = fila.codigo || fila.nombre || 'SIN CÓDIGO';
+                if (!grupo.codigos.has(clave)) {
+                    grupo.codigos.set(clave, {
+                        codigo: fila.codigo,
+                        nombre: fila.nombre,
+                        totales: totalesVacios()
+                    });
+                }
+                acumularTotales(grupo.codigos.get(clave).totales, fila);
+            });
+
+            return [...dias.values()]
+                .sort((a, b) => a.fecha.localeCompare(b.fecha))
+                .map(dia => ({
+                    fecha: dia.fecha,
+                    etiqueta: dia.etiqueta,
+                    totales: dia.totales,
+                    subPlantas: [...dia.subPlantas.values()]
+                        .map(grupo => ({
+                            subPlanta: grupo.subPlanta,
+                            totales: grupo.totales,
+                            codigos: [...grupo.codigos.values()]
+                                .sort((a, b) => b.totales.produccion - a.totales.produccion)
+                        }))
+                        .sort((a, b) => b.totales.total - a.totales.total)
+                }));
+        }
+
+        const DIAS_CORTOS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+
+        // Etiqueta del día dentro de la semana: "Lun 09/11"
+        function etiquetaDia(iso) {
+            if (!iso || iso.length < 10) return 'Sin fecha';
+            const d = new Date(`${iso.substring(0, 10)}T00:00:00`);
+            if (isNaN(d.getTime())) return fechaLegible(iso);
+            return `${DIAS_CORTOS[d.getDay()]} ${iso.substring(8, 10)}/${iso.substring(5, 7)}`;
+        }
+
+        // Días (Lunes a Domingo) de la semana seleccionada, con relleno en cero
+        function diasDeSemana(meta) {
+            const filas = filasDeSemana(semanaKey);
+            const fechas = new Set(filas.map(f => f.fecha).filter(Boolean));
+
+            if (meta && meta.lunes && meta.lunes.length >= 10) {
+                const inicio = new Date(`${meta.lunes.substring(0, 10)}T00:00:00`);
+                if (!isNaN(inicio.getTime())) {
+                    const dias = [];
+                    for (let i = 0; i < 7; i++) {
+                        const d = new Date(inicio.getTime());
+                        d.setDate(inicio.getDate() + i);
+                        const iso = `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+                        dias.push({
+                            fecha: iso,
+                            etiqueta: `${DIAS_CORTOS[d.getDay()]} ${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}`
+                        });
+                    }
+                    return dias;
+                }
+            }
+
+            return [...fechas].sort().map(iso => {
+                const d = new Date(`${iso.substring(0, 10)}T00:00:00`);
+                const etiqueta = isNaN(d.getTime())
+                    ? `${iso.substring(8, 10)}/${iso.substring(5, 7)}`
+                    : `${DIAS_CORTOS[d.getDay()]} ${iso.substring(8, 10)}/${iso.substring(5, 7)}`;
+                return { fecha: iso, etiqueta };
+            });
+        }
+
+        // =========================================================================
+        // 🔁 VISTA GENERAL, RESUMEN Y KPIs
+        // =========================================================================
+        function actualizarVista() {
+            actualizarHintSemana();
+            actualizarResumenSeleccion();
+            actualizarKPIs();
+            renderizarGraficos();
+            renderizarMatriz();
+        }
+
+        function actualizarResumenSeleccion() {
+            const meta = metaSemana(semanaKey);
+            const resumen = document.getElementById('selectionSummary');
+            const registrosResumen = document.getElementById('registrosSummary');
+            const filas = filasDeSemana(semanaKey);
+
+            if (resumen) {
+                resumen.innerHTML = meta
+                    ? `Semana analizada: <b>${escaparHtml(etiquetaSemana(meta))}</b> · Producción Real vs Programa vs Distribución de la misma semana`
+                    : 'Sin semana seleccionada';
+            }
+
+            if (registrosResumen) {
+                registrosResumen.textContent = `${registros.length} registros API · ` +
+                    `${selectedSubPlantas.size} de ${subPlantasDisponibles.length} SubPlantas · ` +
+                    `${filas.length} fila(s) en la semana`;
+            }
+        }
+
+        function fijarKpi(id, valorKg) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.innerHTML = `${formatKg(valorKg)}<span class="kpi-unit">kg</span>`;
+        }
+
+        function actualizarKpiOrigen(sufijo, valor, baseProduccion) {
+            fijarKpi(`kpi${sufijo}`, valor);
+
+            const detalle = document.getElementById(`kpi${sufijo}Detalle`);
+            if (detalle) {
+                const brecha = valor - baseProduccion;
+                detalle.textContent = `Brecha vs real: ${brecha >= 0 ? '+' : '-'}${formatKg(Math.abs(brecha))} kg`;
+            }
+
+            const badge = document.getElementById(`kpi${sufijo}Cobertura`);
+            if (badge) {
+                const cobertura = calcularCobertura(valor, baseProduccion);
+                badge.className = 'badge-kpi';
+                badge.textContent = cobertura === null ? 'Cob. n/a' : `Cob. ${cobertura.toFixed(1)}%`;
+            }
+        }
+
+        function actualizarKPIs() {
+            const filas = filasDeSemana(semanaKey);
+            const totales = totalesDeFilas(filas);
+
+            fijarKpi('kpiProduccion', totales.produccion);
+            const detalleProduccion = document.getElementById('kpiProduccionDetalle');
+            if (detalleProduccion) {
+                const dias = new Set(filas.filter(f => f.produccion > 0).map(f => f.fecha).filter(Boolean)).size;
+                detalleProduccion.textContent = `${dias} día(s) con producción · ${formatKg(totales.registros, 0)} filas`;
+            }
+
+            actualizarKpiOrigen('Programa', totales.programa, totales.produccion);
+            actualizarKpiOrigen('Distribucion', totales.distribucion, totales.produccion);
+
+            const brecha = totales.programa - totales.distribucion;
+            fijarKpi('kpiBrecha', brecha);
+
+            const detalleBrecha = document.getElementById('kpiBrechaDetalle');
+            if (detalleBrecha) {
+                detalleBrecha.textContent = `Prog.: ${formatKg(totales.programa)} kg · ` +
+                    `Dist.: ${formatKg(totales.distribucion)} kg`;
+            }
+
+            const badgeBrecha = document.getElementById('kpiBrechaPct');
+            if (badgeBrecha) {
+                const atendido = calcularCobertura(totales.distribucion, totales.programa);
+                badgeBrecha.className = 'badge-kpi';
+                badgeBrecha.textContent = atendido === null ? 'Atendido n/a' : `Atendido ${atendido.toFixed(1)}%`;
+            }
+        }
+
+        // =========================================================================
+        // 📊 GRÁFICOS COMPARATIVOS
+        // =========================================================================
+        function etiquetaUnidad() {
+            return unidadGrafico === 'Tn' ? 'Tn' : 'kg';
+        }
+
+        function valorGrafico(kg) {
+            return unidadGrafico === 'Tn' ? num(kg) / 1000 : num(kg);
+        }
+
+        function formatearValorGrafico(valor) {
+            return `${formatKg(valor, unidadGrafico === 'Tn' ? 2 : 0)} ${etiquetaUnidad()}`;
+        }
+
+        function opcionesEscala(titulo) {
+            return {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            boxWidth: 8,
+                            boxHeight: 8,
+                            padding: 14,
+                            font: { size: 11, weight: '600' }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: '#2E2C31',
+                        titleFont: { size: 12, weight: '700' },
+                        bodyFont: { size: 11 },
+                        padding: 10,
+                        cornerRadius: 8,
+                        callbacks: {
+                            label: (ctx) => ` ${ctx.dataset.label}: ${formatearValorGrafico(ctx.parsed.y)}`
+                        }
+                    },
+                    datalabels: { display: false }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { font: { size: 10, weight: '600' }, maxRotation: 45, minRotation: 0 }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: COLORES.grid },
+                        ticks: { font: { size: 10 }, callback: (v) => formatKg(v, 0) },
+                        title: { display: true, text: titulo, font: { size: 10, weight: '700' } }
+                    }
+                }
+            };
+        }
+
+        function crearGrafico(clave, canvasId, config) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas || typeof Chart === 'undefined') return;
+            if (charts[clave]) charts[clave].destroy();
+            charts[clave] = new Chart(canvas, config);
+        }
+
+        function renderizarGraficos() {
+            renderizarGraficoSemana();
+            renderizarGraficoSubPlanta();
+            renderizarGraficoDiario();
+            renderizarGraficoEvolucion();
+        }
+
+        // 1) Los tres orígenes de la semana seleccionada
+        function renderizarGraficoSemana() {
+            const meta = metaSemana(semanaKey);
+            const totales = totalesDeFilas(filasDeSemana(semanaKey));
+            const claves = ['produccion', 'programa', 'distribucion'];
+
+            const subtitulo = document.getElementById('chartSemanaSub');
+            if (subtitulo) {
+                subtitulo.textContent = meta
+                    ? `${etiquetaSemana(meta)} · kilos consolidados de los 3 orígenes`
+                    : 'Kilos consolidados de la semana seleccionada';
+            }
+
+            const opciones = opcionesEscala(`Kilos (${etiquetaUnidad()})`);
+            opciones.scales.x.ticks.font.size = 11;
+            opciones.plugins.tooltip.callbacks.footer = (items) => {
+                if (!items || !items.length) return '';
+                const clave = claves[items[0].dataIndex];
+                const valor = totales[clave];
+                const brecha = valor - totales.produccion;
+                const cobertura = calcularCobertura(valor, totales.produccion);
+                return [
+                    `Brecha vs Producción Real: ${brecha >= 0 ? '+' : '-'}${formatKg(Math.abs(brecha))} kg`,
+                    `Cobertura sobre Producción Real: ${cobertura === null ? 'n/a' : cobertura.toFixed(1) + '%'}`
+                ];
+            };
+            opciones.plugins.datalabels = {
+                display: () => window.innerWidth > 768,
+                anchor: 'end',
+                align: 'end',
+                offset: 2,
+                color: '#4A4650',
+                font: { size: 10, weight: '700' },
+                formatter: (value) => formatKg(value, unidadGrafico === 'Tn' ? 2 : 0)
+            };
+
+            crearGrafico('semana', 'chartSemana', {
+                type: 'bar',
+                data: {
+                    labels: claves.map(clave => ETIQUETAS_ORIGEN[clave]),
+                    datasets: [{
+                        label: 'Kilos de la semana',
+                        data: claves.map(clave => valorGrafico(totales[clave])),
+                        backgroundColor: claves.map(clave => COLORES[clave]),
+                        borderRadius: 6,
+                        maxBarThickness: 96
+                    }]
+                },
+                options: opciones
+            });
+        }
+
+        // 2) Tres orígenes por SubPlanta de la misma semana
+        function renderizarGraficoSubPlanta() {
+            const detalle = construirDetalleSemana(filasDeSemana(semanaKey));
+            const opciones = opcionesEscala(`Kilos (${etiquetaUnidad()})`);
+
+            opciones.plugins.tooltip.callbacks.footer = (items) => {
+                if (!items || !items.length) return '';
+                const grupo = detalle[items[0].dataIndex];
+                if (!grupo) return '';
+                const t = grupo.totales;
+                const cobProg = calcularCobertura(t.programa, t.produccion);
+                const cobDist = calcularCobertura(t.distribucion, t.produccion);
+                return [
+                    `Cob. Programa: ${cobProg === null ? 'n/a' : cobProg.toFixed(1) + '%'}`,
+                    `Cob. Distribución: ${cobDist === null ? 'n/a' : cobDist.toFixed(1) + '%'}`
+                ];
+            };
+
+            const datasets = ['produccion', 'programa', 'distribucion'].map(clave => ({
+                label: ETIQUETAS_ORIGEN[clave],
+                data: detalle.map(grupo => valorGrafico(grupo.totales[clave])),
+                backgroundColor: COLORES[clave],
+                borderRadius: 5,
+                maxBarThickness: 34
+            }));
+
+            crearGrafico('subplanta', 'chartSubPlanta', {
+                type: 'bar',
+                data: { labels: detalle.map(grupo => grupo.subPlanta), datasets },
+                options: opciones
+            });
+        }
+
+        // 3) Tendencia diaria Lunes a Domingo de la semana seleccionada
+        function renderizarGraficoDiario() {
+            const meta = metaSemana(semanaKey);
+            const dias = diasDeSemana(meta);
+            const filas = filasDeSemana(semanaKey);
+
+            const mapa = new Map();
+            filas.forEach(fila => {
+                if (!mapa.has(fila.fecha)) {
+                    mapa.set(fila.fecha, { produccion: 0, programa: 0, distribucion: 0 });
+                }
+                const acumulado = mapa.get(fila.fecha);
+                acumulado.produccion += fila.produccion;
+                acumulado.programa += fila.programa;
+                acumulado.distribucion += fila.distribucion;
+            });
+
+            const subtitulo = document.getElementById('chartDiarioSub');
+            if (subtitulo) {
+                subtitulo.textContent = meta
+                    ? `${etiquetaSemana(meta)} · kilos por día (Lunes a Domingo)`
+                    : 'Lunes a domingo de la semana seleccionada';
+            }
+
+            const opciones = opcionesEscala(`Kilos (${etiquetaUnidad()})`);
+            const datasets = ['produccion', 'programa', 'distribucion'].map(clave => ({
+                label: ETIQUETAS_ORIGEN[clave],
+                data: dias.map(dia => valorGrafico((mapa.get(dia.fecha) || {})[clave] || 0)),
+                borderColor: COLORES[clave],
+                backgroundColor: COLORES[clave],
+                borderWidth: 2.4,
+                pointRadius: 3,
+                pointHoverRadius: 5,
+                tension: 0.3,
+                fill: false
+            }));
+
+            crearGrafico('diario', 'chartDiario', {
+                type: 'line',
+                data: { labels: dias.map(dia => dia.etiqueta), datasets },
+                options: opciones
+            });
+        }
+
+        // 4) Evolución semanal histórica de los tres orígenes (contexto)
+        function renderizarGraficoEvolucion() {
+            const visibles = agruparPorSemana(registrosFiltrados()).slice(-26);
+            const opciones = opcionesEscala(`Kilos (${etiquetaUnidad()})`);
+
+            opciones.plugins.tooltip.callbacks.footer = (items) => {
+                if (!items || !items.length) return '';
+                const semana = visibles[items[0].dataIndex];
+                if (!semana) return '';
+                return `${semana.etiqueta} · ${formatKg(semana.totales.registros, 0)} fila(s)`;
+            };
+            opciones.plugins.datalabels = {
+                display: (ctx) => window.innerWidth > 768 && visibles.length <= 6,
+                anchor: 'end',
+                align: 'end',
+                offset: 1,
+                color: '#4A4650',
+                font: { size: 8, weight: '700' },
+                formatter: (value) => formatKg(value, 0)
+            };
+
+            const datasets = ['produccion', 'programa', 'distribucion'].map(clave => ({
+                label: ETIQUETAS_ORIGEN[clave],
+                data: visibles.map(semana => valorGrafico(semana.totales[clave])),
+                backgroundColor: COLORES[clave],
+                borderRadius: 4,
+                maxBarThickness: 26
+            }));
+
+            crearGrafico('evolucion', 'chartEvolucion', {
+                type: 'bar',
+                data: { labels: visibles.map(semana => semana.etiqueta), datasets },
+                options: opciones
+            });
+        }
+
+        // =========================================================================
+        // 🧮 MATRIZ JERÁRQUICA: Semana -> SubPlanta -> CódigoCorto (misma semana)
+        // =========================================================================
+        function filtrarMatriz() {
+            const input = document.getElementById('inputBusquedaMatriz');
+            busquedaMatriz = input ? input.value.trim().toLowerCase() : '';
+            renderizarMatriz();
+        }
+
+        // Selector de vista de la matriz: "Semanal" (SubPlanta -> SKU) o "Diaria" (Día -> SubPlanta -> SKU)
+        function cambiarVistaMatriz(vista) {
+            if (vista !== 'diaria' && vista !== 'semanal') return;
+            vistaMatriz = vista;
+            expandidos.clear();
+            semanaExpandidaInicial = null;
+
+            const btnSemanal = document.getElementById('btnVistaSemanal');
+            const btnDiaria = document.getElementById('btnVistaDiaria');
+            if (btnSemanal) btnSemanal.classList.toggle('active', vista === 'semanal');
+            if (btnDiaria) btnDiaria.classList.toggle('active', vista === 'diaria');
+
+            renderizarMatriz();
+        }
+
+        function toggleNodo(idNodo) {
+            if (expandidos.has(idNodo)) {
+                expandidos.delete(idNodo);
+            } else {
+                expandidos.add(idNodo);
+            }
+            renderizarMatriz();
+        }
+
+        function expandirTodo(expandir) {
+            expandidos.clear();
+            if (expandir && semanaKey) {
+                expandidos.add(`sem_${semanaKey}`);
+
+                if (vistaMatriz === 'diaria') {
+                    construirDetalleSemanaPorDia(filasDeSemana(semanaKey)).forEach(dia => {
+                        expandidos.add(`sem_${semanaKey}_dia_${dia.fecha}`);
+                        dia.subPlantas.forEach(grupo =>
+                            expandidos.add(`sem_${semanaKey}_dia_${dia.fecha}_sp_${grupo.subPlanta}`));
+                    });
+                } else {
+                    construirDetalleSemana(filasDeSemana(semanaKey))
+                        .forEach(grupo => expandidos.add(`sem_${semanaKey}_sp_${grupo.subPlanta}`));
+                }
+            }
+            semanaExpandidaInicial = semanaKey;
+            renderizarMatriz();
+        }
+
+        // Jerarquía de la matriz con dos vistas:
+        //  · Diaria  : Semana -> Día -> SubPlanta -> (CódigoCorto + Nombre)
+        //  · Semanal : Semana -> SubPlanta -> (CódigoCorto + Nombre)
+        function renderizarMatriz() {
+            const tbody = document.getElementById('matrixBody');
+            if (!tbody) return;
+
+            const esDiaria = vistaMatriz === 'diaria';
+            const meta = metaSemana(semanaKey);
+            const subtitulo = document.getElementById('matrixSubtitle');
+            const titulo = document.getElementById('matrixTitle');
+            const encabezado = document.getElementById('matrixHierHeader');
+            const filasSemana = filasDeSemana(semanaKey);
+            const detalle = esDiaria ? construirDetalleSemanaPorDia(filasSemana) : construirDetalleSemana(filasSemana);
+
+            if (titulo) {
+                titulo.textContent = esDiaria
+                    ? 'Comparativo Semana / Día / SubPlanta / CódigoCorto - Nombre'
+                    : 'Comparativo Semana / SubPlanta / CódigoCorto - Nombre';
+            }
+
+            if (encabezado) {
+                encabezado.textContent = esDiaria
+                    ? 'Semana / Día / SubPlanta / CódigoCorto - Nombre'
+                    : 'Semana / SubPlanta / CódigoCorto - Nombre';
+            }
+
+            if (subtitulo) {
+                const modoTexto = esDiaria ? 'Detalle por día' : 'Consolidado semanal';
+                subtitulo.textContent = meta
+                    ? `${etiquetaSemana(meta)} · ${modoTexto} · Producción Real vs Programa de Producción vs Pedido de Distribución`
+                    : `Misma semana · ${modoTexto} · Producción Real, Programa de Producción y Pedido de Distribución`;
+            }
+
+            if (!registros.length) {
+                tbody.innerHTML = '<tr><td colspan="6" class="matrix-empty">Sin datos cargados desde la API.</td></tr>';
+                return;
+            }
+
+            if (!detalle.length) {
+                tbody.innerHTML = '<tr><td colspan="6" class="matrix-empty">No hay registros para la semana seleccionada.</td></tr>';
+                return;
+            }
+
+            // Al cambiar de semana/vista se expanden una sola vez la Semana y su primer nivel
+            if (semanaExpandidaInicial !== semanaKey) {
+                expandidos.add(`sem_${semanaKey}`);
+                if (esDiaria) {
+                    detalle.forEach(dia => expandidos.add(`sem_${semanaKey}_dia_${dia.fecha}`));
+                } else {
+                    detalle.forEach(grupo => expandidos.add(`sem_${semanaKey}_sp_${grupo.subPlanta}`));
+                }
+                semanaExpandidaInicial = semanaKey;
+            }
+
+            const termino = busquedaMatriz;
+            const totalSemana = totalesDeFilas(filasSemana);
+            const etiquetaSemanaNodo = meta
+                ? `Semana ${semanaKey} (${meta.rango})`
+                : `Semana ${semanaKey || 'sin seleccionar'}`;
+
+            const coincideSemana = !termino ||
+                etiquetaSemanaNodo.toLowerCase().includes(termino) ||
+                String(semanaKey).toLowerCase().includes(termino);
+
+            // Nodos hijos según la vista activa (Días o SubPlantas)
+            const hijos = esDiaria
+                ? htmlNodosVistaDiaria(detalle, termino)
+                : htmlNodosVistaSemanal(detalle, termino);
+
+            if (!coincideSemana && !hijos.visible) {
+                const mensaje = (!esDiaria && esTerminoDeDia(termino))
+                    ? 'La vista Semanal no muestra días. Cambia a la vista Diaria para buscar por día.'
+                    : 'No hay datos que coincidan con la búsqueda.';
+                tbody.innerHTML = `<tr><td colspan="6" class="matrix-empty">${escaparHtml(mensaje)}</td></tr>`;
+                return;
+            }
+
+            const idSem = `sem_${semanaKey}`;
+            const semAbierta = termino ? true : expandidos.has(idSem);
+
+            let html = construirFilaJerarquia({
+                nivel: 1,
+                celdasNombre: `
+                        <span class="toggle-icon" onclick="toggleNodo('${idSem}')">${semAbierta ? '−' : '+'}</span>
+                        <b style="color:var(--pantone-dark);">${escaparHtml(etiquetaSemanaNodo)}</b>`,
+                totales: totalSemana,
+                negrita: true
+            });
+
+            if (!semAbierta) {
+                tbody.innerHTML = html;
+                return;
+            }
+
+            html += hijos.html;
+
+            tbody.innerHTML = html;
+        }
+
+        // Vista diaria: Semana -> Día -> SubPlanta -> SKU (con filtro aplicado en cada nivel)
+        function htmlNodosVistaDiaria(detalle, termino) {
+            const diasVisibles = [];
+
+            detalle.forEach(dia => {
+                const coincideDia = !termino ||
+                    dia.etiqueta.toLowerCase().includes(termino) ||
+                    dia.fecha.toLowerCase().includes(termino);
+
+                const subPlantasVisibles = [];
+                dia.subPlantas.forEach(grupo => {
+                    const coincideGrupo = !termino || grupo.subPlanta.toLowerCase().includes(termino);
+                    // Si el término coincide con el día, se muestran todas sus SubPlantas y SKUs
+                    const codigosVisibles = (!termino || coincideDia)
+                        ? grupo.codigos
+                        : grupo.codigos.filter(c =>
+                            String(c.codigo || '').toLowerCase().includes(termino) ||
+                            String(c.nombre || '').toLowerCase().includes(termino));
+                    if (!coincideGrupo && !coincideDia && codigosVisibles.length === 0) return;
+                    subPlantasVisibles.push({ grupo, codigosVisibles });
+                });
+
+                if (!coincideDia && subPlantasVisibles.length === 0) return;
+                diasVisibles.push({ dia, subPlantasVisibles });
+            });
+
+            let html = '';
+
+            diasVisibles.forEach(({ dia, subPlantasVisibles }) => {
+                const idDia = `sem_${semanaKey}_dia_${dia.fecha}`;
+                const diaAbierto = termino ? true : expandidos.has(idDia);
+
+                html += construirFilaJerarquia({
+                    nivel: 2,
+                    sangria: 36,
+                    celdasNombre: `
+                        <span class="toggle-icon" onclick="toggleNodo('${idDia}')">${diaAbierto ? '−' : '+'}</span>
+                        <span class="day-label">${escaparHtml(dia.etiqueta)}</span>`,
+                    totales: dia.totales
+                });
+
+                if (!diaAbierto) return;
+
+                subPlantasVisibles.forEach(({ grupo, codigosVisibles }) => {
+                    const idSp = `sem_${semanaKey}_dia_${dia.fecha}_sp_${grupo.subPlanta}`;
+                    const spAbierta = termino ? true : expandidos.has(idSp);
+
+                    html += construirFilaJerarquia({
+                        nivel: 3,
+                        sangria: 68,
+                        celdasNombre: `
+                        <span class="toggle-icon" onclick="toggleNodo('${idSp}')">${spAbierta ? '−' : '+'}</span>
+                        <span class="tag-subplanta">${escaparHtml(grupo.subPlanta)}</span>`,
+                        totales: grupo.totales
+                    });
+
+                    if (!spAbierta) return;
+
+                    const codigosMostrar = termino && codigosVisibles.length > 0 ? codigosVisibles : grupo.codigos;
+
+                    codigosMostrar.forEach(codigo => {
+                        html += construirFilaJerarquia({
+                            nivel: 4,
+                            sangria: 96,
+                            celdasNombre: `
+                        <span class="sku-code-badge">${escaparHtml(codigo.codigo || 'S/C')}</span>
+                        <span class="sku-name-text">${escaparHtml(codigo.nombre || 'SIN NOMBRE')}</span>`,
+                            totales: codigo.totales
+                        });
+                    });
+                });
+            });
+
+            return { html, visible: diasVisibles.length > 0 };
+        }
+
+        // Vista semanal: Semana -> SubPlanta -> SKU (consolidado de la semana, sin nivel de día)
+        function htmlNodosVistaSemanal(detalle, termino) {
+            const gruposVisibles = [];
+
+            detalle.forEach(grupo => {
+                const coincideGrupo = !termino || grupo.subPlanta.toLowerCase().includes(termino);
+                const codigosVisibles = !termino
+                    ? grupo.codigos
+                    : grupo.codigos.filter(c =>
+                        String(c.codigo || '').toLowerCase().includes(termino) ||
+                        String(c.nombre || '').toLowerCase().includes(termino));
+                if (!coincideGrupo && codigosVisibles.length === 0) return;
+                gruposVisibles.push({ grupo, codigosVisibles, coincideGrupo });
+            });
+
+            let html = '';
+
+            gruposVisibles.forEach(({ grupo, codigosVisibles, coincideGrupo }) => {
+                const idSp = `sem_${semanaKey}_sp_${grupo.subPlanta}`;
+                const spAbierta = termino ? true : expandidos.has(idSp);
+
+                html += construirFilaJerarquia({
+                    nivel: 2,
+                    sangria: 36,
+                    celdasNombre: `
+                        <span class="toggle-icon" onclick="toggleNodo('${idSp}')">${spAbierta ? '−' : '+'}</span>
+                        <span class="tag-subplanta">${escaparHtml(grupo.subPlanta)}</span>`,
+                    totales: grupo.totales
+                });
+
+                if (!spAbierta) return;
+
+                const codigosMostrar = (termino && codigosVisibles.length > 0) ? codigosVisibles
+                    : (coincideGrupo || !termino ? grupo.codigos : []);
+
+                codigosMostrar.forEach(codigo => {
+                    html += construirFilaJerarquia({
+                        nivel: 3,
+                        sangria: 68,
+                        celdasNombre: `
+                        <span class="sku-code-badge">${escaparHtml(codigo.codigo || 'S/C')}</span>
+                        <span class="sku-name-text">${escaparHtml(codigo.nombre || 'SIN NOMBRE')}</span>`,
+                        totales: codigo.totales
+                    });
+                });
+            });
+
+            return { html, visible: gruposVisibles.length > 0 };
+        }
+
+        // ¿El término buscado corresponde a un día de la semana o a una fecha?
+        // Permite avisar que el nivel Día sólo existe en la vista diaria.
+        function esTerminoDeDia(termino) {
+            if (!termino || termino.length < 3) return false;
+            if (/^\d{4}-\d{2}-\d{2}$/.test(termino) || /^\d{1,2}\/\d{1,2}$/.test(termino)) return true;
+
+            const dias = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
+            return dias.some(dia => dia.startsWith(termino) || termino.startsWith(dia));
+        }
+
+        // Fila genérica de la jerarquía con su sangría tipográfica (sin iconos decorativos)
+        function construirFilaJerarquia({ nivel, celdasNombre, totales, sangria = 0, negrita = false }) {
+            const estiloSangria = sangria ? ` style="padding-left:${sangria}px;"` : '';
+            return `
+                <tr class="level-${nivel}">
+                    <td${estiloSangria}>${celdasNombre}</td>
+                    ${celdasCumplimiento(totales, negrita)}
+                </tr>`;
+        }
+
+        // Celdas de la matriz: Producción Real, Programa + % Cumpl., Pedido Distribución + % Cumpl.
+        function celdasCumplimiento(totales, negrita = false) {
+            const valor = (texto) => negrita ? `<b>${texto}</b>` : texto;
+
+            return `
+                    <td class="num-cell" style="color:var(--pantone-dark); font-weight:600;">${valor(formatKgMatriz(totales.produccion))}</td>
+                    <td class="num-cell col-group-prog-start">${valor(formatKgMatriz(totales.programa))}</td>
+                    <td class="num-cell">${badgeHtml(calcPct(totales.produccion, totales.programa))}</td>
+                    <td class="num-cell col-group-dist-start">${valor(formatKgMatriz(totales.distribucion))}</td>
+                    <td class="num-cell">${badgeHtml(calcPct(totales.produccion, totales.distribucion))}</td>`;
+        }
+
+        function formatKgMatriz(valor) {
+            if (valor === null || valor === undefined || isNaN(valor)) return '0';
+            return Math.round(num(valor)).toLocaleString('es-PE', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            });
+        }
+
+        // % Cumplimiento = Producción Real / Plan del mismo origen (criterio ResumenPl_PTC_Detalle)
+        function calcPct(real, meta) {
+            if (!meta) return 0;
+            return (real / meta) * 100;
+        }
+
+        function badgeHtml(pct) {
+            if (pct === null || pct === undefined || isNaN(pct) || !isFinite(pct)) {
+                return '<span class="badge-kpi badge-low">0.0%</span>';
+            }
+            let cls = 'badge-good';
+            if (pct < 85) cls = 'badge-low';
+            else if (pct < 98) cls = 'badge-mid';
+            return `<span class="badge-kpi ${cls}">${pct.toFixed(1)}%</span>`;
+        }
+
+        // =========================================================================
+        // 📥 EXPORTACIÓN A EXCEL (.xlsx) - MISMA SEMANA, DETALLE, HISTÓRICO Y DATA PLANA
+        // =========================================================================
+        function exportarComparativo() {
+            if (!registrosCrudos.length) {
+                mostrarToast('No hay datos cargados para exportar', '⚠️');
+                return;
+            }
+            if (typeof XLSX === 'undefined') {
+                mostrarToast('La librería SheetJS no está disponible', '❌');
+                return;
+            }
+
+            try {
+                const meta = metaSemana(semanaKey);
+                const filas = filasDeSemana(semanaKey);
+                const totales = totalesDeFilas(filas);
+                const nombreArchivo = `Comparativo_PTC_Diario_Sem${meta ? pad2(meta.semana) : '00'}-${meta ? meta.anio : '0000'}.xlsx`;
+
+                // Hoja 1: los tres orígenes de la semana seleccionada
+                const filasOrigenes = ['produccion', 'programa', 'distribucion'].map(clave => ({
+                    'Semana': meta ? pad2(meta.semana) : '',
+                    'Año': meta ? meta.anio : '',
+                    'Rango': meta ? meta.rango : '',
+                    'Origen': ETIQUETAS_ORIGEN[clave],
+                    'Kilos_Kg': Number(totales[clave].toFixed(2)),
+                    'Brecha_vs_Produccion_Kg': Number((totales[clave] - totales.produccion).toFixed(2)),
+                    'Cobertura_vs_Produccion_%': totales.produccion
+                        ? Number(((totales[clave] / totales.produccion) * 100).toFixed(2))
+                        : null
+                }));
+                filasOrigenes.push({
+                    'Semana': meta ? pad2(meta.semana) : '',
+                    'Año': meta ? meta.anio : '',
+                    'Rango': meta ? meta.rango : '',
+                    'Origen': ETIQUETAS_ORIGEN.total,
+                    'Kilos_Kg': Number(totales.total.toFixed(2)),
+                    'Brecha_vs_Produccion_Kg': null,
+                    'Cobertura_vs_Produccion_%': null
+                });
+
+                // Hoja 2: detalle de la misma semana según la vista activa de la matriz
+                const esVistaDiaria = vistaMatriz === 'diaria';
+                const filasDetalle = [];
+
+                if (esVistaDiaria) {
+                    construirDetalleSemanaPorDia(filas).forEach(dia => {
+                        filasDetalle.push(filaExportacionSemana('Día', dia.etiqueta, dia.fecha, '', '', '', dia.totales));
+                        dia.subPlantas.forEach(grupo => {
+                            filasDetalle.push(filaExportacionSemana(
+                                'SubPlanta',
+                                dia.etiqueta,
+                                dia.fecha,
+                                grupo.subPlanta,
+                                '',
+                                '',
+                                grupo.totales
+                            ));
+                            grupo.codigos.forEach(codigo => {
+                                filasDetalle.push(filaExportacionSemana(
+                                    'CódigoCorto',
+                                    dia.etiqueta,
+                                    dia.fecha,
+                                    grupo.subPlanta,
+                                    codigo.codigo,
+                                    codigo.nombre,
+                                    codigo.totales
+                                ));
+                            });
+                        });
+                    });
+                } else {
+                    construirDetalleSemana(filas).forEach(grupo => {
+                        filasDetalle.push(filaExportacionSemana('SubPlanta', '', '', grupo.subPlanta, '', '', grupo.totales));
+                        grupo.codigos.forEach(codigo => {
+                            filasDetalle.push(filaExportacionSemana(
+                                'CódigoCorto',
+                                '',
+                                '',
+                                grupo.subPlanta,
+                                codigo.codigo,
+                                codigo.nombre,
+                                codigo.totales
+                            ));
+                        });
+                    });
+                }
+
+                // Hoja 3: histórico semanal de los tres orígenes
+                const resumenSemanal = agruparPorSemana(registrosFiltrados()).map(fila => ({
+                    'Semana': pad2(metaSemana(fila.key)?.semana || ''),
+                    'Año': metaSemana(fila.key)?.anio || '',
+                    'Rango': metaSemana(fila.key)?.rango || '',
+                    'Produccion_Kg': Number(fila.totales.produccion.toFixed(2)),
+                    'Programa_Kg': Number(fila.totales.programa.toFixed(2)),
+                    'Distribucion_Kg': Number(fila.totales.distribucion.toFixed(2)),
+                    'Total_Kg': Number(fila.totales.total.toFixed(2)),
+                    'Cobertura_Programa_%': fila.totales.produccion
+                        ? Number(((fila.totales.programa / fila.totales.produccion) * 100).toFixed(2))
+                        : null,
+                    'Cobertura_Distribucion_%': fila.totales.produccion
+                        ? Number(((fila.totales.distribucion / fila.totales.produccion) * 100).toFixed(2))
+                        : null
+                }));
+
+                const libro = XLSX.utils.book_new();
+
+                const hojaOrigenes = XLSX.utils.json_to_sheet(filasOrigenes);
+                XLSX.utils.book_append_sheet(libro, hojaOrigenes, 'Origenes Semana');
+
+                const hojaDetalle = XLSX.utils.json_to_sheet(filasDetalle.length ? filasDetalle : [{ 'Mensaje': 'Sin datos' }]);
+                XLSX.utils.book_append_sheet(libro, hojaDetalle, esVistaDiaria ? 'Detalle Diario' : 'Detalle Semanal');
+
+                const hojaResumen = XLSX.utils.json_to_sheet(resumenSemanal.length ? resumenSemanal : [{ 'Mensaje': 'Sin datos' }]);
+                XLSX.utils.book_append_sheet(libro, hojaResumen, 'Resumen Semanal');
+
+                const hojaDataPlana = XLSX.utils.json_to_sheet(registrosCrudos);
+                XLSX.utils.book_append_sheet(libro, hojaDataPlana, 'Data Plana API');
+
+                XLSX.writeFile(libro, nombreArchivo);
+                mostrarToast(`Archivo exportado: ${nombreArchivo}`, '✅');
+            } catch (err) {
+                console.error('Error al exportar:', err);
+                mostrarToast(`No se pudo exportar: ${err.message}`, '❌');
+            }
+        }
+
+        function filaExportacionSemana(nivel, dia, fecha, subPlanta, codigo, nombre, totales) {
+            const cobertura = (valor) => totales.produccion
+                ? Number(((valor / totales.produccion) * 100).toFixed(2))
+                : null;
+
+            const fila = { 'Nivel': nivel };
+            // Las columnas de día sólo existen en la vista diaria (en la semanal el detalle se consolida)
+            if (dia) {
+                fila['Dia'] = dia;
+                fila['Fecha'] = fecha;
+            }
+            fila['SubPlanta'] = subPlanta;
+            fila['CodigoCorto'] = codigo;
+            fila['Nombre'] = nombre;
+            fila['Produccion_Real_Kg'] = Number(totales.produccion.toFixed(2));
+            fila['Programa_Produccion_Kg'] = Number(totales.programa.toFixed(2));
+            fila['Pedido_Distribucion_Kg'] = Number(totales.distribucion.toFixed(2));
+            fila['Brecha_Programa_vs_Real_Kg'] = Number((totales.programa - totales.produccion).toFixed(2));
+            fila['Brecha_Distribucion_vs_Real_Kg'] = Number((totales.distribucion - totales.produccion).toFixed(2));
+            fila['Cobertura_Programa_%'] = cobertura(totales.programa);
+            fila['Cobertura_Distribucion_%'] = cobertura(totales.distribucion);
+            fila['Total_3_Origenes_Kg'] = Number(totales.total.toFixed(2));
+            fila['Filas'] = totales.registros;
+            return fila;
+        }
+    </script>
+</body>
+
+</html>
