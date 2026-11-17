@@ -4,1308 +4,463 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Central de Dashboards | Planta Desposte</title>
+    <title>Portal de Dashboards | Planta Desposte</title>
 
-    <!-- Fuentes e Iconos Google Fonts: Inter y JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-    <!-- Configuración compartida de conexión a la API -->
     <script src="config.js"></script>
+    <link rel="stylesheet" href="responsive.css?v=3">
 
     <style>
-        /* =========================================================================
-           🎨 PALETA PANTONE INDUSTRIAL
-           ========================================================================= */
+        /* =========================================================
+           Paleta: PaletaFinanza_Industrial.json (cssVariables)
+           ========================================================= */
         :root {
-            --pantone-yellow: #F4D03F;
-            --pantone-yellow-light: #F8CC5A;
-            --pantone-yellow-soft: rgba(244, 208, 63, 0.16);
-            --pantone-yellow-border: rgba(244, 208, 63, 0.45);
-            --pantone-gold: #BAA063;
-            --pantone-gold-soft: rgba(186, 160, 99, 0.16);
-            --pantone-gold-border: rgba(186, 160, 99, 0.4);
-            --pantone-dark: #2E2A2F;
-            --pantone-darker: #252C37;
-            --pantone-gray-dark: #605C5E;
-            --pantone-gray-med: #878994;
-            --pantone-gray-light: #CDCAC0;
-            --pantone-bg: #F2F4F8;
-            --pantone-card: #FFFFFF;
-            --pantone-card-alt: #F8FAFC;
-            --pantone-border: #E2E8F0;
-            --pantone-border-subtle: #EDF2F7;
-            --table-accent: #F4D03F;
+            --color-header-bg: #38353B;
+            --color-header-gradient: linear-gradient(135deg, #38353B 0%, #434B57 100%);
+            --color-header-text: #FFFFFF;
+            --color-header-subtext: #E2D5B5;
+            --color-heading: #38353B;
+            --color-text: #4A474C;
+            --color-text-muted: #787479;
+            --color-primary: #BAA063;
+            --color-secondary: #7A828E;
+            --color-accent: #BAA063;
+            --color-bg: #F2F4F8;
+            --color-surface: #FFFFFF;
+            --color-border: #E2E8F0;
 
-            --success: #10B981;
-            --warning: #F59E0B;
-            --danger: #EF4444;
-            --info: #3B82F6;
+            /* Alias internos de la página -> variables de la paleta */
+            --ink: var(--color-heading);
+            --text: var(--color-text);
+            --muted: var(--color-text-muted);
+            --gold: var(--color-primary);
+            --gold-soft: rgba(186, 160, 99, 0.14);
+            --bg: var(--color-bg);
+            --surface: var(--color-surface);
+            --border: var(--color-border);
+            --border-strong: var(--color-secondary);
 
-            --shadow-sm: 0 1px 3px rgba(46, 42, 47, 0.06), 0 1px 2px rgba(46, 42, 47, 0.04);
-            --shadow-md: 0 4px 6px -1px rgba(46, 42, 47, 0.08), 0 2px 4px -1px rgba(46, 42, 47, 0.04);
-            --shadow-lg: 0 10px 15px -3px rgba(46, 42, 47, 0.1), 0 4px 6px -2px rgba(46, 42, 47, 0.05);
-
-            --radius-sm: 8px;
-            --radius-md: 12px;
-            --radius-lg: 16px;
+            /* Estado de la API (semáforo funcional, no decorativo) */
+            --ok: #10B981;
+            --warn: #C4B282;
+            --bad: #EF4444;
+            --radius: 10px;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            -webkit-font-smoothing: antialiased;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            background-color: var(--pantone-bg);
-            color: var(--pantone-dark);
+            font-family: 'Inter', -apple-system, 'Segoe UI', Roboto, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            background: var(--bg);
+            color: var(--text);
             min-height: 100vh;
-            padding: 24px;
         }
 
-        .portal-container {
-            max-width: 1540px;
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
+        .portal { max-width: 1320px; margin: 0 auto; padding: 32px 32px 48px; }
+
+        /* ---------- Cabecera (regla headerBanner: fondo oscuro + texto claro) ---------- */
+        .top {
+            display: flex; justify-content: space-between; align-items: center;
+            gap: 16px; flex-wrap: wrap;
+            background: var(--color-header-gradient);
+            color: var(--color-header-text);
+            border-radius: var(--radius);
+            border-bottom: 3px solid var(--color-primary);
+            box-shadow: 0 6px 18px rgba(56, 53, 59, .12);
+            padding: 24px 28px;
+        }
+        .eyebrow {
+            font-size: .68rem; font-weight: 600; letter-spacing: .14em;
+            text-transform: uppercase; color: var(--color-primary);
+        }
+        .top h1 { font-size: 1.55rem; font-weight: 700; color: var(--color-header-text); letter-spacing: -.02em; margin-top: 4px; }
+        .top-sub { font-size: .84rem; color: var(--color-header-subtext); margin-top: 4px; }
+
+        .top-right { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+        .top-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+        .status {
+            display: inline-flex; align-items: center; gap: 8px;
+            font-size: .78rem; color: var(--color-header-subtext);
+        }
+        .status-pill {
+            background: rgba(255, 255, 255, .07); border: 1px solid rgba(226, 213, 181, .22);
+            padding: 6px 12px; border-radius: 999px;
+        }
+        .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--warn); }
+        .status-dot.online { background: var(--ok); }
+        .status-dot.offline { background: var(--bad); }
+        .status a { color: var(--color-header-text); text-decoration: none; font-family: 'JetBrains Mono', monospace; font-size: .74rem; }
+        .status a:hover { color: var(--color-primary); text-decoration: underline; }
+        .sep { width: 1px; height: 14px; background: rgba(226, 213, 181, .3); }
+
+        .btn-ghost {
+            background: rgba(186, 160, 99, .1); border: 1px solid rgba(186, 160, 99, .45); color: var(--color-header-subtext);
+            font: 500 .76rem 'Inter', sans-serif; padding: 6px 12px; border-radius: 6px; cursor: pointer;
+            transition: all .15s ease;
+        }
+        .btn-ghost:hover { color: var(--color-header-bg); border-color: var(--color-primary); background: var(--color-primary); }
+
+        .admin-session-box { display: inline-flex; align-items: center; gap: 4px; }
+        .badge-admin-active {
+            font-size: .68rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+            color: var(--color-primary); padding: 0 6px;
         }
 
-        /* =========================================================================
-           HEADER PRINCIPAL
-           ========================================================================= */
-        .portal-header {
-            background: linear-gradient(135deg, var(--pantone-dark) 0%, var(--pantone-darker) 100%);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: var(--radius-lg);
-            padding: 28px 32px;
-            color: #FFFFFF;
-            box-shadow: var(--shadow-lg);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 20px;
-            position: relative;
-            overflow: hidden;
+        /* ---------- Barra de categorías y búsqueda ---------- */
+        .toolbar {
+            display: flex; justify-content: space-between; align-items: center;
+            gap: 16px; flex-wrap: wrap; margin: 20px 0 22px;
         }
-
-        .portal-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: linear-gradient(90deg, var(--pantone-yellow) 0%, var(--pantone-gold) 50%, var(--pantone-yellow-light) 100%);
-        }
-
-        .header-title-box {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .header-badge-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .portal-badge {
-            background: rgba(244, 208, 63, 0.18);
-            color: var(--pantone-yellow);
-            border: 1px solid var(--pantone-yellow-border);
-            font-size: 0.72rem;
-            font-weight: 700;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-            padding: 3px 10px;
-            border-radius: 999px;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .portal-title {
-            font-size: 1.75rem;
-            font-weight: 800;
-            letter-spacing: -0.02em;
-            color: #FFFFFF;
-        }
-
-        .portal-subtitle {
-            font-size: 0.88rem;
-            color: var(--pantone-gray-light);
-            max-width: 650px;
-            line-height: 1.45;
-        }
-
-        .header-status-box {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 10px;
-        }
-
-        .api-status-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            padding: 8px 14px;
-            border-radius: 999px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            font-family: 'JetBrains Mono', monospace;
-            backdrop-filter: blur(8px);
-        }
-
-        .status-dot {
-            width: 9px;
-            height: 9px;
-            border-radius: 50%;
-            background-color: var(--warning);
-            box-shadow: 0 0 8px var(--warning);
-            animation: pulseDot 2s infinite ease-in-out;
-        }
-
-        .status-dot.online {
-            background-color: var(--success);
-            box-shadow: 0 0 10px var(--success);
-        }
-
-        .status-dot.offline {
-            background-color: var(--danger);
-            box-shadow: 0 0 10px var(--danger);
-            animation: none;
-        }
-
-        @keyframes pulseDot {
-
-            0%,
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-
-            50% {
-                transform: scale(1.25);
-                opacity: 0.75;
-            }
-        }
-
-        .btn-refresh-status {
-            background: rgba(244, 208, 63, 0.12);
-            color: var(--pantone-yellow);
-            border: 1px solid var(--pantone-yellow-border);
-            padding: 6px 12px;
-            border-radius: var(--radius-sm);
-            font-size: 0.75rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .btn-refresh-status:hover {
-            background: var(--pantone-yellow);
-            color: var(--pantone-dark);
-        }
-
-        /* =========================================================================
-           BANNER INFORMATIVO DE RED
-           ========================================================================= */
-        .info-banner {
-            background: #FFFFFF;
-            border: 1px solid var(--pantone-border);
-            border-left: 5px solid var(--pantone-yellow);
-            border-radius: var(--radius-md);
-            padding: 14px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 16px;
-            box-shadow: var(--shadow-sm);
-            flex-wrap: wrap;
-        }
-
-        .info-banner-content {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 0.85rem;
-            color: var(--pantone-gray-dark);
-        }
-
-        .info-banner-icon {
-            font-size: 1.3rem;
-            line-height: 1;
-        }
-
-        .info-banner-content strong {
-            color: var(--pantone-dark);
-        }
-
-        .quick-metrics {
-            display: flex;
-            gap: 16px;
-            align-items: center;
-        }
-
-        .quick-metric-item {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        .quick-metric-val {
-            font-size: 1.15rem;
-            font-weight: 700;
-            color: var(--pantone-dark);
-        }
-
-        .quick-metric-lbl {
-            font-size: 0.68rem;
-            color: var(--pantone-gray-med);
-            text-transform: uppercase;
-            font-weight: 600;
-        }
-
-        /* =========================================================================
-           BARRA DE FILTROS Y BÚSQUEDA
-           ========================================================================= */
-        .controls-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 16px;
-            flex-wrap: wrap;
-        }
-
         .category-tabs {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
+            display: flex; gap: 4px; min-width: 0; overflow-x: auto; scrollbar-width: none;
+            background: var(--surface); border: 1px solid var(--border); border-radius: 9px; padding: 4px;
         }
-
         .tab-btn {
-            background: #FFFFFF;
-            border: 1px solid var(--pantone-border);
-            color: var(--pantone-gray-dark);
-            padding: 8px 16px;
-            border-radius: var(--radius-sm);
-            font-size: 0.82rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
+            background: none; border: none; border-radius: 6px;
+            padding: 7px 14px; cursor: pointer; white-space: nowrap;
+            font: 500 .84rem 'Inter', sans-serif; color: var(--muted);
+            display: inline-flex; align-items: center; gap: 8px; transition: all .15s ease;
         }
-
-        .tab-btn:hover {
-            border-color: var(--pantone-yellow);
-            color: var(--pantone-dark);
-            background: var(--pantone-card-alt);
-        }
-
-        .tab-btn.active {
-            background: var(--pantone-dark);
-            color: #FFFFFF;
-            border-color: var(--pantone-dark);
-            box-shadow: var(--shadow-sm);
-        }
-
-        .tab-btn.active .tab-count {
-            background: var(--pantone-yellow);
-            color: var(--pantone-dark);
-        }
-
+        .tab-btn:hover { color: var(--ink); background: var(--bg); }
+        .tab-btn.active { color: var(--color-header-text); font-weight: 600; background: var(--color-header-gradient); }
         .tab-count {
-            background: var(--pantone-bg);
-            color: var(--pantone-gray-dark);
-            font-size: 0.7rem;
-            font-weight: 700;
-            padding: 2px 7px;
-            border-radius: 999px;
-            font-family: 'JetBrains Mono', monospace;
+            font-size: .7rem; font-weight: 600; min-width: 20px; text-align: center;
+            padding: 1px 6px; border-radius: 999px; background: var(--bg); color: var(--muted);
         }
+        .tab-btn.active .tab-count { background: var(--color-primary); color: var(--color-header-bg); }
 
-        .search-box {
-            position: relative;
-            min-width: 280px;
-            flex-grow: 1;
-            max-width: 420px;
-        }
-
+        .search-box { position: relative; width: 300px; max-width: 100%; }
+        .search-box svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--muted); }
         .search-input {
-            width: 100%;
-            padding: 9px 14px 9px 38px;
-            border-radius: var(--radius-sm);
-            border: 1px solid var(--pantone-border);
-            background: #FFFFFF;
-            font-size: 0.85rem;
-            color: var(--pantone-dark);
-            outline: none;
-            transition: all 0.2s ease;
+            width: 100%; padding: 8px 12px 8px 34px;
+            border: 1px solid var(--border); border-radius: 8px; background: var(--surface);
+            font: 400 .84rem 'Inter', sans-serif; color: var(--ink); outline: none;
+        }
+        .search-input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-soft); }
+
+        .admin-notice {
+            display: none; font-size: .78rem; color: var(--muted);
+            margin: -8px 0 18px; padding-left: 10px; border-left: 2px solid var(--gold);
         }
 
-        .search-input:focus {
-            border-color: var(--pantone-gold);
-            box-shadow: 0 0 0 3px rgba(186, 160, 99, 0.15);
-        }
-
-        .search-icon {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 0.95rem;
-            color: var(--pantone-gray-med);
-            pointer-events: none;
-        }
-
-        /* =========================================================================
-           GRID DE DASHBOARDS (CARDS)
-           ========================================================================= */
+        /* ---------- Tarjetas ---------- */
         .dashboards-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 20px;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px;
         }
+        .dashboards-grid > * { min-width: 0; }
 
         .dash-card {
-            background: var(--pantone-card);
-            border: 1px solid var(--pantone-border);
-            border-radius: var(--radius-md);
-            padding: 22px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            gap: 16px;
-            box-shadow: var(--shadow-sm);
-            transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-            position: relative;
-            overflow: hidden;
+            position: relative; background: var(--surface);
+            border: 1px solid var(--border); border-radius: var(--radius);
+            padding: 20px 20px 16px; display: flex; flex-direction: column; gap: 10px;
+            box-shadow: 0 1px 3px rgba(56, 53, 59, .05);
+            transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease;
         }
-
-        .dash-card:hover {
-            transform: translateY(-3px);
-            box-shadow: var(--shadow-md);
-            border-color: var(--pantone-yellow-border);
-        }
-
         .dash-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background: transparent;
-            transition: background 0.2s ease;
+            content: ''; position: absolute; left: 0; right: 0; top: 0; height: 3px;
+            border-radius: var(--radius) var(--radius) 0 0; background: transparent; transition: background .15s;
         }
+        .dash-card:hover { border-color: rgba(186, 160, 99, .55); box-shadow: 0 8px 20px rgba(56, 53, 59, .08); transform: translateY(-2px); }
+        .dash-card:hover::before { background: var(--color-primary); }
 
-        .dash-card:hover::before {
-            background: linear-gradient(90deg, var(--pantone-yellow) 0%, var(--pantone-gold) 100%);
-        }
-
-        .card-top {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .card-meta-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .card-category-tag {
-            font-size: 0.68rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            padding: 3px 8px;
-            border-radius: 4px;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .cat-operaciones {
-            background: rgba(244, 208, 63, 0.2);
-            color: #8D7400;
-            border: 1px solid rgba(244, 208, 63, 0.5);
-        }
-
-        .cat-cumplimientos {
-            background: rgba(37, 44, 55, 0.08);
-            color: var(--pantone-darker);
-            border: 1px solid rgba(37, 44, 55, 0.2);
-        }
-
-        .cat-costos {
-            background: rgba(186, 160, 99, 0.15);
-            color: #7B6227;
-            border: 1px solid var(--pantone-gold-border);
-        }
-
-        .cat-personal {
-            background: rgba(96, 92, 94, 0.12);
-            color: var(--pantone-gray-dark);
-            border: 1px solid rgba(96, 92, 94, 0.25);
-        }
-
-        .card-endpoint {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.68rem;
-            color: var(--pantone-gray-med);
-            background: var(--pantone-bg);
-            padding: 2px 6px;
-            border-radius: 4px;
-            border: 1px solid var(--pantone-border-subtle);
-        }
-
-        .card-title-box {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-        }
-
+        .card-head { display: flex; align-items: center; gap: 12px; }
         .card-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: var(--radius-sm);
-            background: var(--pantone-bg);
-            border: 1px solid var(--pantone-border);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
-            flex-shrink: 0;
+            width: 38px; height: 38px; flex-shrink: 0; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
+            background: var(--gold-soft); border: 1px solid rgba(186, 160, 99, .3);
         }
-
-        .card-title {
-            font-size: 1.05rem;
-            font-weight: 700;
-            color: var(--pantone-dark);
-            line-height: 1.35;
+        .card-cat {
+            font-size: .66rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+            color: var(--color-secondary);
         }
+        .card-title { font-size: 1rem; font-weight: 600; color: var(--ink); line-height: 1.35; margin-top: 1px; }
+        .card-link { color: inherit; text-decoration: none; }
+        .card-link:hover { color: var(--color-primary); }
 
         .card-desc {
-            font-size: 0.82rem;
-            color: var(--pantone-gray-dark);
-            line-height: 1.5;
+            font-size: .82rem; line-height: 1.55; color: var(--muted);
+            display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
         }
 
-        .card-footer {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding-top: 14px;
-            border-top: 1px solid var(--pantone-border-subtle);
+        .card-foot {
+            margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center; gap: 8px;
         }
-
-        .btn-card-open {
-            flex-grow: 1;
-            background: var(--pantone-dark);
-            color: #FFFFFF;
-            border: 1px solid var(--pantone-dark);
-            padding: 9px 14px;
-            border-radius: var(--radius-sm);
-            font-size: 0.82rem;
-            font-weight: 600;
-            cursor: pointer;
-            text-align: center;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            transition: all 0.2s ease;
+        .card-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+        .btn-open {
+            background: var(--color-header-gradient); color: var(--color-header-text);
+            border: 1px solid var(--color-header-bg); border-radius: 6px;
+            padding: 6px 12px; font: 600 .76rem 'Inter', sans-serif; text-decoration: none;
+            transition: color .15s ease, border-color .15s ease;
         }
-
-        .btn-card-open:hover {
-            background: var(--pantone-darker);
-            border-color: var(--pantone-darker);
-            color: var(--pantone-yellow);
+        .btn-open:hover { color: var(--color-primary); border-color: var(--color-primary); }
+        .card-endpoint {
+            font-family: 'JetBrains Mono', monospace; font-size: .7rem; color: var(--muted);
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;
         }
-
-        .btn-card-copy {
-            background: var(--pantone-bg);
-            color: var(--pantone-gray-dark);
-            border: 1px solid var(--pantone-border);
-            padding: 9px 12px;
-            border-radius: var(--radius-sm);
-            font-size: 0.8rem;
-            font-weight: 600;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            transition: all 0.2s ease;
+        .btn-copy {
+            position: relative; z-index: 1; flex-shrink: 0;
+            background: none; border: 1px solid transparent; border-radius: 6px;
+            color: var(--muted); padding: 4px 8px; cursor: pointer;
+            font: 500 .74rem 'Inter', sans-serif; display: inline-flex; align-items: center; gap: 5px;
         }
+        .btn-copy:hover { color: var(--ink); border-color: var(--border); background: var(--bg); }
 
-        .btn-card-copy:hover {
-            background: #FFFFFF;
-            color: var(--pantone-dark);
-            border-color: var(--pantone-gold);
-        }
-
-        /* =========================================================================
-           MENSAJE CUANDO NO HAY RESULTADOS
-           ========================================================================= */
-        .no-results {
-            grid-column: 1 / -1;
-            background: #FFFFFF;
-            border: 1px dashed var(--pantone-border);
-            border-radius: var(--radius-md);
-            padding: 40px;
-            text-align: center;
-            display: none;
-        }
-
-        .no-results-icon {
-            font-size: 2.2rem;
-            margin-bottom: 8px;
-            color: var(--pantone-gray-med);
-        }
-
-        .no-results-text {
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: var(--pantone-dark);
-        }
-
-        /* =========================================================================
-           TOAST NOTIFICACIÓN
-           ========================================================================= */
-        .toast {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            background: var(--pantone-dark);
-            color: #FFFFFF;
-            border-left: 4px solid var(--pantone-yellow);
-            padding: 12px 18px;
-            border-radius: var(--radius-sm);
-            box-shadow: var(--shadow-lg);
-            font-size: 0.85rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transform: translateY(100px);
-            opacity: 0;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            z-index: 9999;
-        }
-
-        .toast.show {
-            transform: translateY(0);
-            opacity: 1;
-        }
-
-        /* =========================================================================
-           🔐 ESTILOS DE ADMINISTRACIÓN Y CONTROL DE VISIBILIDAD
-           ========================================================================= */
-        .header-actions-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-            justify-content: flex-end;
-        }
-
-        .btn-admin-access {
-            background: rgba(244, 208, 63, 0.12);
-            color: var(--pantone-yellow);
-            border: 1px solid var(--pantone-yellow-border);
-            padding: 6px 12px;
-            border-radius: var(--radius-sm);
-            font-size: 0.75rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .btn-admin-access:hover {
-            background: var(--pantone-yellow);
-            color: var(--pantone-dark);
-            box-shadow: 0 0 10px rgba(244, 208, 63, 0.4);
-        }
-
-        .admin-session-box {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(244, 208, 63, 0.18);
-            border: 1px solid var(--pantone-yellow);
-            padding: 4px 8px;
-            border-radius: var(--radius-sm);
-        }
-
-        .badge-admin-active {
-            color: #FFFFFF;
-            font-size: 0.72rem;
-            font-weight: 800;
-            letter-spacing: 0.04em;
-            text-transform: uppercase;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .btn-admin-manage {
-            background: var(--pantone-yellow);
-            color: var(--pantone-dark);
-            border: none;
-            padding: 4px 9px;
-            border-radius: 4px;
-            font-size: 0.72rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .btn-admin-manage:hover {
-            background: #FFFFFF;
-        }
-
-        .btn-admin-logout {
-            background: rgba(239, 68, 68, 0.2);
-            color: #FCA5A5;
-            border: 1px solid rgba(239, 68, 68, 0.4);
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.72rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .btn-admin-logout:hover {
-            background: #EF4444;
-            color: #FFFFFF;
-        }
-
-        /* Tarjeta en modo prueba */
-        .dash-card.is-en-prueba {
-            border: 1.5px dashed #F59E0B;
-            background: #FFFDF7;
-            position: relative;
-        }
-
+        /* En prueba (solo visible para admin) */
+        .dash-card.is-en-prueba { border-style: dashed; border-color: var(--border-strong); background: var(--color-bg); }
         .badge-en-prueba {
-            background: rgba(245, 158, 11, 0.15);
-            color: #D97706;
-            border: 1px solid rgba(245, 158, 11, 0.4);
-            font-size: 0.7rem;
-            font-weight: 700;
-            padding: 3px 8px;
-            border-radius: 999px;
-            text-transform: uppercase;
-            letter-spacing: 0.03em;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
+            align-self: flex-start; font-size: .66rem; font-weight: 600; letter-spacing: .06em;
+            text-transform: uppercase; color: var(--color-primary);
         }
 
         .admin-card-switch-box {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: rgba(46, 42, 47, 0.04);
-            border: 1px solid var(--pantone-border);
-            border-radius: var(--radius-sm);
-            padding: 6px 10px;
-            margin-top: 10px;
+            position: relative; z-index: 1;
+            display: flex; justify-content: space-between; align-items: center;
+            padding-top: 10px; border-top: 1px solid var(--border);
         }
+        .admin-switch-label { font-size: .74rem; color: var(--muted); }
 
-        .admin-switch-label {
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: var(--pantone-gray-dark);
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        /* Toggle Switch */
-        .switch-toggle {
-            position: relative;
-            display: inline-block;
-            width: 38px;
-            height: 20px;
-            flex-shrink: 0;
-        }
-
-        .switch-toggle input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider-toggle {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #D1D5DB;
-            transition: .3s;
-            border-radius: 34px;
-        }
-
+        .switch-toggle { position: relative; display: inline-block; width: 32px; height: 18px; flex-shrink: 0; }
+        .switch-toggle input { opacity: 0; width: 0; height: 0; }
+        .slider-toggle { position: absolute; inset: 0; cursor: pointer; background: #B5B2AA; border-radius: 18px; transition: .2s; }
         .slider-toggle:before {
-            position: absolute;
-            content: "";
-            height: 14px;
-            width: 14px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: .3s;
-            border-radius: 50%;
+            content: ""; position: absolute; width: 12px; height: 12px; left: 3px; bottom: 3px;
+            background: #fff; border-radius: 50%; transition: .2s;
+        }
+        input:checked + .slider-toggle { background: var(--color-primary); }
+        input:checked + .slider-toggle:before { transform: translateX(14px); }
+
+        .no-results {
+            display: none; text-align: center; padding: 48px 16px;
+            font-size: .88rem; color: var(--muted);
+            border: 1px dashed var(--border-strong); border-radius: var(--radius);
         }
 
-        input:checked+.slider-toggle {
-            background-color: #10B981;
+        /* ---------- Toast ---------- */
+        .toast {
+            position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+            background: var(--color-header-gradient); color: var(--color-header-text); border-left: 3px solid var(--color-primary); padding: 10px 16px; border-radius: 8px;
+            font-size: .82rem; display: flex; align-items: center; gap: 8px; max-width: calc(100vw - 32px);
+            transform: translateY(80px); opacity: 0; transition: all .25s ease;
         }
+        .toast.show { transform: translateY(0); opacity: 1; }
+        #toastIcon { display: none; }
 
-        input:checked+.slider-toggle:before {
-            transform: translateX(18px);
-        }
-
-        /* =========================================================================
-           MODALES (LOGIN & GESTIÓN)
-           ========================================================================= */
+        /* ---------- Modales ---------- */
         .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(37, 44, 55, 0.78);
-            backdrop-filter: blur(6px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-            padding: 16px;
-            animation: fadeInModal 0.2s ease-out;
+            position: fixed; inset: 0; z-index: 10000; padding: 16px;
+            background: rgba(56, 53, 59, .45);
+            display: flex; justify-content: center; align-items: center;
         }
-
-        @keyframes fadeInModal {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
-        }
-
         .modal-card {
-            background: #FFFFFF;
-            border-radius: var(--radius-lg);
-            border: 1px solid var(--pantone-border);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
-            width: 100%;
-            max-width: 440px;
-            overflow: hidden;
-            animation: scaleInModal 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            background: var(--surface); border-radius: 12px; width: 100%; max-width: 400px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, .18); overflow: hidden;
         }
-
-        .modal-card.modal-large {
-            max-width: 820px;
-            max-height: 85vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        @keyframes scaleInModal {
-            from {
-                transform: scale(0.95);
-                opacity: 0;
-            }
-
-            to {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-
+        .modal-card.modal-large { max-width: 800px; max-height: 85vh; display: flex; flex-direction: column; }
         .modal-header {
-            background: linear-gradient(135deg, var(--pantone-dark) 0%, var(--pantone-darker) 100%);
-            padding: 20px 24px;
-            color: #FFFFFF;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px solid var(--pantone-yellow);
+            padding: 16px 22px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;
+            background: var(--color-header-gradient); border-bottom: 2px solid var(--color-primary);
         }
+        .modal-title { font-size: 1.02rem; font-weight: 600; color: var(--color-header-text); }
+        .modal-subtitle { font-size: .78rem; color: var(--color-header-subtext); margin-top: 2px; }
+        .modal-close-btn { background: none; border: none; color: var(--color-header-subtext); font-size: 1.1rem; cursor: pointer; line-height: 1; }
+        .modal-close-btn:hover { color: var(--color-header-text); }
+        .modal-body { padding: 18px 22px; overflow-y: auto; }
+        .modal-footer { padding: 14px 22px; border-top: 1px solid var(--color-border); display: flex; justify-content: flex-end; align-items: center; gap: 10px; }
 
-        .modal-title-box {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .modal-icon {
-            font-size: 1.5rem;
-        }
-
-        .modal-title {
-            font-size: 1.15rem;
-            font-weight: 800;
-            color: #FFFFFF;
-        }
-
-        .modal-subtitle {
-            font-size: 0.78rem;
-            color: var(--pantone-gray-light);
-            margin-top: 2px;
-        }
-
-        .modal-close-btn {
-            background: transparent;
-            border: none;
-            color: var(--pantone-gray-light);
-            font-size: 1.25rem;
-            cursor: pointer;
-            padding: 4px;
-            line-height: 1;
-            transition: color 0.2s;
-        }
-
-        .modal-close-btn:hover {
-            color: #FFFFFF;
-        }
-
-        .modal-body {
-            padding: 24px;
-            overflow-y: auto;
-        }
-
-        .pin-input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .pin-input-group label {
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: var(--pantone-dark);
-        }
-
-        .pin-field-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-
+        .pin-input-group label { display: block; font-size: .8rem; font-weight: 500; color: var(--text); margin-bottom: 6px; }
+        .pin-field-wrapper { position: relative; }
         .pin-input {
-            width: 100%;
-            padding: 12px 45px 12px 14px;
-            font-size: 1.15rem;
-            font-family: 'JetBrains Mono', monospace;
-            letter-spacing: 0.2em;
-            border: 2px solid var(--pantone-border);
-            border-radius: var(--radius-sm);
-            outline: none;
-            transition: border-color 0.2s;
+            width: 100%; padding: 10px 64px 10px 12px; border: 1px solid var(--border); border-radius: 8px;
+            font: 500 1rem 'JetBrains Mono', monospace; letter-spacing: .15em; outline: none;
         }
-
-        .pin-input:focus {
-            border-color: var(--pantone-yellow);
-        }
-
+        .pin-input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-soft); }
         .btn-toggle-pin {
-            position: absolute;
-            right: 12px;
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            font-size: 1.1rem;
-            color: var(--pantone-gray-med);
+            position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+            background: none; border: none; color: var(--muted); font: 500 .74rem 'Inter', sans-serif; cursor: pointer;
         }
+        .pin-error-msg { color: var(--bad); font-size: .78rem; margin-top: 6px; }
 
-        .pin-error-msg {
-            color: #DC2626;
-            font-size: 0.8rem;
-            font-weight: 600;
-            margin-top: 4px;
+        .btn-modal-cancel, .btn-modal-submit {
+            font: 500 .82rem 'Inter', sans-serif; padding: 8px 14px; border-radius: 8px; cursor: pointer;
         }
+        .btn-modal-cancel { background: none; border: 1px solid var(--border); color: var(--text); }
+        .btn-modal-cancel:hover { background: var(--bg); }
+        .btn-modal-submit { background: var(--color-header-gradient); border: 1px solid var(--color-header-bg); color: var(--color-header-text); }
+        .btn-modal-submit:hover { color: var(--color-header-subtext); border-color: var(--color-primary); }
 
-        .modal-footer {
-            padding: 16px 24px;
-            background: #F8FAFC;
-            border-top: 1px solid var(--pantone-border);
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .btn-modal-cancel {
-            background: transparent;
-            border: 1px solid var(--pantone-border);
-            color: var(--pantone-gray-dark);
-            padding: 9px 16px;
-            border-radius: var(--radius-sm);
-            font-size: 0.85rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .btn-modal-cancel:hover {
-            background: #E2E8F0;
-        }
-
-        .btn-modal-submit {
-            background: var(--pantone-dark);
-            color: var(--pantone-yellow);
-            border: 1px solid var(--pantone-yellow-border);
-            padding: 9px 18px;
-            border-radius: var(--radius-sm);
-            font-size: 0.85rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-modal-submit:hover {
-            background: var(--pantone-yellow);
-            color: var(--pantone-dark);
-        }
-
-        /* Tabla de Gestión Masiva */
-        .modal-toolbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 16px;
-            flex-wrap: wrap;
-        }
-
-        .modal-toolbar .search-input {
-            max-width: 360px;
-            padding: 8px 12px;
-            font-size: 0.85rem;
-            border: 1px solid var(--pantone-border);
-            border-radius: var(--radius-sm);
-        }
-
-        .modal-toolbar-actions {
-            display: flex;
-            gap: 8px;
-        }
-
+        .modal-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+        .modal-toolbar .search-input { max-width: 320px; padding-left: 12px; }
+        .modal-toolbar-actions { display: flex; gap: 6px; }
         .btn-quick-toggle {
-            background: #E2E8F0;
-            border: 1px solid #CBD5E1;
-            color: var(--pantone-dark);
-            padding: 6px 10px;
-            border-radius: var(--radius-sm);
-            font-size: 0.75rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
+            background: none; border: 1px solid var(--border); color: var(--text);
+            font: 500 .76rem 'Inter', sans-serif; padding: 6px 10px; border-radius: 6px; cursor: pointer;
         }
+        .btn-quick-toggle:hover { background: var(--bg); }
 
-        .btn-quick-toggle:hover {
-            background: #CBD5E1;
-        }
-
-        .btn-quick-toggle.secondary {
-            background: rgba(239, 68, 68, 0.1);
-            color: #DC2626;
-            border-color: rgba(239, 68, 68, 0.3);
-        }
-
-        .btn-quick-toggle.secondary:hover {
-            background: #EF4444;
-            color: #FFFFFF;
-        }
-
-        .gestion-table-container {
-            border: 1px solid var(--pantone-border);
-            border-radius: var(--radius-sm);
-            overflow-x: auto;
-        }
-
-        .gestion-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.82rem;
-            text-align: left;
-        }
-
+        .gestion-table-container { overflow-x: auto; }
+        .gestion-table { width: 100%; border-collapse: collapse; font-size: .82rem; }
         .gestion-table th {
-            background: #F1F5F9;
-            color: var(--pantone-dark);
-            font-weight: 700;
-            padding: 10px 14px;
-            border-bottom: 1px solid var(--pantone-border);
+            text-align: left; font-size: .7rem; font-weight: 600; letter-spacing: .05em; text-transform: uppercase;
+            color: var(--muted); padding: 8px 10px; border-bottom: 1px solid var(--border);
         }
+        .gestion-table td { padding: 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+        .gestion-table tr:hover td { background: var(--color-bg); }
+        .gestion-stats { font-size: .78rem; color: var(--muted); margin-right: auto; }
 
-        .gestion-table td {
-            padding: 10px 14px;
-            border-bottom: 1px solid var(--pantone-border);
-            vertical-align: middle;
+        /* ---------- Responsive ---------- */
+        @media screen and (max-width: 1600px) {
+            .portal { padding: 24px 24px 40px; }
         }
-
-        .gestion-table tr:hover {
-            background: #F8FAFC;
+        @media screen and (max-width: 980px) {
+            .search-box { width: 100%; }
         }
-
-        .gestion-stats {
-            font-size: 0.82rem;
-            color: var(--pantone-gray-med);
-            font-weight: 600;
-            margin-right: auto;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            body {
-                padding: 14px;
-            }
-
-            .portal-header {
-                padding: 20px;
-            }
-
-            .portal-title {
-                font-size: 1.35rem;
-            }
-
-            .header-status-box {
-                align-items: flex-start;
-            }
-
-            .dashboards-grid {
-                grid-template-columns: 1fr;
-            }
+        @media screen and (max-width: 768px) {
+            .portal { padding: 18px 16px 32px; }
+            .top { align-items: flex-start; }
+            .top { padding: 18px; }
+            .top h1 { font-size: 1.25rem; }
+            .top-sub { display: none; }
+            .top-right { align-items: flex-start; }
+            .top-actions { justify-content: flex-start; }
+            .top-right { gap: 10px; }
+            .category-tabs { gap: 18px; width: 100%; }
+            .dashboards-grid { grid-template-columns: 1fr; }
+            .card-arrow { opacity: 1; }
         }
     </style>
-    <link rel="stylesheet" href="responsive.css?v=2">
 </head>
 
 <body>
+    <div class="portal">
 
-    <div class="portal-container">
-
-        <!-- HEADER PRINCIPAL -->
-        <header class="portal-header">
-            <div class="header-title-box">
-                <div class="header-badge-row">
-                    <span class="portal-badge">⚡ Servidor Web Activo</span>
-                    <span class="portal-badge"
-                        style="background: rgba(255,255,255,0.1); color: #fff; border-color: rgba(255,255,255,0.2);">Planta
-                        Desposte</span>
-                </div>
-                <h1 class="portal-title">Portal de Dashboards Operativos</h1>
-
+        <header class="top">
+            <div>
+                <div class="eyebrow">Planta Desposte</div>
+                <h1>Portal de Dashboards Operativos</h1>
+                
             </div>
-
-            <div class="header-status-box">
-                <div class="api-status-pill">
+            <div class="top-right">
+                <span class="status status-pill">
                     <span id="statusDot" class="status-dot"></span>
-                    <span id="statusText">Detectando API...</span>
-                </div>
-                <div class="header-actions-row">
-                    <button class="btn-refresh-status" onclick="verificarEstadoApi(true)">
-                        🔄 Reintentar
-                    </button>
-                    <button class="btn-admin-access" id="btnAdminAccess" onclick="abrirModalAdminLogin()">
-                        🔒 Acceso Admin
-                    </button>
+                    <span id="statusText">Detectando API…</span>
+                </span>
+                <div class="top-actions">
+                    <span class="status"><span id="metricTotalDashboards">–</span>&nbsp;dashboards</span>
+                    <span class="sep"></span>
+                    <button class="btn-ghost" onclick="verificarEstadoApi(true)">Reintentar</button>
+                    <button class="btn-ghost" id="btnAdminAccess" onclick="abrirModalAdminLogin()">Acceso admin</button>
                     <div id="adminSessionBox" class="admin-session-box" style="display: none;">
-                        <span class="badge-admin-active">🛡️ Admin</span>
-                        <button class="btn-admin-manage" onclick="abrirModalGestionDashboards()"
-                            title="Panel de Gestión de Visibilidad">
-                            ⚙️ Gestionar
-                        </button>
-                        <button class="btn-admin-logout" onclick="cerrarSesionAdmin()"
-                            title="Cerrar sesión de administrador">
-                            🚪 Salir
-                        </button>
+                        <span class="badge-admin-active">Admin</span>
+                        <button class="btn-ghost" onclick="abrirModalGestionDashboards()">Gestionar</button>
+                        <button class="btn-ghost" onclick="cerrarSesionAdmin()">Salir</button>
                     </div>
                 </div>
             </div>
         </header>
 
-        <!-- BANNER INFORMATIVO -->
-        <section class="info-banner">
-            <div class="info-banner-content">
-                <div id="adminNoticeBanner"
-                    style="display: none; align-items: center; gap: 8px; color: #D97706; font-weight: 700;">
-                    <span>🛡️ Modo Administrador Activo:</span>
-                    <span style="font-weight: 500; color: var(--pantone-gray-dark);">Puedes alternar la visibilidad de
-                        los dashboards directamente en cada tarjeta o desde "Gestionar".</span>
-                </div>
-            </div>
-
-            <div class="quick-metrics">
-                <div class="quick-metric-item">
-                    <span class="quick-metric-val" id="metricTotalDashboards">13</span>
-                    <span class="quick-metric-lbl">Dashboards</span>
-                </div>
-                <div class="quick-metric-item"
-                    style="border-left: 1px solid var(--pantone-border); padding-left: 16px;">
-                    <span class="quick-metric-val" id="metricHostPort">--</span>
-                    <span class="quick-metric-lbl">Host Activo</span>
-                </div>
-            </div>
-        </section>
-
-        <!-- CONTROLES: FILTROS Y BÚSQUEDA -->
-        <section class="controls-bar">
-            <div class="category-tabs">
+        <section class="toolbar">
+            <nav class="category-tabs">
                 <button class="tab-btn active" onclick="filtrarCategoria('OPERACIONES', this)">
-                    🥩 Operaciones <span class="tab-count" id="countOperaciones">4</span>
+                    Operaciones <span class="tab-count" id="countOperaciones">0</span>
                 </button>
                 <button class="tab-btn" onclick="filtrarCategoria('CUMPLIMIENTOS', this)">
-                    🎯 Cumplimientos PTC <span class="tab-count" id="countCumplimientos">4</span>
+                    Cumplimientos PTC <span class="tab-count" id="countCumplimientos">0</span>
                 </button>
                 <button class="tab-btn" onclick="filtrarCategoria('COSTOS', this)">
-                    💰 Costos & Presupuesto <span class="tab-count" id="countCostos">3</span>
+                    Costos &amp; Presupuesto <span class="tab-count" id="countCostos">0</span>
                 </button>
-            </div>
-
+            </nav>
             <div class="search-box">
-                <span class="search-icon">🔍</span>
-                <input type="text" id="inputBuscar" class="search-input"
-                    placeholder="Buscar dashboard por nombre, área o endpoint..." oninput="ejecutarBusqueda()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                <input type="text" id="inputBuscar" class="search-input" placeholder="Buscar dashboard…" oninput="ejecutarBusqueda()">
             </div>
         </section>
 
-        <!-- GRID DE TARJETAS DE DASHBOARDS -->
-        <main class="dashboards-grid" id="gridDashboards">
-            <!-- Renderizado dinámico vía JavaScript -->
-        </main>
-
-        <!-- MENSAJE SIN RESULTADOS -->
-        <div id="noResults" class="no-results">
-            <div class="no-results-icon">🔎</div>
-            <div class="no-results-text">No se encontraron dashboards que coincidan con la búsqueda.</div>
+        <div id="adminNoticeBanner" class="admin-notice">
+            Modo administrador: cambia la visibilidad en cada tarjeta o desde «Gestionar».
         </div>
 
+        <main class="dashboards-grid" id="gridDashboards"></main>
+        <div id="noResults" class="no-results">No se encontraron dashboards que coincidan con la búsqueda.</div>
+
+        <!-- Se conserva oculto para compatibilidad con verificarEstadoApi() -->
+        <span id="metricHostPort" hidden></span>
     </div>
 
-    <!-- TOAST NOTIFICACIÓN -->
     <div id="toastMessage" class="toast">
-        <span id="toastIcon">📋</span>
-        <span id="toastText">¡Enlace copiado al portapapeles!</span>
+        <span id="toastIcon"></span>
+        <span id="toastText"></span>
     </div>
 
-    <!-- MODAL DE LOGIN ADMIN (PIN) -->
-    <div id="modalAdminLogin" class="modal-overlay" style="display: none;"
-        onclick="if(event.target===this) cerrarModalAdminLogin()">
+    <div id="modalAdminLogin" class="modal-overlay" style="display: none;" onclick="if(event.target===this) cerrarModalAdminLogin()">
         <div class="modal-card">
             <div class="modal-header">
-                <div class="modal-title-box">
-                    <span class="modal-icon">🔐</span>
-                    <div>
-                        <h3 class="modal-title">Acceso de Administrador</h3>
-                        <p class="modal-subtitle">Control de visibilidad y dashboards en prueba</p>
-                    </div>
+                <div>
+                    <h3 class="modal-title">Acceso de administrador</h3>
+                    <p class="modal-subtitle">Control de visibilidad de dashboards en prueba</p>
                 </div>
                 <button class="modal-close-btn" onclick="cerrarModalAdminLogin()">✕</button>
             </div>
             <div class="modal-body">
                 <div class="pin-input-group">
-                    <label for="inputAdminPin">Introduce tu PIN de Administrador:</label>
+                    <label for="inputAdminPin">PIN</label>
                     <div class="pin-field-wrapper">
-                        <input type="password" id="inputAdminPin" class="pin-input" placeholder="••••" maxlength="20"
-                            onkeydown="if(event.key==='Enter') autenticarAdmin()">
-                        <button type="button" class="btn-toggle-pin" onclick="toggleVerPin()"
-                            title="Mostrar u ocultar PIN">👁️</button>
+                        <input type="password" id="inputAdminPin" class="pin-input" placeholder="••••" maxlength="20" onkeydown="if(event.key==='Enter') autenticarAdmin()">
+                        <button type="button" class="btn-toggle-pin" onclick="toggleVerPin()">Mostrar</button>
                     </div>
                     <div id="adminPinError" class="pin-error-msg" style="display: none;"></div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn-modal-cancel" onclick="cerrarModalAdminLogin()">Cancelar</button>
-                <button class="btn-modal-submit" onclick="autenticarAdmin()">Ingresar como Admin</button>
+                <button class="btn-modal-submit" onclick="autenticarAdmin()">Ingresar</button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL DE GESTIÓN MASIVA DE DASHBOARDS -->
-    <div id="modalGestionDashboards" class="modal-overlay" style="display: none;"
-        onclick="if(event.target===this) cerrarModalGestionDashboards()">
+    <div id="modalGestionDashboards" class="modal-overlay" style="display: none;" onclick="if(event.target===this) cerrarModalGestionDashboards()">
         <div class="modal-card modal-large">
             <div class="modal-header">
-                <div class="modal-title-box">
-                    <span class="modal-icon">⚙️</span>
-                    <div>
-                        <h3 class="modal-title">Gestión de Dashboards y Visibilidad</h3>
-                        <p class="modal-subtitle">Activa o pon en prueba cualquier dashboard. Los cambios se guardan en
-                            el servidor para toda la red.</p>
-                    </div>
+                <div>
+                    <h3 class="modal-title">Visibilidad de dashboards</h3>
+                    <p class="modal-subtitle">Los cambios se guardan en el servidor para toda la red.</p>
                 </div>
                 <button class="modal-close-btn" onclick="cerrarModalGestionDashboards()">✕</button>
             </div>
             <div class="modal-body">
                 <div class="modal-toolbar">
-                    <input type="text" id="filtroModalGestion" class="search-input"
-                        placeholder="🔍 Filtrar dashboard en esta lista..." oninput="filtrarListaGestion()">
+                    <input type="text" id="filtroModalGestion" class="search-input" placeholder="Filtrar…" oninput="filtrarListaGestion()">
                     <div class="modal-toolbar-actions">
-                        <button class="btn-quick-toggle" onclick="cambiarTodosEstados(true)">✔ Activar Todos</button>
-                        <button class="btn-quick-toggle secondary" onclick="cambiarTodosEstados(false)">🧪 Ocultar
-                            Todos</button>
+                        <button class="btn-quick-toggle" onclick="cambiarTodosEstados(true)">Activar todos</button>
+                        <button class="btn-quick-toggle" onclick="cambiarTodosEstados(false)">Ocultar todos</button>
                     </div>
                 </div>
                 <div class="gestion-table-container">
                     <table class="gestion-table">
                         <thead>
                             <tr>
-                                <th style="width: 48px; text-align: center;">Icono</th>
                                 <th>Dashboard</th>
                                 <th>Categoría</th>
                                 <th>Archivo</th>
-                                <th style="text-align: center; width: 140px;">Visibilidad</th>
+                                <th style="text-align: right;">Visible</th>
                             </tr>
                         </thead>
-                        <tbody id="tbodyGestionDashboards">
-                            <!-- Se renderiza dinámicamente -->
-                        </tbody>
+                        <tbody id="tbodyGestionDashboards"></tbody>
                     </table>
                 </div>
             </div>
             <div class="modal-footer">
-                <span class="gestion-stats" id="gestionStatsText">Cargando...</span>
+                <span class="gestion-stats" id="gestionStatsText">Cargando…</span>
                 <button class="btn-modal-submit" onclick="cerrarModalGestionDashboards()">Cerrar</button>
             </div>
         </div>
     </div>
 
-    <!-- =========================================================================
-       LÓGICA JAVASCRIPT DEL PORTAL
-       ========================================================================= -->
     <script>
         // =========================================================================
         // ⚙️ CONFIGURACIÓN DE CONEXIÓN HÍBRIDA A LA API .NET
@@ -1313,7 +468,7 @@
         const APP_CONFIG = {
             servidor: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.servidor)
                 ? GLOBAL_CONFIG.servidor
-                : "RAEVFINL016",
+                : "RAEVSALL001",
             puertos: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.puertos)
                 ? GLOBAL_CONFIG.puertos
                 : [8080, 5000]
@@ -1352,7 +507,7 @@
 
         // Convierte cualquier URL con localhost / 127.0.0.1 a la URL de red con el nombre real de la máquina
         function normalizarUrlConNombreMaquina(baseUrl) {
-            const hostRed = (nombreMaquinaActiva || APP_CONFIG.servidor || 'RAEVFINL016').toLowerCase();
+            const hostRed = (nombreMaquinaActiva || APP_CONFIG.servidor || 'RAEVSALL001').toLowerCase();
             if (!baseUrl) {
                 return `http://${hostRed}:${APP_CONFIG.puertos[0] || 8080}`;
             }
@@ -1654,14 +809,13 @@
                 dot.className = 'status-dot online';
                 const baseCompartible = normalizarUrlConNombreMaquina(hostEncontrado);
                 const fullHostUrl = `${baseCompartible}/`;
-                txt.innerText = `En Línea: ${fullHostUrl} (${latency}ms)`;
-                metricHost.innerHTML = `<a href="${fullHostUrl}" onclick="event.preventDefault(); copiarEnlace('${fullHostUrl}');" title="Clic para copiar enlace del portal" style="color: inherit; text-decoration: none; cursor: pointer;">${fullHostUrl} 📋</a>`;
+                const hostCorto = fullHostUrl.replace(/^https?:\/\//, '').replace(/\/$/, '');
+                txt.innerHTML = `En línea · <a href="${fullHostUrl}" onclick="event.preventDefault(); copiarEnlace('${fullHostUrl}');" title="Clic para copiar el enlace del portal">${hostCorto}</a> · ${latency} ms`;
                 if (manual) renderizarCards();
             } else {
                 apiBaseActiva = null;
                 dot.className = 'status-dot offline';
-                txt.innerText = `Sin conexión (${APP_CONFIG.servidor}:${APP_CONFIG.puertos.join('/')})`;
-                metricHost.innerText = 'Desconectado';
+                txt.innerText = `Sin conexión · ${APP_CONFIG.servidor}:${APP_CONFIG.puertos.join('/')}`;
             }
         }
 
@@ -1946,29 +1100,18 @@
                 const activo = estadosDashboards[d.archivo] !== false;
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td style="text-align: center; font-size: 1.25rem;">${d.icono}</td>
                     <td>
-                        <div style="font-weight: 700; color: var(--pantone-dark);">${d.titulo}</div>
-                        <div style="font-size: 0.72rem; color: var(--pantone-gray-med);">${d.endpoint}</div>
+                        <div style="font-weight: 500; color: var(--ink);">${d.titulo}</div>
                     </td>
+                    <td style="color: var(--muted);">${d.categoriaNombre}</td>
                     <td>
-                        <span class="card-category-tag ${d.categoriaClase}" style="font-size: 0.7rem; padding: 2px 7px;">${d.categoriaNombre}</span>
+                        <a href="${d.archivo}" target="_blank" style="color: var(--muted); font-size: 0.74rem; font-family: 'JetBrains Mono', monospace;">${d.archivo}</a>
                     </td>
-                    <td>
-                        <a href="${d.archivo}" target="_blank" style="color: var(--info); text-decoration: none; font-size: 0.76rem; font-family: 'JetBrains Mono', monospace;">
-                            ${d.archivo} ↗
-                        </a>
-                    </td>
-                    <td style="text-align: center;">
-                        <div style="display: inline-flex; align-items: center; gap: 8px;">
-                            <label class="switch-toggle" title="Alternar visibilidad">
-                                <input type="checkbox" ${activo ? 'checked' : ''} onchange="toggleVisibilidadDashboard('${d.archivo}', this.checked); renderizarTablaGestion('${filtro}');">
-                                <span class="slider-toggle"></span>
-                            </label>
-                            <span style="font-size: 0.75rem; font-weight: 700; width: 65px; text-align: left; color: ${activo ? 'var(--success)' : '#D97706'};">
-                                ${activo ? 'Visible' : 'Oculto'}
-                            </span>
-                        </div>
+                    <td style="text-align: right;">
+                        <label class="switch-toggle" title="Alternar visibilidad">
+                            <input type="checkbox" ${activo ? 'checked' : ''} onchange="toggleVisibilidadDashboard('${d.archivo}', this.checked); renderizarTablaGestion('${filtro}');">
+                            <span class="slider-toggle"></span>
+                        </label>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -2038,17 +1181,14 @@
                 card.className = `dash-card ${!estaActivo ? 'is-en-prueba' : ''}`;
                 card.id = `card-${item.id}`;
 
-                let badgeExtra = '';
-                if (!estaActivo) {
-                    badgeExtra = `<span class="badge-en-prueba">🧪 En Prueba (Oculto)</span>`;
-                }
+                const badgeExtra = !estaActivo ? `<span class="badge-en-prueba">En prueba</span>` : '';
 
                 let adminControls = '';
                 if (esAdmin) {
                     adminControls = `
                         <div class="admin-card-switch-box">
                             <span class="admin-switch-label">
-                                ${estaActivo ? '🟢 Visible a usuarios' : '🧪 En Prueba / Oculto'}
+                                ${estaActivo ? 'Visible para usuarios' : 'Oculto para usuarios'}
                             </span>
                             <label class="switch-toggle" title="Cambiar visibilidad para usuarios en red">
                                 <input type="checkbox" ${estaActivo ? 'checked' : ''} onchange="toggleVisibilidadDashboard('${item.archivo}', this.checked)">
@@ -2059,34 +1199,27 @@
                 }
 
                 card.innerHTML = `
-                    <div class="card-top">
-                        <div class="card-meta-row">
-                            <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
-                                <span class="card-category-tag ${item.categoriaClase}">${item.categoriaNombre}</span>
-                                ${badgeExtra}
-                            </div>
-                            <span class="card-endpoint">${item.endpoint}</span>
+                    <div class="card-head">
+                        <div class="card-icon">${item.icono}</div>
+                        <div style="min-width: 0;">
+                            <div class="card-cat">${item.categoriaNombre}</div>
+                            <h2 class="card-title">
+                                <a href="${item.archivo}" target="_blank" class="card-link" title="Abrir en pestaña nueva">${item.titulo}</a>
+                            </h2>
                         </div>
-
-                        <div class="card-title-box">
-                            <div class="card-icon">${item.icono}</div>
-                            <div>
-                                <h2 class="card-title">${item.titulo}</h2>
-                            </div>
-                        </div>
-
-                        <p class="card-desc">${item.descripcion}</p>
                     </div>
-
+                    ${badgeExtra}
+                    <p class="card-desc" title="${item.descripcion}">${item.descripcion}</p>
                     ${adminControls}
-
-                    <div class="card-footer">
-                        <a href="${item.archivo}" target="_blank" class="btn-card-open" title="Abrir reporte en pestaña nueva">
-                            Abrir Dashboard ↗
-                        </a>
-                        <button class="btn-card-copy" onclick="copiarEnlace('${urlCompleta}')" title="Copiar enlace para compartir">
-                            📋 Copiar Link
-                        </button>
+                    <div class="card-foot">
+                        <span class="card-endpoint" title="${item.endpoint}">${item.endpoint}</span>
+                        <div class="card-actions">
+                            <button class="btn-copy" onclick="copiarEnlace('${urlCompleta}')" title="Copiar enlace para compartir">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+                                Copiar
+                            </button>
+                            <a href="${item.archivo}" target="_blank" class="btn-open" title="Abrir en pestaña nueva">Abrir ↗</a>
+                        </div>
                     </div>
                 `;
 
