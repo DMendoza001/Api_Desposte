@@ -1,4 +1,5 @@
-﻿using ClosedXML.Excel;
+using ApiDesposte.Infraestructura.Excel;
+using ClosedXML.Excel;
 using Microsoft.AspNetCore.Mvc;
 using System.IO;
 
@@ -18,61 +19,6 @@ namespace ApiDesposte.Controllers.Excel
         {
             string userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             return Path.Combine(userProfile, @"OneDrive - Corporación Rico SAC\Desposte-03\Presupuestos\2027\Presupuesto_2027.xlsm");
-        }
-
-        private XLWorkbook CargarWorkbookEnMemoria(string rutaExcel)
-        {
-            byte[] fileBytes;
-            using (var fileStream = new FileStream(rutaExcel, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
-            using (var ms = new MemoryStream())
-            {
-                fileStream.CopyTo(ms);
-                fileBytes = ms.ToArray();
-            }
-
-            var msModificado = new MemoryStream();
-            msModificado.Write(fileBytes, 0, fileBytes.Length);
-            msModificado.Position = 0;
-
-            try
-            {
-                using (var doc = DocumentFormat.OpenXml.Packaging.SpreadsheetDocument.Open(msModificado, true))
-                {
-                    if (doc.WorkbookPart != null)
-                    {
-                        // 1. Eliminar PivotTableParts de todas las hojas para evitar errores de ClosedXML
-                        foreach (var wsPart in doc.WorkbookPart.WorksheetParts)
-                        {
-                            var pParts = wsPart.PivotTableParts.ToList();
-                            foreach (var p in pParts)
-                            {
-                                wsPart.DeletePart(p);
-                            }
-                        }
-
-                        // 2. Eliminar PivotTableCacheDefinitionParts del Workbook
-                        var pivotCaches = doc.WorkbookPart.PivotTableCacheDefinitionParts.ToList();
-                        foreach (var cache in pivotCaches)
-                        {
-                            doc.WorkbookPart.DeletePart(cache);
-                        }
-
-                        if (doc.WorkbookPart.Workbook != null)
-                        {
-                            doc.WorkbookPart.Workbook.PivotCaches?.Remove();
-                            doc.WorkbookPart.Workbook.Save();
-                        }
-                    }
-                }
-            }
-            catch
-            {
-                // Si falla la manipulación de OpenXml, intentamos cargar directamente
-                msModificado = new MemoryStream(fileBytes);
-            }
-
-            msModificado.Position = 0;
-            return new XLWorkbook(msModificado);
         }
 
         private static int BuscarIndiceColumna(IXLTable tabla, params string[] nombresPosibles)
@@ -131,7 +77,7 @@ namespace ApiDesposte.Controllers.Excel
                     return NotFound(new { error = $"No se encontró el archivo Excel en la ruta: {rutaExcel}" });
                 }
 
-                using var workbook = CargarWorkbookEnMemoria(rutaExcel);
+                using var workbook = LectorTablasExcel.AbrirEnMemoria(rutaExcel);
 
                 if (!workbook.Worksheets.TryGetWorksheet(HojaCabecera, out var wsCabecera))
                     return NotFound(new { error = $"No se encontró la hoja '{HojaCabecera}'" });

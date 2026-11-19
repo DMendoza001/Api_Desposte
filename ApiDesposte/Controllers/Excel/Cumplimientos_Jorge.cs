@@ -1,6 +1,6 @@
-using ClosedXML.Excel;
+using ApiDesposte.Infraestructura.Excel;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Concurrent;
+using System.IO;
 
 namespace ApiDesposte.Controllers.Excel
 {
@@ -17,11 +17,6 @@ namespace ApiDesposte.Controllers.Excel
     {
         private readonly ILogger<CumplimientosJorgeController> _logger;
 
-        // Caché en memoria para lectura instantánea
-        private static readonly ConcurrentDictionary<string, List<Dictionary<string, object?>>> _cacheTablas = new(StringComparer.OrdinalIgnoreCase);
-        private static DateTime _ultimaModificacionArchivo = DateTime.MinValue;
-        private static readonly object _lockCarga = new();
-
         // Mapeo oficial de las 3 tablas según su Hoja y Nombre de Tabla en Excel
         private static readonly Dictionary<string, (string Hoja, string Tabla)> MapeoTablas = new(StringComparer.OrdinalIgnoreCase)
         {
@@ -29,6 +24,9 @@ namespace ApiDesposte.Controllers.Excel
             { "T_DemandaPy",      ("DemandaPy",     "T_DemandaPy") },
             { "T_CodigoRelacion", ("Auxiliares",    "T_CodigoRelacion") }
         };
+
+        // Cache en memoria para lectura instantánea
+        private static readonly CacheTablasExcel Cache = new(TimeSpan.FromSeconds(60));
 
         public CumplimientosJorgeController(ILogger<CumplimientosJorgeController> logger)
         {
@@ -57,18 +55,23 @@ namespace ApiDesposte.Controllers.Excel
         {
             try
             {
-                var tablas = AsegurarCargaTablas(recargar);
+                string rutaExcel = ObtenerRutaExcel();
+                var tablas = Cache.Obtener(rutaExcel, MapeoTablas, recargar);
 
                 var resumen = tablas.ToDictionary(
                     k => k.Key,
                     v => v.Value.Count
                 );
 
+                DateTime ultimaModificacion = System.IO.File.Exists(rutaExcel)
+                    ? System.IO.File.GetLastWriteTimeUtc(rutaExcel)
+                    : DateTime.MinValue;
+
                 return Ok(new
                 {
                     exito = true,
-                    archivo = Path.GetFileName(ObtenerRutaExcel()),
-                    ultimaActualizacionArchivo = _ultimaModificacionArchivo,
+                    archivo = Path.GetFileName(rutaExcel),
+                    ultimaActualizacionArchivo = ultimaModificacion,
                     totalFilasPorTabla = resumen,
                     tablas = tablas
                 });
@@ -109,7 +112,8 @@ namespace ApiDesposte.Controllers.Excel
                     });
                 }
 
-                var tablas = AsegurarCargaTablas(recargar);
+                string rutaExcel = ObtenerRutaExcel();
+                var tablas = Cache.Obtener(rutaExcel, MapeoTablas, recargar);
 
                 if (tablas.TryGetValue(nombreTabla, out var filas))
                 {
@@ -133,179 +137,6 @@ namespace ApiDesposte.Controllers.Excel
                     detalle = ex.Message
                 });
             }
-        }
-
-        /// <summary>
-        /// Carga las 3 tablas desde el Excel en memoria (solo si el archivo cambió o si se fuerza recarga).
-        /// </summary>
-        private ConcurrentDictionary<string, List<Dictionary<string, object?>>> AsegurarCargaTablas(bool forzarRecarga)
-        {
-            string rutaExcel = ObtenerRutaExcel();
-
-            if (!System.IO.File.Exists(rutaExcel))
-            {
-                throw new FileNotFoundException($"No se encontró el archivo Excel en la ruta esperada: {rutaExcel}");
-            }
-
-            DateTime fechaModificacionActual = System.IO.File.GetLastWriteTimeUtc(rutaExcel);
-
-            if (!forzarRecarga && !_cacheTablas.IsEmpty && fechaModificacionActual == _ultimaModificacionArchivo)
-            {
-                return _cacheTablas;
-            }
-
-            lock (_lockCarga)
-            {
-                if (!forzarRecarga && !_cacheTablas.IsEmpty && fechaModificacionActual == _ultimaModificacionArchivo)
-                {
-                    return _cacheTablas;
-                }
-
-                _logger.LogInformation("Cargando tablas desde Excel: {Ruta}", rutaExcel);
-
-                using var memoryStream = new MemoryStream();
-                using (var fileStream = new FileStream(rutaExcel, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
-                {
-                    fileStream.CopyTo(memoryStream);
-                }
-                memoryStream.Position = 0;
-
-                using var workbook = new XLWorkbook(memoryStream);
-
-                foreach (var kvp in MapeoTablas)
-                {
-                    string claveTabla = kvp.Key;
-                    string nombreHoja = kvp.Value.Hoja;
-                    string nombreTablaExcel = kvp.Value.Tabla;
-
-                    var datosTabla = ExtraerDatosTabla(workbook, nombreHoja, nombreTablaExcel);
-                    _cacheTablas[claveTabla] = datosTabla;
-                }
-
-                _ultimaModificacionArchivo = fechaModificacionActual;
-                return _cacheTablas;
-            }
-        }
-
-        /// <summary>
-        /// Extrae todas las filas de un ListObject (Tabla de Excel) o, en su defecto, del rango usado de la hoja.
-        /// </summary>
-        private List<Dictionary<string, object?>> ExtraerDatosTabla(XLWorkbook workbook, string nombreHoja, string nombreTabla)
-        {
-            var resultado = new List<Dictionary<string, object?>>();
-
-            // 1. Intentar buscar la tabla directamente en el libro o en la hoja indicada
-            IXLTable? tabla = null;
-
-            if (workbook.Worksheets.TryGetWorksheet(nombreHoja, out var hoja))
-            {
-                tabla = hoja.Tables.FirstOrDefault(t => t.Name.Equals(nombreTabla, StringComparison.OrdinalIgnoreCase));
-            }
-
-            if (tabla == null)
-            {
-                tabla = workbook.Worksheets
-                    .SelectMany(ws => ws.Tables)
-                    .FirstOrDefault(t => t.Name.Equals(nombreTabla, StringComparison.OrdinalIgnoreCase));
-            }
-
-            if (tabla != null)
-            {
-                var encabezados = tabla.Fields.Select(f => f.Name?.Trim() ?? string.Empty).ToList();
-                var dataRange = tabla.DataRange;
-
-                if (dataRange == null)
-                    return resultado;
-
-                foreach (var row in dataRange.Rows())
-                {
-                    if (row.IsEmpty())
-                        continue;
-
-                    var filaDict = new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
-                    for (int i = 0; i < encabezados.Count; i++)
-                    {
-                        string nombreColumna = string.IsNullOrEmpty(encabezados[i]) ? $"Columna{i + 1}" : encabezados[i];
-                        var cell = row.Cell(i + 1);
-                        filaDict[nombreColumna] = ObtenerValorCelda(cell);
-                    }
-                    resultado.Add(filaDict);
-                }
-
-                return resultado;
-            }
-
-            // 2. Fallback: si no está definida como objeto Tabla pero existe la hoja, leer el rango utilizado
-            if (hoja != null)
-            {
-                var rangeUsed = hoja.RangeUsed();
-                if (rangeUsed == null)
-                    return resultado;
-
-                var rows = rangeUsed.RowsUsed().ToList();
-                if (rows.Count <= 1)
-                    return resultado;
-
-                var headerRow = rows[0];
-                int totalCols = rangeUsed.ColumnCount();
-                var headers = new List<string>();
-
-                for (int c = 1; c <= totalCols; c++)
-                {
-                    string h = headerRow.Cell(c).GetString().Trim();
-                    headers.Add(string.IsNullOrEmpty(h) ? $"Columna{c}" : h);
-                }
-
-                for (int r = 1; r < rows.Count; r++)
-                {
-                    var currentRow = rows[r];
-                    var filaDict = new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
-
-                    for (int c = 1; c <= totalCols; c++)
-                    {
-                        filaDict[headers[c - 1]] = ObtenerValorCelda(currentRow.Cell(c));
-                    }
-
-                    resultado.Add(filaDict);
-                }
-            }
-
-            return resultado;
-        }
-
-        /// <summary>
-        /// Convierte el valor de una celda de ClosedXML a un tipo primitivo limpio para serialización JSON.
-        /// </summary>
-        private static object? ObtenerValorCelda(IXLCell cell)
-        {
-            if (cell == null || cell.IsEmpty())
-                return null;
-
-            if (cell.Value.IsError)
-                return null;
-
-            if (cell.Value.IsNumber)
-            {
-                double num = cell.Value.GetNumber();
-                if (Math.Abs(num % 1) < 0.0000001 && num >= long.MinValue && num <= long.MaxValue)
-                {
-                    return (long)Math.Round(num);
-                }
-                return Math.Round(num, 4);
-            }
-
-            if (cell.Value.IsDateTime)
-            {
-                return cell.Value.GetDateTime().ToString("yyyy-MM-dd");
-            }
-
-            if (cell.Value.IsBoolean)
-            {
-                return cell.Value.GetBoolean();
-            }
-
-            string texto = cell.GetString().Trim();
-            return string.IsNullOrEmpty(texto) ? null : texto;
         }
     }
 }

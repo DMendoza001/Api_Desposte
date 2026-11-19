@@ -54,3 +54,14 @@ Todo dashboard en `Docu_Paginas/` cuya fuente de datos provenga de SQL Server (c
 - **Preservación de data plana:** Almacenar en una variable de memoria (`rawSqlData` / `registrosCrudos`) el array de objetos original devuelto por la API .NET tal cual viene de SQL Server, sin filtros ni modificaciones.
 - **Botón en barra de herramientas / cabecera:** Exponer un botón visible y accesible (`Data Plana SQL (.xlsx)` o `Exportar Data Plana SP`) con icono descriptivo y validación cuando no haya datos cargados.
 - **Descarga estándar con SheetJS:** Implementar la función de exportación (`exportarDataPlanaSQL()`) convirtiendo los datos planos a hoja Excel con `XLSX.utils.json_to_sheet(rawSqlData)` y descargando el archivo `.xlsx` con nombre estandarizado `Data_Plana_SQL_<Modulo>_<RangoFechas>.xlsx`.
+
+### 8. Uso Obligatorio de `LectorTablasExcel` y `CacheTablasExcel` en .NET (Regla Obligatoria)
+Todo controlador en C# .NET (`ApiDesposte/Controllers/Excel/`) que lea archivos Excel (`.xlsx`, `.xlsm`) debe delegar la apertura y lectura a la capa de infraestructura [ApiDesposte/Infraestructura/Excel/LectorTablasExcel.cs](file:///ApiDesposte/Infraestructura/Excel/LectorTablasExcel.cs), según lo detallado en [.agents/rules/conexion-excel-onedrive.md](file:///.agents/rules/conexion-excel-onedrive.md):
+- **Apertura y limpieza segura en memoria:** Usar exclusivamente `LectorTablasExcel.AbrirEnMemoria(rutaExcel)`. Queda estrictamente prohibido instanciar `FileStream`, `MemoryStream` o manipular paquetes `SpreadsheetDocument` de OpenXml directamente en los controladores.
+- **Lectura dinámica de tablas:** Usar `LectorTablasExcel.LeerTablaTalCual(workbook, nombreHoja, nombreTabla)` para extraer dinámicamente las columnas desde `HeadersRow()`, con tipado automático (`Dictionary<string, object?>`) y soporte de fallback a `RangeUsed()`.
+- **Caché en memoria concurrente:** Para endpoints que expongan colecciones de tablas completas, usar `CacheTablasExcel` (ej. `new CacheTablasExcel(TimeSpan.FromSeconds(60))`) llamando a `Cache.Obtener(rutaExcel, MapeoTablas, forzarRecarga)`.
+- **Controladores delgados (*Thin Controllers*):** El controlador sólo debe resolver la ruta con `ObtenerRutaExcel()`, declarar el catálogo `MapeoTablas` y retornar las respuestas HTTP (`Ok`, `NotFound`, `StatusCode(500)`).
+
+## Sincronización Obligatoria de Reglas (`AGENTS.md` y `CLAUDE.md`)
+
+**Regla de Mantenimiento:** Cualquier modificación, actualización, ajuste o regla nueva de desarrollo debe ser incluida obligatoriamente y de manera sincronizada tanto en `AGENTS.md` como en `CLAUDE.md` (y su especificación detallada en `.agents/rules/`). Ninguna regla debe existir en uno de los archivos sin estar reflejada en el otro.

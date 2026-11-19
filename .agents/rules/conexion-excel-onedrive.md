@@ -34,3 +34,20 @@ private string ObtenerRutaExcel()
 3. **Endpoints de Tablas Planas (Consumo Crudo para JS):**
    Cuando se solicite exponer tablas de hojas de Excel para ser procesadas directamente en JavaScript, el endpoint debe leer las columnas dinámicamente a partir de `tabla.HeadersRow().Cells()` y devolver los registros **tal cual están en la tabla original**, sin inyectar ni calcular campos adicionales en el backend.
 
+---
+
+## 3. Uso Obligatorio de Infraestructura (`LectorTablasExcel` y `CacheTablasExcel`)
+
+Para evitar duplicar código de bajo nivel en los controladores, es **mandatorio** utilizar los componentes centralizados ubicados en `ApiDesposte/Infraestructura/Excel/`:
+
+1. **Apertura segura en memoria:**
+   - Usar `LectorTablasExcel.AbrirEnMemoria(rutaExcel)`.
+   - Queda estrictamente prohibido instanciar `FileStream`, `MemoryStream` o `SpreadsheetDocument` manualmente dentro de los controladores.
+2. **Lectura dinámica de tablas:**
+   - Usar `LectorTablasExcel.LeerTablaTalCual(workbook, nombreHoja, nombreTabla)`.
+   - Descubre dinámicamente las columnas desde `HeadersRow()`, soporta fallback a `RangeUsed()` en hojas sin tabla formal y mapea valores tipados (`Dictionary<string, object?>`).
+3. **Caché en memoria concurrente:**
+   - Para controladores que expongan colecciones de tablas completas, instanciar `private static readonly CacheTablasExcel Cache = new(TimeSpan.FromSeconds(60));` y llamar a `Cache.Obtener(rutaExcel, MapeoTablas, forzarRecarga)`.
+4. **Responsabilidad del Controlador:**
+   - Cada controlador debe ser delgado (*Thin Controller*): solo resuelve la ruta con `ObtenerRutaExcel()`, define el diccionario `MapeoTablas` y devuelve las respuestas HTTP.
+

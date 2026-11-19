@@ -1,4 +1,5 @@
-﻿using ClosedXML.Excel;
+﻿using ApiDesposte.Infraestructura.Excel;
+using ClosedXML.Excel;
 using Microsoft.AspNetCore.Mvc;
 using System.IO;
 
@@ -21,58 +22,6 @@ namespace ApiDesposte.Controllers.Excel
         {
             string userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             return Path.Combine(userProfile, @"OneDrive - Corporación Rico SAC\Desposte-03\PlantasCore\Planificacion\Cumplimiento_PTC.xlsm");
-        }
-
-        private XLWorkbook CargarWorkbookEnMemoria(string rutaExcel)
-        {
-            byte[] fileBytes;
-            using (var fileStream = new FileStream(rutaExcel, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
-            using (var ms = new MemoryStream())
-            {
-                fileStream.CopyTo(ms);
-                fileBytes = ms.ToArray();
-            }
-
-            var msModificado = new MemoryStream();
-            msModificado.Write(fileBytes, 0, fileBytes.Length);
-            msModificado.Position = 0;
-
-            try
-            {
-                using (var doc = DocumentFormat.OpenXml.Packaging.SpreadsheetDocument.Open(msModificado, true))
-                {
-                    if (doc.WorkbookPart != null)
-                    {
-                        foreach (var wsPart in doc.WorkbookPart.WorksheetParts)
-                        {
-                            var pParts = wsPart.PivotTableParts.ToList();
-                            foreach (var p in pParts)
-                            {
-                                wsPart.DeletePart(p);
-                            }
-                        }
-
-                        var pivotCaches = doc.WorkbookPart.PivotTableCacheDefinitionParts.ToList();
-                        foreach (var cache in pivotCaches)
-                        {
-                            doc.WorkbookPart.DeletePart(cache);
-                        }
-
-                        if (doc.WorkbookPart.Workbook != null)
-                        {
-                            doc.WorkbookPart.Workbook.PivotCaches?.Remove();
-                            doc.WorkbookPart.Workbook.Save();
-                        }
-                    }
-                }
-            }
-            catch
-            {
-                msModificado = new MemoryStream(fileBytes);
-            }
-
-            msModificado.Position = 0;
-            return new XLWorkbook(msModificado);
         }
 
         private static IXLTable? ObtenerTabla(IXLWorksheet ws, string nombreTabla)
@@ -147,7 +96,7 @@ namespace ApiDesposte.Controllers.Excel
                     throw new FileNotFoundException($"No se encontró el archivo Excel en la ruta: {rutaExcel}");
                 }
 
-                using var workbook = CargarWorkbookEnMemoria(rutaExcel);
+                using var workbook = LectorTablasExcel.AbrirEnMemoria(rutaExcel);
 
                 if (!workbook.Worksheets.TryGetWorksheet(HojaResumenPL, out var ws))
                 {

@@ -88,34 +88,72 @@ namespace ApiDesposte.Infraestructura.Excel
                 }
             }
 
-            tabla ??= workbook.Worksheets.SelectMany(w => w.Tables).FirstOrDefault(t => MismoNombre(t.Name, nombreTabla))
-                ?? throw new InvalidOperationException($"No se encontró la tabla '{nombreTabla}' en la hoja '{nombreHoja}'.");
+            tabla ??= workbook.Worksheets.SelectMany(w => w.Tables).FirstOrDefault(t => MismoNombre(t.Name, nombreTabla));
 
-            var headers = tabla.HeadersRow().Cells().Select(c => c.Value.ToString().Trim()).ToList();
-            var registros = new List<Dictionary<string, object?>>();
-
-            foreach (var fila in tabla.DataRange.Rows())
+            if (tabla != null)
             {
-                if (fila.IsEmpty()) continue;
+                var headers = tabla.HeadersRow().Cells().Select(c => c.Value.ToString().Trim()).ToList();
+                var registros = new List<Dictionary<string, object?>>();
 
-                var filaDict = new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
-                bool tieneDatos = false;
-
-                for (int i = 0; i < headers.Count; i++)
+                foreach (var fila in tabla.DataRange.Rows())
                 {
-                    string columna = string.IsNullOrWhiteSpace(headers[i]) ? $"Columna_{i + 1}" : headers[i];
-                    object? valor = ObtenerValorCelda(fila.Cell(i + 1));
-                    if (valor != null) tieneDatos = true;
-                    filaDict[columna] = valor;
+                    if (fila.IsEmpty()) continue;
+
+                    var filaDict = new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
+                    bool tieneDatos = false;
+
+                    for (int i = 0; i < headers.Count; i++)
+                    {
+                        string columna = string.IsNullOrWhiteSpace(headers[i]) ? $"Columna_{i + 1}" : headers[i];
+                        object? valor = ObtenerValorCelda(fila.Cell(i + 1));
+                        if (valor != null) tieneDatos = true;
+                        filaDict[columna] = valor;
+                    }
+
+                    if (tieneDatos)
+                    {
+                        registros.Add(filaDict);
+                    }
                 }
 
-                if (tieneDatos)
+                return registros;
+            }
+
+            // Fallback si no es tabla estructurada de Excel pero la hoja tiene un rango de datos
+            if (hoja != null)
+            {
+                var rango = hoja.RangeUsed();
+                if (rango != null && rango.RowCount() > 1)
                 {
-                    registros.Add(filaDict);
+                    var headers = rango.FirstRow().Cells().Select(c => c.Value.ToString().Trim()).ToList();
+                    var registros = new List<Dictionary<string, object?>>();
+
+                    foreach (var fila in rango.Rows().Skip(1))
+                    {
+                        if (fila.IsEmpty()) continue;
+
+                        var filaDict = new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
+                        bool tieneDatos = false;
+
+                        for (int i = 0; i < headers.Count; i++)
+                        {
+                            string columna = string.IsNullOrWhiteSpace(headers[i]) ? $"Columna_{i + 1}" : headers[i];
+                            object? valor = ObtenerValorCelda(fila.Cell(i + 1));
+                            if (valor != null) tieneDatos = true;
+                            filaDict[columna] = valor;
+                        }
+
+                        if (tieneDatos)
+                        {
+                            registros.Add(filaDict);
+                        }
+                    }
+
+                    return registros;
                 }
             }
 
-            return registros;
+            throw new InvalidOperationException($"No se encontró la tabla '{nombreTabla}' en la hoja '{nombreHoja}'.");
         }
 
         /// <summary>
