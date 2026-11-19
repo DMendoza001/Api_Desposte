@@ -62,6 +62,13 @@ Todo controlador en C# .NET (`ApiDesposte/Controllers/Excel/`) que lea archivos 
 - **Caché en memoria concurrente:** Para endpoints que expongan colecciones de tablas completas, usar `CacheTablasExcel` (ej. `new CacheTablasExcel(TimeSpan.FromSeconds(60))`) llamando a `Cache.Obtener(rutaExcel, MapeoTablas, forzarRecarga)`.
 - **Controladores delgados (*Thin Controllers*):** El controlador sólo debe resolver la ruta con `ObtenerRutaExcel()`, declarar el catálogo `MapeoTablas` y retornar las respuestas HTTP (`Ok`, `NotFound`, `StatusCode(500)`).
 
+### 9. Filtros de Periodo por Vista Temporal (Regla Obligatoria)
+Todo dashboard en `Docu_Paginas/` con vistas Diario / Semanal / Mensual debe seguir estrictamente lo definido en [.agents/rules/filtros-periodo-vistas.md](.agents/rules/filtros-periodo-vistas.md):
+- **Diario:** selección múltiple de semanas, por defecto las **2 últimas semanas**.
+- **Semanal:** selección múltiple de semanas, por defecto las **12 últimas semanas**.
+- **Mensual:** selección múltiple de años, por defecto el **último año**.
+- Cada vista conserva su propia selección; una nueva consulta o "Reestablecer" devuelve todas a su valor por defecto.
+
 ## Sincronización Obligatoria de Reglas (`AGENTS.md` y `CLAUDE.md`)
 
 **Regla de Mantenimiento:** Cualquier modificación, actualización, ajuste o regla nueva de desarrollo debe ser incluida obligatoriamente y de manera sincronizada tanto en `AGENTS.md` como en `CLAUDE.md` (y su especificación detallada en `.agents/rules/`). Ninguna regla debe existir en uno de los archivos sin estar reflejada en el otro.

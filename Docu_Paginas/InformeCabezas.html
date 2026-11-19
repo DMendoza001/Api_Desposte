@@ -199,6 +199,130 @@
       color: var(--pantone-yellow);
     }
 
+    /* =========================================================================
+       Barra lateral plegable
+       - Contraída: franja de iconos (60px) y el dashboard gana ancho.
+       - Al pasar el mouse se despliega SOBRE el contenido (margin-right
+         negativo), sin redimensionar gráficos ni matriz.
+       ========================================================================= */
+    .sidebar {
+      transition: width 0.22s ease, margin-right 0.22s ease, box-shadow 0.22s ease;
+    }
+
+    .sidebar-header h2,
+    .sidebar-header p,
+    .sidebar-btn .btn-info span {
+      white-space: nowrap;
+    }
+
+    .app-layout.sidebar-oculta .sidebar {
+      width: 60px;
+      overflow: hidden;
+    }
+
+    .app-layout.sidebar-oculta .sidebar-header {
+      padding: 0 8px 14px;
+    }
+
+    .app-layout.sidebar-oculta .sidebar-header h2 {
+      font-size: 0;
+      justify-content: center;
+      gap: 0;
+    }
+
+    .app-layout.sidebar-oculta .sidebar-header h2 i {
+      font-size: 0.95rem;
+    }
+
+    .app-layout.sidebar-oculta .sidebar-header p,
+    .app-layout.sidebar-oculta .sidebar-btn .btn-info span,
+    .app-layout.sidebar-oculta .sidebar-badge {
+      display: none;
+    }
+
+    .app-layout.sidebar-oculta .sidebar-btn {
+      justify-content: center;
+      padding: 9px 0;
+    }
+
+    @media screen and (min-width: 981px) and (hover: hover) {
+
+      .app-layout.sidebar-oculta .sidebar:hover,
+      .app-layout.sidebar-oculta .sidebar:has(:focus-visible) {
+        width: 180px;
+        margin-right: -120px;
+        box-shadow: 8px 0 24px rgba(0, 0, 0, 0.28);
+      }
+
+      .app-layout.sidebar-oculta .sidebar:hover .sidebar-header,
+      .app-layout.sidebar-oculta .sidebar:has(:focus-visible) .sidebar-header {
+        padding: 0 14px 14px;
+      }
+
+      .app-layout.sidebar-oculta .sidebar:hover .sidebar-header h2,
+      .app-layout.sidebar-oculta .sidebar:has(:focus-visible) .sidebar-header h2 {
+        font-size: 0.95rem;
+        justify-content: flex-start;
+        gap: 8px;
+      }
+
+      .app-layout.sidebar-oculta .sidebar:hover .sidebar-header p,
+      .app-layout.sidebar-oculta .sidebar:has(:focus-visible) .sidebar-header p {
+        display: block;
+      }
+
+      .app-layout.sidebar-oculta .sidebar:hover .sidebar-btn .btn-info span,
+      .app-layout.sidebar-oculta .sidebar:has(:focus-visible) .sidebar-btn .btn-info span {
+        display: inline;
+      }
+
+      .app-layout.sidebar-oculta .sidebar:hover .sidebar-badge,
+      .app-layout.sidebar-oculta .sidebar:has(:focus-visible) .sidebar-badge {
+        display: inline-block;
+      }
+
+      .app-layout.sidebar-oculta .sidebar:hover .sidebar-btn,
+      .app-layout.sidebar-oculta .sidebar:has(:focus-visible) .sidebar-btn {
+        justify-content: space-between;
+        padding: 9px 11px;
+      }
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .btn-toggle-sidebar {
+      flex-shrink: 0;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      border: 1px solid var(--color-primary-border);
+      background: rgba(186, 160, 99, 0.12);
+      color: var(--color-header-subtext);
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+    }
+
+    .btn-toggle-sidebar:hover {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+      color: var(--color-header-bg);
+    }
+
+    .app-layout:not(.sidebar-oculta) .btn-toggle-sidebar {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+      color: var(--color-header-bg);
+    }
+
     .main-content {
       flex: 1;
       padding: 20px 25px 40px;
@@ -1367,6 +1491,11 @@
         display: none;
       }
 
+      /* En celular la barra es horizontal: contraída se oculta por completo */
+      .app-layout.sidebar-oculta .sidebar {
+        display: none;
+      }
+
       .sidebar-menu {
         flex-direction: row;
         gap: 6px;
@@ -1547,14 +1676,14 @@
 
   <div class="app-layout">
     <!-- BARRA LATERAL REDUCIDA -->
-    <aside class="sidebar">
+    <aside class="sidebar" id="sidebarNav">
       <div class="sidebar-header">
         <h2><i class="fa-solid fa-layer-group"></i> NAVEGACIÓN</h2>
         <p>Vistas Temporales</p>
       </div>
 
       <nav class="sidebar-menu">
-        <button class="sidebar-btn" id="sideTabDiario" onclick="cambiarModoMatriz('diario')">
+        <button class="sidebar-btn" id="sideTabDiario" title="Vista Diario" onclick="cambiarModoMatriz('diario')">
           <div class="btn-info">
             <i class="fa-regular fa-calendar-days"></i>
             <span>Diario</span>
@@ -1562,7 +1691,7 @@
           <span class="sidebar-badge" id="sideBadgeDiario">0</span>
         </button>
 
-        <button class="sidebar-btn active" id="sideTabSemanal" onclick="cambiarModoMatriz('semanal')">
+        <button class="sidebar-btn active" id="sideTabSemanal" title="Vista Semanal" onclick="cambiarModoMatriz('semanal')">
           <div class="btn-info">
             <i class="fa-solid fa-calendar-week"></i>
             <span>Semanal</span>
@@ -1570,7 +1699,7 @@
           <span class="sidebar-badge" id="sideBadgeSemanal">0</span>
         </button>
 
-        <button class="sidebar-btn" id="sideTabMensual" onclick="cambiarModoMatriz('mensual')">
+        <button class="sidebar-btn" id="sideTabMensual" title="Vista Mensual" onclick="cambiarModoMatriz('mensual')">
           <div class="btn-info">
             <i class="fa-regular fa-calendar"></i>
             <span>Mensual</span>
@@ -1578,7 +1707,7 @@
           <span class="sidebar-badge" id="sideBadgeMensual">0</span>
         </button>
 
-        <button class="sidebar-btn" id="sideTabAnual" onclick="cambiarModoMatriz('anual')">
+        <button class="sidebar-btn" id="sideTabAnual" title="Vista Anual" onclick="cambiarModoMatriz('anual')">
           <div class="btn-info">
             <i class="fa-solid fa-chart-line"></i>
             <span>Anual</span>
@@ -1593,9 +1722,15 @@
       <div class="dashboard-wrapper">
         <!-- Header -->
         <header class="header-banner">
-          <div class="header-info">
-            <h1><i class="fa-solid fa-drumstick-bite me-2"></i>Control de Producción y Saldo - Cabezas de Cerdo</h1>
-            <p>Monitoreo en Unidades de Entrada (Corte Primario) vs. Saldo Pendiente sin Procesar</p>
+          <div class="header-left">
+            <button type="button" class="btn-toggle-sidebar" id="btnToggleSidebar" onclick="toggleSidebar()"
+              aria-controls="sidebarNav" aria-expanded="true" title="Contraer menú a iconos">
+              <i class="fa-solid fa-bars"></i>
+            </button>
+            <div class="header-info">
+              <h1><i class="fa-solid fa-drumstick-bite me-2"></i>Control de Producción y Saldo - Cabezas de Cerdo</h1>
+              <p>Monitoreo en Unidades de Entrada (Corte Primario) vs. Saldo Pendiente sin Procesar</p>
+            </div>
           </div>
           <div class="header-status">
             <div class="status-badge">
@@ -1877,7 +2012,28 @@
       document.getElementById('fechaInicio').value = toYMD(hace30Dias);
     }
 
+    // =========================================================================
+    // ☰ MOSTRAR / OCULTAR BARRA LATERAL (preferencia por usuario en localStorage)
+    // =========================================================================
+    const CLAVE_SIDEBAR_OCULTA = 'informeCabezas_sidebarOculta';
+
+    function aplicarEstadoSidebar(oculta) {
+      const layout = document.querySelector('.app-layout');
+      const btn = document.getElementById('btnToggleSidebar');
+      if (!layout || !btn) return;
+      layout.classList.toggle('sidebar-oculta', oculta);
+      btn.setAttribute('aria-expanded', String(!oculta));
+      btn.title = oculta ? 'Expandir menú de navegación' : 'Contraer menú a iconos';
+    }
+
+    function toggleSidebar() {
+      const oculta = !document.querySelector('.app-layout').classList.contains('sidebar-oculta');
+      aplicarEstadoSidebar(oculta);
+      try { localStorage.setItem(CLAVE_SIDEBAR_OCULTA, oculta ? '1' : '0'); } catch (e) { }
+    }
+
     window.addEventListener('DOMContentLoaded', async () => {
+      try { aplicarEstadoSidebar(localStorage.getItem(CLAVE_SIDEBAR_OCULTA) === '1'); } catch (e) { }
       inicializarFechas();
       actualizarEstadoUI('loading', 'Detectando API...');
       apiBaseActiva = await detectarServidorApi();
