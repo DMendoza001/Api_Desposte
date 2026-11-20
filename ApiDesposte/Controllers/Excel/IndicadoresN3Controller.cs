@@ -22,8 +22,9 @@ namespace ApiDesposte.Controllers.Excel
         private string ObtenerRutaExcel()
         {
             string userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            return Path.Combine(userProfile, @"OneDrive - Corporación Rico SAC\Desposte-03\PlantasCore\Indicadores\BD Indicadores N3.xlsx");
+            return Path.Combine(userProfile, @"OneDrive - Corporación Rico SAC\Desposte-03\PlantasCore\Indicadores\BD Indicadores N3.xlsm");
         }
+    
 
         /// <summary>
         /// Devuelve la tabla tblRegistro (hoja Registro) de BD Indicadores N3.xlsx tal cual está en el Excel.
