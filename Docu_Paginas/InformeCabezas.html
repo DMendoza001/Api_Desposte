@@ -107,6 +107,13 @@
       min-height: 100vh;
     }
 
+    /* responsive.css aplica `body { padding: ... !important }` (<= 1600px y
+       <= 768px). Con barra lateral el margen lo da .main-content, así que se
+       anula para que el menú quede pegado al borde y no se pierda espacio. */
+    html body {
+      padding: 0 !important;
+    }
+
     .app-layout {
       display: flex;
       min-height: 100vh;
@@ -1329,10 +1336,8 @@
 
     /* 💻 NIVEL 1: LAPTOPS (<= 1600px incluye FHD 1920 al 125% = 1536px) */
     @media screen and (max-width: 1600px) {
-      .sidebar {
-        width: 158px;
-      }
-
+      /* El ancho del sidebar NO se fija aquí: es la franja auto-plegable de 60px
+         (definida arriba); un width en este bloque la anularía en laptops. */
       .main-content {
         padding: 12px 14px 28px;
       }
@@ -1409,10 +1414,6 @@
 
     /* 📲 NIVEL 2: TABLETS HORIZONTALES (<= 980px) */
     @media screen and (max-width: 980px) {
-      .sidebar {
-        width: 70px;
-      }
-
       .sidebar-header {
         padding: 0 4px 10px;
         text-align: center;
@@ -1490,10 +1491,31 @@
         overflow-x: auto;
       }
 
+      /* Las 4 vistas caben en una fila sin barra de desplazamiento */
+      .sidebar-menu {
+        scrollbar-width: none;
+      }
+
       .sidebar-btn {
-        flex: 1 1 auto;
-        padding: 8px 10px;
-        font-size: 0.76rem;
+        flex: 1 1 0;
+        min-width: 0;
+        justify-content: center;
+        gap: 4px;
+        padding: 7px 4px;
+        font-size: 0.72rem;
+      }
+
+      .sidebar-btn .btn-info {
+        gap: 4px;
+      }
+
+      .sidebar-btn .btn-info i {
+        display: none;
+      }
+
+      .sidebar-badge {
+        padding: 1px 5px;
+        font-size: 0.64rem;
       }
 
       .sidebar-btn .btn-info span {

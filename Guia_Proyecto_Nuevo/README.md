@@ -16,6 +16,7 @@ Seguir los archivos en orden:
 | 2 | [02_Plantillas_Codigo.md](02_Plantillas_Codigo.md) | Código base: `Program.cs`, `appsettings.json`, controladores SQL y Excel, dashboard HTML |
 | 3 | [03_Reglas_Agentes.md](03_Reglas_Agentes.md) | Cómo copiar y adaptar las reglas para agentes |
 | 4 | [04_Checklist_Nuevo_Dashboard.md](04_Checklist_Nuevo_Dashboard.md) | Lista de control para cada endpoint + dashboard nuevo |
+| 5 | [05_Catalogo_Componentes.html](05_Catalogo_Componentes.html) | Catálogo visual de los componentes de los dashboards (C01–C20), para pedir cambios con precisión. Abrir en el navegador |
 
 ## Estructura final del proyecto
 

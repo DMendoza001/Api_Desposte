@@ -1,0 +1,2655 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Informe de Marinado y Congelado Directo</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+
+  <!-- SheetJS para exportar a Excel (.xlsx) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <!-- Diseño responsive compartido (laptops, tablets y celulares) -->
+  <link rel="stylesheet" href="responsive.css?v=3">
+
+  <!-- Configuración compartida de conexión a la API -->
+  <script src="config.js"></script>
+
+  <style>
+    /* =========================================================================
+       TEMA: Pantone Industrial Palette (PaletaFinanza_Industrial.json)
+       ========================================================================= */
+    :root {
+      --color-header-bg: #38353B;
+      --color-header-gradient: linear-gradient(135deg, #38353B 0%, #434B57 100%);
+      --color-header-text: #FFFFFF;
+      --color-header-subtext: #E2D5B5;
+      --color-heading: #38353B;
+      --color-text: #4A474C;
+      --color-text-muted: #787479;
+      --color-primary: #BAA063;
+      --color-secondary: #7A828E;
+      --color-accent: #BAA063;
+      --color-bg: #F2F4F8;
+      --color-surface: #FFFFFF;
+      --color-border: #E2E8F0;
+
+      /* chartColors del JSON */
+      --color-primary-soft: #C4B282;
+      --color-taupe: #A89F91;
+      --color-gray-300: #B5B2AA;
+      --color-ink-900: #434B57;
+
+      --color-primary-soft-bg: rgba(186, 160, 99, 0.16);
+      --color-primary-border: rgba(186, 160, 99, 0.45);
+      --color-secondary-soft-bg: rgba(122, 130, 142, 0.16);
+      --color-secondary-border: rgba(122, 130, 142, 0.42);
+      --color-hover-tint: rgba(186, 160, 99, 0.10);
+
+      --shadow-sm: 0 1px 3px rgba(56, 53, 59, 0.06), 0 1px 2px rgba(56, 53, 59, 0.04);
+      --shadow-lg: 0 10px 15px -3px rgba(56, 53, 59, 0.12), 0 4px 6px -2px rgba(56, 53, 59, 0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--color-bg);
+      color: var(--color-text);
+      min-height: 100vh;
+    }
+
+    /* responsive.css aplica `body { padding: ... !important }`. Con barra lateral
+       el margen lo da .main-content, así que se anula aquí. */
+    html body {
+      padding: 0 !important;
+    }
+
+    .is-hidden {
+      display: none !important;
+    }
+
+    .app-layout {
+      display: flex;
+      min-height: 100vh;
+      width: 100%;
+    }
+
+    /* =========================================================================
+       BARRA LATERAL AUTO-PLEGABLE
+       - Franja de iconos (60px); al pasar el mouse se despliega SOBRE el
+         contenido (margin-right negativo) sin redimensionar gráficos.
+       ========================================================================= */
+    .sidebar {
+      position: sticky;
+      top: 0;
+      align-self: flex-start;
+      height: 100vh;
+      width: 60px;
+      overflow: hidden;
+      background: linear-gradient(180deg, #38353B 0%, #434B57 100%);
+      color: var(--color-header-text);
+      display: flex;
+      flex-direction: column;
+      padding: 14px 0;
+      flex-shrink: 0;
+      border-radius: 0 14px 14px 0;
+      box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+      z-index: 100;
+      transition: width 0.22s ease, margin-right 0.22s ease, box-shadow 0.22s ease;
+    }
+
+    .sidebar-header {
+      padding: 0 8px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 14px;
+    }
+
+    .sidebar-header h2 {
+      font-size: 0;
+      font-weight: 800;
+      color: var(--color-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      white-space: nowrap;
+    }
+
+    .sidebar-header h2 i {
+      font-size: 0.95rem;
+    }
+
+    .sidebar-header p {
+      display: none;
+      font-size: 0.7rem;
+      color: var(--color-header-subtext);
+      margin-top: 3px;
+      white-space: nowrap;
+    }
+
+    .sidebar-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      padding: 0 8px;
+    }
+
+    .sidebar-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 9px 0;
+      border-radius: 7px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--color-gray-300);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s ease, color 0.2s ease;
+      text-align: left;
+    }
+
+    .sidebar-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #FFFFFF;
+    }
+
+    .sidebar-btn.active {
+      background: var(--color-primary);
+      color: #FFFFFF;
+      font-weight: 700;
+      box-shadow: 0 4px 12px rgba(186, 160, 99, 0.35);
+    }
+
+    .sidebar-btn .btn-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sidebar-btn .btn-info span {
+      display: none;
+      white-space: nowrap;
+    }
+
+    .sidebar-badge {
+      display: none;
+      background: rgba(0, 0, 0, 0.15);
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-size: 0.7rem;
+    }
+
+    .sidebar-btn.active .sidebar-badge {
+      background: var(--color-ink-900);
+      color: var(--color-primary);
+    }
+
+    @media screen and (min-width: 981px) and (hover: hover) {
+
+      .sidebar:hover,
+      .sidebar:has(:focus-visible) {
+        width: 180px;
+        margin-right: -120px;
+        box-shadow: 8px 0 24px rgba(0, 0, 0, 0.28);
+      }
+
+      .sidebar:hover .sidebar-header,
+      .sidebar:has(:focus-visible) .sidebar-header {
+        padding: 0 14px 14px;
+      }
+
+      .sidebar:hover .sidebar-header h2,
+      .sidebar:has(:focus-visible) .sidebar-header h2 {
+        font-size: 0.95rem;
+        justify-content: flex-start;
+        gap: 8px;
+      }
+
+      .sidebar:hover .sidebar-header p,
+      .sidebar:has(:focus-visible) .sidebar-header p {
+        display: block;
+      }
+
+      .sidebar:hover .sidebar-btn .btn-info span,
+      .sidebar:has(:focus-visible) .sidebar-btn .btn-info span {
+        display: inline;
+      }
+
+      .sidebar:hover .sidebar-badge,
+      .sidebar:has(:focus-visible) .sidebar-badge {
+        display: inline-block;
+      }
+
+      .sidebar:hover .sidebar-btn,
+      .sidebar:has(:focus-visible) .sidebar-btn {
+        justify-content: space-between;
+        padding: 9px 11px;
+      }
+    }
+
+    /* =========================================================================
+       CONTENIDO
+       ========================================================================= */
+    .main-content {
+      flex: 1;
+      padding: 20px 25px 40px;
+      overflow-x: hidden;
+      min-width: 0;
+    }
+
+    .dashboard-wrapper {
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+
+    /* Prevención de desbordamiento en hijos de CSS Grid y Flexbox */
+    .dashboard-wrapper,
+    .dashboard-wrapper>*,
+    .kpi-container>*,
+    .charts-grid>*,
+    .kpi-card,
+    .chart-card,
+    .chart-box,
+    .matrix-card {
+      min-width: 0;
+    }
+
+    .header-banner {
+      background: var(--color-header-gradient);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-left: 6px solid var(--color-primary);
+      color: var(--color-header-text);
+      padding: 20px 24px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .header-info h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--color-header-text);
+    }
+
+    .header-info p {
+      font-size: 0.85rem;
+      color: var(--color-header-subtext);
+      margin-top: 4px;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: var(--color-primary-soft-bg);
+      border: 1px solid var(--color-primary-border);
+      color: var(--color-primary);
+    }
+
+    .status-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background-color: var(--color-text-muted);
+      display: inline-block;
+    }
+
+    .status-dot.online {
+      background-color: #10B981;
+      box-shadow: 0 0 8px #10B981;
+    }
+
+    .status-dot.loading {
+      background-color: var(--color-primary);
+      animation: pulseDot 1s infinite alternate;
+    }
+
+    .status-dot.error {
+      background-color: #EF4444;
+    }
+
+    @keyframes pulseDot {
+      from {
+        transform: scale(0.85);
+        opacity: 0.6;
+      }
+
+      to {
+        transform: scale(1.2);
+        opacity: 1;
+      }
+    }
+
+    .alert-error-box {
+      background: #FEE2E2;
+      border: 1px solid #FCA5A5;
+      color: #991B1B;
+      padding: 14px 18px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 0.88rem;
+    }
+
+    .alert-error-box.show {
+      display: flex;
+    }
+
+    .btn-close-alert {
+      background: transparent;
+      border: none;
+      font-size: 1.1rem;
+      color: #991B1B;
+      cursor: pointer;
+    }
+
+    /* ---------- Panel de filtros ---------- */
+    .filter-panel {
+      background-color: var(--color-surface);
+      border: 1px solid var(--color-border);
+      padding: 18px 22px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: flex-end;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .filter-group>label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: var(--color-heading);
+    }
+
+    .filter-group>input,
+    .filter-group>select {
+      border: 1px solid var(--color-border);
+      padding: 9px 13px;
+      border-radius: 8px;
+      outline: none;
+      background: #FFFFFF;
+      color: var(--color-text);
+      font-size: 0.85rem;
+      font-weight: 500;
+      min-width: 170px;
+    }
+
+    .filter-group>input:focus,
+    .filter-group>select:focus {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px var(--color-primary-soft-bg);
+    }
+
+    .btn-action-group {
+      display: flex;
+      gap: 10px;
+      margin-left: auto;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary-action {
+      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-soft) 100%);
+      border: 1px solid rgba(186, 160, 99, 0.6);
+      color: #FFFFFF;
+      padding: 9px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      box-shadow: 0 2px 6px rgba(186, 160, 99, 0.35);
+    }
+
+    .btn-primary-action:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+
+    .btn-reset,
+    .btn-tool {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background-color: #FFFFFF;
+      color: var(--color-heading);
+      border: 1px solid var(--color-border);
+      padding: 9px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+
+    .btn-reset {
+      background-color: var(--color-bg);
+      color: var(--color-text-muted);
+    }
+
+    .btn-tool:hover,
+    .btn-reset:hover {
+      border-color: var(--color-primary);
+    }
+
+    .btn-excel-flat {
+      background: var(--color-primary-soft-bg);
+      border-color: var(--color-primary-border);
+      font-weight: 700;
+    }
+
+    .btn-excel {
+      background: var(--color-secondary-soft-bg);
+      border-color: var(--color-secondary-border);
+      font-weight: 700;
+    }
+
+    .btn-tool:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* ---------- Combo de periodos (regla de filtros por vista) ---------- */
+    .semana-combo {
+      position: relative;
+    }
+
+    .semana-combo-btn {
+      border: 1px solid var(--color-border);
+      padding: 9px 13px;
+      border-radius: 8px;
+      background: #FFFFFF;
+      color: var(--color-text);
+      font-size: 0.85rem;
+      font-weight: 600;
+      min-width: 230px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .semana-combo-btn:hover,
+    .semana-combo.abierto .semana-combo-btn {
+      border-color: var(--color-primary);
+    }
+
+    #semanaSelectedText {
+      max-width: 260px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .semana-panel {
+      display: none;
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      z-index: 200;
+      min-width: 280px;
+      background: #FFFFFF;
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      box-shadow: var(--shadow-lg);
+      padding: 8px;
+    }
+
+    .semana-combo.abierto .semana-panel {
+      display: block;
+    }
+
+    .semana-acciones {
+      display: flex;
+      gap: 6px;
+      padding: 2px 2px 8px;
+      margin-bottom: 6px;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .semana-accion {
+      flex: 1;
+      border: 1px solid var(--color-border);
+      background: var(--color-bg);
+      color: var(--color-heading);
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 5px 6px;
+      border-radius: 6px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .semana-accion:hover {
+      border-color: var(--color-primary);
+      background: var(--color-primary-soft-bg);
+    }
+
+    .semana-lista {
+      max-height: 280px;
+      overflow-y: auto;
+    }
+
+    .filter-group .semana-opcion {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      font-size: 0.82rem;
+      border-radius: 6px;
+      cursor: pointer;
+      color: var(--color-text);
+      text-transform: none;
+      letter-spacing: 0;
+      font-weight: 500;
+    }
+
+    .semana-opcion:hover {
+      background: var(--color-hover-tint);
+    }
+
+    .filter-group .semana-opcion input[type="checkbox"] {
+      width: 16px !important;
+      min-width: 16px !important;
+      max-width: 16px !important;
+      height: 16px;
+      flex: 0 0 auto !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      box-shadow: none !important;
+      accent-color: var(--color-heading);
+      cursor: pointer;
+    }
+
+    .semana-vacio {
+      padding: 8px 6px;
+      font-size: 0.78rem;
+      color: var(--color-text-muted);
+    }
+
+    /* ---------- Pestañas de análisis y selector de proceso ---------- */
+    .analisis-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .segmented {
+      display: inline-flex;
+      background: #FFFFFF;
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      padding: 4px;
+      gap: 4px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .segmented button {
+      border: none;
+      background: transparent;
+      color: var(--color-text-muted);
+      font-size: 0.84rem;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 7px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .segmented button:hover {
+      color: var(--color-heading);
+      background: var(--color-bg);
+    }
+
+    .segmented button.active {
+      background: var(--color-header-gradient);
+      color: #FFFFFF;
+    }
+
+    .segmented button .seg-code {
+      font-weight: 500;
+      opacity: 0.75;
+      margin-left: 4px;
+    }
+
+    .vista-actual {
+      font-size: 0.8rem;
+      color: var(--color-text-muted);
+    }
+
+    .vista-actual strong {
+      color: var(--color-heading);
+    }
+
+    .section-title {
+      font-size: 0.74rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-text-muted);
+      margin: 4px 0 8px 2px;
+    }
+
+    /* ---------- KPIs ---------- */
+    .kpi-container {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .kpi-card {
+      background-color: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-top: 4px solid var(--color-primary);
+      padding: 16px 20px;
+      border-radius: 10px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .kpi-card.kpi-taupe {
+      border-top-color: var(--color-taupe);
+    }
+
+    .kpi-card.kpi-dark {
+      border-top-color: var(--color-heading);
+    }
+
+    .kpi-card.kpi-slate {
+      border-top-color: var(--color-secondary);
+    }
+
+    .kpi-title {
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: var(--color-text-muted);
+      margin-bottom: 6px;
+    }
+
+    .kpi-value {
+      font-size: 1.55rem;
+      font-weight: 800;
+      color: var(--color-heading);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .kpi-sub {
+      font-size: 0.76rem;
+      color: var(--color-text);
+      margin-top: 4px;
+      font-weight: 500;
+    }
+
+    /* ---------- Gráficos ---------- */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .charts-grid .span-2 {
+      grid-column: 1 / -1;
+    }
+
+    .chart-card {
+      background-color: var(--color-surface);
+      border: 1px solid var(--color-border);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .chart-header h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--color-heading);
+    }
+
+    .badge-info {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--color-heading);
+      background: var(--color-primary-soft-bg);
+      border: 1px solid var(--color-primary-border);
+      padding: 3px 9px;
+      border-radius: 9999px;
+      white-space: nowrap;
+    }
+
+    /* responsive.css estira los hijos de .chart-header en celular */
+    .chart-header .badge-info {
+      align-self: flex-start;
+    }
+
+    .badge-info.badge-slate {
+      background: var(--color-secondary-soft-bg);
+      border-color: var(--color-secondary-border);
+    }
+
+    .chart-box {
+      position: relative;
+      width: 100%;
+      height: 320px;
+    }
+
+    .chart-box.chart-ranking {
+      height: 420px;
+    }
+
+    .chart-vacio {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      color: var(--color-text-muted);
+    }
+
+    /* ---------- Matrices ---------- */
+    .matrix-card {
+      background-color: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      margin-bottom: 20px;
+
+      --mx-nivel-bg: #F0EADD;
+      --mx-nivel-line: #DCCDA8;
+      --mx-hover-bg: #F8F6EF;
+      --mx-metric-bg: #F7F7F9;
+      --mx-ind-1: 12px;
+      --mx-ind-2: 34px;
+    }
+
+    .matrix-header-bar {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .matrix-header-bar h3 {
+      font-size: 1.02rem;
+      font-weight: 700;
+      color: var(--color-heading);
+    }
+
+    .matrix-header-bar .matrix-sub {
+      font-size: 0.78rem;
+      color: var(--color-text-muted);
+      margin-top: 2px;
+    }
+
+    .matrix-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .table-wrapper {
+      overflow: auto;
+      max-height: 560px;
+    }
+
+    .matrix-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 0.82rem;
+      color: var(--color-text);
+    }
+
+    .matrix-table th {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      white-space: nowrap;
+    }
+
+    /* Fila 1: periodos / grupos (oscura con filete dorado) */
+    .matrix-table thead tr:first-child th {
+      height: 36px;
+      background-color: var(--color-header-bg);
+      color: #FFFFFF;
+      padding: 8px 12px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      text-align: center;
+      border-bottom: 2px solid var(--color-primary);
+    }
+
+    .matrix-table thead tr:first-child th.grp-header {
+      border-left: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    /* Fila 2: métricas, fija debajo de la fila 1 */
+    .matrix-table th.metric-header {
+      top: 36px;
+      background-color: var(--mx-metric-bg);
+      color: var(--color-text-muted);
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      text-align: right;
+      padding: 6px 10px;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    /* Tabla de una sola fila de encabezado */
+    .matrix-table.una-fila thead tr th {
+      text-align: right;
+    }
+
+    /* Reparto de anchos: numéricas al contenido, la 1ª columna absorbe el resto */
+    .matrix-table th.metric-header,
+    .matrix-table td.num-col,
+    .matrix-table.una-fila th.num-head {
+      width: 1%;
+      white-space: nowrap;
+    }
+
+    .matrix-table th.col-jerarquia {
+      width: 100%;
+      min-width: 300px;
+      left: 0;
+      z-index: 12;
+      vertical-align: bottom;
+      text-align: left !important;
+      padding-left: 14px;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-header-subtext);
+    }
+
+    .matrix-table td.num-col {
+      padding: 7px 10px;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .matrix-table .grp-start {
+      border-left: 1px solid var(--color-border);
+    }
+
+    .matrix-table tbody td {
+      background-color: var(--color-surface);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .matrix-table tbody td:first-child {
+      position: sticky;
+      left: 0;
+      z-index: 2;
+      border-right: 1px solid var(--color-border);
+      white-space: nowrap;
+      padding: 7px 14px 7px 12px;
+    }
+
+    .matrix-table tbody tr:hover>td {
+      background-color: var(--mx-hover-bg);
+    }
+
+    .num-zero {
+      color: var(--color-gray-300);
+    }
+
+    .plantilla-code {
+      display: inline-block;
+      min-width: 3.4em;
+      margin-right: 8px;
+      font-family: 'Consolas', 'SFMono-Regular', monospace;
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: var(--color-text-muted);
+    }
+
+    .nivel-count {
+      font-weight: 500;
+      font-size: 0.72rem;
+      color: var(--color-text-muted);
+      margin-left: 6px;
+    }
+
+    /* Único icono permitido: control de expansión/colapso */
+    .tree-toggle-icon {
+      display: inline-block;
+      width: 14px;
+      margin-right: 6px;
+      font-size: 9px;
+      text-align: center;
+      color: var(--color-primary);
+    }
+
+    /* Matriz por periodo: Periodo › Punto de proceso › Plantilla
+       (jerarquía por fondo, peso y sangría; etiquetas planas) */
+    #tablaResumen tr.mx-periodo,
+    #tablaResumen tr.mx-punto {
+      cursor: pointer;
+    }
+
+    #tablaResumen tr.mx-periodo>td {
+      background-color: var(--mx-nivel-bg);
+      color: var(--color-heading);
+      font-weight: 700;
+      border-bottom: 1px solid var(--mx-nivel-line);
+    }
+
+    #tablaResumen tr.mx-periodo>td:first-child {
+      box-shadow: inset 3px 0 0 var(--color-primary);
+    }
+
+    #tablaResumen tr.mx-punto>td {
+      background-color: var(--color-bg);
+      color: var(--color-heading);
+      font-weight: 600;
+    }
+
+    #tablaResumen tr.mx-plantilla>td {
+      font-weight: 400;
+    }
+
+    #tablaResumen tr.mx-periodo:hover>td,
+    #tablaResumen tr.mx-punto:hover>td,
+    #tablaResumen tr.mx-plantilla:hover>td {
+      background-color: var(--mx-hover-bg);
+    }
+
+    table.matrix-table#tablaResumen tr.mx-periodo>td:first-child {
+      padding-left: var(--mx-ind-1) !important;
+    }
+
+    table.matrix-table#tablaResumen tr.mx-punto>td:first-child {
+      padding-left: var(--mx-ind-2) !important;
+    }
+
+    table.matrix-table#tablaResumen tr.mx-plantilla>td:first-child {
+      padding-left: calc(var(--mx-ind-2) * 2 - 4px) !important;
+    }
+
+    /* Fila de total general */
+    .matrix-table tfoot td {
+      position: sticky;
+      bottom: 0;
+      z-index: 3;
+      background: var(--color-header-bg);
+      color: #FFFFFF;
+      font-weight: 700;
+      padding: 9px 10px;
+      border-top: 2px solid var(--color-primary);
+      text-align: right;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .matrix-table tfoot td:first-child {
+      left: 0;
+      z-index: 4;
+      text-align: left;
+      padding-left: 14px;
+    }
+
+    .matrix-vacio {
+      padding: 28px;
+      text-align: center;
+      color: var(--color-text-muted);
+      font-size: 0.85rem;
+    }
+
+    /* ---------- Overlay y toast ---------- */
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(56, 53, 59, 0.6);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+    }
+
+    .loading-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .loading-box {
+      background: #FFFFFF;
+      padding: 28px 36px;
+      border-radius: 14px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.25);
+      text-align: center;
+      max-width: 400px;
+      color: var(--color-heading);
+    }
+
+    .loading-box p {
+      font-size: 0.85rem;
+      color: var(--color-text-muted);
+      margin-top: 4px;
+    }
+
+    .spinner {
+      width: 44px;
+      height: 44px;
+      border: 4px solid var(--color-border);
+      border-top-color: var(--color-primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 14px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .toast-notification {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--color-ink-900);
+      border: 1px solid var(--color-primary-border);
+      color: #FFFFFF;
+      padding: 12px 20px;
+      border-radius: 8px;
+      box-shadow: var(--shadow-lg);
+      font-size: 0.86rem;
+      font-weight: 500;
+      z-index: 10000;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s;
+    }
+
+    .toast-notification.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* =========================================================================
+       RESPONSIVE HÍBRIDO (autónomo por si se comparte sin responsive.css)
+       ========================================================================= */
+
+    /* LAPTOPS (<= 1600px incluye FHD 1920 al 125% = 1536px) */
+    @media screen and (max-width: 1600px) {
+      .main-content {
+        padding: 12px 14px 28px;
+      }
+
+      .header-banner {
+        padding: 14px 18px;
+        margin-bottom: 14px;
+      }
+
+      .header-info h1 {
+        font-size: 1.15rem;
+      }
+
+      .filter-panel {
+        padding: 12px 14px;
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+
+      .kpi-container {
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+
+      .kpi-card {
+        padding: 12px 16px;
+      }
+
+      .kpi-value {
+        font-size: 1.32rem;
+      }
+
+      .charts-grid {
+        gap: 14px;
+        margin-bottom: 14px;
+      }
+
+      .chart-card {
+        padding: 14px 16px;
+      }
+
+      .chart-box {
+        height: 285px !important;
+      }
+
+      .chart-box.chart-ranking {
+        height: 380px !important;
+      }
+
+      .matrix-header-bar {
+        padding: 12px 14px;
+      }
+
+      .table-wrapper {
+        max-height: 460px !important;
+      }
+
+      .matrix-table {
+        font-size: 11.5px;
+      }
+
+      .matrix-table thead th.col-jerarquia {
+        min-width: 260px !important;
+      }
+    }
+
+    /* TABLETS (<= 980px) */
+    @media screen and (max-width: 980px) {
+      .kpi-container {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      }
+
+      .charts-grid {
+        grid-template-columns: 1fr !important;
+      }
+
+      .matrix-table thead th.col-jerarquia {
+        min-width: 220px !important;
+      }
+    }
+
+    /* CELULARES (<= 768px) */
+    @media screen and (max-width: 768px) {
+      .app-layout {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        width: 100%;
+        height: auto;
+        align-self: stretch;
+        flex-direction: row;
+        align-items: center;
+        padding: 6px 8px;
+        border-radius: 0 0 12px 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+      }
+
+      .sidebar-header {
+        display: none;
+      }
+
+      .sidebar-menu {
+        flex-direction: row;
+        gap: 6px;
+        padding: 0;
+        width: 100%;
+        scrollbar-width: none;
+      }
+
+      .sidebar-btn {
+        flex: 1 1 0;
+        min-width: 0;
+        justify-content: center;
+        gap: 4px;
+        padding: 7px 4px;
+        font-size: 0.72rem;
+      }
+
+      .sidebar-btn .btn-info i {
+        display: none;
+      }
+
+      .sidebar-btn .btn-info span {
+        display: inline;
+      }
+
+      .sidebar-badge {
+        display: inline-block;
+        padding: 1px 5px;
+        font-size: 0.64rem;
+      }
+
+      .main-content {
+        padding: 10px 8px 24px;
+      }
+
+      .header-banner {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 12px 14px;
+      }
+
+      .header-info h1 {
+        font-size: 1.02rem;
+      }
+
+      .filter-panel {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .filter-group>input,
+      .filter-group>select,
+      .semana-combo-btn {
+        min-width: 0;
+        width: 100%;
+      }
+
+      .semana-panel {
+        min-width: 0;
+        width: 100%;
+      }
+
+      #semanaSelectedText {
+        max-width: 100%;
+      }
+
+      .btn-action-group {
+        margin-left: 0;
+      }
+
+      .btn-action-group>button {
+        flex: 1 1 140px;
+        justify-content: center;
+      }
+
+      .analisis-bar,
+      .segmented {
+        width: 100%;
+      }
+
+      .segmented button {
+        flex: 1 1 0;
+        padding: 8px 6px;
+        font-size: 0.78rem;
+        white-space: normal;
+      }
+
+      .kpi-container {
+        grid-template-columns: 1fr !important;
+      }
+
+      .chart-box {
+        height: 240px !important;
+      }
+
+      .chart-box.chart-ranking {
+        height: 360px !important;
+      }
+
+      .chart-header {
+        flex-wrap: wrap;
+      }
+
+      .matrix-header-bar,
+      .matrix-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .table-wrapper {
+        max-height: 70vh !important;
+      }
+
+      .matrix-card {
+        --mx-ind-1: 8px;
+        --mx-ind-2: 20px;
+      }
+
+      /* Primera columna liberada para deslizar la matriz con el dedo */
+      .matrix-table thead th.col-jerarquia,
+      .matrix-table tbody td:first-child,
+      .matrix-table tfoot td:first-child {
+        position: static !important;
+        min-width: 150px !important;
+        max-width: 210px;
+        white-space: normal;
+        word-break: break-word;
+      }
+
+      .toast-notification {
+        left: 12px;
+        right: 12px;
+        bottom: 12px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Overlay de carga -->
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-box">
+      <div class="spinner"></div>
+      <h4 id="loadingTitle">Consultando datos</h4>
+      <p id="loadingMessage">Ejecutando en SQL Server...</p>
+    </div>
+  </div>
+
+  <div class="app-layout">
+    <!-- BARRA LATERAL: VISTAS TEMPORALES -->
+    <aside class="sidebar" id="sidebarNav">
+      <div class="sidebar-header">
+        <h2><i class="fa-solid fa-layer-group"></i> NAVEGACIÓN</h2>
+        <p>Vistas Temporales</p>
+      </div>
+
+      <nav class="sidebar-menu">
+        <button class="sidebar-btn" id="sideTabDiario" title="Vista Diario" onclick="cambiarVista('diario')">
+          <div class="btn-info"><i class="fa-regular fa-calendar-days"></i><span>Diario</span></div>
+          <span class="sidebar-badge" id="badgeDiario">0</span>
+        </button>
+        <button class="sidebar-btn active" id="sideTabSemanal" title="Vista Semanal" onclick="cambiarVista('semanal')">
+          <div class="btn-info"><i class="fa-solid fa-calendar-week"></i><span>Semanal</span></div>
+          <span class="sidebar-badge" id="badgeSemanal">0</span>
+        </button>
+        <button class="sidebar-btn" id="sideTabMensual" title="Vista Mensual" onclick="cambiarVista('mensual')">
+          <div class="btn-info"><i class="fa-regular fa-calendar"></i><span>Mensual</span></div>
+          <span class="sidebar-badge" id="badgeMensual">0</span>
+        </button>
+        <button class="sidebar-btn" id="sideTabAnual" title="Vista Anual" onclick="cambiarVista('anual')">
+          <div class="btn-info"><i class="fa-solid fa-chart-line"></i><span>Anual</span></div>
+          <span class="sidebar-badge" id="badgeAnual">0</span>
+        </button>
+      </nav>
+    </aside>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="main-content">
+      <div class="dashboard-wrapper">
+
+        <header class="header-banner">
+          <div class="header-info">
+            <h1>Marinado y Congelado Directo</h1>
+            <p>Kilos procesados e inyección de marinado · 1005-Marinado · 1011-Congelado Directo</p>
+          </div>
+          <div class="status-badge">
+            <span class="status-dot" id="statusDot"></span>
+            <span id="statusText">Listo para consultar</span>
+          </div>
+        </header>
+
+        <div id="alertError" class="alert-error-box">
+          <div><i class="fa-solid fa-triangle-exclamation"></i> <strong>Atención:</strong> <span id="errorText"></span></div>
+          <button type="button" class="btn-close-alert" onclick="cerrarError()" aria-label="Cerrar">✕</button>
+        </div>
+
+        <!-- Filtros -->
+        <section class="filter-panel">
+          <div class="filter-group">
+            <label for="fechaInicio">Fecha Inicial:</label>
+            <input type="date" id="fechaInicio">
+          </div>
+          <div class="filter-group">
+            <label for="fechaFin">Fecha Final:</label>
+            <input type="date" id="fechaFin">
+          </div>
+
+          <!-- Periodo según la vista (regla 9): Diario/Semanal = semanas, Mensual = años -->
+          <div class="filter-group" id="semanasFilterGroup">
+            <label id="semanasFilterLabel">Semanas:</label>
+            <div class="semana-combo" id="semanaCombo">
+              <button type="button" class="semana-combo-btn" onclick="toggleSemanaDropdown(event)">
+                <span id="semanaSelectedText">Sin datos</span>
+                <i class="fa-solid fa-chevron-down"></i>
+              </button>
+              <div class="semana-panel" id="semanaPanel">
+                <div class="semana-acciones">
+                  <button type="button" class="semana-accion" id="btnSemanasDefecto"
+                    onclick="seleccionarPeriodosPorDefecto()">Últimas 12</button>
+                  <button type="button" class="semana-accion" onclick="seleccionarTodosPeriodos()">Todas</button>
+                </div>
+                <div class="semana-lista" id="semanaLista"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="btn-action-group">
+            <button class="btn-primary-action" id="btnConsultar" onclick="consultarReporte()">
+              <i class="fa-solid fa-magnifying-glass-chart"></i> Generar Reporte
+            </button>
+            <button class="btn-reset" onclick="resetFiltros()"><i class="fa-solid fa-rotate-left"></i> Reestablecer</button>
+            <button class="btn-tool btn-excel-flat" id="btnExportarPlana" onclick="exportarDataPlanaSQL()"
+              title="Exportar data plana tal cual viene de SQL Server" disabled>
+              <i class="fa-solid fa-file-excel"></i> Data Plana SQL (.xlsx)
+            </button>
+          </div>
+        </section>
+
+        <!-- Tipo de análisis -->
+        <div class="analisis-bar">
+          <div class="segmented" role="tablist">
+            <button type="button" id="tabGeneral" class="active" role="tab" onclick="cambiarAnalisis('general')">Análisis General</button>
+            <button type="button" id="tabPlantilla" role="tab" onclick="cambiarAnalisis('plantilla')">Detalle por Plantilla</button>
+          </div>
+          <div class="vista-actual">Vista: <strong id="vistaActualTxt">Semanal</strong> · <span id="periodoActualTxt">—</span></div>
+        </div>
+
+        <!-- =========================== ANÁLISIS GENERAL =========================== -->
+        <div id="panelGeneral">
+          <h2 class="section-title">Resumen general · participación sobre kilos iniciales</h2>
+          <section class="kpi-container">
+            <div class="kpi-card kpi-taupe">
+              <div class="kpi-title">Kilos iniciales totales</div>
+              <div class="kpi-value" id="kpiKiTotal">0 kg</div>
+              <div class="kpi-sub" id="kpiKiTotalSub">Marinado + congelado directo</div>
+            </div>
+            <div class="kpi-card kpi-dark">
+              <div class="kpi-title">Total congelado (kilos finales)</div>
+              <div class="kpi-value" id="kpiTotalCong">0 kg</div>
+              <div class="kpi-sub" id="kpiTotalCongSub">Marinado + congelado directo</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-title">Participación · Se marina</div>
+              <div class="kpi-value" id="kpiPartMar">0.00%</div>
+              <div class="kpi-sub" id="kpiPartMarSub">0 kg iniciales</div>
+            </div>
+            <div class="kpi-card kpi-slate">
+              <div class="kpi-title">Participación · Congelado sin marinar</div>
+              <div class="kpi-value" id="kpiPartCong">0.00%</div>
+              <div class="kpi-sub" id="kpiPartCongSub">0 kg iniciales</div>
+            </div>
+          </section>
+
+          <section class="charts-grid">
+            <div class="chart-card span-2">
+              <div class="chart-header">
+                <h3>Total congelado y participación</h3>
+                <span class="badge-info badge-slate">kg finales · % al pasar el cursor</span>
+              </div>
+              <div class="chart-box"><canvas id="chartTotalCong"></canvas></div>
+            </div>
+          </section>
+
+          <h2 class="section-title">Marinado (1005) y Congelado Directo (1011)</h2>
+          <section class="kpi-container">
+            <div class="kpi-card kpi-taupe">
+              <div class="kpi-title">Marinado · Kilos iniciales</div>
+              <div class="kpi-value" id="kpiKi">0 kg</div>
+              <div class="kpi-sub" id="kpiKiSub">0 und</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-title">Marinado · Kilos marinados</div>
+              <div class="kpi-value" id="kpiKf">0 kg</div>
+              <div class="kpi-sub" id="kpiKfSub">Producto final</div>
+            </div>
+            <div class="kpi-card kpi-dark">
+              <div class="kpi-title">% de inyección</div>
+              <div class="kpi-value" id="kpiPct">0.00%</div>
+              <div class="kpi-sub" id="kpiPctSub">0 kg inyectados</div>
+            </div>
+            <div class="kpi-card kpi-slate">
+              <div class="kpi-title">Congelado directo · Kilos</div>
+              <div class="kpi-value" id="kpiCong">0 kg</div>
+              <div class="kpi-sub" id="kpiCongSub">0 plantillas</div>
+            </div>
+          </section>
+
+          <section class="charts-grid">
+            <div class="chart-card span-2">
+              <div class="chart-header">
+                <h3>Marinado (1005): % de inyección</h3>
+                <span class="badge-info">Kilos Inicial, Kilos Final y Ganancia al pasar el cursor</span>
+              </div>
+              <div class="chart-box"><canvas id="chartMarPct"></canvas></div>
+            </div>
+          </section>
+
+          <section class="matrix-card">
+            <div class="matrix-header-bar">
+              <div>
+                <h3>Matriz por periodo</h3>
+                <div class="matrix-sub" id="resumenSub">Semana › Punto de proceso › Plantilla</div>
+              </div>
+              <div class="matrix-toolbar">
+                <button class="btn-tool" onclick="expandirResumen(true)">Expandir</button>
+                <button class="btn-tool" onclick="expandirResumen(false)">Colapsar</button>
+                <button class="btn-tool btn-excel" onclick="exportarResumenExcel()"><i class="fa-solid fa-table"></i> Excel (.xlsx)</button>
+              </div>
+            </div>
+            <div class="table-wrapper">
+              <table class="matrix-table una-fila" id="tablaResumen">
+                <thead></thead>
+                <tbody></tbody>
+                <tfoot></tfoot>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <!-- ========================= DETALLE POR PLANTILLA ========================= -->
+        <div id="panelPlantilla" class="is-hidden">
+          <div class="analisis-bar">
+            <div class="segmented">
+              <button type="button" id="procMarinado" class="active" onclick="cambiarProceso(1005)">Marinado<span class="seg-code">1005</span></button>
+              <button type="button" id="procCongelado" onclick="cambiarProceso(1011)">Congelado Directo<span class="seg-code">1011</span></button>
+            </div>
+          </div>
+
+          <section class="charts-grid">
+            <div class="chart-card span-2">
+              <div class="chart-header">
+                <h3 id="rankingTitulo">% de inyección por plantilla</h3>
+                <span class="badge-info" id="rankingBadge">15 plantillas con más kilos</span>
+              </div>
+              <div class="chart-box chart-ranking"><canvas id="chartRanking"></canvas></div>
+            </div>
+          </section>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <div id="toastNotification" class="toast-notification"></div>
+
+  <script>
+    // =========================================================================
+    // ⚙️ CONFIGURACIÓN DE CONEXIÓN HÍBRIDA A LA API .NET
+    // =========================================================================
+    const APP_CONFIG = {
+      servidor: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.servidor) ? GLOBAL_CONFIG.servidor : "RAEVSALL001",
+      puertos: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.puertos) ? GLOBAL_CONFIG.puertos : [8080, 5000],
+      controllerPath: "/api/Marinado",
+      timeoutMs: 120000
+    };
+
+    function generarBasesApi() {
+      if (typeof generarBasesApiGlobal === 'function') return generarBasesApiGlobal();
+      const bases = [];
+      if (window.location && window.location.origin && window.location.protocol.startsWith('http')) {
+        bases.push(window.location.origin);
+      }
+      for (const puerto of APP_CONFIG.puertos) {
+        bases.push(`http://${APP_CONFIG.servidor}:${puerto}`);
+      }
+      return bases;
+    }
+
+    let apiBaseActiva = null;
+
+    async function fetchConTimeout(url, timeoutMs = 10000) {
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        const res = await fetch(url, { signal: controller.signal });
+        clearTimeout(id);
+        return res;
+      } catch (err) {
+        clearTimeout(id);
+        throw err;
+      }
+    }
+
+    // Detección del host activo: /api/health y, si no responde, ping a la raíz '/'
+    async function detectarServidorApi() {
+      for (const base of generarBasesApi()) {
+        try {
+          const res = await fetchConTimeout(`${base}/api/health`, 3500);
+          if (res.ok) return base;
+        } catch (e) { }
+        try {
+          const pingRes = await fetchConTimeout(`${base}/`, 3500);
+          if (pingRes.ok) return base;
+        } catch (e) { }
+      }
+      return null;
+    }
+
+    function generarEndpointsApi(rutaRelativa) {
+      const endpoints = [];
+      if (apiBaseActiva) endpoints.push(`${apiBaseActiva}${rutaRelativa}`);
+      generarBasesApi().forEach(base => {
+        const ep = `${base}${rutaRelativa}`;
+        if (!endpoints.includes(ep)) endpoints.push(ep);
+      });
+      return endpoints;
+    }
+
+    // =========================================================================
+    // ESTADO
+    // =========================================================================
+    const PP_MARINADO = 1005;
+    const PP_CONGELADO = 1011;
+
+    let rawSqlData = [];    // data plana tal cual la devuelve SQL Server
+    let registros = [];     // mismos registros con la fecha como Date (para agrupar)
+    let datosVista = [];    // registros del periodo seleccionado en la vista activa
+
+    let vistaActiva = 'semanal';         // diario | semanal | mensual | anual
+    let analisisActivo = 'general';      // general | plantilla
+    let procesoDetalle = PP_MARINADO;    // 1005 | 1011
+
+    // Filtro de periodo por vista (regla 9): null = por defecto, Set vacío = todos
+    const PERIODOS_POR_DEFECTO = { diario: 2, semanal: 12, mensual: 1 };
+    const periodoSel = { diario: null, semanal: null, mensual: null };
+    let periodosDisponibles = [];        // claves de la más reciente a la más antigua
+
+    const charts = {};
+
+    const COLORES = {
+      marinadoFinal: '#BAA063',   // primary
+      marinadoFresco: '#A89F91',  // taupe (chartColors)
+      congelado: '#7A828E',       // secondary
+      tinta: '#38353B',
+      texto: '#787479',
+      grid: '#E2E8F0'
+    };
+
+    // =========================================================================
+    // UTILIDADES DE FECHA (semanas ISO-8601: lunes a domingo)
+    // =========================================================================
+    const pad = n => String(n).padStart(2, '0');
+    const ymd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    const ddmm = d => `${pad(d.getDate())}/${pad(d.getMonth() + 1)}`;
+    const MESES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    const DIAS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+
+    function semanaISO(d) {
+      const dateUtc = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+      const dia = dateUtc.getUTCDay() === 0 ? 7 : dateUtc.getUTCDay();
+      dateUtc.setUTCDate(dateUtc.getUTCDate() + 4 - dia);
+      const anio = dateUtc.getUTCFullYear();
+      const semana = Math.ceil((((dateUtc - Date.UTC(anio, 0, 1)) / 86400000) + 1) / 7);
+      return { anio, semana };
+    }
+
+    function semanaKey(d) {
+      const { anio, semana } = semanaISO(d);
+      return `${anio}-S${pad(semana)}`;
+    }
+
+    function lunesDeSemanaISO(anio, semana) {
+      const ene4 = new Date(anio, 0, 4);
+      const lunes = new Date(anio, 0, 4 - ((ene4.getDay() + 6) % 7));
+      lunes.setDate(lunes.getDate() + (semana - 1) * 7);
+      return lunes;
+    }
+
+    // "2026-S46" -> "Sem. 46 (09/11 al 15/11)"
+    function etiquetaSemana(key, incluirAnio = false) {
+      const [anio, sem] = key.split('-S').map(n => parseInt(n, 10));
+      if (!anio || !sem) return key;
+      const lunes = lunesDeSemanaISO(anio, sem);
+      const domingo = new Date(lunes);
+      domingo.setDate(lunes.getDate() + 6);
+      return `Sem. ${pad(sem)}${incluirAnio ? ' ' + anio : ''} (${ddmm(lunes)} al ${ddmm(domingo)})`;
+    }
+
+    // Clave del periodo con que se agrupa según la vista activa
+    function periodoKey(d) {
+      switch (vistaActiva) {
+        case 'diario': return ymd(d);
+        case 'semanal': return semanaKey(d);
+        case 'mensual': return `${d.getFullYear()}-${pad(d.getMonth() + 1)}`;
+        default: return String(d.getFullYear());
+      }
+    }
+
+    // Etiqueta del periodo; `corta` devuelve un arreglo (multilínea) para ejes
+    function etiquetaPeriodo(key, corta = false) {
+      if (vistaActiva === 'diario') {
+        const [y, m, dd] = key.split('-').map(Number);
+        const d = new Date(y, m - 1, dd);
+        return corta ? [`${DIAS[d.getDay()]} ${ddmm(d)}`] : `${DIAS[d.getDay()]} ${ddmm(d)}/${y}`;
+      }
+      if (vistaActiva === 'semanal') {
+        if (!corta) return etiquetaSemana(key, anioMultiple());
+        const [anio, sem] = key.split('-S').map(Number);
+        const lunes = lunesDeSemanaISO(anio, sem);
+        const domingo = new Date(lunes);
+        domingo.setDate(lunes.getDate() + 6);
+        // Eje X liviano: sólo "Sem 32"; el rango de fechas va en el tooltip
+        return `Sem ${pad(sem)}`;
+      }
+      if (vistaActiva === 'mensual') {
+        const [y, m] = key.split('-').map(Number);
+        return corta ? [`${MESES[m - 1]} ${y}`] : `${MESES[m - 1]} ${y}`;
+      }
+      return corta ? [key] : `Año ${key}`;
+    }
+
+    function anioMultiple() {
+      return new Set(datosVista.map(r => r.fecha.getFullYear())).size > 1;
+    }
+
+    function parsearFecha(valor) {
+      if (!valor) return null;
+      const [y, m, d] = String(valor).split('T')[0].split('-').map(Number);
+      if (!y || !m || !d) return null;
+      return new Date(y, m - 1, d);
+    }
+
+    // =========================================================================
+    // FORMATOS
+    // =========================================================================
+    const fmtKg = v => Number(v || 0).toLocaleString('es-PE', { maximumFractionDigits: 0 });
+    const fmtPct = v => (v === null || !isFinite(v)) ? '–' : `${v.toFixed(2)}%`;
+    const fmtEnt = v => Number(v || 0).toLocaleString('es-PE', { maximumFractionDigits: 0 });
+    const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+    function celdaNum(v, extraClase = '') {
+      const vacio = !v;
+      return `<td class="num-col ${extraClase}${vacio ? ' num-zero' : ''}">${vacio ? '–' : fmtKg(v)}</td>`;
+    }
+
+    function celdaPct(m, extraClase = '') {
+      return `<td class="num-col ${extraClase}${m.pct === null ? ' num-zero' : ''}">${fmtPct(m.pct)}</td>`;
+    }
+
+    // =========================================================================
+    // MÉTRICAS
+    //   1005 Marinado: kilos inicial (KilosInicial), kilos marinados (KilosFinal),
+    //                  % inyección = (KilosFinal - KilosInicial) / KilosInicial
+    //   1011 Congelado Directo: kilos congelados (KilosFinal)
+    // =========================================================================
+    function metricas(rows) {
+      let und = 0, ki = 0, kf = 0;
+      for (const r of rows) {
+        und += r.und;
+        ki += r.ki;
+        kf += r.kf;
+      }
+      return { und, ki, kf, iny: kf - ki, pct: ki > 0 ? ((kf - ki) / ki) * 100 : null };
+    }
+
+    const deProceso = (rows, pp) => rows.filter(r => r.pp === pp);
+
+    // =========================================================================
+    // INICIO
+    // =========================================================================
+    function inicializarFechas() {
+      const hoy = new Date();
+      const lunesActual = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+      lunesActual.setDate(lunesActual.getDate() - ((lunesActual.getDay() + 6) % 7));
+      // Cubre las 12 últimas semanas (vista Semanal) y el año en curso (vista Mensual)
+      const hace12Semanas = new Date(lunesActual);
+      hace12Semanas.setDate(lunesActual.getDate() - 7 * 11);
+      const inicioAnio = new Date(hoy.getFullYear(), 0, 1);
+      const inicio = hace12Semanas < inicioAnio ? hace12Semanas : inicioAnio;
+
+      document.getElementById('fechaInicio').value = ymd(inicio);
+      document.getElementById('fechaFin').value = ymd(hoy);
+    }
+
+    function configurarChartJs() {
+      Chart.defaults.font.family = "'Inter', sans-serif";
+      Chart.defaults.font.size = 11;
+      Chart.defaults.color = COLORES.texto;
+      Chart.defaults.plugins.tooltip.backgroundColor = '#38353B';
+      Chart.defaults.plugins.tooltip.titleColor = '#FFFFFF';
+      Chart.defaults.plugins.tooltip.bodyColor = '#E2D5B5';
+      Chart.defaults.plugins.tooltip.padding = 10;
+      Chart.defaults.plugins.tooltip.cornerRadius = 8;
+      Chart.defaults.plugins.legend.labels.usePointStyle = true;
+      Chart.defaults.plugins.legend.labels.boxWidth = 8;
+      if (typeof ChartDataLabels !== 'undefined') {
+        Chart.register(ChartDataLabels);
+        Chart.defaults.plugins.datalabels.display = false;   // cada gráfico define las suyas
+      }
+    }
+
+    // =========================================================================
+    // ETIQUETAS DE DATOS (ocultas en celular, <= 768px)
+    // =========================================================================
+    const MAX_PUNTOS_CON_ETIQUETA = 24;   // con más periodos los textos se encimarían
+
+    function mostrarEtiqueta(ctx) {
+      const v = ctx.dataset.data[ctx.dataIndex];
+      return window.innerWidth > 768 &&
+        ctx.chart.data.labels.length <= MAX_PUNTOS_CON_ETIQUETA &&
+        v !== null && v !== undefined && v !== 0;
+    }
+
+    // 120,798 -> "121k" | 8,234 -> "8.2k" | 640 -> "640"
+    function fmtCompacto(v) {
+      const a = Math.abs(v);
+      if (a >= 10000) return `${Math.round(v / 1000)}k`;
+      if (a >= 1000) return `${(v / 1000).toFixed(1)}k`;
+      return fmtKg(v);
+    }
+
+    function etiquetas(opciones = {}) {
+      return Object.assign({
+        display: mostrarEtiqueta,
+        anchor: 'end',
+        align: 'end',
+        offset: 2,
+        clamp: true,
+        color: COLORES.tinta,
+        font: { size: 9, weight: '600' },
+        formatter: v => fmtCompacto(v)
+      }, opciones);
+    }
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      if (typeof Chart !== 'undefined') configurarChartJs();
+      inicializarFechas();
+      actualizarTextosVista();
+      actualizarEstadoUI('loading', 'Detectando API...');
+      apiBaseActiva = await detectarServidorApi();
+
+      if (apiBaseActiva) {
+        await consultarReporte();
+      } else {
+        actualizarEstadoUI('error', `Sin conexión con ${APP_CONFIG.servidor}`);
+        mostrarError(`No se pudo conectar a ${APP_CONFIG.servidor} en puertos ${APP_CONFIG.puertos.join('/')}. Verifica que la API .NET esté activa.`);
+      }
+    });
+
+    // =========================================================================
+    // CONSULTA A LA API
+    // =========================================================================
+    async function consultarReporte() {
+      const fIni = document.getElementById('fechaInicio').value;
+      const fFin = document.getElementById('fechaFin').value;
+      if (!fIni || !fFin || fIni > fFin) {
+        mostrarError('Rango de fechas inválido: la fecha inicial debe ser menor o igual a la final.');
+        return;
+      }
+
+      cerrarError();
+      const btn = document.getElementById('btnConsultar');
+      btn.disabled = true;
+      actualizarEstadoUI('loading', 'Consultando...');
+      mostrarCargando(true, 'Consultando Marinado', `Periodo ${fIni} al ${fFin}...`);
+
+      const query = `?fechaInicio=${encodeURIComponent(fIni)}&fechaFin=${encodeURIComponent(fFin)}`;
+      let ultimoError = '';
+      let exito = false;
+
+      for (const url of generarEndpointsApi(`${APP_CONFIG.controllerPath}${query}`)) {
+        try {
+          const res = await fetchConTimeout(url, APP_CONFIG.timeoutMs);
+          if (!res.ok) {
+            const cuerpo = await res.json().catch(() => ({}));
+            ultimoError = cuerpo.error || `HTTP ${res.status}`;
+            continue;
+          }
+          const json = await res.json();
+          const items = Array.isArray(json) ? json : (json.datos || []);
+          rawSqlData = items;
+          registros = items.map(mapearRegistro).filter(r => r.fecha);
+          apiBaseActiva = new URL(url).origin;
+          exito = true;
+          break;
+        } catch (e) {
+          ultimoError = e.name === 'AbortError' ? 'Tiempo de espera agotado' : e.message;
+        }
+      }
+
+      mostrarCargando(false);
+      btn.disabled = false;
+
+      if (!exito) {
+        actualizarEstadoUI('error', 'Error en la consulta');
+        mostrarError(`No se pudo obtener el informe (${ultimoError || 'sin respuesta'}).`);
+        return;
+      }
+
+      // Nueva consulta: todas las vistas vuelven a su periodo por defecto
+      periodoSel.diario = periodoSel.semanal = periodoSel.mensual = null;
+      document.getElementById('btnExportarPlana').disabled = rawSqlData.length === 0;
+      actualizarEstadoUI('online', `En línea · ${registros.length.toLocaleString('es-PE')} registros`);
+      refrescarVista();
+      mostrarToast(`${registros.length.toLocaleString('es-PE')} registros cargados`);
+    }
+
+    // Copia de trabajo con tipos numéricos y la fecha como Date (los nombres de
+    // columna de SQL se leen tal cual vienen: FechaOrden, PuntoProceso, ...)
+    function mapearRegistro(d) {
+      return {
+        fecha: parsearFecha(d.FechaOrden),
+        pp: Number(d.PuntoProceso),
+        plantilla: Number(d.plantilla),
+        nPuntoProceso: String(d.NPuntoProceso || '').trim(),
+        nPlantilla: String(d.NPlantilla || 'Sin plantilla').trim(),
+        codigo1: String(d.Codigo1 || '').trim(),
+        nombre1: String(d.Nombre1 || '').trim(),
+        codigo2: String(d.Codigo2 || '').trim(),
+        nombre2: String(d.Nombre2 || '').trim(),
+        und: Number(d.Unidades) || 0,
+        ki: Number(d.KilosInicial) || 0,
+        kf: Number(d.KilosFinal) || 0
+      };
+    }
+
+    // =========================================================================
+    // VISTAS (barra lateral) Y FILTRO DE PERIODO (regla 9)
+    // =========================================================================
+    function cambiarVista(vista) {
+      vistaActiva = vista;
+      document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(`sideTab${vista.charAt(0).toUpperCase()}${vista.slice(1)}`).classList.add('active');
+      refrescarVista();
+    }
+
+    function vistaUsaFiltro() {
+      return vistaActiva !== 'anual';
+    }
+
+    function filtroEsPorAnio() {
+      return vistaActiva === 'mensual';
+    }
+
+    function claveFiltro(d) {
+      return filtroEsPorAnio() ? String(d.getFullYear()) : semanaKey(d);
+    }
+
+    function refrescarVista() {
+      cerrarSemanaDropdown();
+      document.getElementById('semanasFilterGroup').classList.toggle('is-hidden', !vistaUsaFiltro());
+      document.getElementById('semanasFilterLabel').textContent = filtroEsPorAnio() ? 'Años:' : 'Semanas:';
+      reconstruirOpcionesPeriodo();
+      aplicarFiltroPeriodoYRender();
+      actualizarBadges();
+    }
+
+    function periodosPorDefecto() {
+      return new Set(periodosDisponibles.slice(0, PERIODOS_POR_DEFECTO[vistaActiva] || 0));
+    }
+
+    function reconstruirOpcionesPeriodo() {
+      if (!vistaUsaFiltro()) return;
+      periodosDisponibles = [...new Set(registros.map(r => claveFiltro(r.fecha)))].sort().reverse();
+
+      let sel = periodoSel[vistaActiva];
+      if (sel === null) {
+        sel = periodosPorDefecto();
+      } else if (sel.size > 0) {
+        sel = new Set([...sel].filter(p => periodosDisponibles.includes(p)));
+        if (sel.size === 0) sel = periodosPorDefecto();
+      }
+      periodoSel[vistaActiva] = sel;
+      renderListaPeriodos();
+    }
+
+    function etiquetaOpcion(key, variosAnios) {
+      return filtroEsPorAnio() ? `Año ${key}` : etiquetaSemana(key, variosAnios);
+    }
+
+    function renderListaPeriodos() {
+      const lista = document.getElementById('semanaLista');
+      const n = PERIODOS_POR_DEFECTO[vistaActiva] || 0;
+      document.getElementById('btnSemanasDefecto').textContent = filtroEsPorAnio() ? 'Último año' : `Últimas ${n}`;
+
+      if (periodosDisponibles.length === 0) {
+        lista.innerHTML = `<div class="semana-vacio">Sin ${filtroEsPorAnio() ? 'años' : 'semanas'} con datos en el rango consultado.</div>`;
+        actualizarTextoPeriodo();
+        return;
+      }
+
+      const sel = periodoSel[vistaActiva] || new Set();
+      const variosAnios = new Set(periodosDisponibles.map(p => p.split('-S')[0])).size > 1;
+      lista.innerHTML = periodosDisponibles.map(p => `
+        <label class="semana-opcion">
+          <input type="checkbox" value="${p}" ${(sel.size === 0 || sel.has(p)) ? 'checked' : ''} onchange="onPeriodoChange(this)">
+          <span>${etiquetaOpcion(p, variosAnios)}</span>
+        </label>`).join('');
+      actualizarTextoPeriodo();
+    }
+
+    function actualizarTextoPeriodo() {
+      const txt = document.getElementById('semanaSelectedText');
+      const sel = periodoSel[vistaActiva] || new Set();
+      const total = periodosDisponibles.length;
+      const defecto = periodosPorDefecto();
+      const esDefecto = sel.size === defecto.size && [...defecto].every(p => sel.has(p));
+
+      if (total === 0) txt.textContent = 'Sin datos';
+      else if (filtroEsPorAnio()) {
+        if (sel.size === 0 || sel.size === total) txt.textContent = total === 1 ? `Año ${periodosDisponibles[0]}` : `Todos los años (${total})`;
+        else if (esDefecto) txt.textContent = `Último año (${[...sel][0]})`;
+        else if (sel.size === 1) txt.textContent = `Año ${[...sel][0]}`;
+        else txt.textContent = `${sel.size} años seleccionados`;
+      }
+      else if (sel.size === 0 || sel.size === total) txt.textContent = `Todas las semanas (${total})`;
+      else if (esDefecto) txt.textContent = `Últimas ${sel.size} semanas`;
+      else if (sel.size === 1) txt.textContent = etiquetaSemana([...sel][0]);
+      else txt.textContent = `${sel.size} semanas seleccionadas`;
+    }
+
+    function onPeriodoChange(checkbox) {
+      let sel = periodoSel[vistaActiva];
+      if (!sel || sel.size === 0) sel = new Set(periodosDisponibles);   // "todas" = Set vacío
+      if (checkbox.checked) sel.add(checkbox.value);
+      else sel.delete(checkbox.value);
+
+      // Sin ninguno marcado se vuelve a "todos" para no dejar el informe vacío
+      periodoSel[vistaActiva] = (sel.size === periodosDisponibles.length) ? new Set() : sel;
+      if (sel.size === 0) renderListaPeriodos();
+      actualizarTextoPeriodo();
+      aplicarFiltroPeriodoYRender();
+    }
+
+    function seleccionarPeriodosPorDefecto() {
+      periodoSel[vistaActiva] = periodosPorDefecto();
+      renderListaPeriodos();
+      aplicarFiltroPeriodoYRender();
+    }
+
+    function seleccionarTodosPeriodos() {
+      periodoSel[vistaActiva] = new Set();
+      renderListaPeriodos();
+      aplicarFiltroPeriodoYRender();
+    }
+
+    function toggleSemanaDropdown(e) {
+      if (e) e.stopPropagation();
+      document.getElementById('semanaCombo').classList.toggle('abierto');
+    }
+
+    function cerrarSemanaDropdown() {
+      document.getElementById('semanaCombo').classList.remove('abierto');
+    }
+
+    document.addEventListener('click', e => {
+      const combo = document.getElementById('semanaCombo');
+      if (combo && !combo.contains(e.target)) combo.classList.remove('abierto');
+    });
+
+    function aplicarFiltroPeriodoYRender() {
+      const sel = vistaUsaFiltro() ? periodoSel[vistaActiva] : null;
+      datosVista = (sel && sel.size > 0) ? registros.filter(r => sel.has(claveFiltro(r.fecha))) : registros;
+      actualizarTextosVista();
+      renderAnalisisActivo();
+    }
+
+    function actualizarBadges() {
+      const contar = fn => new Set(registros.map(r => fn(r.fecha))).size;
+      document.getElementById('badgeDiario').textContent = contar(ymd);
+      document.getElementById('badgeSemanal').textContent = contar(semanaKey);
+      document.getElementById('badgeMensual').textContent = contar(d => `${d.getFullYear()}-${d.getMonth()}`);
+      document.getElementById('badgeAnual').textContent = contar(d => d.getFullYear());
+    }
+
+    function actualizarTextosVista() {
+      const nombres = { diario: 'Diario', semanal: 'Semanal', mensual: 'Mensual', anual: 'Anual' };
+      document.getElementById('vistaActualTxt').textContent = nombres[vistaActiva];
+      const n = new Set(datosVista.map(r => periodoKey(r.fecha))).size;
+      const unidad = { diario: 'día', semanal: 'semana', mensual: 'mes', anual: 'año' }[vistaActiva];
+      const plural = { día: 'días', semana: 'semanas', mes: 'meses', año: 'años' }[unidad];
+      document.getElementById('periodoActualTxt').textContent = n ? `${n} ${n === 1 ? unidad : plural} con datos` : 'Sin datos';
+    }
+
+    // =========================================================================
+    // PESTAÑAS: ANÁLISIS GENERAL / DETALLE POR PLANTILLA
+    // =========================================================================
+    function cambiarAnalisis(tipo) {
+      analisisActivo = tipo;
+      document.getElementById('tabGeneral').classList.toggle('active', tipo === 'general');
+      document.getElementById('tabPlantilla').classList.toggle('active', tipo === 'plantilla');
+      document.getElementById('panelGeneral').classList.toggle('is-hidden', tipo !== 'general');
+      document.getElementById('panelPlantilla').classList.toggle('is-hidden', tipo !== 'plantilla');
+      renderAnalisisActivo();
+    }
+
+    function cambiarProceso(pp) {
+      procesoDetalle = pp;
+      document.getElementById('procMarinado').classList.toggle('active', pp === PP_MARINADO);
+      document.getElementById('procCongelado').classList.toggle('active', pp === PP_CONGELADO);
+      renderRanking();
+    }
+
+    function renderAnalisisActivo() {
+      if (analisisActivo === 'general') renderGeneral();
+      else renderDetalle();
+    }
+
+    // =========================================================================
+    // GRÁFICOS (un solo eje por gráfico)
+    // =========================================================================
+    function opcionesBase(formatoY, mostrarLeyenda) {
+      return {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { display: mostrarLeyenda, position: 'top', align: window.innerWidth <= 768 ? 'start' : 'end' },
+          tooltip: { callbacks: { label: c => `${c.dataset.label}: ${formatoY(c.parsed.y ?? c.parsed.x)}` } }
+        },
+        scales: {
+          x: { grid: { display: false }, ticks: { maxRotation: 0, autoSkip: true } },
+          y: { grid: { color: COLORES.grid }, border: { display: false }, grace: '10%', ticks: { callback: v => formatoY(v) } }
+        }
+      };
+    }
+
+    function dibujarGrafico(id, config) {
+      if (charts[id]) charts[id].destroy();
+      const canvas = document.getElementById(id);
+      const caja = canvas.parentElement;
+      caja.querySelector('.chart-vacio')?.remove();
+      const sinDatos = !config.data.labels.length;
+      if (sinDatos) {
+        caja.insertAdjacentHTML('beforeend', '<div class="chart-vacio">Sin datos para el periodo seleccionado</div>');
+      }
+      charts[id] = new Chart(canvas.getContext('2d'), config);
+    }
+
+    const barra = (label, data, color) => ({
+      label, data,
+      backgroundColor: color,
+      hoverBackgroundColor: COLORES.tinta,
+      borderRadius: 4,
+      borderSkipped: 'start',
+      maxBarThickness: 36,
+      categoryPercentage: 0.72,
+      barPercentage: 0.9
+    });
+
+    // =========================================================================
+    // ANÁLISIS GENERAL
+    // =========================================================================
+    function agruparPorPeriodo(rows) {
+      const mapa = new Map();
+      for (const r of rows) {
+        const k = periodoKey(r.fecha);
+        if (!mapa.has(k)) mapa.set(k, []);
+        mapa.get(k).push(r);
+      }
+      return new Map([...mapa.entries()].sort((a, b) => a[0].localeCompare(b[0])));
+    }
+
+    function renderGeneral() {
+      const mar = deProceso(datosVista, PP_MARINADO);
+      const cong = deProceso(datosVista, PP_CONGELADO);
+      const mMar = metricas(mar);
+      const mCong = metricas(cong);
+
+      // Resumen general: total congelado = suma de KilosFinal (1005 + 1011) y
+      // participación sobre kilos iniciales (qué se marina / qué se congela sin marinar)
+      const part = participacion(mMar, mCong);
+      document.getElementById('kpiKiTotal').textContent = `${fmtKg(part.kiTotal)} kg`;
+      document.getElementById('kpiTotalCong').textContent = `${fmtKg(mMar.kf + mCong.kf)} kg`;
+      document.getElementById('kpiTotalCongSub').textContent = `Marinado ${fmtKg(mMar.kf)} · Directo ${fmtKg(mCong.kf)} kg`;
+      document.getElementById('kpiPartMar').textContent = fmtPct(part.pctMar);
+      document.getElementById('kpiPartMarSub').textContent = `${fmtKg(mMar.ki)} kg iniciales se marinan`;
+      document.getElementById('kpiPartCong').textContent = fmtPct(part.pctCong);
+      document.getElementById('kpiPartCongSub').textContent = `${fmtKg(mCong.ki)} kg iniciales sin marinar`;
+
+      // KPIs por proceso
+      document.getElementById('kpiKi').textContent = `${fmtKg(mMar.ki)} kg`;
+      document.getElementById('kpiKiSub').textContent = `${fmtEnt(mMar.und)} und procesadas`;
+      document.getElementById('kpiKf').textContent = `${fmtKg(mMar.kf)} kg`;
+      document.getElementById('kpiKfSub').textContent = `${new Set(mar.map(r => r.plantilla)).size} plantillas de marinado`;
+      document.getElementById('kpiPct').textContent = fmtPct(mMar.pct);
+      document.getElementById('kpiPctSub').textContent = `${fmtKg(mMar.iny)} kg inyectados`;
+      document.getElementById('kpiCong').textContent = `${fmtKg(mCong.kf)} kg`;
+      document.getElementById('kpiCongSub').textContent = `${new Set(cong.map(r => r.plantilla)).size} plantillas de congelado`;
+
+      // Series por periodo (mismo eje de periodos para ambos procesos)
+      const grupos = agruparPorPeriodo(datosVista);
+      const claves = [...grupos.keys()];
+      const ejes = claves.map(k => etiquetaPeriodo(k, true));
+      const porPeriodo = claves.map(k => ({
+        mar: metricas(deProceso(grupos.get(k), PP_MARINADO)),
+        cong: metricas(deProceso(grupos.get(k), PP_CONGELADO))
+      }));
+
+      const fmtKgEje = v => `${fmtKg(v)} kg`;
+      // Título del tooltip: periodo completo, p. ej. "Sem. 46 (09/11 al 15/11)"
+      const tituloPeriodo = items => items.length ? etiquetaPeriodo(claves[items[0].dataIndex]) : '';
+
+      // --- Total congelado (KilosFinal 1005 + 1011) y participación sobre kilos
+      //     iniciales. Las barras muestran kilos; los % sólo en el tooltip. ---
+      const optTotal = opcionesBase(fmtKgEje, true);
+      optTotal.scales.x.stacked = true;
+      optTotal.scales.y.stacked = true;
+      optTotal.plugins.tooltip.callbacks.title = tituloPeriodo;
+      // Tooltip simple: sólo el % de participación de cada proceso
+      optTotal.plugins.tooltip.callbacks.label = c => {
+        const p = porPeriodo[c.dataIndex];
+        const part = participacion(p.mar, p.cong);
+        return c.datasetIndex === 0
+          ? `Se marina: ${fmtPct(part.pctMar)}`
+          : `Sin marinar: ${fmtPct(part.pctCong)}`;
+      };
+      dibujarGrafico('chartTotalCong', {
+        type: 'bar',
+        data: {
+          labels: ejes,
+          datasets: [
+            { ...barra('Marinado (1005)', porPeriodo.map(p => round2(p.mar.kf)), COLORES.marinadoFinal), borderSkipped: false, borderRadius: 0, datalabels: { color: COLORES.tinta } },
+            { ...barra('Congelado directo (1011)', porPeriodo.map(p => round2(p.cong.kf)), COLORES.congelado), borderRadius: { topLeft: 4, topRight: 4 }, borderSkipped: false, datalabels: { color: '#FFFFFF' } }
+          ]
+        },
+        options: {
+          ...optTotal,
+          plugins: {
+            ...optTotal.plugins,
+            datalabels: etiquetas({
+              anchor: 'center', align: 'center', offset: 0,
+              // Sin etiqueta en segmentos muy delgados para que el texto no se salga
+              display: ctx => {
+                if (!mostrarEtiqueta(ctx)) return false;
+                const max = Math.max(...porPeriodo.map(p => p.mar.kf + p.cong.kf));
+                return ctx.dataset.data[ctx.dataIndex] >= max * 0.08;
+              }
+            })
+          }
+        }
+      });
+
+      // --- Marinado: % de inyección (línea) con el detalle en kilos en el tooltip ---
+      const optPct = opcionesBase(v => `${Number(v).toFixed(2)}%`, false);
+      optPct.plugins.tooltip.callbacks.title = tituloPeriodo;
+      optPct.plugins.tooltip.callbacks.label = c => {
+        const m = porPeriodo[c.dataIndex].mar;
+        return [
+          `% de inyección: ${fmtPct(m.pct)}`,
+          `Kilos Inicial: ${fmtKg(m.ki)} kg`,
+          `Kilos Final: ${fmtKg(m.kf)} kg`,
+          `Ganancia: ${fmtKg(m.iny)} kg`
+        ];
+      };
+      optPct.plugins.datalabels = etiquetas({ align: 'top', offset: 4, formatter: v => `${Number(v).toFixed(1)}%` });
+      optPct.layout = { padding: { left: 12, right: 18 } };   // que no se corten las etiquetas de los extremos
+      dibujarGrafico('chartMarPct', {
+        type: 'line',
+        data: {
+          labels: ejes,
+          datasets: [{
+            label: '% de inyección',
+            data: porPeriodo.map(p => p.mar.pct === null ? null : round2(p.mar.pct)),
+            borderColor: COLORES.marinadoFinal,
+            backgroundColor: COLORES.marinadoFinal,
+            borderWidth: 2,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            pointBorderColor: '#FFFFFF',
+            pointBorderWidth: 2,
+            tension: 0.25,
+            spanGaps: true
+          }]
+        },
+        options: optPct
+      });
+
+      renderMatrizResumen();
+    }
+
+    const round2 = v => Math.round(v * 100) / 100;
+
+    // Participación sobre kilos iniciales: Marinado (1005) vs. congelado sin marinar (1011)
+    function participacion(mMar, mCong) {
+      const kiTotal = mMar.ki + mCong.ki;
+      return {
+        kiTotal,
+        pctMar: kiTotal > 0 ? (mMar.ki / kiTotal) * 100 : null,
+        pctCong: kiTotal > 0 ? (mCong.ki / kiTotal) * 100 : null
+      };
+    }
+
+    // =========================================================================
+    // MATRIZ POR PERIODO
+    //   Filas:    Periodo (Semana en la vista Semanal) › PuntoProceso - NPuntoProceso › Plantilla
+    //   Columnas: Unidades, KilosInicial, KilosFinal, Ganancia y % de Inyección
+    //   Por defecto: periodos abiertos (muestran sus puntos) y plantillas cerradas.
+    // =========================================================================
+    const resumenPeriodosCerrados = new Set();
+    const resumenPuntosAbiertos = new Set();
+
+    // Periodo -> punto de proceso -> plantilla (orden: periodo más reciente primero)
+    function construirMatrizResumen() {
+      const periodos = new Map();
+      for (const r of datosVista) {
+        const kPer = periodoKey(r.fecha);
+        if (!periodos.has(kPer)) periodos.set(kPer, { key: kPer, rows: [], puntos: new Map() });
+        const per = periodos.get(kPer);
+        per.rows.push(r);
+
+        if (!per.puntos.has(r.pp)) per.puntos.set(r.pp, { pp: r.pp, nombre: r.nPuntoProceso, rows: [], plantillas: new Map() });
+        const pun = per.puntos.get(r.pp);
+        pun.rows.push(r);
+
+        if (!pun.plantillas.has(r.plantilla)) pun.plantillas.set(r.plantilla, { id: r.plantilla, nombre: r.nPlantilla, rows: [] });
+        pun.plantillas.get(r.plantilla).rows.push(r);
+      }
+      return [...periodos.values()].sort((a, b) => b.key.localeCompare(a.key));
+    }
+
+    // mPct: métricas con las que se calcula el % de inyección de la fila.
+    // En la fila de periodo es sólo Marinado (1005), para que se vea aun colapsada;
+    // no se usa el % total de ambos procesos.
+    function celdasResumen(m, mPct = m) {
+      return `${celdaNum(m.und)}${celdaNum(m.ki)}${celdaNum(m.kf)}${celdaNum(m.iny)}${celdaPct(mPct)}`;
+    }
+
+    function renderMatrizResumen() {
+      const tabla = document.getElementById('tablaResumen');
+      const nivel1 = { diario: 'Día', semanal: 'Semana', mensual: 'Mes', anual: 'Año' }[vistaActiva];
+      document.getElementById('resumenSub').textContent = `${nivel1} › Punto de proceso › Plantilla`;
+
+      tabla.querySelector('thead').innerHTML = `
+        <tr>
+          <th class="col-jerarquia">${nivel1} / Punto de proceso / Plantilla</th>
+          <th class="num-head">Unidades</th>
+          <th class="num-head">Kilos Inicial</th>
+          <th class="num-head">Kilos Final</th>
+          <th class="num-head">Ganancia</th>
+          <th class="num-head" title="En la fila de cada periodo: sólo Marinado (1005)">% Inyección</th>
+        </tr>`;
+
+      const tbody = tabla.querySelector('tbody');
+      const tfoot = tabla.querySelector('tfoot');
+      const periodos = construirMatrizResumen();
+      if (!periodos.length) {
+        tbody.innerHTML = `<tr><td colspan="6" class="matrix-vacio">Sin datos para el periodo seleccionado.</td></tr>`;
+        tfoot.innerHTML = '';
+        return;
+      }
+
+      let html = '';
+      for (const per of periodos) {
+        const perAbierto = !resumenPeriodosCerrados.has(per.key);
+        html += `
+          <tr class="mx-periodo" onclick="toggleResumenPeriodo('${per.key}')">
+            <td><span class="tree-toggle-icon">${perAbierto ? '▼' : '▶'}</span>${esc(etiquetaPeriodo(per.key))}</td>
+            ${celdasResumen(metricas(per.rows), metricas(per.puntos.get(PP_MARINADO)?.rows || []))}
+          </tr>`;
+        if (!perAbierto) continue;
+
+        for (const pun of [...per.puntos.values()].sort((a, b) => a.pp - b.pp)) {
+          const kPun = `${per.key}|${pun.pp}`;
+          const punAbierto = resumenPuntosAbiertos.has(kPun);
+          html += `
+            <tr class="mx-punto" onclick="toggleResumenPunto('${kPun}')">
+              <td><span class="tree-toggle-icon">${punAbierto ? '▼' : '▶'}</span>${pun.pp} - ${esc(pun.nombre)}<span class="nivel-count">(${pun.plantillas.size})</span></td>
+              ${celdasResumen(metricas(pun.rows))}
+            </tr>`;
+          if (!punAbierto) continue;
+
+          [...pun.plantillas.values()]
+            .map(pl => ({ ...pl, m: metricas(pl.rows) }))
+            .sort((a, b) => b.m.kf - a.m.kf)
+            .forEach(pl => {
+              html += `
+                <tr class="mx-plantilla">
+                  <td><span class="plantilla-code">${pl.id}</span>${esc(pl.nombre)}</td>
+                  ${celdasResumen(pl.m)}
+                </tr>`;
+            });
+        }
+      }
+      tbody.innerHTML = html;
+
+      const t = metricas(datosVista);
+      tfoot.innerHTML = `
+        <tr>
+          <td>Total general</td>
+          <td>${fmtEnt(t.und)}</td>
+          <td>${fmtKg(t.ki)}</td>
+          <td>${fmtKg(t.kf)}</td>
+          <td>${fmtKg(t.iny)}</td>
+          <td></td>
+        </tr>`;
+    }
+
+    function toggleResumenPeriodo(key) {
+      if (resumenPeriodosCerrados.has(key)) resumenPeriodosCerrados.delete(key);
+      else resumenPeriodosCerrados.add(key);
+      renderMatrizResumen();
+    }
+
+    function toggleResumenPunto(key) {
+      if (resumenPuntosAbiertos.has(key)) resumenPuntosAbiertos.delete(key);
+      else resumenPuntosAbiertos.add(key);
+      renderMatrizResumen();
+    }
+
+    function expandirResumen(expandir) {
+      resumenPeriodosCerrados.clear();
+      resumenPuntosAbiertos.clear();
+      for (const per of construirMatrizResumen()) {
+        if (expandir) per.puntos.forEach(p => resumenPuntosAbiertos.add(`${per.key}|${p.pp}`));
+        else resumenPeriodosCerrados.add(per.key);
+      }
+      renderMatrizResumen();
+    }
+
+    // =========================================================================
+    // DETALLE POR PLANTILLA (sólo el gráfico; la matriz está en el Análisis General)
+    // =========================================================================
+    function filasDetalle() {
+      return datosVista.filter(r => r.pp === procesoDetalle);
+    }
+
+    function renderDetalle() {
+      renderRanking();
+    }
+
+    function agruparPorPlantilla(rows) {
+      const plantillas = new Map();
+      for (const r of rows) {
+        if (!plantillas.has(r.plantilla)) plantillas.set(r.plantilla, { id: r.plantilla, nombre: r.nPlantilla, rows: [] });
+        plantillas.get(r.plantilla).rows.push(r);
+      }
+      return plantillas;
+    }
+
+    function renderRanking() {
+      const esMarinado = procesoDetalle === PP_MARINADO;
+      const TOP = 15;
+      const lista = [...agruparPorPlantilla(filasDetalle()).values()]
+        .map(p => ({ nombre: p.nombre, m: metricas(p.rows) }))
+        .sort((a, b) => (esMarinado ? b.m.ki - a.m.ki : b.m.kf - a.m.kf))
+        .slice(0, TOP);
+
+      if (esMarinado) lista.sort((a, b) => (b.m.pct ?? -Infinity) - (a.m.pct ?? -Infinity));
+
+      document.getElementById('rankingTitulo').textContent = esMarinado
+        ? 'Marinado (1005): % de inyección por plantilla'
+        : 'Congelado Directo (1011): kilos congelados por plantilla';
+      const badge = document.getElementById('rankingBadge');
+      const recortado = agruparPorPlantilla(filasDetalle()).size > TOP;
+      badge.textContent = !recortado
+        ? `${lista.length} ${lista.length === 1 ? 'plantilla' : 'plantillas'}`
+        : (esMarinado ? `${TOP} plantillas con más kilos` : `Top ${TOP} por kilos`);
+      badge.classList.toggle('badge-slate', !esMarinado);
+
+      const formato = esMarinado ? (v => `${Number(v).toFixed(2)}%`) : (v => `${fmtKg(v)} kg`);
+      const opciones = opcionesBase(formato, false);
+      opciones.indexAxis = 'y';
+      opciones.interaction = { mode: 'nearest', axis: 'y', intersect: false };
+      opciones.scales = {
+        x: { grid: { color: COLORES.grid }, border: { display: false }, grace: '10%', ticks: { callback: v => formato(v) } },
+        y: { grid: { display: false }, ticks: { autoSkip: false, callback: function (v) { const t = this.getLabelForValue(v); return t.length > 34 ? t.slice(0, 33) + '…' : t; } } }
+      };
+      opciones.plugins.tooltip.callbacks = {
+        label: c => {
+          const m = lista[c.dataIndex].m;
+          return esMarinado
+            ? [`% inyección: ${fmtPct(m.pct)}`, `Kilos inicial: ${fmtKg(m.ki)} kg`, `Kilos marinados: ${fmtKg(m.kf)} kg`]
+            : [`Kilos congelados: ${fmtKg(m.kf)} kg`];
+        }
+      };
+      opciones.plugins.datalabels = etiquetas({
+        formatter: v => esMarinado ? `${Number(v).toFixed(2)}%` : `${fmtCompacto(v)} kg`
+      });
+
+      dibujarGrafico('chartRanking', {
+        type: 'bar',
+        data: {
+          labels: lista.map(p => p.nombre),
+          datasets: [{
+            label: esMarinado ? '% de inyección' : 'Kilos congelados',
+            data: lista.map(p => round2(esMarinado ? (p.m.pct ?? 0) : p.m.kf)),
+            backgroundColor: esMarinado ? COLORES.marinadoFinal : COLORES.congelado,
+            hoverBackgroundColor: COLORES.tinta,
+            borderRadius: 4,
+            borderSkipped: 'start',
+            maxBarThickness: 20
+          }]
+        },
+        options: opciones
+      });
+    }
+
+    // =========================================================================
+    // EXPORTACIONES
+    // =========================================================================
+    function sufijoRango() {
+      const fIni = document.getElementById('fechaInicio').value || '';
+      const fFin = document.getElementById('fechaFin').value || '';
+      return (fIni && fFin)
+        ? `_${fIni.replace(/-/g, '')}_al_${fFin.replace(/-/g, '')}`
+        : `_${new Date().toISOString().slice(0, 10).replace(/-/g, '')}`;
+    }
+
+    // Data plana tal cual viene de SQL Server (regla 7)
+    function exportarDataPlanaSQL() {
+      if (!rawSqlData || rawSqlData.length === 0) {
+        mostrarToast('⚠️ No hay datos de SQL Server cargados para exportar');
+        return;
+      }
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rawSqlData), 'Data_Plana_SQL');
+      XLSX.writeFile(wb, `Data_Plana_SQL_Marinado${sufijoRango()}.xlsx`);
+      mostrarToast(`Data Plana SQL exportada (${rawSqlData.length.toLocaleString('es-PE')} filas)`);
+    }
+
+    function exportarResumenExcel() {
+      const periodos = construirMatrizResumen();
+      if (!periodos.length) {
+        mostrarToast('⚠️ No hay datos para exportar');
+        return;
+      }
+      // Una fila por Periodo › Punto de proceso › Plantilla, con las columnas de la matriz
+      const filas = [];
+      for (const per of periodos) {
+        for (const pun of [...per.puntos.values()].sort((a, b) => a.pp - b.pp)) {
+          for (const pl of pun.plantillas.values()) {
+            const m = metricas(pl.rows);
+            filas.push({
+              Periodo: etiquetaPeriodo(per.key),
+              PuntoProceso: pun.pp,
+              NPuntoProceso: pun.nombre,
+              Plantilla: pl.id,
+              NPlantilla: pl.nombre,
+              Unidades: m.und,
+              'Kilos Inicial': round2(m.ki),
+              'Kilos Final': round2(m.kf),
+              Ganancia: round2(m.iny),
+              '% Inyección': m.pct === null ? null : round2(m.pct)
+            });
+          }
+        }
+      }
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(filas), 'Resumen');
+      XLSX.writeFile(wb, `Marinado_Resumen_${vistaActiva}${sufijoRango()}.xlsx`);
+    }
+
+    // =========================================================================
+    // REESTABLECER Y UI
+    // =========================================================================
+    function resetFiltros() {
+      inicializarFechas();
+      periodoSel.diario = periodoSel.semanal = periodoSel.mensual = null;
+      cambiarVista('semanal');
+      mostrarToast('Filtros reestablecidos');
+    }
+
+    function actualizarEstadoUI(estado, texto) {
+      const dot = document.getElementById('statusDot');
+      dot.className = 'status-dot' + (estado ? ` ${estado}` : '');
+      document.getElementById('statusText').textContent = texto;
+    }
+
+    function mostrarError(msg) {
+      document.getElementById('errorText').textContent = msg;
+      document.getElementById('alertError').classList.add('show');
+    }
+
+    function cerrarError() {
+      document.getElementById('alertError').classList.remove('show');
+    }
+
+    function mostrarCargando(activo, titulo = '', mensaje = '') {
+      document.getElementById('loadingOverlay').classList.toggle('active', activo);
+      if (titulo) document.getElementById('loadingTitle').textContent = titulo;
+      if (mensaje) document.getElementById('loadingMessage').textContent = mensaje;
+    }
+
+    let temporizadorToast = null;
+    function mostrarToast(msg, ms = 3000) {
+      const t = document.getElementById('toastNotification');
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(temporizadorToast);
+      temporizadorToast = setTimeout(() => t.classList.remove('show'), ms);
+    }
+  </script>
+</body>
+
+</html>

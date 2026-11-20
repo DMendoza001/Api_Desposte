@@ -11,6 +11,7 @@ Actualmente identificados en el proyecto:
 2. `Docu_Paginas/RendimientosChuletas002.html` (Controlador: `/api/ProdChuletas`, SP: `Sp_Informe_Prod_Chuletas`)
 3. `Docu_Paginas/Indice_Rotacion_Semanal.html` (Controlador: `/api/IndiceRotacionSemanal`, SP: `Sp_Indice_Rotacion_Semanal`)
 4. `Docu_Paginas/Informe_Costo_Produccion.html` (Controlador: `/api/CostosProduccion`, Tabla: `CostoProduccion`)
+5. `Docu_Paginas/InformeMarinado.html` (Controlador: `/api/Marinado`, SP: `Sp_Informe_Marinado_Congelado`)
 *(Cualquier nuevo dashboard que consuma un controlador en `ApiDesposte/Controllers/Sql/` deberá incluir obligatoriamente esta funcionalidad).*
 
 ---

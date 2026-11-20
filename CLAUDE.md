@@ -22,7 +22,7 @@ Todos los archivos `.html` deben seguir el estándar híbrido y resiliente de co
 Todo cálculo, análisis, reporte o agregación semanal en el proyecto (tanto en C# .NET como en dashboards HTML / JavaScript) debe seguir estrictamente lo definido en [.agents/rules/calculo-semanas.md](.agents/rules/calculo-semanas.md):
 - **El primer día de la semana es obligatoriamente el LUNES** (y termina en Domingo).
 - Utilizar el cálculo estándar ISO-8601 (`(d.getDay() + 6) % 7` en JS, `ISOWeek.GetWeekOfYear` en C#).
-- En presentaciones visuales semanales (gráficos/tablas), incluir preferentemente el rango `Sem. XX (DD/MM al DD/MM)`.
+- **Etiquetas de semana (regla de negocio):** en el **eje X de los gráficos** mostrar solo `Sem XX` (ej. `Sem 32`); el rango completo `Sem. XX (DD/MM al DD/MM)` va en el **título del tooltip** al pasar el cursor y en **tablas, matrices y filtros**.
 
 ### 3. Conexión Dinámica a Archivos Excel en OneDrive (Regla Obligatoria)
 Todo controlador en C# .NET (`ApiDesposte/Controllers/Excel/`) que consuma archivos Excel locales sincronizados en OneDrive debe seguir estrictamente lo definido en [.agents/rules/conexion-excel-onedrive.md](.agents/rules/conexion-excel-onedrive.md):

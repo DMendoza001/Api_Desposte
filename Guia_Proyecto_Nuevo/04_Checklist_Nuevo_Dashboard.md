@@ -20,7 +20,7 @@ Usar esta lista cada vez que se agregue un informe.
 - [ ] Usa la paleta `PaletaFinanza_Industrial.json` (cabecera oscura con texto claro).
 - [ ] Las 4 tarjetas KPI quedan en una fila en laptop; se ve bien en tablet (≤ 980px) y celular (≤ 768px).
 - [ ] Los gráficos están dentro de `.chart-box` / `.chart-container`, sin alturas fijas inline.
-- [ ] Las semanas van de lunes a domingo y se muestran como `Sem. XX (DD/MM al DD/MM)`.
+- [ ] Las semanas van de lunes a domingo. En el eje X de los gráficos se muestran como `Sem XX`; el rango `Sem. XX (DD/MM al DD/MM)` va en el tooltip, tablas y filtros.
 - [ ] **Fuente SQL:** guarda `rawSqlData` y tiene el botón `Data Plana SQL (.xlsx)`.
 - [ ] **Matriz jerárquica:** etiquetas planas; el único icono es el de expandir/colapsar.
 - [ ] **Vistas Diario / Semanal / Mensual:** filtros de periodo según la regla 9.

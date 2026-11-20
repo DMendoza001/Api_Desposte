@@ -57,12 +57,27 @@ function calcularSemanaConInicioLunes(d) {
 }
 ```
 
-### Formato de Presentación Visual:
-En gráficos y tablas semanales se debe mostrar el rango para evitar ambigüedades:
+### Formato de Presentación Visual (Regla de Negocio):
+
+| Dónde | Formato | Ejemplo |
+|---|---|---|
+| **Eje X de gráficos** | Solo el número de semana, sin rango, para no cargar el eje | `Sem 32` |
+| **Tooltip al pasar el cursor** (título) | Semana con el rango completo de fechas | `Sem. 32 (03/08 al 09/08)` |
+| **Tablas, matrices y filtros de semanas** | Semana con el rango completo de fechas | `Sem. 32 (03/08 al 09/08)` |
+
 ```javascript
-`Sem. ${String(semana).padStart(2, '0')} (${rangoTexto})`
-// Ejemplo: "Sem. 41 (05/10 al 11/10)"
+// Eje X del gráfico (corto)
+const etiquetaEje = `Sem ${String(semana).padStart(2, '0')}`;          // "Sem 32"
+
+// Tooltip, tablas y filtros (completo)
+const etiquetaCompleta = `Sem. ${String(semana).padStart(2, '0')} (${rangoTexto})`;  // "Sem. 32 (03/08 al 09/08)"
+
+// Chart.js: el eje usa la etiqueta corta y el tooltip muestra la completa
+options.plugins.tooltip.callbacks.title = items => etiquetasCompletas[items[0].dataIndex];
 ```
+
+- El rango nunca se pierde: si no está en el eje, debe aparecer en el tooltip.
+- Implementación de referencia: `Docu_Paginas/InformeMarinado.html`.
 
 ---
 

@@ -1,0 +1,2068 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catálogo de Componentes</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+
+  <style>
+    /* =========================================================================
+       Paleta oficial (PaletaFinanza_Industrial.json): la misma de los dashboards
+       ========================================================================= */
+    :root {
+      --color-header-bg: #38353B;
+      --color-header-gradient: linear-gradient(135deg, #38353B 0%, #434B57 100%);
+      --color-header-subtext: #E2D5B5;
+      --color-heading: #38353B;
+      --color-text: #4A474C;
+      --color-text-muted: #787479;
+      --color-primary: #BAA063;
+      --color-secondary: #7A828E;
+      --color-bg: #F2F4F8;
+      --color-surface: #FFFFFF;
+      --color-border: #E2E8F0;
+      --color-primary-soft: #C4B282;
+      --color-taupe: #A89F91;
+      --color-gray-300: #B5B2AA;
+      --color-ink-900: #434B57;
+      --color-primary-soft-bg: rgba(186, 160, 99, 0.16);
+      --color-primary-border: rgba(186, 160, 99, 0.45);
+      --color-secondary-soft-bg: rgba(122, 130, 142, 0.16);
+      --color-secondary-border: rgba(122, 130, 142, 0.42);
+      --mx-nivel-bg: #F0EADD;
+      --mx-nivel-line: #DCCDA8;
+      --shadow-sm: 0 1px 3px rgba(56, 53, 59, 0.06), 0 1px 2px rgba(56, 53, 59, 0.04);
+      --shadow-lg: 0 10px 15px -3px rgba(56, 53, 59, 0.12), 0 4px 6px -2px rgba(56, 53, 59, 0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+      background: var(--color-bg);
+      color: var(--color-text);
+      font-size: 14px;
+    }
+
+    code {
+      font-family: 'Consolas', 'SFMono-Regular', monospace;
+      font-size: 0.8em;
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+      padding: 1px 5px;
+      color: var(--color-heading);
+    }
+
+    /* =========================================================================
+       ESTRUCTURA DEL CATÁLOGO
+       ========================================================================= */
+    .cat-top {
+      background: var(--color-header-gradient);
+      color: #FFFFFF;
+      padding: 28px 32px 24px;
+      border-bottom: 3px solid var(--color-primary);
+    }
+
+    .cat-top .eyebrow {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: var(--color-primary);
+    }
+
+    .cat-top h1 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      margin-top: 4px;
+    }
+
+    .cat-top p {
+      color: var(--color-header-subtext);
+      margin-top: 6px;
+      max-width: 860px;
+      line-height: 1.5;
+    }
+
+    .cat-wrap {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 24px 24px 60px;
+    }
+
+    .cat-como {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-left: 4px solid var(--color-primary);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    .cat-como strong {
+      color: var(--color-heading);
+    }
+
+    .cat-index {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 28px;
+    }
+
+    .cat-index a {
+      text-decoration: none;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--color-heading);
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 999px;
+      padding: 5px 11px;
+    }
+
+    .cat-index a:hover {
+      border-color: var(--color-primary);
+      background: var(--color-primary-soft-bg);
+    }
+
+    .cat-index a b {
+      color: var(--color-primary);
+      margin-right: 4px;
+    }
+
+    .cat-grupo {
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+      margin: 34px 0 12px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .cat-item {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 18px;
+      overflow: hidden;
+      scroll-margin-top: 16px;
+    }
+
+    .cat-item-head {
+      display: flex;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .cat-code {
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: #FFFFFF;
+      background: var(--color-heading);
+      border-radius: 6px;
+      padding: 3px 8px;
+    }
+
+    .cat-item-head h2 {
+      font-size: 1.05rem;
+      color: var(--color-heading);
+    }
+
+    .cat-item-head .tec {
+      margin-left: auto;
+      font-size: 0.8rem;
+      color: var(--color-text-muted);
+    }
+
+    .cat-body {
+      display: grid;
+      grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+    }
+
+    .cat-demo {
+      padding: 20px;
+      background: var(--color-bg);
+      border-right: 1px solid var(--color-border);
+      min-width: 0;
+    }
+
+    .cat-info {
+      padding: 18px 20px;
+      line-height: 1.55;
+      font-size: 0.86rem;
+      min-width: 0;
+    }
+
+    .cat-info h4 {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+      margin: 12px 0 4px;
+    }
+
+    .cat-info h4:first-child {
+      margin-top: 0;
+    }
+
+    .cat-info ul {
+      padding-left: 18px;
+    }
+
+    .cat-info .pedido {
+      background: var(--color-primary-soft-bg);
+      border: 1px dashed var(--color-primary-border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: var(--color-heading);
+      font-style: italic;
+    }
+
+    .demo-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+    }
+
+    .demo-fila {
+      display: flex;
+      gap: 18px;
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+
+    .demo-fila>div {
+      min-width: 0;
+    }
+
+    /* Marcadores numerados para señalar partes de un componente */
+    .pin {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #C2410C;
+      color: #FFFFFF;
+      font-size: 0.66rem;
+      font-weight: 800;
+      font-style: normal;
+      vertical-align: middle;
+      flex-shrink: 0;
+    }
+
+    /* =========================================================================
+       COMPONENTES (copia de los estilos de los dashboards)
+       ========================================================================= */
+
+    /* C01 Estructura */
+    .mapa {
+      display: grid;
+      grid-template-columns: 54px 1fr;
+      gap: 8px;
+      height: 300px;
+    }
+
+    .mapa div {
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.74rem;
+      font-weight: 700;
+      text-align: center;
+      padding: 4px;
+    }
+
+    .mapa .m-side {
+      background: var(--color-header-gradient);
+      color: var(--color-header-subtext);
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+    }
+
+    .mapa .m-main {
+      display: grid;
+      justify-content: stretch;
+      align-items: stretch;
+      grid-template-rows: 40px 40px 30px 46px 1fr 60px;
+      gap: 6px;
+      padding: 0;
+    }
+
+    .mapa .m-main div {
+      background: #FFFFFF;
+      border: 1px solid var(--color-border);
+      color: var(--color-heading);
+    }
+
+    .mapa .m-main .m-head {
+      background: var(--color-header-gradient);
+      color: #FFFFFF;
+      border: none;
+    }
+
+    .mapa .m-kpis {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      justify-content: stretch;
+      align-items: stretch;
+      background: transparent !important;
+      border: none !important;
+      padding: 0;
+    }
+
+    /* C02 / C03 Barra lateral */
+    .sidebar {
+      width: 60px;
+      overflow: hidden;
+      background: linear-gradient(180deg, #38353B 0%, #434B57 100%);
+      color: #FFFFFF;
+      display: flex;
+      flex-direction: column;
+      padding: 14px 0;
+      border-radius: 0 14px 14px 0;
+      box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+      height: 270px;
+    }
+
+    .sidebar-header {
+      padding: 0 8px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 14px;
+    }
+
+    .sidebar-header h2 {
+      font-size: 0;
+      font-weight: 800;
+      color: var(--color-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+    }
+
+    .sidebar-header h2 i {
+      font-size: 0.95rem;
+    }
+
+    .sidebar-header p {
+      display: none;
+      font-size: 0.7rem;
+      color: var(--color-header-subtext);
+      margin-top: 3px;
+      white-space: nowrap;
+    }
+
+    .sidebar-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      padding: 0 8px;
+    }
+
+    .sidebar-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 9px 0;
+      border-radius: 7px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--color-gray-300);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .sidebar-btn.active {
+      background: var(--color-primary);
+      color: #FFFFFF;
+      font-weight: 700;
+      box-shadow: 0 4px 12px rgba(186, 160, 99, 0.35);
+    }
+
+    .sidebar-btn .btn-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sidebar-btn .btn-info span,
+    .sidebar-badge {
+      display: none;
+      white-space: nowrap;
+    }
+
+    .sidebar-badge {
+      background: rgba(0, 0, 0, 0.15);
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-size: 0.7rem;
+    }
+
+    .sidebar-btn.active .sidebar-badge {
+      background: var(--color-ink-900);
+      color: var(--color-primary);
+    }
+
+    /* Estado desplegado (al pasar el mouse en el dashboard) */
+    .sidebar.expandida {
+      width: 180px;
+      box-shadow: 8px 0 24px rgba(0, 0, 0, 0.28);
+    }
+
+    .sidebar.expandida .sidebar-header {
+      padding: 0 14px 14px;
+    }
+
+    .sidebar.expandida .sidebar-header h2 {
+      font-size: 0.95rem;
+      justify-content: flex-start;
+      gap: 8px;
+    }
+
+    .sidebar.expandida .sidebar-header p {
+      display: block;
+    }
+
+    .sidebar.expandida .sidebar-btn {
+      justify-content: space-between;
+      padding: 9px 11px;
+    }
+
+    .sidebar.expandida .btn-info span {
+      display: inline;
+    }
+
+    .sidebar.expandida .sidebar-badge {
+      display: inline-block;
+    }
+
+    /* Versión celular */
+    .sidebar.movil {
+      width: 360px;
+      max-width: 100%;
+      height: auto;
+      flex-direction: row;
+      padding: 6px 8px;
+      border-radius: 0 0 12px 12px;
+    }
+
+    .sidebar.movil .sidebar-header,
+    .sidebar.movil .btn-info i {
+      display: none;
+    }
+
+    .sidebar.movil .sidebar-menu {
+      flex-direction: row;
+      gap: 6px;
+      padding: 0;
+      width: 100%;
+    }
+
+    .sidebar.movil .sidebar-btn {
+      flex: 1 1 0;
+      gap: 4px;
+      padding: 7px 4px;
+      font-size: 0.72rem;
+    }
+
+    .sidebar.movil .btn-info span {
+      display: inline;
+    }
+
+    .sidebar.movil .sidebar-badge {
+      display: inline-block;
+      padding: 1px 5px;
+      font-size: 0.64rem;
+    }
+
+    /* C04 Cabecera */
+    .header-banner {
+      background: var(--color-header-gradient);
+      border-left: 6px solid var(--color-primary);
+      color: #FFFFFF;
+      padding: 18px 22px;
+      border-radius: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .header-info h1 {
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    .header-info p {
+      font-size: 0.82rem;
+      color: var(--color-header-subtext);
+      margin-top: 4px;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: var(--color-primary-soft-bg);
+      border: 1px solid var(--color-primary-border);
+      color: var(--color-primary);
+    }
+
+    .status-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--color-text-muted);
+      display: inline-block;
+    }
+
+    .status-dot.online {
+      background: #10B981;
+      box-shadow: 0 0 8px #10B981;
+    }
+
+    .status-dot.loading {
+      background: var(--color-primary);
+    }
+
+    .status-dot.error {
+      background: #EF4444;
+    }
+
+    .estados-fondo {
+      background: var(--color-header-bg);
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    /* C05 Alerta */
+    .alert-error-box {
+      background: #FEE2E2;
+      border: 1px solid #FCA5A5;
+      color: #991B1B;
+      padding: 14px 18px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 0.86rem;
+    }
+
+    /* C06 Filtros */
+    .filter-panel {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      padding: 14px 16px;
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: flex-end;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .filter-group>label {
+      font-size: 0.74rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: var(--color-heading);
+    }
+
+    .filter-group>input {
+      border: 1px solid var(--color-border);
+      padding: 8px 11px;
+      border-radius: 8px;
+      background: #FFFFFF;
+      color: var(--color-text);
+      font-size: 0.82rem;
+      width: 150px;
+    }
+
+    .semana-combo-btn {
+      border: 1px solid var(--color-border);
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: #FFFFFF;
+      color: var(--color-text);
+      font-size: 0.82rem;
+      font-weight: 600;
+      min-width: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .semana-panel {
+      width: 280px;
+      background: #FFFFFF;
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      box-shadow: var(--shadow-lg);
+      padding: 8px;
+    }
+
+    .semana-acciones {
+      display: flex;
+      gap: 6px;
+      padding: 2px 2px 8px;
+      margin-bottom: 6px;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .semana-accion {
+      flex: 1;
+      border: 1px solid var(--color-border);
+      background: var(--color-bg);
+      color: var(--color-heading);
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 5px 6px;
+      border-radius: 6px;
+    }
+
+    .semana-opcion {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      font-size: 0.82rem;
+      border-radius: 6px;
+    }
+
+    .semana-opcion input {
+      accent-color: var(--color-heading);
+    }
+
+    /* C07 Botones */
+    .btn-primary-action {
+      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-soft) 100%);
+      border: 1px solid rgba(186, 160, 99, 0.6);
+      color: #FFFFFF;
+      padding: 9px 18px;
+      border-radius: 8px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      box-shadow: 0 2px 6px rgba(186, 160, 99, 0.35);
+    }
+
+    .btn-reset,
+    .btn-tool {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #FFFFFF;
+      color: var(--color-heading);
+      border: 1px solid var(--color-border);
+      padding: 9px 14px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+
+    .btn-reset {
+      background: var(--color-bg);
+      color: var(--color-text-muted);
+    }
+
+    .btn-excel-flat {
+      background: var(--color-primary-soft-bg);
+      border-color: var(--color-primary-border);
+      font-weight: 700;
+    }
+
+    .btn-excel {
+      background: var(--color-secondary-soft-bg);
+      border-color: var(--color-secondary-border);
+      font-weight: 700;
+    }
+
+    .btn-tool:disabled {
+      opacity: 0.5;
+    }
+
+    .botonera {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 10px 14px;
+      align-items: center;
+    }
+
+    .botonera small {
+      color: var(--color-text-muted);
+    }
+
+    /* C08 Segmentado */
+    .segmented {
+      display: inline-flex;
+      background: #FFFFFF;
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      padding: 4px;
+      gap: 4px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .segmented button {
+      border: none;
+      background: transparent;
+      color: var(--color-text-muted);
+      font-size: 0.84rem;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 7px;
+    }
+
+    .segmented button.active {
+      background: var(--color-header-gradient);
+      color: #FFFFFF;
+    }
+
+    .segmented .seg-code {
+      font-weight: 500;
+      opacity: 0.75;
+      margin-left: 4px;
+    }
+
+    /* C09 Títulos */
+    .section-title {
+      font-size: 0.74rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-text-muted);
+    }
+
+    .vista-actual {
+      font-size: 0.8rem;
+      color: var(--color-text-muted);
+    }
+
+    .vista-actual strong {
+      color: var(--color-heading);
+    }
+
+    /* C10 KPI */
+    .kpi-container {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .kpi-card {
+      background: #FFFFFF;
+      border: 1px solid var(--color-border);
+      border-top: 4px solid var(--color-primary);
+      padding: 12px 14px;
+      border-radius: 10px;
+      box-shadow: var(--shadow-sm);
+      min-width: 0;
+    }
+
+    .kpi-card.kpi-taupe {
+      border-top-color: var(--color-taupe);
+    }
+
+    .kpi-card.kpi-dark {
+      border-top-color: var(--color-heading);
+    }
+
+    .kpi-card.kpi-slate {
+      border-top-color: var(--color-secondary);
+    }
+
+    .kpi-title {
+      font-size: 0.66rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: var(--color-text-muted);
+      margin-bottom: 4px;
+    }
+
+    .kpi-value {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--color-heading);
+    }
+
+    .kpi-sub {
+      font-size: 0.7rem;
+      margin-top: 3px;
+    }
+
+    /* C11–C14 Gráficos */
+    .chart-card {
+      background: #FFFFFF;
+      border: 1px solid var(--color-border);
+      padding: 14px 16px;
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+      min-width: 0;
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .chart-header h3 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--color-heading);
+    }
+
+    .badge-info {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--color-heading);
+      background: var(--color-primary-soft-bg);
+      border: 1px solid var(--color-primary-border);
+      padding: 3px 9px;
+      border-radius: 9999px;
+      white-space: nowrap;
+    }
+
+    .badge-info.badge-slate {
+      background: var(--color-secondary-soft-bg);
+      border-color: var(--color-secondary-border);
+    }
+
+    .chart-box {
+      position: relative;
+      width: 100%;
+      height: 230px;
+      min-width: 0;
+    }
+
+    /* C15 Tooltip (maqueta estática) */
+    .tooltip-mock {
+      display: inline-block;
+      background: #38353B;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .tooltip-mock .tt-title {
+      color: #FFFFFF;
+      font-weight: 700;
+    }
+
+    .tooltip-mock .tt-body {
+      color: #E2D5B5;
+    }
+
+    .tooltip-mock .sw {
+      display: inline-block;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+
+    /* C16 Matriz */
+    .matrix-card {
+      background: #FFFFFF;
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .matrix-header-bar {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .matrix-header-bar h3 {
+      font-size: 0.95rem;
+      color: var(--color-heading);
+    }
+
+    .matrix-sub {
+      font-size: 0.74rem;
+      color: var(--color-text-muted);
+    }
+
+    .matrix-toolbar {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .matrix-toolbar .btn-tool {
+      padding: 6px 10px;
+      font-size: 0.76rem;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+    }
+
+    .matrix-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 0.78rem;
+    }
+
+    .matrix-table th {
+      background: var(--color-header-bg);
+      color: #FFFFFF;
+      padding: 8px 10px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-align: right;
+      white-space: nowrap;
+      border-bottom: 2px solid var(--color-primary);
+    }
+
+    .matrix-table th.col-jerarquia {
+      text-align: left;
+      width: 100%;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-header-subtext);
+    }
+
+    .matrix-table td {
+      padding: 6px 10px;
+      border-bottom: 1px solid var(--color-border);
+      text-align: right;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .matrix-table td:first-child {
+      text-align: left;
+      border-right: 1px solid var(--color-border);
+    }
+
+    .matrix-table tr.mx-periodo td {
+      background: var(--mx-nivel-bg);
+      font-weight: 700;
+      color: var(--color-heading);
+      border-bottom-color: var(--mx-nivel-line);
+    }
+
+    .matrix-table tr.mx-periodo td:first-child {
+      box-shadow: inset 3px 0 0 var(--color-primary);
+      padding-left: 12px;
+    }
+
+    .matrix-table tr.mx-punto td {
+      background: var(--color-bg);
+      font-weight: 600;
+      color: var(--color-heading);
+    }
+
+    .matrix-table tr.mx-punto td:first-child {
+      padding-left: 34px;
+    }
+
+    .matrix-table tr.mx-plantilla td:first-child {
+      padding-left: 64px;
+    }
+
+    .matrix-table tfoot td {
+      background: var(--color-header-bg);
+      color: #FFFFFF;
+      font-weight: 700;
+      border-top: 2px solid var(--color-primary);
+    }
+
+    .tree-toggle-icon {
+      display: inline-block;
+      width: 14px;
+      margin-right: 6px;
+      font-size: 9px;
+      color: var(--color-primary);
+    }
+
+    .plantilla-code {
+      display: inline-block;
+      min-width: 3.4em;
+      margin-right: 8px;
+      font-family: 'Consolas', monospace;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--color-text-muted);
+    }
+
+    .nivel-count {
+      font-weight: 500;
+      font-size: 0.7rem;
+      color: var(--color-text-muted);
+      margin-left: 6px;
+    }
+
+    .num-zero {
+      color: var(--color-gray-300);
+    }
+
+    /* C17 / C18 */
+    .toast-notification {
+      display: inline-block;
+      background: var(--color-ink-900);
+      border: 1px solid var(--color-primary-border);
+      color: #FFFFFF;
+      padding: 12px 20px;
+      border-radius: 8px;
+      box-shadow: var(--shadow-lg);
+      font-size: 0.86rem;
+      font-weight: 500;
+    }
+
+    .loading-overlay {
+      background: rgba(56, 53, 59, 0.6);
+      border-radius: 10px;
+      padding: 30px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .loading-box {
+      background: #FFFFFF;
+      padding: 22px 30px;
+      border-radius: 14px;
+      text-align: center;
+      color: var(--color-heading);
+    }
+
+    .loading-box p {
+      font-size: 0.82rem;
+      color: var(--color-text-muted);
+      margin-top: 4px;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid var(--color-border);
+      border-top-color: var(--color-primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 12px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* C19 Paleta */
+    .swatches {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 10px;
+    }
+
+    .swatch {
+      background: #FFFFFF;
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      overflow: hidden;
+      font-size: 0.74rem;
+    }
+
+    .swatch .c {
+      height: 46px;
+    }
+
+    .swatch div:last-child {
+      padding: 6px 8px;
+      line-height: 1.4;
+    }
+
+    .swatch b {
+      color: var(--color-heading);
+    }
+
+    /* C20 Tabla de pantallas */
+    .tabla-simple {
+      width: 100%;
+      border-collapse: collapse;
+      background: #FFFFFF;
+      border-radius: 10px;
+      overflow: hidden;
+      font-size: 0.82rem;
+    }
+
+    .tabla-simple th,
+    .tabla-simple td {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--color-border);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .tabla-simple th {
+      background: var(--color-header-bg);
+      color: #FFFFFF;
+      font-size: 0.74rem;
+    }
+
+    /* =========================================================================
+       RESPONSIVE DEL CATÁLOGO
+       ========================================================================= */
+    @media screen and (max-width: 980px) {
+      .cat-body {
+        grid-template-columns: 1fr;
+      }
+
+      .cat-demo {
+        border-right: none;
+        border-bottom: 1px solid var(--color-border);
+      }
+
+      .kpi-container {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media screen and (max-width: 768px) {
+      .cat-top {
+        padding: 20px 16px;
+      }
+
+      .cat-wrap {
+        padding: 16px 12px 40px;
+      }
+
+      .cat-demo,
+      .cat-info {
+        padding: 14px;
+      }
+
+      .cat-item-head .tec {
+        margin-left: 0;
+        width: 100%;
+      }
+
+      .kpi-container {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="cat-top">
+    <div class="eyebrow">API_DESPOSTE · DASHBOARDS</div>
+    <h1>Catálogo de componentes</h1>
+    <p>Cada pieza de los dashboards con su código, su nombre técnico y un ejemplo visual. Para pedir un cambio, menciona el
+      <strong>código</strong> (por ejemplo <strong>C10</strong>) o el <strong>nombre técnico</strong> y, si hace falta, el número
+      de la parte señalada con <span class="pin">1</span>.</p>
+  </header>
+
+  <main class="cat-wrap">
+
+    <div class="cat-como">
+      <strong>Cómo usar este catálogo para pedir cambios.</strong> Indica el componente, el dashboard y lo que quieres cambiar.
+      Ejemplo: <em>«En InformeMarinado, C10 Tarjetas KPI: agrega una 5ª tarjeta con las unidades del 1011»</em> o
+      <em>«En InformeCabezas, C02 parte <span class="pin">3</span>: quita los contadores»</em>. Los ejemplos usan datos ficticios.
+    </div>
+
+    <nav class="cat-index" aria-label="Índice">
+      <a href="#c01"><b>C01</b>Estructura</a>
+      <a href="#c02"><b>C02</b>Barra lateral</a>
+      <a href="#c03"><b>C03</b>Barra en celular</a>
+      <a href="#c04"><b>C04</b>Cabecera</a>
+      <a href="#c05"><b>C05</b>Alerta</a>
+      <a href="#c06"><b>C06</b>Panel de filtros</a>
+      <a href="#c07"><b>C07</b>Botones</a>
+      <a href="#c08"><b>C08</b>Selector segmentado</a>
+      <a href="#c09"><b>C09</b>Títulos</a>
+      <a href="#c10"><b>C10</b>Tarjetas KPI</a>
+      <a href="#c11"><b>C11</b>Tarjeta de gráfico</a>
+      <a href="#c12"><b>C12</b>Barras apiladas</a>
+      <a href="#c13"><b>C13</b>Línea</a>
+      <a href="#c14"><b>C14</b>Ranking</a>
+      <a href="#c15"><b>C15</b>Recuadro del cursor</a>
+      <a href="#c16"><b>C16</b>Matriz jerárquica</a>
+      <a href="#c17"><b>C17</b>Aviso flotante</a>
+      <a href="#c18"><b>C18</b>Pantalla de carga</a>
+      <a href="#c19"><b>C19</b>Paleta</a>
+      <a href="#c20"><b>C20</b>Tamaños de pantalla</a>
+    </nav>
+
+    <!-- ===================================================================== -->
+    <h2 class="cat-grupo">Estructura y navegación</h2>
+
+    <section class="cat-item" id="c01">
+      <div class="cat-item-head">
+        <span class="cat-code">C01</span>
+        <h2>Estructura de la página</h2>
+        <span class="tec"><code>.app-layout</code> = <code>.sidebar</code> + <code>.main-content</code></span>
+      </div>
+      <div class="cat-body">
+        <div class="cat-demo">
+          <div class="mapa">
+            <div class="m-side">C02 Barra lateral</div>
+            <div class="m-main">
+              <div class="m-head">C04 Cabecera</div>
+              <div>C06 Panel de filtros</div>
+              <div>C08 Selector segmentado · C09 Vista actual</div>
+              <div class="m-kpis">
+                <div>C10</div>
+                <div>C10</div>
+                <div>C10</div>
+                <div>C10</div>
+              </div>
+              <div>C11–C14 Gráficos</div>
+              <div>C16 Matriz jerárquica</div>
+            </div>
+          </div>
+        </div>
+        <div class="cat-info">
+          <h4>Qué es</h4>
+          <p>El orden de arriba hacia abajo de un dashboard. La barra lateral queda fija a la izquierda; todo lo demás va en el
+            área de contenido.</p>
+          <h4>Dónde se usa</h4>
+          <p>InformeMarinado, InformeCabezas, RendimientosChuletas002.</p>
+          <h4>Ejemplo de pedido</h4>
+          <p class="pedido">«En InformeMarinado mueve C16 arriba de los gráficos.»</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="cat-item" id="c02">
+      <div class="cat-item-head">
+        <span class="cat-code">C02</span>
+        <h2>Barra lateral de vistas</h2>
+        <span class="tec"><code>#sidebarNav</code> · <code>.sidebar</code></span>
+      </div>
+      <div class="cat-body">
+        <div class="cat-demo">
+          <div class="demo-fila">
+            <div>
+              <div class="demo-label">Contraída (normal)</div>
+              <aside class="sidebar">
+                <div class="sidebar-header">
+                  <h2><i class="fa-solid fa-layer-group"></i> NAVEGACIÓN</h2>
+                </div>
+                <nav class="sidebar-menu">
+                  <button class="sidebar-btn"><div class="btn-info"><i class="fa-regular fa-calendar-days"></i></div></button>
+                  <button class="sidebar-btn active"><div class="btn-info"><i class="fa-solid fa-calendar-week"></i></div></button>
+                  <button class="sidebar-btn"><div class="btn-info"><i class="fa-regular fa-calendar"></i></div></button>
+                  <button class="sidebar-btn"><div class="btn-info"><i class="fa-solid fa-chart-line"></i></div></button>
+                </nav>
+              </aside>
+            </div>
+            <div>
+              <div class="demo-label">Desplegada (al pasar el mouse)</div>
+              <aside class="sidebar expandida">
+                <div class="sidebar-header">
+                  <h2><i class="fa-solid fa-layer-group"></i> NAVEGACIÓN <span class="pin">1</span></h2>
+                  <p>Vistas Temporales</p>
+                </div>
+                <nav class="sidebar-menu">
+                  <button class="sidebar-btn"><div class="btn-info"><i class="fa-regular fa-calendar-days"></i><span>Diario</span></div><span class="sidebar-badge">309</span></button>
+                  <button class="sidebar-btn active"><div class="btn-info"><i class="fa-solid fa-calendar-week"></i><span>Semanal</span> <span class="pin">2</span></div><span class="sidebar-badge">51</span></button>
+                  <button class="sidebar-btn"><div class="btn-info"><i class="fa-regular fa-calendar"></i><span>Mensual</span></div><span class="sidebar-badge">12</span></button>
+                  <button class="sidebar-btn"><div class="btn-info"><i class="fa-solid fa-chart-line"></i><span>Anual</span></div><span class="sidebar-badge">2</span> <span class="pin">3</span></button>
+                </nav>
+              </aside>
+            </div>
+          </div>
+        </div>
+        <div class="cat-info">
+          <h4>Qué es</h4>
+          <p>Cambia la vista temporal del dashboard. Normalmente es una franja de iconos de 60 px y se despliega sobre el
+            contenido al pasar el mouse.</p>
+          <h4>Partes</h4>
+          <ul>
+            <li><span class="pin">1</span> Encabezado <code>.sidebar-header</code></li>
+            <li><span class="pin">2</span> Botón de vista <code>.sidebar-btn</code>; el activo es dorado (<code>.active</code>)</li>
+            <li><span class="pin">3</span> Contador de periodos <code>.sidebar-badge</code></li>
+          </ul>
+          <h4>Dónde se usa</h4>
+          <p>InformeMarinado, InformeCabezas, RendimientosChuletas002.</p>
+          <h4>Ejemplo de pedido</h4>
+          <p class="pedido">«En C02 agrega una vista Trimestral debajo de Mensual.»</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="cat-item" id="c03">
+      <div class="cat-item-head">
+        <span class="cat-code">C03</span>
+        <h2>Barra de vistas en celular</h2>
+        <span class="tec"><code>.sidebar</code> en pantallas ≤ 768 px</span>
+      </div>
+      <div class="cat-body">
+        <div class="cat-demo">
+          <aside class="sidebar movil">
+            <div class="sidebar-header"></div>
+            <nav class="sidebar-menu">
+              <button class="sidebar-btn"><div class="btn-info"><span>Diario</span></div><span class="sidebar-badge">309</span></button>
+              <button class="sidebar-btn active"><div class="btn-info"><span>Semanal</span></div><span class="sidebar-badge">51</span></button>
+              <button class="sidebar-btn"><div class="btn-info"><span>Mensual</span></div><span class="sidebar-badge">12</span></button>
+              <button class="sidebar-btn"><div class="btn-info"><span>Anual</span></div><span class="sidebar-badge">2</span></button>
+            </nav>
+          </aside>
+        </div>
+        <div class="cat-info">
+          <h4>Qué es</h4>
+          <p>La misma barra lateral (C02), convertida en una fila horizontal arriba de la página. Muestra nombre y contador, sin
+            iconos, para que las 4 vistas quepan.</p>
+          <h4>Ejemplo de pedido</h4>
+          <p class="pedido">«En C03 oculta los contadores en celular.»</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="cat-item" id="c04">
+      <div class="cat-item-head">
+        <span class="cat-code">C04</span>
+        <h2>Cabecera e indicador de conexión</h2>
+        <span class="tec"><code>.header-banner</code> · <code>.status-badge</code></span>
+      </div>
+      <div class="cat-body">
+        <div class="cat-demo">
+          <header class="header-banner">
+            <div class="header-info">
+              <h1>Marinado y Congelado Directo <span class="pin">1</span></h1>
+              <p>Kilos procesados e inyección de marinado <span class="pin">2</span></p>
+            </div>
+            <div class="status-badge"><span class="status-dot online"></span>En línea · 7,572 registros <span class="pin">3</span></div>
+          </header>
+          <div class="demo-label" style="margin-top:14px">Estados del indicador <span class="pin">3</span></div>
+          <div class="estados-fondo">
+            <div class="status-badge"><span class="status-dot online"></span>En línea</div>
+            <div class="status-badge"><span class="status-dot loading"></span>Consultando...</div>
+            <div class="status-badge"><span class="status-dot error"></span>Sin conexión</div>
+            <div class="status-badge"><span class="status-dot"></span>Listo para consultar</div>
+          </div>
+        </div>
+        <div class="cat-info">
+          <h4>Qué es</h4>
+          <p>Banda oscura con el nombre del informe. Por regla de la paleta siempre lleva fondo oscuro y texto claro.</p>
+          <h4>Partes</h4>
+          <ul>
+            <li><span class="pin">1</span> Título <code>.header-info h1</code></li>
+            <li><span class="pin">2</span> Subtítulo <code>.header-info p</code></li>
+            <li><span class="pin">3</span> Indicador de conexión <code>.status-badge</code> (verde, dorado, rojo o gris)</li>
+          </ul>
+          <h4>Ejemplo de pedido</h4>
+          <p class="pedido">«En C04 parte 2 cambia el subtítulo por "Planta Desposte · Semana actual".»</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="cat-item" id="c05">
+      <div class="cat-item-head">
+        <span class="cat-code">C05</span>
+        <h2>Alerta de error</h2>
+        <span class="tec"><code>#alertError</code> · <code>.alert-error-box</code></span>
+      </div>
+      <div class="cat-body">
+        <div class="cat-demo">
+          <div class="alert-error-box">
+            <div><i class="fa-solid fa-triangle-exclamation"></i> <strong>Atención:</strong> No se pudo conectar a RAEVSALL001 en
+              puertos 8080/5000.</div>
+            <span>✕</span>
+          </div>
+        </div>
+        <div class="cat-info">
+          <h4>Qué es</h4>
+          <p>Aparece debajo de la cabecera cuando falla la conexión o la consulta. Se cierra con la ✕.</p>
+          <h4>Ejemplo de pedido</h4>
+          <p class="pedido">«En C05 agrega un botón "Reintentar".»</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <h2 class="cat-grupo">Filtros y controles</h2>
+
+    <section class="cat-item" id="c06">
+      <div class="cat-item-head">
+        <span class="cat-code">C06</span>
+        <h2>Panel de filtros y combo de periodos</h2>
+        <span class="tec"><code>.filter-panel</code> · <code>#semanaCombo</code></span>
+      </div>
+      <div class="cat-body">
+        <div class="cat-demo">
+          <section class="filter-panel">
+            <div class="filter-group">
+              <label>Fecha Inicial: <span class="pin">1</span></label>
+              <input type="text" value="01/01/2026" readonly>
+            </div>
+            <div class="filter-group">
+              <label>Fecha Final:</label>
+              <input type="text" value="20/11/2026" readonly>
+            </div>
+            <div class="filter-group">
+              <label>Semanas: <span class="pin">2</span></label>
+              <button type="button" class="semana-combo-btn"><span>Últimas 12 semanas</span><i class="fa-solid fa-chevron-down"></i></button>
+            </div>
+            <div style="display:flex;gap:8px;margin-left:auto;flex-wrap:wrap">
+              <button class="btn-primary-action"><i class="fa-solid fa-magnifying-glass-chart"></i> Generar Reporte</button>
+              <button class="btn-reset"><i class="fa-solid fa-rotate-left"></i> Reestablecer</button>
+              <span class="pin">3</span>
+            </div>
+          </section>
+          <div class="demo-label" style="margin-top:14px">Combo de periodos abierto <span class="pin">2</span></div>
+          <div class="semana-panel">
+            <div class="semana-acciones">
+              <button class="semana-accion">Últimas 12</button>
+              <button class="semana-accion">Todas</button>
+              <span class="pin">4</span>
+            </div>
+            <label class="semana-opcion"><input type="checkbox" checked> Sem. 47 (16/11 al 22/11)</label>
+            <label class="semana-opcion"><input type="checkbox" checked> Sem. 46 (09/11 al 15/11)</label>
+            <label class="semana-opcion"><input type="checkbox" checked> Sem. 45 (02/11 al 08/11)</label>
+            <label class="semana-opcion"><input type="checkbox"> Sem. 35 (24/08 al 30/08)</label>
+          </div>
+        </div>
+        <div class="cat-info">
+          <h4>Qué es</h4>
+          <p>Barra blanca con el rango de fechas que se consulta a SQL y el periodo que se muestra.</p>
+          <h4>Partes</h4>
+          <ul>
+            <li><span class="pin">1</span> Fechas de la consulta <code>#fechaInicio</code> / <code>#fechaFin</code></li>
+            <li><span class="pin">2</span> Combo de periodos <code>#semanaCombo</code>. Según la vista filtra semanas o años
+              (regla 9): Diario 2 últimas semanas, Semanal 12, Mensual último año, Anual sin filtro.</li>
+            <li><span class="pin">3</span> Acciones (ver C07)</li>
+            <li><span class="pin">4</span> Atajos <code>.semana-accion</code>: por defecto / todas</li>
+          </ul>
+          <h4>Dónde se usa</h4>
+          <p>InformeMarinado y RendimientosChuletas002. InformeCabezas usa una variante con botones de año.</p>
+          <h4>Ejemplo de pedido</h4>
+          <p class="pedido">«En C06 agrega un filtro de Plantilla al lado del combo de semanas.»</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="cat-item" id="c07">
+      <div class="cat-item-head">
+        <span class="cat-code">C07</span>
+        <h2>Botones</h2>
+        <span class="tec"><code>.btn-primary-action</code> · <code>.btn-reset</code> · <code>.btn-tool</code></span>
+      </div>
+      <div class="cat-body">
+        <div class="cat-demo">
+          <div class="botonera">
+            <button class="btn-primary-action"><i class="fa-solid fa-magnifying-glass-chart"></i> Generar Reporte</button>
+            <small><b>Principal</b> <code>.btn-primary-action</code>: una sola por pantalla.</small>
+            <button class="btn-reset"><i class="fa-solid fa-rotate-left"></i> Reestablecer</button>
+            <small><b>Secundario</b> <code>.btn-reset</code>: vuelve a los valores por defecto.</small>
+            <button class="btn-tool btn-excel-flat"><i class="fa-solid fa-file-excel"></i> Data Plana SQL (.xlsx)</button>
+            <small><b>Data plana</b> <code>.btn-excel-flat</code>: descarga lo que entrega SQL, tal cual (regla 7).</small>
+            <button class="btn-tool btn-excel"><i class="fa-solid fa-table"></i> Excel (.xlsx)</button>
+            <small><b>Exportar vista</b> <code>.btn-excel</code>: descarga la matriz como se ve.</small>
+            <button class="btn-tool">Expandir</button>
+            <small><b>Herramienta</b> <code>.btn-tool</code>: acciones de la matriz.</small>
+            <button class="btn-tool btn-excel-flat" disabled><i class="fa-solid fa-file-excel"></i> Data Plana SQL (.xlsx)</button>
+            <small><b>Deshabilitado</b>: antes de cargar datos.</small>
+          </div>
+        </div>
+        <div class="cat-info">
+          <h4>Qué es</h4>
+          <p>Los cinco tipos de botón. El color indica la importancia: dorado lleno para la acción principal, tonos suaves
+            para las demás.</p>
+          <h4>Ejemplo de pedido</h4>
+          <p class="pedido">«En C07 quita el icono del botón Reestablecer.»</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="cat-item" id="c08">
+      <div class="cat-item-head">
+        <span class="cat-code">C08</span>
+        <h2>Selector segmentado (pestañas)</h2>
+        <span class="tec"><code>.segmented</code></span>
+      </div>
+      <div class="cat-body">
+        <div class="cat-demo">
+          <div class="demo-label">Tipo de análisis</div>
+          <div class="segmented">
+            <button class="active">Análisis General</button>
+            <button>Detalle por Plantilla</button>
+          </div>
+          <div class="demo-label" style="margin-top:14px">Proceso (con código)</div>
+          <div class="segmented">
+            <button class="active">Marinado<span class="seg-code">1005</span></button>
+            <button>Congelado Directo<span class="seg-code">1011</span></button>
+          </div>
+        </div>
+        <div class="cat-info">
+          <h4>Qué es</h4>
+          <p>Botones unidos para elegir una opción entre pocas. La opción activa va en oscuro.</p>
+          <h4>Dónde se usa</h4>
+          <p>InformeMarinado: pestañas de análisis (<code>#tabGeneral</code>, <code>#tabPlantilla</code>) y selector de proceso
+            (<code>#procMarinado</code>, <code>#procCongelado</code>).</p>
+          <h4>Ejemplo de pedido</h4>
+          <p class="pedido">«En C08 agrega una pestaña "Comparativo".»</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="cat-item" id="c09">
+      <div class="cat-item-head">
+        <span class="cat-code">C09</span>
+        <h2>Título de sección e indicador de vista</h2>
+        <span class="tec"><code>.section-title</code> · <code>.vista-actual</code></span>
+      </div>
+      <div class="cat-body">
+        <div class="cat-demo">
+          <h2 class="section-title">Resumen general · participación sobre kilos iniciales <span class="pin">1</span></h2>
+          <div class="vista-actual" style="margin-top:14px">Vista: <strong>Semanal</strong> · 12 semanas con datos <span class="pin">2</span></div>
+        </div>
+        <div class="cat-info">
+          <h4>Partes</h4>
+          <ul>
+            <li><span class="pin">1</span> Título de sección <code>.section-title</code>: separa bloques de tarjetas.</li>
+            <li><span class="pin">2</span> Indicador de vista <code>.vista-actual</code>: vista activa y cuántos periodos hay.</li>
+          </ul>
+          <h4>Ejemplo de pedido</h4>
+          <p class="pedido">«En C09 parte 2 muestra también el rango de fechas.»</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <h2 class="cat-grupo">Indicadores y gráficos</h2>
+
+    <section class="cat-item" id="c10">
+      <div class="cat-item-head">
+        <span class="cat-code">C10</span>
+        <h2>Tarjetas KPI</h2>
+        <span class="tec"><code>.kpi-container</code> · <code>.kpi-card</code></span>
+      </div>
+      <div class="cat-body">
+        <div class="cat-demo">
+          <section class="kpi-container">
+            <div class="kpi-card kpi-taupe">
+              <div class="kpi-title">Kilos iniciales <span class="pin">1</span></div>
+              <div class="kpi-value">2,383,752 kg <span class="pin">2</span></div>
+              <div class="kpi-sub">Marinado + directo <span class="pin">3</span></div>
+            </div>
+            <div class="kpi-card kpi-dark">
+              <div class="kpi-title">Total congelado</div>
+              <div class="kpi-value">2,647,149 kg</div>
+              <div class="kpi-sub">Kilos finales</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-title">Se marina</div>
+              <div class="kpi-value">68.17%</div>
+              <div class="kpi-sub">1,625,012 kg</div>
+            </div>
+            <div class="kpi-card kpi-slate">
+              <div class="kpi-title">Sin marinar</div>
+              <div class="kpi-value">31.83%</div>
+              <div class="kpi-sub">758,739 kg <span class="pin">4</span></div>
+            </div>
+          </section>
+        </div>
+        <div class="cat-info">
+          <h4>Partes</h4>
+          <ul>
+            <li><span class="pin">1</span> Título <code>.kpi-title</code></li>
+            <li><span class="pin">2</span> Valor principal <code>.kpi-value</code></li>
+            <li><span class="pin">3</span> Detalle <code>.kpi-sub</code></li>
+            <li><span class="pin">4</span> Color del borde superior: dorado (por defecto), <code>.kpi-taupe</code>,
+              <code>.kpi-dark</code>, <code>.kpi-slate</code></li>
+          </ul>
+          <h4>Regla</h4>
+          <p>4 por fila en laptop, 2 en tablet y 1 en celular (regla 4).</p>
+          <h4>Ejemplo de pedido</h4>
+          <p class="pedido">«En C10 la tarjeta "Se marina" muestra el valor en kg y el % en el detalle.»</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="cat-item" id="c11">
+      <div class="cat-item-head">
+        <span class="cat-code">C11</span>
+        <h2>Tarjeta de gráfico</h2>
+        <span class="tec"><code>.chart-card</code> · <code>.chart-header</code> · <code>.chart-box</code></span>
+      </div>
+      <div class="cat-body">
+        <div class="cat-demo">
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3>Título del gráfico <span class="pin">1</span></h3>
+              <span class="badge-info">kg · unidad <span class="pin">2</span></span>
+            </div>
+            <div class="chart-box" style="height:120px;display:flex;align-items:center;justify-content:center;background:var(--color-bg);border-radius:8px;color:var(--color-text-muted)">
+              Área del gráfico <span class="pin" style="margin-left:6px">3</span>
+            </div>
+          </div>
+        </div>
+        <div class="cat-info">
+          <h4>Partes</h4>
+          <ul>
+            <li><span class="pin">1</span> Título <code>.chart-header h3</code></li>
+            <li><span class="pin">2</span> Etiqueta de unidad <code>.badge-info</code> (dorada o gris <code>.badge-slate</code>)</li>
+            <li><span class="pin">3</span> Contenedor <code>.chart-box</code>: alto 320 px, 285 en laptop, 240 en celular</li>
+          </ul>
+          <h4>Ancho</h4>
+          <p>Media fila (2 por fila) o fila completa (<code>.span-2</code>).</p>
+          <h4>Ejemplo de pedido</h4>
+          <p class="pedido">«En C11 pon el gráfico de ranking a media fila.»</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="cat-item" id="c12">
+      <div class="cat-item-head">
+        <span class="cat-code">C12</span>
+        <h2>Gráfico de barras apiladas</h2>
+        <span class="tec"><code>#chartTotalCong</code> · Chart.js <code>bar</code> + <code>stacked</code></span>
+      </div>
+      <div class="cat-body">
+        <div class="cat-demo">
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3>Total congelado y participación</h3>
+              <span class="badge-info badge-slate">kg finales</span>
+            </div>
+            <div class="chart-box"><canvas id="demoApiladas"></canvas></div>
+          </div>
+        </div>
+        <div class="cat-info">
+          <h4>Qué es</h4>
+          <p>Barras divididas en tramos por categoría; la altura total es la suma.</p>
+          <h4>Elementos</h4>
+          <ul>
+            <li><b>Leyenda</b> arriba del gráfico, con el color de cada serie</li>
+            <li><b>Etiquetas de datos</b> dentro de cada tramo (abreviadas: 145k); se ocultan en celular y en tramos muy delgados</li>
+            <li><b>Eje X</b>: solo «Sem 41»; el rango va en el recuadro del cursor (regla 2)</li>
+          </ul>
+          <h4>Ejemplo de pedido</h4>
+          <p class="pedido">«En C12 muestra el total encima de cada barra.»</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="cat-item" id="c13">
+      <div class="cat-item-head">
+        <span class="cat-code">C13</span>
+        <h2>Gráfico de línea</h2>
+        <span class="tec"><code>#chartMarPct</code> · Chart.js <code>line</code></span>
+      </div>
+      <div class="cat-body">
+        <div class="cat-demo">
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3>Marinado (1005): % de inyección</h3>
+              <span class="badge-info">%</span>
+            </div>
+            <div class="chart-box"><canvas id="demoLinea"></canvas></div>
+          </div>
+        </div>
+        <div class="cat-info">
+          <h4>Qué es</h4>
+          <p>Evolución de un indicador en el tiempo. Línea de 2 px con puntos y la etiqueta del valor sobre cada punto.</p>
+          <h4>Ejemplo de pedido</h4>
+          <p class="pedido">«En C13 agrega una línea punteada con la meta de 16%.»</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="cat-item" id="c14">
+      <div class="cat-item-head">
+        <span class="cat-code">C14</span>
+        <h2>Ranking (barras horizontales)</h2>
+        <span class="tec"><code>#chartRanking</code> · Chart.js <code>bar</code> + <code>indexAxis: 'y'</code></span>
+      </div>
+      <div class="cat-body">
+        <div class="cat-demo">
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3>% de inyección por plantilla</h3>
+              <span class="badge-info">15 plantillas con más kilos</span>
+            </div>
+            <div class="chart-box"><canvas id="demoRanking"></canvas></div>
+          </div>
+        </div>
+        <div class="cat-info">
+          <h4>Qué es</h4>
+          <p>Compara categorías con nombres largos (plantillas), ordenadas de mayor a menor. Muestra hasta 15.</p>
+          <h4>Ejemplo de pedido</h4>
+          <p class="pedido">«En C14 muestra las 10 plantillas con menor % de inyección.»</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="cat-item" id="c15">
+      <div class="cat-item-head">
+        <span class="cat-code">C15</span>
+        <h2>Recuadro del cursor (tooltip)</h2>
+        <span class="tec">Chart.js <code>plugins.tooltip</code></span>
+      </div>
+      <div class="cat-body">
+        <div class="cat-demo">
+          <div class="demo-fila">
+            <div>
+              <div class="demo-label">Detallado (C13)</div>
+              <div class="tooltip-mock">
+                <div class="tt-title">Sem. 42 (12/10 al 18/10) <span class="pin">1</span></div>
+                <div class="tt-body"><span class="sw" style="background:#BAA063"></span>% de inyección: 15.89%</div>
+                <div class="tt-body">Kilos Inicial: 128,080 kg</div>
+                <div class="tt-body">Kilos Final: 148,434 kg</div>
+                <div class="tt-body">Ganancia: 20,355 kg <span class="pin">2</span></div>
+              </div>
+            </div>
+            <div>
+              <div class="demo-label">Simple (C12)</div>
+              <div class="tooltip-mock">
+                <div class="tt-title">Sem. 42 (12/10 al 18/10)</div>
+                <div class="tt-body"><span class="sw" style="background:#BAA063"></span>Se marina: 68.41%</div>
+                <div class="tt-body"><span class="sw" style="background:#7A828E"></span>Sin marinar: 31.59%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="cat-info">
+          <h4>Qué es</h4>
+          <p>Aparece al pasar el cursor por un punto o barra. Se puede dejar simple o con detalle.</p>
+          <h4>Partes</h4>
+          <ul>
+            <li><span class="pin">1</span> Título: periodo completo con rango de fechas</li>
+            <li><span class="pin">2</span> Líneas de detalle</li>
+          </ul>
+          <h4>Ejemplo de pedido</h4>
+          <p class="pedido">«En el C15 del C12 agrega los kg además del %.»</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <h2 class="cat-grupo">Tablas</h2>
+
+    <section class="cat-item" id="c16">
+      <div class="cat-item-head">
+        <span class="cat-code">C16</span>
+        <h2>Matriz jerárquica</h2>
+        <span class="tec"><code>.matrix-card</code> · <code>.matrix-table</code></span>
+      </div>
+      <div class="cat-body">
+        <div class="cat-demo">
+          <section class="matrix-card">
+            <div class="matrix-header-bar">
+              <div>
+                <h3>Matriz por periodo <span class="pin">1</span></h3>
+                <div class="matrix-sub">Semana › Punto de proceso › Plantilla</div>
+              </div>
+              <div class="matrix-toolbar">
+                <button class="btn-tool">Expandir</button>
+                <button class="btn-tool">Colapsar</button>
+                <button class="btn-tool btn-excel"><i class="fa-solid fa-table"></i> Excel</button>
+                <span class="pin">2</span>
+              </div>
+            </div>
+            <div class="table-wrapper">
+              <table class="matrix-table">
+                <thead>
+                  <tr>
+                    <th class="col-jerarquia">Semana / Punto / Plantilla <span class="pin">3</span></th>
+                    <th>Unidades</th>
+                    <th>Kilos Inicial</th>
+                    <th>Kilos Final</th>
+                    <th>Ganancia</th>
+                    <th>% Iny.</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="mx-periodo">
+                    <td><span class="tree-toggle-icon">▼</span>Sem. 47 (16/11 al 22/11) <span class="pin">4</span></td>
+                    <td>15,680</td><td>142,354</td><td>158,663</td><td>16,310</td><td></td>
+                  </tr>
+                  <tr class="mx-punto">
+                    <td><span class="tree-toggle-icon">▼</span>1005 - MARINADO<span class="nivel-count">(9)</span> <span class="pin">5</span></td>
+                    <td>12,079</td><td>104,489</td><td>120,798</td><td>16,310</td><td>15.61%</td>
+                  </tr>
+                  <tr class="mx-plantilla">
+                    <td><span class="plantilla-code">1181</span>PIERNA P/CHULETA MARINADO <span class="pin">6</span></td>
+                    <td>2,926</td><td>33,744</td><td>39,036</td><td>5,292</td><td>15.68%</td>
+                  </tr>
+                  <tr class="mx-punto">
+                    <td><span class="tree-toggle-icon">▶</span>1011 - CONGELADO DIRECTO<span class="nivel-count">(24)</span></td>
+                    <td>3,601</td><td>37,865</td><td>37,865</td><td class="num-zero">–</td><td>0.00%</td>
+                  </tr>
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td>Total general <span class="pin">7</span></td>
+                    <td>295,472</td><td>2,383,752</td><td>2,647,149</td><td>263,397</td><td></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </section>
+        </div>
+        <div class="cat-info">
+          <h4>Partes</h4>
+          <ul>
+            <li><span class="pin">1</span> Título y subtítulo de la matriz</li>
+            <li><span class="pin">2</span> Barra de herramientas <code>.matrix-toolbar</code></li>
+            <li><span class="pin">3</span> Encabezado oscuro con filete dorado</li>
+            <li><span class="pin">4</span> Nivel 1, banda dorada <code>.mx-periodo</code></li>
+            <li><span class="pin">5</span> Nivel 2, fondo gris <code>.mx-punto</code>, con conteo de hijos</li>
+            <li><span class="pin">6</span> Nivel 3, texto regular <code>.mx-plantilla</code>, con código</li>
+            <li><span class="pin">7</span> Total general <code>tfoot</code>, fijo abajo</li>
+          </ul>
+          <h4>Regla 5</h4>
+          <p>Etiquetas planas; el único icono es ▼/▶ para abrir y cerrar. La primera columna absorbe el ancho sobrante.</p>
+          <h4>Ejemplo de pedido</h4>
+          <p class="pedido">«En C16 agrega un 4º nivel con el producto debajo de la plantilla.»</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <h2 class="cat-grupo">Mensajes</h2>
+
+    <section class="cat-item" id="c17">
+      <div class="cat-item-head">
+        <span class="cat-code">C17</span>
+        <h2>Aviso flotante (toast)</h2>
+        <span class="tec"><code>#toastNotification</code> · <code>mostrarToast()</code></span>
+      </div>
+      <div class="cat-body">
+        <div class="cat-demo">
+          <div class="toast-notification">7,572 registros cargados</div>
+        </div>
+        <div class="cat-info">
+          <h4>Qué es</h4>
+          <p>Mensaje breve abajo a la derecha que desaparece solo a los 3 segundos (cargas, exportaciones, reestablecer).</p>
+          <h4>Ejemplo de pedido</h4>
+          <p class="pedido">«En C17 que el aviso dure 5 segundos.»</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="cat-item" id="c18">
+      <div class="cat-item-head">
+        <span class="cat-code">C18</span>
+        <h2>Pantalla de carga</h2>
+        <span class="tec"><code>#loadingOverlay</code> · <code>mostrarCargando()</code></span>
+      </div>
+      <div class="cat-body">
+        <div class="cat-demo">
+          <div class="loading-overlay">
+            <div class="loading-box">
+              <div class="spinner"></div>
+              <h4>Consultando Marinado</h4>
+              <p>Periodo 2026-01-01 al 2026-11-20...</p>
+            </div>
+          </div>
+        </div>
+        <div class="cat-info">
+          <h4>Qué es</h4>
+          <p>Cubre la página mientras se consulta SQL Server. Bloquea los clics hasta que termina.</p>
+          <h4>Ejemplo de pedido</h4>
+          <p class="pedido">«En C18 muestra cuántos segundos lleva la consulta.»</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <h2 class="cat-grupo">Referencias</h2>
+
+    <section class="cat-item" id="c19">
+      <div class="cat-item-head">
+        <span class="cat-code">C19</span>
+        <h2>Paleta de colores</h2>
+        <span class="tec"><code>PaletaFinanza_Industrial.json</code></span>
+      </div>
+      <div class="cat-body">
+        <div class="cat-demo">
+          <div class="swatches">
+            <div class="swatch"><div class="c" style="background:#38353B"></div><div><b>Tinta</b><br>#38353B · cabecera, títulos</div></div>
+            <div class="swatch"><div class="c" style="background:#434B57"></div><div><b>Pizarra oscura</b><br>#434B57 · degradado</div></div>
+            <div class="swatch"><div class="c" style="background:#BAA063"></div><div><b>Bronce</b><br>#BAA063 · principal, Marinado</div></div>
+            <div class="swatch"><div class="c" style="background:#7A828E"></div><div><b>Pizarra</b><br>#7A828E · secundario, Congelado</div></div>
+            <div class="swatch"><div class="c" style="background:#A89F91"></div><div><b>Taupe</b><br>#A89F91 · kilos iniciales</div></div>
+            <div class="swatch"><div class="c" style="background:#E2D5B5"></div><div><b>Arena</b><br>#E2D5B5 · subtítulos sobre oscuro</div></div>
+            <div class="swatch"><div class="c" style="background:#F0EADD"></div><div><b>Banda dorada</b><br>#F0EADD · nivel 1 de matriz</div></div>
+            <div class="swatch"><div class="c" style="background:#F2F4F8;border-bottom:1px solid #E2E8F0"></div><div><b>Fondo</b><br>#F2F4F8 · página, nivel 2</div></div>
+            <div class="swatch"><div class="c" style="background:#4A474C"></div><div><b>Texto</b><br>#4A474C</div></div>
+            <div class="swatch"><div class="c" style="background:#787479"></div><div><b>Texto tenue</b><br>#787479</div></div>
+          </div>
+        </div>
+        <div class="cat-info">
+          <h4>Qué es</h4>
+          <p>Los colores oficiales. En los gráficos cada proceso mantiene su color: Marinado en bronce y Congelado directo en
+            pizarra.</p>
+          <h4>Ejemplo de pedido</h4>
+          <p class="pedido">«En C12 usa Taupe para el Congelado directo.»</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="cat-item" id="c20">
+      <div class="cat-item-head">
+        <span class="cat-code">C20</span>
+        <h2>Tamaños de pantalla</h2>
+        <span class="tec"><code>@media</code> 1600 / 980 / 768 px (regla 4)</span>
+      </div>
+      <div class="cat-body">
+        <div class="cat-demo">
+          <table class="tabla-simple">
+            <thead>
+              <tr><th>Pantalla</th><th>Ancho</th><th>Qué cambia</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><b>Monitor</b></td><td>&gt; 1600 px</td><td>Tamaño normal.</td></tr>
+              <tr><td><b>Laptop</b></td><td>≤ 1600 px</td><td>Todo más compacto; gráficos de 285 px; matriz con alto máximo de 460 px.</td></tr>
+              <tr><td><b>Tablet</b></td><td>≤ 980 px</td><td>KPI de 2 en 2; gráficos uno por fila; la barra lateral ya no se despliega.</td></tr>
+              <tr><td><b>Celular</b></td><td>≤ 768 px</td><td>Barra lateral horizontal (C03); KPI uno por fila; filtros a todo el ancho; sin etiquetas de datos en gráficos.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="cat-info">
+          <h4>Qué es</h4>
+          <p>Cómo se adapta cada dashboard. Una laptop Full HD con escala de Windows al 125% mide 1536 px, por eso entra en «Laptop».</p>
+          <h4>Ejemplo de pedido</h4>
+          <p class="pedido">«En tablet muestra los KPI de 4 en 4.»</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // Gráficos de ejemplo (datos ficticios) con la misma configuración visual de los dashboards
+    window.addEventListener('DOMContentLoaded', () => {
+      if (typeof Chart === 'undefined') return;
+      Chart.defaults.font.family = "'Inter', sans-serif";
+      Chart.defaults.font.size = 11;
+      Chart.defaults.color = '#787479';
+      Chart.defaults.plugins.legend.labels.usePointStyle = true;
+      Chart.defaults.plugins.legend.labels.boxWidth = 8;
+      Chart.defaults.plugins.tooltip.backgroundColor = '#38353B';
+      Chart.defaults.plugins.tooltip.bodyColor = '#E2D5B5';
+      if (typeof ChartDataLabels !== 'undefined') Chart.register(ChartDataLabels);
+
+      const sem = ['Sem 41', 'Sem 42', 'Sem 43', 'Sem 44', 'Sem 45', 'Sem 46', 'Sem 47'];
+      const k = v => v >= 10000 ? `${Math.round(v / 1000)}k` : v.toLocaleString('es-PE');
+      const etiquetas = extra => Object.assign({
+        display: () => window.innerWidth > 768,
+        font: { size: 9, weight: '600' },
+        color: '#38353B'
+      }, extra);
+      const ejes = (fmt, extraY = {}) => ({
+        x: { grid: { display: false } },
+        y: Object.assign({ grid: { color: '#E2E8F0' }, border: { display: false }, ticks: { callback: fmt } }, extraY)
+      });
+
+      new Chart(document.getElementById('demoApiladas'), {
+        type: 'bar',
+        data: {
+          labels: sem,
+          datasets: [
+            { label: 'Marinado (1005)', data: [184000, 148000, 156000, 165000, 166000, 163000, 121000], backgroundColor: '#BAA063', maxBarThickness: 36, datalabels: { color: '#38353B' } },
+            { label: 'Congelado directo (1011)', data: [69000, 59000, 71000, 49000, 80000, 54000, 38000], backgroundColor: '#7A828E', borderRadius: { topLeft: 4, topRight: 4 }, borderSkipped: false, maxBarThickness: 36, datalabels: { color: '#FFFFFF' } }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { align: 'start' }, datalabels: etiquetas({ formatter: k }) },
+          scales: Object.assign(ejes(v => `${k(v)} kg`), { x: { stacked: true, grid: { display: false } } }, { y: { stacked: true, grid: { color: '#E2E8F0' }, border: { display: false }, ticks: { callback: v => `${k(v)} kg` } } })
+        }
+      });
+
+      new Chart(document.getElementById('demoLinea'), {
+        type: 'line',
+        data: {
+          labels: sem,
+          datasets: [{ label: '% de inyección', data: [16.5, 15.9, 16.5, 17.0, 15.6, 17.5, 15.6], borderColor: '#BAA063', backgroundColor: '#BAA063', borderWidth: 2, pointRadius: 4, pointBorderColor: '#FFFFFF', pointBorderWidth: 2, tension: 0.25 }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          layout: { padding: { left: 12, right: 18 } },
+          plugins: { legend: { display: false }, datalabels: etiquetas({ align: 'top', anchor: 'end', formatter: v => `${v.toFixed(1)}%` }) },
+          scales: ejes(v => `${Number(v).toFixed(1)}%`, { grace: '15%' })
+        }
+      });
+
+      const plantillas = ['COGOTE SIN LONJA MARINADO', 'COSTILLAR C/LONJA MARINADO', 'PIERNA P/CHULETA MARINADO', 'BRAZUELO P/CHULETA MARINADO', 'LOMO CON LONJA MARINADO', 'LOMITO FINO MARINADO'];
+      new Chart(document.getElementById('demoRanking'), {
+        type: 'bar',
+        data: {
+          labels: plantillas,
+          datasets: [{ label: '% de inyección', data: [18.16, 17.41, 16.56, 16.45, 15.64, 12.77], backgroundColor: '#BAA063', borderRadius: 4, borderSkipped: 'start', maxBarThickness: 20 }]
+        },
+        options: {
+          indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false }, datalabels: etiquetas({ anchor: 'end', align: 'end', formatter: v => `${v.toFixed(2)}%` }) },
+          scales: {
+            x: { grid: { color: '#E2E8F0' }, border: { display: false }, grace: '12%', ticks: { callback: v => `${v}%` } },
+            y: { grid: { display: false } }
+          }
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>
