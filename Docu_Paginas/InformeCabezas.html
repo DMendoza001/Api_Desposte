@@ -121,6 +121,7 @@
       flex-direction: column;
       padding: 14px 0;
       flex-shrink: 0;
+      border-radius: 0 14px 14px 0;
       box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
       z-index: 100;
     }
@@ -200,8 +201,8 @@
     }
 
     /* =========================================================================
-       Barra lateral plegable
-       - Contraída: franja de iconos (60px) y el dashboard gana ancho.
+       Barra lateral auto-plegable
+       - En escritorio/tablet: franja de iconos (60px) y el dashboard gana ancho.
        - Al pasar el mouse se despliega SOBRE el contenido (margin-right
          negativo), sin redimensionar gráficos ni matriz.
        ========================================================================= */
@@ -215,74 +216,76 @@
       white-space: nowrap;
     }
 
-    .app-layout.sidebar-oculta .sidebar {
-      width: 60px;
-      overflow: hidden;
-    }
+    @media screen and (min-width: 769px) {
+      .sidebar {
+        width: 60px;
+        overflow: hidden;
+      }
 
-    .app-layout.sidebar-oculta .sidebar-header {
-      padding: 0 8px 14px;
-    }
+      .sidebar-header {
+        padding: 0 8px 14px;
+      }
 
-    .app-layout.sidebar-oculta .sidebar-header h2 {
-      font-size: 0;
-      justify-content: center;
-      gap: 0;
-    }
+      .sidebar-header h2 {
+        font-size: 0;
+        justify-content: center;
+        gap: 0;
+      }
 
-    .app-layout.sidebar-oculta .sidebar-header h2 i {
-      font-size: 0.95rem;
-    }
+      .sidebar-header h2 i {
+        font-size: 0.95rem;
+      }
 
-    .app-layout.sidebar-oculta .sidebar-header p,
-    .app-layout.sidebar-oculta .sidebar-btn .btn-info span,
-    .app-layout.sidebar-oculta .sidebar-badge {
-      display: none;
-    }
+      .sidebar-header p,
+      .sidebar-btn .btn-info span,
+      .sidebar-badge {
+        display: none;
+      }
 
-    .app-layout.sidebar-oculta .sidebar-btn {
-      justify-content: center;
-      padding: 9px 0;
+      .sidebar-btn {
+        justify-content: center;
+        padding: 9px 0;
+      }
     }
 
     @media screen and (min-width: 981px) and (hover: hover) {
 
-      .app-layout.sidebar-oculta .sidebar:hover,
-      .app-layout.sidebar-oculta .sidebar:has(:focus-visible) {
+      .sidebar:hover,
+      .sidebar:has(:focus-visible) {
         width: 180px;
         margin-right: -120px;
         box-shadow: 8px 0 24px rgba(0, 0, 0, 0.28);
       }
 
-      .app-layout.sidebar-oculta .sidebar:hover .sidebar-header,
-      .app-layout.sidebar-oculta .sidebar:has(:focus-visible) .sidebar-header {
+      .sidebar:hover .sidebar-header,
+      .sidebar:has(:focus-visible) .sidebar-header {
         padding: 0 14px 14px;
       }
 
-      .app-layout.sidebar-oculta .sidebar:hover .sidebar-header h2,
-      .app-layout.sidebar-oculta .sidebar:has(:focus-visible) .sidebar-header h2 {
+      .sidebar:hover .sidebar-header h2,
+      .sidebar:has(:focus-visible) .sidebar-header h2 {
         font-size: 0.95rem;
         justify-content: flex-start;
         gap: 8px;
       }
 
-      .app-layout.sidebar-oculta .sidebar:hover .sidebar-header p,
-      .app-layout.sidebar-oculta .sidebar:has(:focus-visible) .sidebar-header p {
+      .sidebar:hover .sidebar-header p,
+      .sidebar:has(:focus-visible) .sidebar-header p {
         display: block;
       }
 
-      .app-layout.sidebar-oculta .sidebar:hover .sidebar-btn .btn-info span,
-      .app-layout.sidebar-oculta .sidebar:has(:focus-visible) .sidebar-btn .btn-info span {
+      .sidebar:hover .sidebar-btn .btn-info span,
+      .sidebar:has(:focus-visible) .sidebar-btn .btn-info span {
         display: inline;
       }
 
-      .app-layout.sidebar-oculta .sidebar:hover .sidebar-badge,
-      .app-layout.sidebar-oculta .sidebar:has(:focus-visible) .sidebar-badge {
+      .sidebar:hover .sidebar-badge,
+      .sidebar:has(:focus-visible) .sidebar-badge {
         display: inline-block;
       }
 
-      .app-layout.sidebar-oculta .sidebar:hover .sidebar-btn,
-      .app-layout.sidebar-oculta .sidebar:has(:focus-visible) .sidebar-btn {
+      .sidebar:hover .sidebar-btn,
+      .sidebar:has(:focus-visible) .sidebar-btn {
         justify-content: space-between;
         padding: 9px 11px;
       }
@@ -293,34 +296,6 @@
       align-items: center;
       gap: 14px;
       min-width: 0;
-    }
-
-    .btn-toggle-sidebar {
-      flex-shrink: 0;
-      width: 36px;
-      height: 36px;
-      border-radius: 8px;
-      border: 1px solid var(--color-primary-border);
-      background: rgba(186, 160, 99, 0.12);
-      color: var(--color-header-subtext);
-      font-size: 0.95rem;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.15s ease;
-    }
-
-    .btn-toggle-sidebar:hover {
-      background: var(--color-primary);
-      border-color: var(--color-primary);
-      color: var(--color-header-bg);
-    }
-
-    .app-layout:not(.sidebar-oculta) .btn-toggle-sidebar {
-      background: var(--color-primary);
-      border-color: var(--color-primary);
-      color: var(--color-header-bg);
     }
 
     .main-content {
@@ -484,7 +459,7 @@
       gap: 6px;
     }
 
-    .filter-group > label {
+    .filter-group>label {
       font-size: 0.78rem;
       font-weight: 700;
       text-transform: uppercase;
@@ -492,7 +467,7 @@
       color: var(--pantone-dark);
     }
 
-    .filter-group > input {
+    .filter-group>input {
       border: 1px solid var(--border-ui);
       padding: 9px 13px;
       border-radius: 8px;
@@ -505,7 +480,7 @@
       transition: all 0.2s ease;
     }
 
-    .filter-group > input:focus {
+    .filter-group>input:focus {
       border-color: var(--pantone-gold);
       box-shadow: 0 0 0 3px var(--pantone-yellow-soft);
     }
@@ -969,11 +944,15 @@
          paleta sobre blanco) para que la 1ª columna fija tape lo que se desliza.
        ========================================================================= */
     .matrix-card {
-      --mx-nivel-bg: #F0EADD;      /* #BAA063 al 22% sobre blanco */
-      --mx-nivel-line: #DCCDA8;    /* #BAA063 al 45% sobre blanco */
+      --mx-nivel-bg: #F0EADD;
+      /* #BAA063 al 22% sobre blanco */
+      --mx-nivel-line: #DCCDA8;
+      /* #BAA063 al 45% sobre blanco */
       --mx-nttra-bg: var(--color-bg);
-      --mx-hover-bg: #F8F6EF;      /* #BAA063 al 10% sobre blanco */
-      --mx-destacado-bg: #F5F2E9;  /* #BAA063 al 14% sobre blanco */
+      --mx-hover-bg: #F8F6EF;
+      /* #BAA063 al 10% sobre blanco */
+      --mx-destacado-bg: #F5F2E9;
+      /* #BAA063 al 14% sobre blanco */
       --mx-metric-bg: #F7F7F9;
       --mx-zero: var(--color-gray-300);
     }
@@ -1087,7 +1066,7 @@
       padding-right: 14px;
     }
 
-    .matrix-table tbody tr:hover > td {
+    .matrix-table tbody tr:hover>td {
       background-color: var(--mx-hover-bg) !important;
     }
 
@@ -1096,7 +1075,7 @@
       cursor: pointer;
     }
 
-    .matrix-table tr.row-nivel > td {
+    .matrix-table tr.row-nivel>td {
       background-color: var(--mx-nivel-bg) !important;
       color: var(--color-heading);
       font-weight: 700;
@@ -1106,7 +1085,7 @@
       padding-bottom: 9px;
     }
 
-    .matrix-table tr.row-nivel > td:first-child {
+    .matrix-table tr.row-nivel>td:first-child {
       padding-left: 12px;
       box-shadow: inset 3px 0 0 var(--color-primary);
     }
@@ -1123,7 +1102,7 @@
       cursor: pointer;
     }
 
-    .matrix-table tr.row-nttra > td {
+    .matrix-table tr.row-nttra>td {
       background-color: var(--mx-nttra-bg) !important;
       color: var(--color-heading);
       font-weight: 600;
@@ -1134,7 +1113,7 @@
       cursor: pointer;
     }
 
-    .matrix-table tr.row-desposte > td {
+    .matrix-table tr.row-desposte>td {
       color: var(--color-heading);
       font-weight: 600;
     }
@@ -1155,7 +1134,7 @@
     }
 
     /* Nivel 4: Producto (texto regular) */
-    .matrix-table tr.row-producto > td {
+    .matrix-table tr.row-producto>td {
       color: var(--color-text);
       font-weight: 400;
     }
@@ -1179,16 +1158,16 @@
        Tinte dorado tenue y filete dorado a la izquierda, sin competir con los
        niveles.
        ========================================================================= */
-    .matrix-table tr.row-destacado-05829 > td {
+    .matrix-table tr.row-destacado-05829>td {
       background-color: var(--mx-destacado-bg) !important;
       color: var(--color-heading);
     }
 
-    .matrix-table tr.row-destacado-05829 > td:first-child {
+    .matrix-table tr.row-destacado-05829>td:first-child {
       box-shadow: inset 3px 0 0 var(--color-primary);
     }
 
-    .matrix-table tr.row-destacado-05829:hover > td {
+    .matrix-table tr.row-destacado-05829:hover>td {
       background-color: var(--mx-nivel-bg) !important;
     }
 
@@ -1227,10 +1206,21 @@
       --mx-ind-4: 64px;
     }
 
-    table.matrix-table tr.row-nivel > td:first-child { padding-left: var(--mx-ind-1) !important; }
-    table.matrix-table tr.row-nttra > td:first-child { padding-left: var(--mx-ind-2) !important; }
-    table.matrix-table tr.row-desposte > td:first-child { padding-left: var(--mx-ind-3) !important; }
-    table.matrix-table tr.row-producto > td:first-child { padding-left: var(--mx-ind-4) !important; }
+    table.matrix-table tr.row-nivel>td:first-child {
+      padding-left: var(--mx-ind-1) !important;
+    }
+
+    table.matrix-table tr.row-nttra>td:first-child {
+      padding-left: var(--mx-ind-2) !important;
+    }
+
+    table.matrix-table tr.row-desposte>td:first-child {
+      padding-left: var(--mx-ind-3) !important;
+    }
+
+    table.matrix-table tr.row-producto>td:first-child {
+      padding-left: var(--mx-ind-4) !important;
+    }
 
     .num-col {
       font-variant-numeric: tabular-nums;
@@ -1484,15 +1474,11 @@
         align-items: center;
         padding: 6px 8px;
         gap: 6px;
+        border-radius: 0 0 12px 12px;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
       }
 
       .sidebar-header {
-        display: none;
-      }
-
-      /* En celular la barra es horizontal: contraída se oculta por completo */
-      .app-layout.sidebar-oculta .sidebar {
         display: none;
       }
 
@@ -1539,7 +1525,7 @@
         padding: 12px 14px;
       }
 
-      .filter-group > input {
+      .filter-group>input {
         min-width: 0;
         width: 100%;
       }
@@ -1691,7 +1677,8 @@
           <span class="sidebar-badge" id="sideBadgeDiario">0</span>
         </button>
 
-        <button class="sidebar-btn active" id="sideTabSemanal" title="Vista Semanal" onclick="cambiarModoMatriz('semanal')">
+        <button class="sidebar-btn active" id="sideTabSemanal" title="Vista Semanal"
+          onclick="cambiarModoMatriz('semanal')">
           <div class="btn-info">
             <i class="fa-solid fa-calendar-week"></i>
             <span>Semanal</span>
@@ -1723,12 +1710,8 @@
         <!-- Header -->
         <header class="header-banner">
           <div class="header-left">
-            <button type="button" class="btn-toggle-sidebar" id="btnToggleSidebar" onclick="toggleSidebar()"
-              aria-controls="sidebarNav" aria-expanded="true" title="Contraer menú a iconos">
-              <i class="fa-solid fa-bars"></i>
-            </button>
             <div class="header-info">
-              <h1><i class="fa-solid fa-drumstick-bite me-2"></i>Control de Producción y Saldo - Cabezas de Cerdo</h1>
+              <h1>Control de Producción y Saldo - Cabezas de Cerdo</h1>
               <p>Monitoreo en Unidades de Entrada (Corte Primario) vs. Saldo Pendiente sin Procesar</p>
             </div>
           </div>
@@ -2012,28 +1995,7 @@
       document.getElementById('fechaInicio').value = toYMD(hace30Dias);
     }
 
-    // =========================================================================
-    // ☰ MOSTRAR / OCULTAR BARRA LATERAL (preferencia por usuario en localStorage)
-    // =========================================================================
-    const CLAVE_SIDEBAR_OCULTA = 'informeCabezas_sidebarOculta';
-
-    function aplicarEstadoSidebar(oculta) {
-      const layout = document.querySelector('.app-layout');
-      const btn = document.getElementById('btnToggleSidebar');
-      if (!layout || !btn) return;
-      layout.classList.toggle('sidebar-oculta', oculta);
-      btn.setAttribute('aria-expanded', String(!oculta));
-      btn.title = oculta ? 'Expandir menú de navegación' : 'Contraer menú a iconos';
-    }
-
-    function toggleSidebar() {
-      const oculta = !document.querySelector('.app-layout').classList.contains('sidebar-oculta');
-      aplicarEstadoSidebar(oculta);
-      try { localStorage.setItem(CLAVE_SIDEBAR_OCULTA, oculta ? '1' : '0'); } catch (e) { }
-    }
-
     window.addEventListener('DOMContentLoaded', async () => {
-      try { aplicarEstadoSidebar(localStorage.getItem(CLAVE_SIDEBAR_OCULTA) === '1'); } catch (e) { }
       inicializarFechas();
       actualizarEstadoUI('loading', 'Detectando API...');
       apiBaseActiva = await detectarServidorApi();

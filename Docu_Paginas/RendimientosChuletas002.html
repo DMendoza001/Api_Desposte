@@ -137,8 +137,10 @@
       flex-direction: column;
       padding: 14px 0;
       flex-shrink: 0;
+      border-radius: 0 14px 14px 0;
       box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
       z-index: 100;
+      transition: width 0.22s ease, margin-right 0.22s ease, box-shadow 0.22s ease;
     }
 
     .sidebar-header {
@@ -215,9 +217,91 @@
       color: var(--pantone-yellow);
     }
 
-    /* Barra lateral plegable: al ocultarla el dashboard ocupa todo el ancho */
-    .app-layout.sidebar-oculta .sidebar {
-      display: none;
+    /* =========================================================================
+       Barra lateral auto-plegable
+       - En escritorio/tablet: franja de iconos (60px) y el dashboard gana ancho.
+       - Al pasar el mouse se despliega SOBRE el contenido (margin-right
+         negativo), sin redimensionar gráficos ni matriz.
+       ========================================================================= */
+    .sidebar-header h2,
+    .sidebar-header p,
+    .sidebar-btn .btn-info span {
+      white-space: nowrap;
+    }
+
+    @media screen and (min-width: 769px) {
+      .sidebar {
+        width: 60px;
+        overflow: hidden;
+      }
+
+      .sidebar-header {
+        padding: 0 8px 14px;
+      }
+
+      .sidebar-header h2 {
+        font-size: 0;
+        justify-content: center;
+        gap: 0;
+      }
+
+      .sidebar-header h2 i {
+        font-size: 0.95rem;
+      }
+
+      .sidebar-header p,
+      .sidebar-btn .btn-info span,
+      .sidebar-badge {
+        display: none;
+      }
+
+      .sidebar-btn {
+        justify-content: center;
+        padding: 9px 0;
+      }
+    }
+
+    @media screen and (min-width: 981px) and (hover: hover) {
+
+      .sidebar:hover,
+      .sidebar:has(:focus-visible) {
+        width: 180px;
+        margin-right: -120px;
+        box-shadow: 8px 0 24px rgba(0, 0, 0, 0.28);
+      }
+
+      .sidebar:hover .sidebar-header,
+      .sidebar:has(:focus-visible) .sidebar-header {
+        padding: 0 14px 14px;
+      }
+
+      .sidebar:hover .sidebar-header h2,
+      .sidebar:has(:focus-visible) .sidebar-header h2 {
+        font-size: 0.95rem;
+        justify-content: flex-start;
+        gap: 8px;
+      }
+
+      .sidebar:hover .sidebar-header p,
+      .sidebar:has(:focus-visible) .sidebar-header p {
+        display: block;
+      }
+
+      .sidebar:hover .sidebar-btn .btn-info span,
+      .sidebar:has(:focus-visible) .sidebar-btn .btn-info span {
+        display: inline;
+      }
+
+      .sidebar:hover .sidebar-badge,
+      .sidebar:has(:focus-visible) .sidebar-badge {
+        display: inline-block;
+      }
+
+      .sidebar:hover .sidebar-btn,
+      .sidebar:has(:focus-visible) .sidebar-btn {
+        justify-content: space-between;
+        padding: 9px 11px;
+      }
     }
 
     .main-content {
@@ -232,29 +316,6 @@
       align-items: center;
       gap: 14px;
       min-width: 0;
-    }
-
-    .btn-toggle-sidebar {
-      flex-shrink: 0;
-      width: 36px;
-      height: 36px;
-      border-radius: 8px;
-      border: 1px solid var(--pantone-yellow-border);
-      background: rgba(186, 160, 99, 0.12);
-      color: var(--color-header-subtext);
-      font-size: 0.95rem;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.15s ease;
-    }
-
-    .btn-toggle-sidebar:hover,
-    .app-layout:not(.sidebar-oculta) .btn-toggle-sidebar {
-      background: var(--color-primary);
-      border-color: var(--color-primary);
-      color: var(--color-header-bg);
     }
 
     /* Prevención de desbordamiento en hijos de CSS Grid y Flexbox */
@@ -1198,20 +1259,12 @@
        📱💻 RESPONSIVE: BARRA LATERAL Y FILTRO DE SEMANAS
        ========================================================================= */
     @media screen and (max-width: 1600px) {
-      .sidebar {
-        width: 158px;
-      }
-
       .main-content {
         padding: 10px 12px 28px;
       }
     }
 
     @media screen and (max-width: 980px) {
-      .sidebar {
-        width: 70px;
-      }
-
       .sidebar-header {
         padding: 0 4px 10px;
         text-align: center;
@@ -1254,6 +1307,7 @@
         align-items: center;
         padding: 6px 8px;
         gap: 6px;
+        border-radius: 0 0 12px 12px;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
       }
 
@@ -1323,7 +1377,7 @@
       </div>
 
       <nav class="sidebar-menu">
-        <button class="sidebar-btn" id="sideTabDiario" onclick="cambiarModoMatriz('diario')">
+        <button class="sidebar-btn" id="sideTabDiario" title="Vista Diario" onclick="cambiarModoMatriz('diario')">
           <div class="btn-info">
             <i class="fa-regular fa-calendar-days"></i>
             <span>Diario</span>
@@ -1331,7 +1385,7 @@
           <span class="sidebar-badge" id="badgeDiario">0</span>
         </button>
 
-        <button class="sidebar-btn active" id="sideTabSemanal" onclick="cambiarModoMatriz('semanal')">
+        <button class="sidebar-btn active" id="sideTabSemanal" title="Vista Semanal" onclick="cambiarModoMatriz('semanal')">
           <div class="btn-info">
             <i class="fa-solid fa-calendar-week"></i>
             <span>Semanal</span>
@@ -1339,7 +1393,7 @@
           <span class="sidebar-badge" id="badgeSemanal">0</span>
         </button>
 
-        <button class="sidebar-btn" id="sideTabMensual" onclick="cambiarModoMatriz('mensual')">
+        <button class="sidebar-btn" id="sideTabMensual" title="Vista Mensual" onclick="cambiarModoMatriz('mensual')">
           <div class="btn-info">
             <i class="fa-regular fa-calendar"></i>
             <span>Mensual</span>
@@ -1347,7 +1401,7 @@
           <span class="sidebar-badge" id="badgeMensual">0</span>
         </button>
 
-        <button class="sidebar-btn" id="sideTabAnual" onclick="cambiarModoMatriz('anual')">
+        <button class="sidebar-btn" id="sideTabAnual" title="Vista Anual" onclick="cambiarModoMatriz('anual')">
           <div class="btn-info">
             <i class="fa-solid fa-chart-line"></i>
             <span>Anual</span>
@@ -1363,10 +1417,6 @@
     <!-- Header -->
     <header class="header-banner">
       <div class="header-left">
-        <button type="button" class="btn-toggle-sidebar" id="btnToggleSidebar" onclick="toggleSidebar()"
-          aria-controls="sidebarNav" aria-expanded="true" title="Ocultar menú de navegación">
-          <i class="fa-solid fa-bars"></i>
-        </button>
         <div class="header-info">
           <h1><i class="fa-solid fa-chart-column me-2"></i>Control de Rendimiento - Chuletas</h1>
           <p>Kilos Origen (TTra 13) vs. Kilos Resultado (TTra 4 excl. Harinas y Merma)</p>
@@ -1793,28 +1843,7 @@
       document.getElementById('fechaInicio').value = toYMD(inicio);
     }
 
-    // =========================================================================
-    // ☰ MOSTRAR / OCULTAR BARRA LATERAL (preferencia por usuario en localStorage)
-    // =========================================================================
-    const CLAVE_SIDEBAR_OCULTA = 'rendimientosChuletas_sidebarOculta';
-
-    function aplicarEstadoSidebar(oculta) {
-      const layout = document.querySelector('.app-layout');
-      const btn = document.getElementById('btnToggleSidebar');
-      if (!layout || !btn) return;
-      layout.classList.toggle('sidebar-oculta', oculta);
-      btn.setAttribute('aria-expanded', String(!oculta));
-      btn.title = oculta ? 'Mostrar menú de navegación' : 'Ocultar menú de navegación';
-    }
-
-    function toggleSidebar() {
-      const oculta = !document.querySelector('.app-layout').classList.contains('sidebar-oculta');
-      aplicarEstadoSidebar(oculta);
-      try { localStorage.setItem(CLAVE_SIDEBAR_OCULTA, oculta ? '1' : '0'); } catch (e) { }
-    }
-
     window.addEventListener('DOMContentLoaded', async () => {
-      try { aplicarEstadoSidebar(localStorage.getItem(CLAVE_SIDEBAR_OCULTA) === '1'); } catch (e) { }
       inicializarFechas();
       setupEvents();
       actualizarVisibilidadFiltroSemanas();
