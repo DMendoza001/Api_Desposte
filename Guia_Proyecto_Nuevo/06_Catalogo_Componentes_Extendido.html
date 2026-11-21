@@ -1,0 +1,1662 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catálogo Extendido de Componentes UI (E01–E20)</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <style>
+    :root {
+      --color-header-bg: #38353B;
+      --color-header-gradient: linear-gradient(135deg, #38353B 0%, #434B57 100%);
+      --color-header-subtext: #E2D5B5;
+      --color-heading: #38353B;
+      --color-text: #4A474C;
+      --color-text-muted: #787479;
+      --color-primary: #BAA063;
+      --color-secondary: #7A828E;
+      --color-bg: #F2F4F8;
+      --color-surface: #FFFFFF;
+      --color-border: #E2E8F0;
+      --color-primary-soft: #C4B282;
+      --color-primary-soft-bg: rgba(186, 160, 99, 0.16);
+      --color-primary-border: rgba(186, 160, 99, 0.45);
+      --color-secondary-soft-bg: rgba(122, 130, 142, 0.16);
+      --color-secondary-border: rgba(122, 130, 142, 0.42);
+      --ok-bg: #DCFCE7;
+      --ok-text: #166534;
+      --warn-bg: #FEF3C7;
+      --warn-text: #92400E;
+      --err-bg: #FEE2E2;
+      --err-text: #991B1B;
+      --info-bg: #DBEAFE;
+      --info-text: #1E40AF;
+      --shadow-sm: 0 1px 3px rgba(56, 53, 59, 0.06), 0 1px 2px rgba(56, 53, 59, 0.04);
+      --shadow-lg: 0 10px 20px -4px rgba(56, 53, 59, 0.16), 0 4px 8px -2px rgba(56, 53, 59, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+      background: var(--color-bg);
+      color: var(--color-text);
+      font-size: 14px;
+    }
+
+    code {
+      font-family: 'Consolas', 'SFMono-Regular', monospace;
+      font-size: 0.8em;
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+      padding: 1px 5px;
+      color: var(--color-heading);
+    }
+
+    .cat-top {
+      background: var(--color-header-gradient);
+      color: #FFFFFF;
+      padding: 28px 32px 24px;
+      border-bottom: 3px solid var(--color-primary);
+    }
+
+    .cat-top .eyebrow {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: var(--color-primary);
+    }
+
+    .cat-top h1 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      margin-top: 4px;
+    }
+
+    .cat-top p {
+      color: var(--color-header-subtext);
+      margin-top: 6px;
+      max-width: 900px;
+      line-height: 1.5;
+    }
+
+    .cat-wrap {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 24px 24px 64px;
+    }
+
+    .cat-como {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-left: 4px solid var(--color-primary);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    .cat-index {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 28px;
+    }
+
+    .cat-index a {
+      text-decoration: none;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--color-heading);
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 999px;
+      padding: 5px 11px;
+    }
+
+    .cat-index a:hover {
+      border-color: var(--color-primary);
+      background: var(--color-primary-soft-bg);
+    }
+
+    .cat-index a b {
+      color: var(--color-primary);
+      margin-right: 4px;
+    }
+
+    .cat-grupo {
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+      margin: 34px 0 12px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .cat-item {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 18px;
+      overflow: hidden;
+      scroll-margin-top: 16px;
+    }
+
+    .cat-item-head {
+      display: flex;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .cat-code {
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: #FFFFFF;
+      background: var(--color-primary);
+      border-radius: 6px;
+      padding: 3px 8px;
+    }
+
+    .cat-item-head h2 {
+      font-size: 1.05rem;
+      color: var(--color-heading);
+    }
+
+    .cat-item-head .tec {
+      margin-left: auto;
+      font-size: 0.8rem;
+      color: var(--color-text-muted);
+    }
+
+    .cat-body {
+      display: grid;
+      grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+    }
+
+    .cat-demo {
+      padding: 20px;
+      background: var(--color-bg);
+      border-right: 1px solid var(--color-border);
+      min-width: 0;
+    }
+
+    .cat-info {
+      padding: 18px 20px;
+      line-height: 1.55;
+      font-size: 0.86rem;
+      min-width: 0;
+    }
+
+    .cat-info h4 {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+      margin: 12px 0 4px;
+    }
+
+    .cat-info h4:first-child {
+      margin-top: 0;
+    }
+
+    .cat-info .pedido {
+      background: var(--color-primary-soft-bg);
+      border: 1px dashed var(--color-primary-border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: var(--color-heading);
+      font-style: italic;
+    }
+
+    .btn-demo {
+      background: var(--color-header-gradient);
+      color: #FFFFFF;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .btn-demo.gold {
+      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-soft) 100%);
+    }
+
+    .btn-demo.light {
+      background: #FFFFFF;
+      color: var(--color-heading);
+      border: 1px solid var(--color-border);
+    }
+
+    /* E01 Breadcrumbs */
+    .breadcrumbs {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      background: #FFFFFF;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.82rem;
+    }
+
+    .breadcrumbs a {
+      color: var(--color-text-muted);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .breadcrumbs a:hover {
+      color: var(--color-primary);
+    }
+
+    .breadcrumbs .sep {
+      color: #B5B2AA;
+      font-size: 0.72rem;
+    }
+
+    .breadcrumbs .current {
+      color: var(--color-heading);
+      font-weight: 700;
+    }
+
+    /* E02 Modal (interactivo) */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(56, 53, 59, 0.58);
+      backdrop-filter: blur(2px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 900;
+      padding: 16px;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-card {
+      background: #FFFFFF;
+      border-radius: 14px;
+      max-width: 480px;
+      width: 100%;
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+    }
+
+    .modal-head {
+      background: var(--color-header-gradient);
+      color: #FFFFFF;
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-body {
+      padding: 18px;
+      line-height: 1.55;
+      font-size: 0.86rem;
+    }
+
+    .modal-foot {
+      padding: 12px 18px;
+      background: var(--color-bg);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    /* E03 Drawer */
+    .drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(56, 53, 59, 0.45);
+      display: none;
+      justify-content: flex-end;
+      z-index: 900;
+    }
+
+    .drawer-backdrop.open {
+      display: flex;
+    }
+
+    .drawer-panel {
+      width: 340px;
+      max-width: 90vw;
+      background: #FFFFFF;
+      height: 100%;
+      box-shadow: -8px 0 24px rgba(0, 0, 0, 0.22);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* E04 Accordion */
+    .accordion {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .accordion details {
+      background: #FFFFFF;
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .accordion summary {
+      padding: 11px 14px;
+      font-weight: 700;
+      color: var(--color-heading);
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .accordion summary::after {
+      content: '▾';
+      color: var(--color-primary);
+    }
+
+    .accordion details[open] summary {
+      border-bottom: 1px solid var(--color-border);
+      background: var(--color-primary-soft-bg);
+    }
+
+    .accordion .acc-body {
+      padding: 12px 14px;
+      font-size: 0.83rem;
+      line-height: 1.5;
+    }
+
+    /* E05 Stepper */
+    .stepper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #FFFFFF;
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      padding: 14px;
+      flex-wrap: wrap;
+    }
+
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--color-text-muted);
+    }
+
+    .step .num {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.72rem;
+      font-weight: 800;
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+    }
+
+    .step.done .num {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+      color: #FFFFFF;
+    }
+
+    .step.active {
+      color: var(--color-heading);
+    }
+
+    .step.active .num {
+      background: var(--color-heading);
+      border-color: var(--color-heading);
+      color: #FFFFFF;
+    }
+
+    .step-line {
+      flex: 1;
+      min-width: 18px;
+      height: 2px;
+      background: var(--color-border);
+    }
+
+    /* E06 Search + Chips */
+    .search-box {
+      display: flex;
+      align-items: center;
+      background: #FFFFFF;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 7px 12px;
+      gap: 8px;
+      max-width: 340px;
+    }
+
+    .search-box input {
+      border: none;
+      outline: none;
+      width: 100%;
+      font-size: 0.84rem;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--color-primary-soft-bg);
+      border: 1px solid var(--color-primary-border);
+      color: var(--color-heading);
+      font-size: 0.76rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 999px;
+    }
+
+    .chip button {
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      color: var(--color-heading);
+      font-weight: 800;
+    }
+
+    /* E07 Toggle Switch */
+    .switch-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #FFFFFF;
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      width: fit-content;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 42px;
+      height: 24px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .switch .track {
+      position: absolute;
+      inset: 0;
+      background: #CBD5E1;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .switch .track::before {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      left: 3px;
+      top: 3px;
+      background: #FFFFFF;
+      border-radius: 50%;
+      transition: transform 0.2s;
+    }
+
+    .switch input:checked+.track {
+      background: var(--color-primary);
+    }
+
+    .switch input:checked+.track::before {
+      transform: translateX(18px);
+    }
+
+    /* E08 Range Slider */
+    .slider-box {
+      background: #FFFFFF;
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      max-width: 340px;
+    }
+
+    .slider-box input[type="range"] {
+      width: 100%;
+      accent-color: var(--color-primary);
+      margin-top: 8px;
+    }
+
+    /* E09 Dropdown Menu */
+    .dd-wrap {
+      position: relative;
+      display: inline-block;
+    }
+
+    .dd-menu {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      min-width: 210px;
+      background: #FFFFFF;
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      box-shadow: var(--shadow-lg);
+      padding: 6px;
+      display: none;
+      z-index: 30;
+    }
+
+    .dd-menu.open {
+      display: block;
+    }
+
+    .dd-menu button {
+      width: 100%;
+      border: none;
+      background: transparent;
+      text-align: left;
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--color-heading);
+    }
+
+    .dd-menu button:hover {
+      background: var(--color-primary-soft-bg);
+    }
+
+    /* E10 KPI Sparkline + Delta */
+    .kpi-spark {
+      background: #FFFFFF;
+      border: 1px solid var(--color-border);
+      border-top: 4px solid var(--color-primary);
+      border-radius: 12px;
+      padding: 14px 16px;
+      max-width: 300px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .delta-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+    }
+
+    .delta-up {
+      background: var(--ok-bg);
+      color: var(--ok-text);
+    }
+
+    .delta-down {
+      background: var(--err-bg);
+      color: var(--err-text);
+    }
+
+    /* E11 Progress / Bullet */
+    .prog-card {
+      background: #FFFFFF;
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .prog-track {
+      position: relative;
+      height: 12px;
+      background: #E2E8F0;
+      border-radius: 999px;
+      overflow: visible;
+    }
+
+    .prog-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--color-primary), var(--color-primary-soft));
+    }
+
+    .prog-target {
+      position: absolute;
+      top: -4px;
+      bottom: -4px;
+      width: 3px;
+      background: var(--color-heading);
+      border-radius: 2px;
+    }
+
+    /* E12 / E13 Charts */
+    .chart-card {
+      background: #FFFFFF;
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      padding: 14px;
+    }
+
+    .chart-box {
+      position: relative;
+      width: 100%;
+      height: 210px;
+    }
+
+    /* E14 Heatmap */
+    .heatmap {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 4px;
+      background: #FFFFFF;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid var(--color-border);
+      font-size: 0.78rem;
+    }
+
+    .heatmap th {
+      color: var(--color-text-muted);
+      font-size: 0.72rem;
+      padding: 4px 6px;
+      text-align: center;
+    }
+
+    .heatmap td {
+      text-align: center;
+      padding: 7px 8px;
+      border-radius: 6px;
+      font-weight: 700;
+    }
+
+    .hm-hi {
+      background: #DCFCE7;
+      color: #166534;
+    }
+
+    .hm-mid {
+      background: #FEF3C7;
+      color: #92400E;
+    }
+
+    .hm-lo {
+      background: #FEE2E2;
+      color: #991B1B;
+    }
+
+    /* E15 Status Badges */
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 11px;
+      border-radius: 999px;
+      font-size: 0.76rem;
+      font-weight: 700;
+    }
+
+    .pill.ok {
+      background: var(--ok-bg);
+      color: var(--ok-text);
+    }
+
+    .pill.warn {
+      background: var(--warn-bg);
+      color: var(--warn-text);
+    }
+
+    .pill.err {
+      background: var(--err-bg);
+      color: var(--err-text);
+    }
+
+    .pill.info {
+      background: var(--info-bg);
+      color: var(--info-text);
+    }
+
+    .pill.neutral {
+      background: var(--color-secondary-soft-bg);
+      color: var(--color-heading);
+    }
+
+    /* E16 Data Table + Pagination */
+    .dt-card {
+      background: #FFFFFF;
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .dt-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+
+    .dt-table th,
+    .dt-table td {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--color-border);
+      text-align: left;
+    }
+
+    .dt-table th {
+      background: var(--color-header-bg);
+      color: #FFFFFF;
+      font-size: 0.72rem;
+    }
+
+    .pager {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      font-size: 0.76rem;
+      color: var(--color-text-muted);
+    }
+
+    .pager-btns {
+      display: flex;
+      gap: 4px;
+    }
+
+    .pager-btns button {
+      border: 1px solid var(--color-border);
+      background: #FFFFFF;
+      padding: 4px 9px;
+      border-radius: 6px;
+      font-size: 0.76rem;
+      cursor: pointer;
+    }
+
+    .pager-btns button.active {
+      background: var(--color-heading);
+      color: #FFFFFF;
+      border-color: var(--color-heading);
+    }
+
+    /* E17 Empty State */
+    .empty-state {
+      background: #FFFFFF;
+      border: 1px dashed var(--color-border);
+      border-radius: 12px;
+      padding: 26px 20px;
+      text-align: center;
+    }
+
+    .empty-state i {
+      font-size: 1.8rem;
+      color: var(--color-primary);
+      margin-bottom: 8px;
+    }
+
+    /* E18 Skeleton Loader */
+    .skel-card {
+      background: #FFFFFF;
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .skel-line {
+      height: 12px;
+      border-radius: 6px;
+      background: linear-gradient(90deg, #E2E8F0 25%, #F1F5F9 50%, #E2E8F0 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+    }
+
+    @keyframes shimmer {
+      0% {
+        background-position: 200% 0;
+      }
+
+      100% {
+        background-position: -200% 0;
+      }
+    }
+
+    /* E19 Popover / Info Tooltip */
+    .info-tip {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #FFFFFF;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-weight: 700;
+      color: var(--color-heading);
+    }
+
+    .info-tip .tip-pop {
+      position: absolute;
+      left: 0;
+      top: calc(100% + 8px);
+      width: 260px;
+      background: var(--color-heading);
+      color: #FFFFFF;
+      font-weight: 500;
+      font-size: 0.76rem;
+      line-height: 1.45;
+      padding: 10px 12px;
+      border-radius: 8px;
+      box-shadow: var(--shadow-lg);
+      display: none;
+      z-index: 20;
+    }
+
+    .info-tip:hover .tip-pop {
+      display: block;
+    }
+
+    /* E20 Callout */
+    .callout {
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 0.82rem;
+      line-height: 1.5;
+      border-left: 4px solid;
+      margin-bottom: 8px;
+    }
+
+    .callout.info {
+      background: var(--info-bg);
+      color: var(--info-text);
+      border-color: #2563EB;
+    }
+
+    .callout.warn {
+      background: var(--warn-bg);
+      color: var(--warn-text);
+      border-color: #D97706;
+    }
+
+    @media screen and (max-width: 980px) {
+      .cat-body {
+        grid-template-columns: 1fr;
+      }
+
+      .cat-demo {
+        border-right: none;
+        border-bottom: 1px solid var(--color-border);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="cat-top">
+    <div class="eyebrow">API_DESPOSTE · BIBLIOTECA UI EXTENDIDA</div>
+    <h1>Catálogo Extendido de Componentes (E01–E20)</h1>
+    <p>Componentes modernos de interfaz y visualización que <strong>todavía no están en tus dashboards</strong>, listos
+      para
+      pedir por código (<strong>E01–E20</strong>) o por su <strong>nombre técnico estándar</strong> cuando diseñes
+      nuevos módulos.</p>
+  </header>
+
+  <main class="cat-wrap">
+    <div class="cat-como">
+      <strong>Complemento del catálogo base.</strong> Para ver los componentes que ya existen hoy en tus HTML, vuelve a
+      <a href="05_Catalogo_Componentes.html" style="color:var(--color-heading);font-weight:700;">←
+        05_Catalogo_Componentes.html (C01–C21)</a>.
+      Varios ejemplos de esta guía son <strong>interactivos</strong> (puedes abrir el Modal, el Drawer, el Dropdown o
+      mover el Slider).
+    </div>
+
+    <nav class="cat-index" aria-label="Índice">
+      <a href="#e01"><b>E01</b>Breadcrumbs</a>
+      <a href="#e02"><b>E02</b>Modal</a>
+      <a href="#e03"><b>E03</b>Drawer</a>
+      <a href="#e04"><b>E04</b>Accordion</a>
+      <a href="#e05"><b>E05</b>Stepper</a>
+      <a href="#e06"><b>E06</b>Search + Chips</a>
+      <a href="#e07"><b>E07</b>Toggle Switch</a>
+      <a href="#e08"><b>E08</b>Range Slider</a>
+      <a href="#e09"><b>E09</b>Dropdown Menu</a>
+      <a href="#e10"><b>E10</b>KPI Sparkline</a>
+      <a href="#e11"><b>E11</b>Progress / Bullet</a>
+      <a href="#e12"><b>E12</b>Gauge / Donut</a>
+      <a href="#e13"><b>E13</b>Combo Chart</a>
+      <a href="#e14"><b>E14</b>Heatmap</a>
+      <a href="#e15"><b>E15</b>Status Pills</a>
+      <a href="#e16"><b>E16</b>Paginación</a>
+      <a href="#e17"><b>E17</b>Empty State</a>
+      <a href="#e18"><b>E18</b>Skeleton</a>
+      <a href="#e19"><b>E19</b>Popover ⓘ</a>
+      <a href="#e20"><b>E20</b>Callout</a>
+    </nav>
+
+    <h2 class="cat-grupo">Navegación, ventanas y estructura</h2>
+
+    <section class="cat-item" id="e01">
+      <div class="cat-item-head">
+        <span class="cat-code">E01</span>
+        <h2>Migas de pan (Breadcrumbs)</h2>
+        <span class="tec"><b>Breadcrumb Navigation</b> · <code>&lt;nav aria-label="breadcrumb"&gt;</code></span>
+      </div>
+      <div class="cat-body">
+        <div class="cat-demo">
+          <nav class="breadcrumbs">
+            <a href="#"><i class="fa-solid fa-house"></i> Portal</a>
+            <span class="sep">›</span>
+            <a href="#">Operaciones</a>
+            <span class="sep">›</span>
+            <span class="current">Control de Cabezas</span>
+          </nav>
+        </div>
+        <div class="cat-info">
+          <h4>Para qué sirve</h4>
+          <p>Ubica al usuario dentro de la jerarquía del portal y le permite volver con un clic al índice.</p>
+          <h4>Ejemplo de pedido</h4>
+          <p class="pedido">«Agrega un E01 Breadcrumbs arriba de la cabecera para regresar a index.html.»</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="cat-item" id="e02">
+      <div class="cat-item-head">
+        <span class="cat-code">E02</span>
+        <h2>Ventana emergente (Modal / Dialog)</h2>
+        <span class="tec"><b>Modal Dialog + Backdrop</b> · <code>&lt;dialog&gt;</code> /
+          <code>role="dialog"</code></span>
+      </div>
+      <div class="cat-body">
+        <div class="cat-demo">
+          <button class="btn-demo gold" onclick="document.getElementById('demoModal').classList.add('open')">
+            <i class="fa-regular fa-window-restore"></i> Abrir Modal de ejemplo
+          </button>
+        </div>
+        <div class="cat-info">
+          <h4>Para qué sirve</h4>
+          <p>Muestra el detalle de un SKU, un formulario o una confirmación sobre la pantalla sin cambiar de página.</p>
+          <h4>Ejemplo de pedido</h4>
+          <p class="pedido">«Al hacer clic en un producto de la tabla, abre un E02 Modal con su historial.»</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="cat-item" id="e03">
+      <div class="cat-item-head">
+        <span class="cat-code">E03</span>
+        <h2>Panel lateral deslizable (Drawer / Offcanvas)</h2>
+        <span class="tec"><b>Slide-over Drawer / Offcanvas</b> · <code>&lt;aside&gt;</code></span>
+      </div>
+      <div class="cat-body">
+        <div class="cat-demo">
+          <button class="btn-demo" onclick="document.getElementById('demoDrawer').classList.add('open')">
+            <i class="fa-solid fa-sliders"></i> Abrir Drawer derecho
+          </button>
+        </div>
+        <div class="cat-info">
+          <h4>Para qué sirve</h4>
+          <p>Ideal para filtros avanzados (5+ criterios) o ficha de detalle sin recargar la barra superior del
+            dashboard.</p>
+          <h4>Ejemplo de pedido</h4>
+          <p class="pedido">«Mueve los filtros secundarios a un E03 Drawer que se abra con el botón "Filtros
+            avanzados".»</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="cat-item" id="e04">
+      <div class="cat-item-head">
+        <span class="cat-code">E04</span>
+        <h2>Acordeón colapsable (Accordion)</h2>
+        <span class="tec"><b>Accordion / Disclosure</b> · <code>&lt;details&gt;</code> +
+          <code>&lt;summary&gt;</code></span>
+      </div>
+      <div class="cat-body">
+        <div class="cat-demo">
+          <div class="accordion">
+            <details open>
+              <summary>Fórmula de % de Rendimiento</summary>
+              <div class="acc-body"><code>% Rendimiento = (Kilos Resultado / Kilos Origen) × 100</code>. Excluye harinas
+                y merma.</div>
+            </details>
+            <details>
+              <summary>Regla de semanas ISO-8601</summary>
+              <div class="acc-body">Todas las semanas inician el lunes y cierran el domingo.</div>
+            </details>
+          </div>
+        </div>
+        <div class="cat-info">
+          <h4>Para qué sirve</h4>
+          <p>Oculta notas metodológicas, glosarios o tablas secundarias hasta que el usuario quiera consultarlas.</p>
+          <h4>Ejemplo de pedido</h4>
+          <p class="pedido">«Agrega un E04 Accordion al pie del dashboard con las fórmulas de cálculo.»</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="cat-item" id="e05">
+      <div class="cat-item-head">
+        <span class="cat-code">E05</span>
+        <h2>Indicador de pasos (Stepper / Flujo)</h2>
+        <span class="tec"><b>Stepper / Process Flow</b> · <code>&lt;ol&gt;</code></span>
+      </div>
+      <div class="cat-body">
+        <div class="cat-demo">
+          <div class="stepper">
+            <div class="step done"><span class="num">✓</span>Corte Primario</div>
+            <div class="step-line"></div>
+            <div class="step active"><span class="num">2</span>Línea de Cabezas</div>
+            <div class="step-line"></div>
+            <div class="step"><span class="num">3</span>Tercer Corte</div>
+          </div>
+        </div>
+        <div class="cat-info">
+          <h4>Para qué sirve</h4>
+          <p>Visualiza etapas secuenciales de un proceso productivo o un asistente de carga paso a paso.</p>
+          <h4>Ejemplo de pedido</h4>
+          <p class="pedido">«Pon un E05 Stepper arriba para navegar entre Corte Primario, Línea y Tercer Corte.»</p>
+        </div>
+      </div>
+    </section>
+
+    <h2 class="cat-grupo">Controles de filtrado e interacción</h2>
+
+    <section class="cat-item" id="e06">
+      <div class="cat-item-head">
+        <span class="cat-code">E06</span>
+        <h2>Buscador con chips de filtro activo</h2>
+        <span class="tec"><b>Search Input + Removable Filter Chips / Tags</b></span>
+      </div>
+      <div class="cat-body">
+        <div class="cat-demo">
+          <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass" style="color:var(--color-text-muted)"></i>
+            <input type="text" placeholder="Buscar por código o producto...">
+          </div>
+          <div class="chips" id="demoChips">
+            <span class="chip">SubPlanta: Desposte <button onclick="this.parentElement.remove()">×</button></span>
+            <span class="chip">MP: Sí <button onclick="this.parentElement.remove()">×</button></span>
+            <span class="chip">Sem 45–47 <button onclick="this.parentElement.remove()">×</button></span>
+          </div>
+        </div>
+        <div class="cat-info">
+          <h4>Para qué sirve</h4>
+          <p>Muestra de un vistazo qué filtros están activos y permite quitar cada uno con un solo clic.</p>
+          <h4>Ejemplo de pedido</h4>
+          <p class="pedido">«Debajo del panel de filtros muestra E06 Chips con los filtros activos y botón ×.»</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="cat-item" id="e07">
+      <div class="cat-item-head">
+        <span class="cat-code">E07</span>
+        <h2>Interruptor On/Off (Toggle Switch)</h2>
+        <span class="tec"><b>Toggle Switch</b> · <code>&lt;input type="checkbox" role="switch"&gt;</code></span>
+      </div>
+      <div class="cat-body">
+        <div class="cat-demo">
+          <div class="switch-row">
+            <label class="switch">
+              <input type="checkbox" checked>
+              <span class="track"></span>
+            </label>
+            <span style="font-weight:600;color:var(--color-heading)">Mostrar solo SKUs con saldo pendiente</span>
+          </div>
+        </div>
+        <div class="cat-info">
+          <h4>Para qué sirve</h4>
+          <p>Activa o desactiva una opción binaria de forma inmediata (ej. incluir merma, mostrar porcentajes, modo
+            compacto).</p>
+          <h4>Ejemplo de pedido</h4>
+          <p class="pedido">«Agrega un E07 Toggle Switch para alternar entre Kilos y Unidades.»</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="cat-item" id="e08">
+      <div class="cat-item-head">
+        <span class="cat-code">E08</span>
+        <h2>Deslizador de rango (Range Slider)</h2>
+        <span class="tec"><b>Range Slider</b> · <code>&lt;input type="range"&gt;</code></span>
+      </div>
+      <div class="cat-body">
+        <div class="cat-demo">
+          <div class="slider-box">
+            <div
+              style="display:flex;justify-content:space-between;font-size:0.8rem;font-weight:700;color:var(--color-heading)">
+              <span>Umbral mínimo de cumplimiento</span>
+              <span id="sliderVal" style="color:var(--color-primary)">85%</span>
+            </div>
+            <input type="range" min="50" max="100" value="85"
+              oninput="document.getElementById('sliderVal').textContent=this.value+'%'">
+          </div>
+        </div>
+        <div class="cat-info">
+          <h4>Para qué sirve</h4>
+          <p>Filtra dinámicamente valores numéricos o simula escenarios (ej. ajustar meta o sensibilidad de merma).</p>
+          <h4>Ejemplo de pedido</h4>
+          <p class="pedido">«Agrega un E08 Range Slider para filtrar artículos con rendimiento menor a X%.»</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="cat-item" id="e09">
+      <div class="cat-item-head">
+        <span class="cat-code">E09</span>
+        <h2>Menú desplegable de acciones (Dropdown Menu)</h2>
+        <span class="tec"><b>Action Dropdown / Split Button</b> · <code>role="menu"</code></span>
+      </div>
+      <div class="cat-body">
+        <div class="cat-demo">
+          <div class="dd-wrap">
+            <button class="btn-demo gold" onclick="document.getElementById('demoDd').classList.toggle('open')">
+              <i class="fa-solid fa-download"></i> Exportar <i class="fa-solid fa-chevron-down"
+                style="font-size:0.7rem"></i>
+            </button>
+            <div class="dd-menu" id="demoDd">
+              <button onclick="document.getElementById('demoDd').classList.remove('open')"><i
+                  class="fa-solid fa-file-excel"></i> Data Plana SQL (.xlsx)</button>
+              <button onclick="document.getElementById('demoDd').classList.remove('open')"><i
+                  class="fa-solid fa-table"></i> Matriz actual (.xlsx)</button>
+              <button onclick="document.getElementById('demoDd').classList.remove('open')"><i
+                  class="fa-brands fa-whatsapp"></i> Copiar resumen WhatsApp</button>
+            </div>
+          </div>
+        </div>
+        <div class="cat-info">
+          <h4>Para qué sirve</h4>
+          <p>Agrupa varias opciones de exportación o acciones secundarias bajo un solo botón para no saturar la barra.
+          </p>
+          <h4>Ejemplo de pedido</h4>
+          <p class="pedido">«Unifica los botones de Excel y WhatsApp dentro de un E09 Dropdown Menu.»</p>
+        </div>
+      </div>
+    </section>
+
+    <h2 class="cat-grupo">Indicadores y visualización de datos</h2>
+
+    <section class="cat-item" id="e10">
+      <div class="cat-item-head">
+        <span class="cat-code">E10</span>
+        <h2>KPI con variación (Delta) y mini-tendencia (Sparkline)</h2>
+        <span class="tec"><b>Stat Card + Delta Badge + Sparkline</b></span>
+      </div>
+      <div class="cat-body">
+        <div class="cat-demo">
+          <div class="kpi-spark">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span
+                style="font-size:0.68rem;font-weight:700;text-transform:uppercase;color:var(--color-text-muted)">Rendimiento
+                Promedio</span>
+              <span class="delta-pill delta-up">▲ +2.4%</span>
+            </div>
+            <div style="font-size:1.35rem;font-weight:800;color:var(--color-heading);margin:6px 0">78.6%</div>
+            <div style="height:44px"><canvas id="demoSpark"></canvas></div>
+          </div>
+        </div>
+        <div class="cat-info">
+          <h4>Para qué sirve</h4>
+          <p>Agrega contexto inmediato a una tarjeta KPI mostrando si subió o bajó frente al periodo anterior y su
+            tendencia.</p>
+          <h4>Ejemplo de pedido</h4>
+          <p class="pedido">«Convierte las tarjetas KPI en E10 con badge de variación vs la semana anterior.»</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="cat-item" id="e11">
+      <div class="cat-item-head">
+        <span class="cat-code">E11</span>
+        <h2>Barra de progreso con meta (Progress / Bullet Bar)</h2>
+        <span class="tec"><b>Progress Bar / Bullet Chart</b> · <code>role="progressbar"</code></span>
+      </div>
+      <div class="cat-body">
+        <div class="cat-demo">
+          <div class="prog-card">
+            <div>
+              <div
+                style="display:flex;justify-content:space-between;font-size:0.8rem;font-weight:700;margin-bottom:6px">
+                <span>Cumplimiento Desposte</span><span>92% (Meta: 95%)</span>
+              </div>
+              <div class="prog-track">
+                <div class="prog-fill" style="width:92%"></div>
+                <div class="prog-target" style="left:95%" title="Meta 95%"></div>
+              </div>
+            </div>
+            <div>
+              <div
+                style="display:flex;justify-content:space-between;font-size:0.8rem;font-weight:700;margin-bottom:6px">
+                <span>Cumplimiento Embutidos</span><span>74% (Meta: 90%)</span>
+              </div>
+              <div class="prog-track">
+                <div class="prog-fill" style="width:74%;background:#7A828E"></div>
+                <div class="prog-target" style="left:90%" title="Meta 90%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="cat-info">
+          <h4>Para qué sirve</h4>
+          <p>Compara avance real contra una meta fija (la línea vertical oscura) en muy poco espacio vertical.</p>
+          <h4>Ejemplo de pedido</h4>
+          <p class="pedido">«Agrega una columna con E11 Progress Bar para visualizar el % de cumplimiento.»</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="cat-item" id="e12">
+      <div class="cat-item-head">
+        <span class="cat-code">E12</span>
+        <h2>Gráfico de Dona / Medidor (Donut / Gauge Chart)</h2>
+        <span class="tec"><b>Doughnut / Semi-circle Gauge</b> · Chart.js <code>doughnut</code></span>
+      </div>
+      <div class="cat-body">
+        <div class="cat-demo">
+          <div class="chart-card" style="max-width:300px">
+            <div class="chart-box" style="height:170px"><canvas id="demoGauge"></canvas></div>
+          </div>
+        </div>
+        <div class="cat-info">
+          <h4>Para qué sirve</h4>
+          <p>Muestra participación porcentual (2 a 5 categorías) o el nivel global de cumplimiento en formato
+            velocímetro.</p>
+          <h4>Ejemplo de pedido</h4>
+          <p class="pedido">«Agrega un E12 Gauge con el % global de cumplimiento al lado de las tarjetas KPI.»</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="cat-item" id="e13">
+      <div class="cat-item-head">
+        <span class="cat-code">E13</span>
+        <h2>Gráfico combinado (Barras + Línea con doble eje Y)</h2>
+        <span class="tec"><b>Combo Chart (Dual Axis)</b> · Chart.js <code>bar</code> + <code>line</code></span>
+      </div>
+      <div class="cat-body">
+        <div class="cat-demo">
+          <div class="chart-card">
+            <div class="chart-box"><canvas id="demoCombo"></canvas></div>
+          </div>
+        </div>
+        <div class="cat-info">
+          <h4>Para qué sirve</h4>
+          <p>Cruza una magnitud en volumen (ej. Kilos en barras, eje izquierdo) con un ratio (ej. % rendimiento en
+            línea, eje derecho).</p>
+          <h4>Ejemplo de pedido</h4>
+          <p class="pedido">«Cambia el gráfico principal a un E13 Combo Chart: Kilos en barras y % de merma en línea.»
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="cat-item" id="e14">
+      <div class="cat-item-head">
+        <span class="cat-code">E14</span>
+        <h2>Mapa de calor (Heatmap / Semáforo matricial)</h2>
+        <span class="tec"><b>Matrix Heatmap</b> · escala de color condicional</span>
+      </div>
+      <div class="cat-body">
+        <div class="cat-demo">
+          <table class="heatmap">
+            <thead>
+              <tr>
+                <th style="text-align:left">Área</th>
+                <th>Sem 44</th>
+                <th>Sem 45</th>
+                <th>Sem 46</th>
+                <th>Sem 47</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="text-align:left;color:var(--color-heading)">Corte Primario</td>
+                <td class="hm-hi">98%</td>
+                <td class="hm-hi">96%</td>
+                <td class="hm-mid">88%</td>
+                <td class="hm-hi">97%</td>
+              </tr>
+              <tr>
+                <td style="text-align:left;color:var(--color-heading)">Chuletas</td>
+                <td class="hm-mid">84%</td>
+                <td class="hm-lo">72%</td>
+                <td class="hm-mid">86%</td>
+                <td class="hm-hi">95%</td>
+              </tr>
+              <tr>
+                <td style="text-align:left;color:var(--color-heading)">Marinado</td>
+                <td class="hm-hi">95%</td>
+                <td class="hm-hi">97%</td>
+                <td class="hm-hi">99%</td>
+                <td class="hm-mid">89%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="cat-info">
+          <h4>Para qué sirve</h4>
+          <p>Detecta desvíos o cuellos de botella de un vistazo combinando filas, periodos y semáforo condicional.</p>
+          <h4>Ejemplo de pedido</h4>
+          <p class="pedido">«Aplica formato E14 Heatmap a la columna de % cumplimiento: verde ≥ 95%, ámbar 85–94%, rojo
+            &lt; 85%.»</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="cat-item" id="e15">
+      <div class="cat-item-head">
+        <span class="cat-code">E15</span>
+        <h2>Etiquetas de estado (Status Badges / Pills)</h2>
+        <span class="tec"><b>Semantic Badges / Pills</b></span>
+      </div>
+      <div class="cat-body">
+        <div class="cat-demo">
+          <div class="pill-row">
+            <span class="pill ok">● Óptimo</span>
+            <span class="pill warn">● En observación</span>
+            <span class="pill err">● Crítico</span>
+            <span class="pill info">● En proceso</span>
+            <span class="pill neutral">● Sin datos</span>
+          </div>
+        </div>
+        <div class="cat-info">
+          <h4>Para qué sirve</h4>
+          <p>Clasifica filas de tablas o tarjetas con estados claros y consistentes.</p>
+          <h4>Ejemplo de pedido</h4>
+          <p class="pedido">«Agrega una columna Estado con E15 Pills según el índice de rotación.»</p>
+        </div>
+      </div>
+    </section>
+
+    <h2 class="cat-grupo">Tablas, estados y retroalimentación</h2>
+
+    <section class="cat-item" id="e16">
+      <div class="cat-item-head">
+        <span class="cat-code">E16</span>
+        <h2>Tabla paginada con ordenamiento (Sortable Data Table)</h2>
+        <span class="tec"><b>Data Table + Pagination + Column Sort</b></span>
+      </div>
+      <div class="cat-body">
+        <div class="cat-demo">
+          <div class="dt-card">
+            <table class="dt-table">
+              <thead>
+                <tr>
+                  <th>Código ▾</th>
+                  <th>Producto ⇅</th>
+                  <th>Kilos ⇅</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>05829</td>
+                  <td>CABEZA DE CERDO</td>
+                  <td>4,820 kg</td>
+                </tr>
+                <tr>
+                  <td>11810</td>
+                  <td>PIERNA P/CHULETA</td>
+                  <td>3,910 kg</td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="pager">
+              <span>Mostrando 1–2 de 48</span>
+              <div class="pager-btns">
+                <button>«</button><button
+                  class="active">1</button><button>2</button><button>3</button><button>»</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="cat-info">
+          <h4>Para qué sirve</h4>
+          <p>Maneja listados largos de cientos o miles de registros sin volver lenta la página.</p>
+          <h4>Ejemplo de pedido</h4>
+          <p class="pedido">«Agrega E16 Paginación de 25 filas y ordenamiento al clic en las cabeceras.»</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="cat-item" id="e17">
+      <div class="cat-item-head">
+        <span class="cat-code">E17</span>
+        <h2>Estado vacío (Empty State)</h2>
+        <span class="tec"><b>Empty State Placeholder</b></span>
+      </div>
+      <div class="cat-body">
+        <div class="cat-demo">
+          <div class="empty-state">
+            <i class="fa-regular fa-folder-open"></i>
+            <h4 style="color:var(--color-heading);margin-bottom:4px">No se encontraron registros</h4>
+            <p style="font-size:0.8rem;color:var(--color-text-muted);margin-bottom:12px">Prueba ampliando el rango de
+              fechas o limpiando los filtros activos.</p>
+            <button class="btn-demo light">Limpiar filtros</button>
+          </div>
+        </div>
+        <div class="cat-info">
+          <h4>Para qué sirve</h4>
+          <p>Reemplaza una tabla en blanco con un mensaje claro y un botón directo para corregir el filtro.</p>
+          <h4>Ejemplo de pedido</h4>
+          <p class="pedido">«Cuando la búsqueda no devuelva filas, muestra un E17 Empty State con botón Reestablecer.»
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="cat-item" id="e18">
+      <div class="cat-item-head">
+        <span class="cat-code">E18</span>
+        <h2>Esqueleto de carga (Skeleton Loader)</h2>
+        <span class="tec"><b>Skeleton Screen / Shimmer</b></span>
+      </div>
+      <div class="cat-body">
+        <div class="cat-demo">
+          <div class="skel-card">
+            <div class="skel-line" style="width:45%"></div>
+            <div class="skel-line" style="width:75%;height:18px"></div>
+            <div class="skel-line" style="width:60%"></div>
+          </div>
+        </div>
+        <div class="cat-info">
+          <h4>Para qué sirve</h4>
+          <p>Alternativa moderna a la pantalla oscura de carga: muestra la silueta animada de cada tarjeta mientras
+            llegan los datos.</p>
+          <h4>Ejemplo de pedido</h4>
+          <p class="pedido">«Muestra E18 Skeleton en las 4 tarjetas KPI mientras responde la API.»</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="cat-item" id="e19">
+      <div class="cat-item-head">
+        <span class="cat-code">E19</span>
+        <h2>Popover de ayuda / fórmula (Info Tooltip ⓘ)</h2>
+        <span class="tec"><b>Info Popover / Micro-tooltip</b></span>
+      </div>
+      <div class="cat-body">
+        <div class="cat-demo">
+          <div class="info-tip">
+            <span>% Inyección</span>
+            <i class="fa-solid fa-circle-info" style="color:var(--color-primary);cursor:help"></i>
+            <div class="tip-pop">Se calcula como <strong>(Kilos Final − Kilos Inicial) / Kilos Inicial × 100</strong>
+              solo para el proceso 1005.</div>
+          </div>
+          <p style="font-size:0.74rem;color:var(--color-text-muted);margin-top:8px">Pasa el mouse por encima para verlo
+            desplegarse.</p>
+        </div>
+        <div class="cat-info">
+          <h4>Para qué sirve</h4>
+          <p>Explica fórmulas o reglas de negocio justo al lado del KPI sin ocupar espacio permanente.</p>
+          <h4>Ejemplo de pedido</h4>
+          <p class="pedido">«Agrega un E19 Popover ⓘ en cada tarjeta KPI explicando cómo se calcula.»</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="cat-item" id="e20">
+      <div class="cat-item-head">
+        <span class="cat-code">E20</span>
+        <h2>Caja destacada de aviso (Callout / Banner)</h2>
+        <span class="tec"><b>Callout / Inline Banner</b> (Info · Warning)</span>
+      </div>
+      <div class="cat-body">
+        <div class="cat-demo">
+          <div class="callout info"><strong>Nota:</strong> Los datos de la semana en curso son preliminares hasta el
+            cierre del domingo.</div>
+          <div class="callout warn"><strong>Atención:</strong> Hay 2 días sin registro de producción en el rango
+            seleccionado.</div>
+        </div>
+        <div class="cat-info">
+          <h4>Para qué sirve</h4>
+          <p>Comunica aclaraciones de negocio o advertencias suaves sin bloquear el dashboard como un error crítico.</p>
+          <h4>Ejemplo de pedido</h4>
+          <p class="pedido">«Muestra un E20 Callout amarillo cuando la semana actual esté incompleta.»</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal interactivo E02 -->
+  <div class="modal-backdrop" id="demoModal" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="modal-card">
+      <div class="modal-head">
+        <strong>Detalle de SKU · 1181</strong>
+        <button style="background:none;border:none;color:#fff;font-size:1.1rem;cursor:pointer"
+          onclick="document.getElementById('demoModal').classList.remove('open')">✕</button>
+      </div>
+      <div class="modal-body">
+        <p><strong>PIERNA P/CHULETA MARINADO</strong></p>
+        <p style="margin-top:8px">Ejemplo de ventana modal (<code>E02</code>). Permite ver desglose por día, lote o
+          confirmar una acción.</p>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-demo light"
+          onclick="document.getElementById('demoModal').classList.remove('open')">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Drawer interactivo E03 -->
+  <div class="drawer-backdrop" id="demoDrawer" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="drawer-panel">
+      <div class="modal-head">
+        <strong>Filtros avanzados (E03)</strong>
+        <button style="background:none;border:none;color:#fff;font-size:1.1rem;cursor:pointer"
+          onclick="document.getElementById('demoDrawer').classList.remove('open')">✕</button>
+      </div>
+      <div class="modal-body" style="flex:1">
+        <p>Aquí pueden ir filtros secundarios como Turno, Línea, Plantilla, Familia o Tipo de MP sin recargar la barra
+          principal.</p>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-demo gold"
+          onclick="document.getElementById('demoDrawer').classList.remove('open')">Aplicar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      if (typeof Chart === 'undefined') return;
+      Chart.defaults.font.family = "'Inter', sans-serif";
+      Chart.defaults.font.size = 11;
+
+      new Chart(document.getElementById('demoSpark'), {
+        type: 'line',
+        data: {
+          labels: ['S42', 'S43', 'S44', 'S45', 'S46', 'S47'],
+          datasets: [{ data: [74.2, 75.8, 75.1, 76.9, 76.2, 78.6], borderColor: '#BAA063', backgroundColor: 'rgba(186,160,99,0.18)', fill: true, tension: 0.35, pointRadius: 0, borderWidth: 2 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false }, y: { display: false } } }
+      });
+
+      new Chart(document.getElementById('demoGauge'), {
+        type: 'doughnut',
+        data: {
+          labels: ['Cumplido', 'Pendiente'],
+          datasets: [{ data: [87.4, 12.6], backgroundColor: ['#BAA063', '#E2E8F0'], borderWidth: 0 }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false, rotation: -90, circumference: 180, cutout: '72%',
+          plugins: { legend: { position: 'bottom' } }
+        }
+      });
+
+      new Chart(document.getElementById('demoCombo'), {
+        data: {
+          labels: ['Sem 43', 'Sem 44', 'Sem 45', 'Sem 46', 'Sem 47'],
+          datasets: [
+            { type: 'bar', label: 'Kilos', data: [142, 158, 151, 169, 162], backgroundColor: 'rgba(122,130,142,0.85)', borderRadius: 4, yAxisID: 'y' },
+            { type: 'line', label: '% Rend.', data: [76.2, 77.5, 76.8, 79.1, 78.6], borderColor: '#BAA063', backgroundColor: '#BAA063', borderWidth: 2.5, tension: 0.3, yAxisID: 'y1' }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          scales: {
+            y: { position: 'left', title: { display: true, text: 'Kilos (k)' }, grid: { color: '#E2E8F0' } },
+            y1: { position: 'right', title: { display: true, text: '% Rend.' }, grid: { display: false }, min: 70, max: 85 }
+          }
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>

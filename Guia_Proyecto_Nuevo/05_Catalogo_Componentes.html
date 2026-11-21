@@ -1225,7 +1225,10 @@
     <div class="cat-como">
       <strong>Cómo usar este catálogo para pedir cambios.</strong> Indica el componente, el dashboard y lo que quieres cambiar.
       Ejemplo: <em>«En InformeMarinado, C10 Tarjetas KPI: agrega una 5ª tarjeta con las unidades del 1011»</em> o
-      <em>«En InformeCabezas, C02 parte <span class="pin">3</span>: quita los contadores»</em>. Los ejemplos usan datos ficticios.
+      <em>«En InformeCabezas, C02 parte <span class="pin">3</span>: quita los contadores»</em>. Cada ficha incluye tanto las
+      <strong>clases del proyecto</strong> como el <strong>nombre técnico estándar (HTML/UI)</strong>.
+      ¿Buscas componentes nuevos que aún no están en tus dashboards? Abre el
+      <a href="06_Catalogo_Componentes_Extendido.html" style="color:var(--color-heading);font-weight:700;">Catálogo Extendido (E01–E20) →</a>
     </div>
 
     <nav class="cat-index" aria-label="Índice">
@@ -1249,6 +1252,7 @@
       <a href="#c18"><b>C18</b>Pantalla de carga</a>
       <a href="#c19"><b>C19</b>Paleta</a>
       <a href="#c20"><b>C20</b>Tamaños de pantalla</a>
+      <a href="#c21"><b>C21</b>Propiedades visuales</a>
     </nav>
 
     <!-- ===================================================================== -->
@@ -1258,7 +1262,7 @@
       <div class="cat-item-head">
         <span class="cat-code">C01</span>
         <h2>Estructura de la página</h2>
-        <span class="tec"><code>.app-layout</code> = <code>.sidebar</code> + <code>.main-content</code></span>
+        <span class="tec"><b>App Shell / Layout</b> · <code>&lt;aside&gt;</code> + <code>&lt;main&gt;</code> · <code>.app-layout</code></span>
       </div>
       <div class="cat-body">
         <div class="cat-demo">
@@ -1295,7 +1299,7 @@
       <div class="cat-item-head">
         <span class="cat-code">C02</span>
         <h2>Barra lateral de vistas</h2>
-        <span class="tec"><code>#sidebarNav</code> · <code>.sidebar</code></span>
+        <span class="tec"><b>Collapsible Rail / Sidebar</b> · <code>&lt;aside&gt;</code> / <code>&lt;nav&gt;</code> · <code>#sidebarNav</code></span>
       </div>
       <div class="cat-body">
         <div class="cat-demo">
@@ -1381,7 +1385,7 @@
       <div class="cat-item-head">
         <span class="cat-code">C04</span>
         <h2>Cabecera e indicador de conexión</h2>
-        <span class="tec"><code>.header-banner</code> · <code>.status-badge</code></span>
+        <span class="tec"><b>Page Header / Status Pill</b> · <code>&lt;header&gt;</code> · <code>.header-banner</code> · <code>.status-badge</code></span>
       </div>
       <div class="cat-body">
         <div class="cat-demo">
@@ -1445,7 +1449,7 @@
       <div class="cat-item-head">
         <span class="cat-code">C06</span>
         <h2>Panel de filtros y combo de periodos</h2>
-        <span class="tec"><code>.filter-panel</code> · <code>#semanaCombo</code></span>
+        <span class="tec"><b>Filter Bar / Date Picker / Multi-select Dropdown</b> · <code>&lt;input type="date"&gt;</code> · <code>.filter-panel</code></span>
       </div>
       <div class="cat-body">
         <div class="cat-demo">
@@ -1537,7 +1541,7 @@
       <div class="cat-item-head">
         <span class="cat-code">C08</span>
         <h2>Selector segmentado (pestañas)</h2>
-        <span class="tec"><code>.segmented</code></span>
+        <span class="tec"><b>Segmented Control / Tabs</b> · <code>.segmented</code></span>
       </div>
       <div class="cat-body">
         <div class="cat-demo">
@@ -1594,7 +1598,7 @@
       <div class="cat-item-head">
         <span class="cat-code">C10</span>
         <h2>Tarjetas KPI</h2>
-        <span class="tec"><code>.kpi-container</code> · <code>.kpi-card</code></span>
+        <span class="tec"><b>KPI Stat Cards / CSS Grid</b> · <code>.kpi-container</code> · <code>.kpi-card</code></span>
       </div>
       <div class="cat-body">
         <div class="cat-demo">
@@ -1802,7 +1806,7 @@
       <div class="cat-item-head">
         <span class="cat-code">C16</span>
         <h2>Matriz jerárquica</h2>
-        <span class="tec"><code>.matrix-card</code> · <code>.matrix-table</code></span>
+        <span class="tec"><b>Tree Table / Pivot Matrix</b> · <code>&lt;table&gt;</code> (<code>thead</code> / <code>tbody</code> / <code>tfoot</code>) · <code>.matrix-table</code></span>
       </div>
       <div class="cat-body">
         <div class="cat-demo">
@@ -1963,7 +1967,7 @@
       <div class="cat-item-head">
         <span class="cat-code">C20</span>
         <h2>Tamaños de pantalla</h2>
-        <span class="tec"><code>@media</code> 1600 / 980 / 768 px (regla 4)</span>
+        <span class="tec"><b>Responsive Breakpoints</b> · <code>@media</code> 1600 / 980 / 768 px (regla 4)</span>
       </div>
       <div class="cat-body">
         <div class="cat-demo">
@@ -1984,6 +1988,40 @@
           <p>Cómo se adapta cada dashboard. Una laptop Full HD con escala de Windows al 125% mide 1536 px, por eso entra en «Laptop».</p>
           <h4>Ejemplo de pedido</h4>
           <p class="pedido">«En tablet muestra los KPI de 4 en 4.»</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="cat-item" id="c21">
+      <div class="cat-item-head">
+        <span class="cat-code">C21</span>
+        <h2>Propiedades visuales frecuentes (CSS / UI)</h2>
+        <span class="tec"><b>Styling Vocabulary</b> · <code>border-radius</code> · <code>padding</code> · <code>gap</code> · <code>sticky</code> · <code>hover</code></span>
+      </div>
+      <div class="cat-body">
+        <div class="cat-demo">
+          <table class="tabla-simple">
+            <thead>
+              <tr><th>Término técnico</th><th>Cómo se ve / qué controla</th><th>Ejemplo cotidiano</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>border-radius</code></td><td>Redondeo o chaflán de las esquinas</td><td>«Ponle un <code>border-radius</code> de 14 px a la barra lateral»</td></tr>
+              <tr><td><code>padding</code></td><td>Espacio interno entre el borde y el contenido</td><td>«Reduce el <code>padding</code> de las tarjetas KPI para compactar»</td></tr>
+              <tr><td><code>margin</code> / <code>gap</code></td><td>Separación externa entre tarjetas o columnas</td><td>«Aumenta el <code>gap</code> entre los filtros»</td></tr>
+              <tr><td><code>box-shadow</code></td><td>Sombra suave para dar profundidad o elevación</td><td>«Quita el <code>box-shadow</code> de las tarjetas»</td></tr>
+              <tr><td><code>position: sticky</code></td><td>Fija encabezados o columnas al hacer scroll</td><td>«Deja fija (<code>sticky</code>) la primera columna de la tabla»</td></tr>
+              <tr><td><code>overflow-x: auto</code></td><td>Activa desplazamiento horizontal si el contenido es ancho</td><td>«Asegura <code>overflow-x</code> en el contenedor de la matriz»</td></tr>
+              <tr><td><code>:hover</code></td><td>Estilo que aparece al pasar el cursor encima</td><td>«Al hacer <code>hover</code> en la fila, resáltala en dorado suave»</td></tr>
+              <tr><td><code>z-index</code></td><td>Orden de capas (qué elemento queda encima de otro)</td><td>«El combo queda detrás del gráfico, sube su <code>z-index</code>»</td></tr>
+              <tr><td><code>CSS Variables (:root)</code></td><td>Tokens globales de color (<code>--color-primary</code>, etc.)</td><td>«Cambia <code>--color-primary</code> al nuevo color de marca»</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="cat-info">
+          <h4>Qué es</h4>
+          <p>Vocabulario técnico universal de CSS/UI para pedir ajustes finos de forma, espaciado, capas o comportamiento sin ambigüedad.</p>
+          <h4>Ejemplo de pedido</h4>
+          <p class="pedido">«En C02 aumenta el <code>border-radius</code> a 16 px y haz el <code>:hover</code> más suave.»</p>
         </div>
       </div>
     </section>

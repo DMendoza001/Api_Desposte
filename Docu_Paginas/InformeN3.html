@@ -12,6 +12,7 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
 
@@ -40,13 +41,270 @@
 
         * { box-sizing: border-box; }
 
-        body {
+        html body {
             margin: 0;
-            padding: 16px 22px;
+            padding: 0 !important;
             font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
             background: var(--color-bg);
             color: var(--color-text);
             font-size: 14px;
+            min-height: 100vh;
+        }
+
+        .app-layout {
+            display: flex;
+            min-height: 100vh;
+            width: 100%;
+        }
+
+        /* =========================================================================
+           BARRA LATERAL SMART FLOTANTE (AUTO-PLEGABLE)
+           ========================================================================= */
+        .sidebar {
+            position: sticky;
+            top: 10px;
+            align-self: flex-start;
+            height: calc(100vh - 20px);
+            margin: 10px 0 10px 10px;
+            width: 60px;
+            overflow: hidden;
+            background: linear-gradient(180deg, #38353B 0%, #434B57 100%);
+            color: var(--color-header-text);
+            display: flex;
+            flex-direction: column;
+            padding: 14px 0 12px;
+            flex-shrink: 0;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 26px rgba(30, 27, 34, 0.22);
+            z-index: 100;
+            transition: width 0.22s ease, margin-right 0.22s ease, box-shadow 0.22s ease;
+        }
+
+        .sidebar-header {
+            padding: 0 8px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sidebar-header h2 {
+            margin: 0;
+            font-size: 0;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            color: #FFFFFF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            white-space: nowrap;
+        }
+
+        .sidebar-header h2 i {
+            font-size: 1rem;
+            color: var(--color-primary);
+        }
+
+        .sidebar-section-label {
+            display: none;
+            font-size: 0.64rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: rgba(226, 213, 181, 0.55);
+            padding: 4px 14px 4px;
+            white-space: nowrap;
+        }
+
+        .sidebar-divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.09);
+            margin: 10px 10px;
+        }
+
+        .sidebar-menu,
+        .sidebar-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 0 8px;
+        }
+
+        .sidebar-btn {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 9px 0;
+            border-radius: 9px;
+            border: 1px solid transparent;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.72);
+            font-family: inherit;
+            font-size: 0.81rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            text-align: left;
+            text-decoration: none;
+        }
+
+        .sidebar-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #FFFFFF;
+        }
+
+        .sidebar-btn.active {
+            background: rgba(186, 160, 99, 0.22);
+            border-color: rgba(186, 160, 99, 0.35);
+            color: #FFFFFF;
+            font-weight: 700;
+            box-shadow: inset 3px 0 0 var(--color-primary);
+        }
+
+        .sidebar-btn.active i {
+            color: var(--color-primary);
+        }
+
+        .sidebar-btn .btn-info {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+        }
+
+        .sidebar-btn .btn-info i {
+            width: 16px;
+            text-align: center;
+            font-size: 0.88rem;
+            flex-shrink: 0;
+        }
+
+        .sidebar-btn .btn-info span,
+        .side-status-text {
+            display: none;
+            white-space: nowrap;
+        }
+
+        .sidebar-badge {
+            display: none;
+            background: rgba(255, 255, 255, 0.10);
+            color: rgba(255, 255, 255, 0.82);
+            padding: 2px 7px;
+            border-radius: 999px;
+            font-size: 0.68rem;
+            font-weight: 700;
+        }
+
+        .sidebar-btn.active .sidebar-badge {
+            background: var(--color-primary);
+            color: #38353B;
+        }
+
+        .sidebar-bottom {
+            margin-top: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 0 8px;
+        }
+
+        .sidebar-footer {
+            padding: 10px 0 2px;
+            border-top: 1px solid rgba(255, 255, 255, 0.09);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 0.74rem;
+            font-weight: 600;
+            color: var(--color-header-subtext);
+            white-space: nowrap;
+        }
+
+        .status-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: var(--color-text-muted);
+            display: inline-block;
+            flex-shrink: 0;
+        }
+
+        .status-dot.ok {
+            background: #10B981;
+            box-shadow: 0 0 8px #10B981;
+        }
+
+        .status-dot.loading {
+            background: var(--color-primary);
+        }
+
+        .status-dot.error {
+            background: #EF4444;
+        }
+
+        @media screen and (min-width: 981px) and (hover: hover) {
+            .sidebar:hover,
+            .sidebar:has(:focus-visible) {
+                width: 215px;
+                margin-right: -155px;
+                box-shadow: 10px 12px 30px rgba(30, 27, 34, 0.32);
+            }
+
+            .sidebar:hover .sidebar-header,
+            .sidebar:has(:focus-visible) .sidebar-header {
+                padding: 0 12px 12px;
+                justify-content: flex-start;
+            }
+
+            .sidebar:hover .sidebar-header h2,
+            .sidebar:has(:focus-visible) .sidebar-header h2 {
+                font-size: 0.84rem;
+                justify-content: flex-start;
+                gap: 8px;
+            }
+
+            .sidebar:hover .sidebar-section-label,
+            .sidebar:has(:focus-visible) .sidebar-section-label {
+                display: block;
+            }
+
+            .sidebar:hover .sidebar-btn .btn-info span,
+            .sidebar:has(:focus-visible) .sidebar-btn .btn-info span {
+                display: inline;
+            }
+
+            .sidebar:hover .sidebar-badge,
+            .sidebar:has(:focus-visible) .sidebar-badge {
+                display: inline-block;
+            }
+
+            .sidebar:hover .sidebar-btn,
+            .sidebar:has(:focus-visible) .sidebar-btn {
+                justify-content: space-between;
+                padding: 9px 11px;
+            }
+
+            .sidebar:hover .sidebar-footer,
+            .sidebar:has(:focus-visible) .sidebar-footer {
+                justify-content: flex-start;
+                padding: 10px 4px 2px;
+            }
+
+            .sidebar:hover .side-status-text,
+            .sidebar:has(:focus-visible) .side-status-text {
+                display: inline;
+            }
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 16px 22px 32px;
+            overflow-x: hidden;
+            min-width: 0;
         }
 
         .dashboard-container {
@@ -123,40 +381,6 @@
         .week-btn:focus-visible, .seg-btn:focus-visible, .quick-btn:focus-visible {
             outline: 2px solid var(--color-primary);
             outline-offset: 2px;
-        }
-
-        /* ---------- Pestañas de vista (Semanal / Diario) ---------- */
-        .view-tabs {
-            display: flex;
-            gap: 4px;
-            border-bottom: 1px solid var(--color-border);
-        }
-
-        .view-tab {
-            font: inherit;
-            font-size: 14px;
-            font-weight: 600;
-            padding: 10px 18px;
-            border: none;
-            border-bottom: 3px solid transparent;
-            margin-bottom: -1px;
-            background: transparent;
-            color: var(--color-text-muted);
-            cursor: pointer;
-        }
-
-        .view-tab:hover { color: var(--color-heading); }
-
-        .view-tab.active {
-            color: var(--color-heading);
-            border-bottom-color: var(--color-primary);
-        }
-
-        .view-tab .view-tab-sub {
-            font-weight: 500;
-            font-size: 12px;
-            color: var(--color-text-muted);
-            margin-left: 6px;
         }
 
         /* ---------- Filtros ---------- */
@@ -236,6 +460,61 @@
             background: var(--color-surface);
             color: var(--color-heading);
             min-width: 110px;
+        }
+
+        /* Toggle Switch E07 (Auto-zoom eje Y) */
+        .zoom-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--color-text-muted);
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        .zoom-switch {
+            position: relative;
+            display: inline-block;
+            width: 34px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .zoom-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .zoom-switch .track {
+            position: absolute;
+            inset: 0;
+            background: #CBD5E1;
+            border-radius: 999px;
+            transition: background 0.18s ease;
+        }
+
+        .zoom-switch .track::before {
+            content: '';
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            left: 3px;
+            top: 3px;
+            background: #FFFFFF;
+            border-radius: 50%;
+            transition: transform 0.18s ease;
+        }
+
+        .zoom-switch input:checked + .track {
+            background: var(--color-primary);
+        }
+
+        .zoom-switch input:checked + .track::before {
+            transform: translateX(14px);
         }
 
         /* ---------- Combobox de semanas ---------- */
@@ -692,12 +971,47 @@
         }
 
         @media screen and (max-width: 768px) {
-            body { padding: 8px; }
+            .app-layout { flex-direction: column; }
+            .sidebar {
+                position: static;
+                width: 100%;
+                height: auto;
+                margin: 0;
+                align-self: stretch;
+                flex-direction: row;
+                align-items: center;
+                padding: 6px 8px;
+                border: none;
+                border-radius: 0 0 12px 12px;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+            }
+            .sidebar-header,
+            .sidebar-section-label,
+            .sidebar-divider,
+            .sidebar-actions,
+            .sidebar-bottom,
+            .sidebar-footer { display: none; }
+            .sidebar-menu {
+                flex-direction: row;
+                gap: 6px;
+                padding: 0;
+                width: 100%;
+            }
+            .sidebar-btn {
+                flex: 1 1 0;
+                min-width: 0;
+                justify-content: center;
+                gap: 4px;
+                padding: 7px 6px;
+                font-size: 0.76rem;
+            }
+            .sidebar-btn .btn-info i { display: none; }
+            .sidebar-btn .btn-info span { display: inline; }
+            .sidebar-badge { display: inline-block; padding: 1px 6px; font-size: 0.66rem; }
+            .main-content { padding: 10px 8px 24px; }
             .header-banner { flex-direction: column; align-items: flex-start; }
             .header-actions { width: 100%; }
             .header-actions .btn { flex: 1; }
-            .view-tab { flex: 1; padding: 10px 8px; }
-            .view-tab .view-tab-sub { display: none; }
             .filters-card { flex-direction: column; align-items: stretch; }
             .filters-right { flex-direction: column; align-items: stretch; gap: 10px; }
             .area-tabs { width: 100%; }
@@ -721,6 +1035,51 @@
 </head>
 
 <body>
+    <div class="app-layout">
+        <!-- BARRA LATERAL SMART FLOTANTE -->
+        <aside class="sidebar" id="sidebarNav">
+            <div class="sidebar-header">
+                <h2><i class="fa-solid fa-layer-group"></i> PTC · N3</h2>
+            </div>
+
+            <div class="sidebar-section-label">Vistas</div>
+            <nav class="sidebar-menu view-tabs" role="tablist" aria-label="Vista">
+                <button type="button" class="sidebar-btn view-tab active" role="tab" aria-selected="true" data-vista="semanal" title="Vista Semanal">
+                    <div class="btn-info"><i class="fa-solid fa-calendar-week"></i><span>Semanal</span></div>
+                    <span class="sidebar-badge" id="badgeSemanal">0</span>
+                </button>
+                <button type="button" class="sidebar-btn view-tab" role="tab" aria-selected="false" data-vista="diario" title="Vista Diario">
+                    <div class="btn-info"><i class="fa-regular fa-calendar-days"></i><span>Diario</span></div>
+                    <span class="sidebar-badge" id="badgeDiario">0</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-divider"></div>
+            <div class="sidebar-section-label">Acciones</div>
+            <div class="sidebar-actions">
+                <button type="button" class="sidebar-btn" title="Recargar datos desde Excel" onclick="cargarDatosDesdeApi(true)">
+                    <div class="btn-info"><i class="fa-solid fa-arrows-rotate"></i><span>Actualizar</span></div>
+                </button>
+                <button type="button" class="sidebar-btn" title="Reestablecer semanas por defecto" onclick="reestablecerVistaActual()">
+                    <div class="btn-info"><i class="fa-solid fa-rotate-left"></i><span>Reestablecer</span></div>
+                </button>
+                <button type="button" class="sidebar-btn" id="btnSideFullscreen" title="Pantalla completa" onclick="togglePantallaCompleta()">
+                    <div class="btn-info"><i class="fa-solid fa-expand"></i><span>Pantalla completa</span></div>
+                </button>
+            </div>
+
+            <div class="sidebar-bottom">
+                <a href="index.html" class="sidebar-btn" title="Regresar al Menú Principal">
+                    <div class="btn-info"><i class="fa-solid fa-house"></i><span>Menú Principal</span></div>
+                </a>
+                <div class="sidebar-footer" title="Estado de conexión con la API">
+                    <span class="status-dot loading" id="sideStatusDot"></span>
+                    <span class="side-status-text" id="sideStatusText">Conectando…</span>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-content">
     <div class="dashboard-container">
         <header class="header-banner">
             <div>
@@ -732,15 +1091,6 @@
                 <button id="btnRecargar" class="btn btn-header" type="button">Recargar datos</button>
             </div>
         </header>
-
-        <nav class="view-tabs" role="tablist" aria-label="Vista">
-            <button type="button" class="view-tab active" role="tab" aria-selected="true" data-vista="semanal">
-                Semanal<span class="view-tab-sub">tendencia por semana</span>
-            </button>
-            <button type="button" class="view-tab" role="tab" aria-selected="false" data-vista="diario">
-                Diario<span class="view-tab-sub">detalle por día</span>
-            </button>
-        </nav>
 
         <section class="filters-card" aria-label="Filtros">
             <div id="areaTabs" class="area-tabs" role="tablist" aria-label="Área"></div>
@@ -774,6 +1124,13 @@
                         </div>
                     </div>
                 </div>
+                <label class="zoom-toggle" title="Activa el auto-zoom en el eje Y para ver variaciones pequeñas con lupa">
+                    <span class="zoom-switch">
+                        <input type="checkbox" id="chkAutoZoom" role="switch">
+                        <span class="track"></span>
+                    </span>
+                    <span>Auto-zoom</span>
+                </label>
             </div>
         </section>
 
@@ -817,6 +1174,8 @@
                 </div>
             </section>
         </div>
+    </div>
+        </main>
     </div>
 
     <script>
@@ -965,6 +1324,8 @@
                 const escala = esFraccion ? 100 : 1;
                 const dec = (mediana * escala) < 2 ? 2 : 1;
                 return {
+                    esPorcentaje: true,
+                    escala,
                     etiqueta: v => `${fmtNum(v * escala, 1)}%`,
                     valor: v => v == null ? '–' : `${fmtNum(v * escala, dec)}%`,
                     eje: v => `${fmtNum(v * escala, dec > 1 ? 1 : 0)}%`,
@@ -975,6 +1336,8 @@
             const dec = mediana >= 100 ? 0 : (mediana >= 10 ? 1 : 2);
             const suf = u ? ` ${u}` : '';
             return {
+                esPorcentaje: false,
+                escala: 1,
                 etiqueta: v => fmtNum(v, dec),
                 valor: v => v == null ? '–' : `${fmtNum(v, dec)}${suf}`,
                 eje: v => fmtNum(v, dec > 1 ? 1 : 0),
@@ -1015,7 +1378,8 @@
             semanasAnio: [],          // [{ semana, rango }] con datos en el año, ascendente
             anioDeSeleccion: null,    // año para el que se calcularon las selecciones
             sel: { semanal: new Set(), diario: new Set() },
-            modo: { semanal: 'multiple', diario: 'multiple' }
+            modo: { semanal: 'multiple', diario: 'multiple' },
+            autoZoom: false           // false = escala equilibrada; true = zoom/lupa
         };
 
         const $ = id => document.getElementById(id);
@@ -1101,10 +1465,30 @@
             }
         }
 
+        function togglePantallaCompleta() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen?.().catch(() => {});
+            } else {
+                document.exitFullscreen?.().catch(() => {});
+            }
+        }
+
+        function reestablecerVistaActual() {
+            aplicarSeleccionPorDefecto(estado.vista);
+            renderizarFiltroSemanas();
+            if (registrosCrudos.length) renderizar();
+        }
+
         function setEstadoConexion(texto, clase) {
             const el = $('estadoConexion');
             el.textContent = texto;
             el.className = `status-pill ${clase}`;
+
+            const sDot = $('sideStatusDot');
+            const sTxt = $('sideStatusText');
+            const dotCls = clase === 'ok' ? 'ok' : (clase === 'error' ? 'error' : 'loading');
+            if (sDot) sDot.className = `status-dot ${dotCls}`;
+            if (sTxt) sTxt.textContent = clase === 'ok' ? 'API En Línea' : (clase === 'error' ? 'Sin conexión' : 'Consultando…');
         }
 
         function mostrarCarga(titulo, detalle, esError = false) {
@@ -1130,7 +1514,13 @@
 
         // Semanas con datos en el año (todas las áreas) y selección por defecto de cada vista
         function prepararSemanasDelAnio() {
-            const nums = [...new Set(registrosProc.filter(r => r.anio === estado.anio).map(r => r.semana))].sort((a, b) => a - b);
+            const delAnio = registrosProc.filter(r => r.anio === estado.anio);
+            const nums = [...new Set(delAnio.map(r => r.semana))].sort((a, b) => a - b);
+            const diasUnicos = new Set(delAnio.map(r => r.fechaKey)).size;
+            const bSem = $('badgeSemanal');
+            const bDia = $('badgeDiario');
+            if (bSem) bSem.textContent = nums.length;
+            if (bDia) bDia.textContent = diasUnicos;
             estado.semanasAnio = nums.map(s => ({
                 semana: s,
                 rango: calcularSemanaConInicioLunes(lunesDeSemanaIso(estado.anio, s)).rangoTexto
@@ -1214,6 +1604,11 @@
         if (location.hash === '#diario') aplicarVista('diario');
 
         $('btnRecargar').addEventListener('click', () => cargarDatosDesdeApi(true));
+
+        $('chkAutoZoom').addEventListener('change', e => {
+            estado.autoZoom = e.target.checked;
+            if (registrosCrudos.length) renderizar();
+        });
 
         // =========================================================================
         // 🗓️ FILTRO DE SEMANAS (selección única o múltiple, independiente por vista)
@@ -1565,11 +1960,61 @@
             }
         }
 
+        // Escala Y equilibrada para evitar el "efecto lupa" en indicadores estables
+        function calcularEscalaY(ind) {
+            if (estado.autoZoom) return { grace: '8%' };
+
+            const vals = ind.serie.filter(v => v != null && !isNaN(v));
+            if (!vals.length) return { grace: '15%' };
+
+            const f = ind.formato;
+            const vMin = Math.min(...vals);
+            const vMax = Math.max(...vals);
+            const span = vMax - vMin;
+            const centro = (vMin + vMax) / 2;
+
+            if (f.esPorcentaje) {
+                const maxPct = vMax * f.escala;
+                // Porcentajes pequeños (ej. mermas, ausentismo <= 10%): anclar en 0
+                if (vMin >= 0 && maxPct <= 10) {
+                    return {
+                        min: 0,
+                        suggestedMax: Math.max(vMax * 1.3, 2 / f.escala)
+                    };
+                }
+                // Rendimientos / OEE / Cumplimientos: amplitud mínima de 8 pp centrada
+                const minSpan = 8 / f.escala;
+                const rango = Math.max(span * 1.35, minSpan);
+                let yMin = centro - rango / 2;
+                let yMax = centro + rango / 2;
+                const techo100 = 100 / f.escala;
+                if (vMin >= 0 && yMin < 0) {
+                    yMax += -yMin;
+                    yMin = 0;
+                }
+                if (vMax <= techo100 && yMax > techo100) {
+                    yMin = Math.max(0, yMin - (yMax - techo100));
+                    yMax = techo100;
+                }
+                return { min: yMin, max: yMax };
+            }
+
+            // Volúmenes / conteos / otras unidades
+            if (vMin >= 0 && (vMax === 0 || vMin / vMax < 0.5)) {
+                return { beginAtZero: true, grace: '18%' };
+            }
+            const rango = Math.max(span * 1.4, Math.abs(centro) * 0.12 || 1);
+            const yMin = vMin >= 0 ? Math.max(0, centro - rango / 2) : centro - rango / 2;
+            const yMax = centro + rango / 2;
+            return { min: yMin, max: yMax };
+        }
+
         function crearGrafico(canvas, vista, puntos, ind) {
             const f = ind.formato;
             const color = PALETA.primary;
             const paso = Math.ceil(puntos.length / MAX_ETIQUETAS);
             const ultimoIdx = ind.idxUltima;
+            const escalaY = calcularEscalaY(ind);
             return new Chart(canvas, {
                 type: 'line',
                 data: {
@@ -1644,12 +2089,11 @@
                             grid: { display: false },
                             ticks: { maxRotation: 0, autoSkip: true, autoSkipPadding: 8 }
                         },
-                        y: {
+                        y: Object.assign({
                             grid: { color: PALETA.border },
                             border: { display: false },
-                            ticks: { maxTicksLimit: 5, callback: v => f.eje(v) },
-                            grace: '8%'
-                        }
+                            ticks: { maxTicksLimit: 5, callback: v => f.eje(v) }
+                        }, escalaY)
                     }
                 }
             });

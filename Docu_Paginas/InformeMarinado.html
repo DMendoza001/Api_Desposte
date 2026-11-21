@@ -92,39 +92,46 @@
     }
 
     /* =========================================================================
-       BARRA LATERAL AUTO-PLEGABLE
-       - Franja de iconos (60px); al pasar el mouse se despliega SOBRE el
-         contenido (margin-right negativo) sin redimensionar gráficos.
+       BARRA LATERAL SMART FLOTANTE (AUTO-PLEGABLE)
+       - Dock flotante de iconos (60px) con margen de 10px; al pasar el mouse se
+         despliega a 215px SOBRE el contenido (margin-right negativo) sin
+         redimensionar gráficos.
        ========================================================================= */
     .sidebar {
       position: sticky;
-      top: 0;
+      top: 10px;
       align-self: flex-start;
-      height: 100vh;
+      height: calc(100vh - 20px);
+      margin: 10px 0 10px 10px;
       width: 60px;
       overflow: hidden;
       background: linear-gradient(180deg, #38353B 0%, #434B57 100%);
       color: var(--color-header-text);
       display: flex;
       flex-direction: column;
-      padding: 14px 0;
+      padding: 14px 0 12px;
       flex-shrink: 0;
-      border-radius: 0 14px 14px 0;
-      box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 10px 26px rgba(30, 27, 34, 0.22);
       z-index: 100;
       transition: width 0.22s ease, margin-right 0.22s ease, box-shadow 0.22s ease;
     }
 
     .sidebar-header {
-      padding: 0 8px 14px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      margin-bottom: 14px;
+      padding: 0 8px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .sidebar-header h2 {
       font-size: 0;
       font-weight: 800;
-      color: var(--color-primary);
+      letter-spacing: 0.04em;
+      color: #FFFFFF;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -133,38 +140,51 @@
     }
 
     .sidebar-header h2 i {
-      font-size: 0.95rem;
+      font-size: 1rem;
+      color: var(--color-primary);
     }
 
-    .sidebar-header p {
+    .sidebar-section-label {
       display: none;
-      font-size: 0.7rem;
-      color: var(--color-header-subtext);
-      margin-top: 3px;
+      font-size: 0.64rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(226, 213, 181, 0.55);
+      padding: 4px 14px 4px;
       white-space: nowrap;
     }
 
-    .sidebar-menu {
+    .sidebar-divider {
+      height: 1px;
+      background: rgba(255, 255, 255, 0.09);
+      margin: 10px 10px;
+    }
+
+    .sidebar-menu,
+    .sidebar-actions {
       display: flex;
       flex-direction: column;
-      gap: 5px;
+      gap: 4px;
       padding: 0 8px;
     }
 
     .sidebar-btn {
+      position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 9px 0;
-      border-radius: 7px;
+      border-radius: 9px;
       border: 1px solid transparent;
       background: transparent;
-      color: var(--color-gray-300);
-      font-size: 0.82rem;
+      color: rgba(255, 255, 255, 0.72);
+      font-size: 0.81rem;
       font-weight: 600;
       cursor: pointer;
-      transition: background 0.2s ease, color 0.2s ease;
+      transition: all 0.18s ease;
       text-align: left;
+      text-decoration: none;
     }
 
     .sidebar-btn:hover {
@@ -173,59 +193,96 @@
     }
 
     .sidebar-btn.active {
-      background: var(--color-primary);
+      background: rgba(186, 160, 99, 0.22);
+      border-color: rgba(186, 160, 99, 0.35);
       color: #FFFFFF;
       font-weight: 700;
-      box-shadow: 0 4px 12px rgba(186, 160, 99, 0.35);
+      box-shadow: inset 3px 0 0 var(--color-primary);
+    }
+
+    .sidebar-btn.active i {
+      color: var(--color-primary);
     }
 
     .sidebar-btn .btn-info {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 9px;
     }
 
-    .sidebar-btn .btn-info span {
+    .sidebar-btn .btn-info i {
+      width: 16px;
+      text-align: center;
+      font-size: 0.88rem;
+      flex-shrink: 0;
+    }
+
+    .sidebar-btn .btn-info span,
+    .side-status-text {
       display: none;
       white-space: nowrap;
     }
 
     .sidebar-badge {
       display: none;
-      background: rgba(0, 0, 0, 0.15);
-      padding: 2px 6px;
-      border-radius: 10px;
-      font-size: 0.7rem;
+      background: rgba(255, 255, 255, 0.10);
+      color: rgba(255, 255, 255, 0.82);
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-size: 0.68rem;
+      font-weight: 700;
     }
 
     .sidebar-btn.active .sidebar-badge {
-      background: var(--color-ink-900);
-      color: var(--color-primary);
+      background: var(--color-primary);
+      color: #38353B;
+    }
+
+    .sidebar-bottom {
+      margin-top: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 0 8px;
+    }
+
+    .sidebar-footer {
+      padding: 10px 0 2px;
+      border-top: 1px solid rgba(255, 255, 255, 0.09);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: var(--color-header-subtext);
+      white-space: nowrap;
     }
 
     @media screen and (min-width: 981px) and (hover: hover) {
 
       .sidebar:hover,
       .sidebar:has(:focus-visible) {
-        width: 180px;
-        margin-right: -120px;
-        box-shadow: 8px 0 24px rgba(0, 0, 0, 0.28);
+        width: 215px;
+        margin-right: -155px;
+        box-shadow: 10px 12px 30px rgba(30, 27, 34, 0.32);
       }
 
       .sidebar:hover .sidebar-header,
       .sidebar:has(:focus-visible) .sidebar-header {
-        padding: 0 14px 14px;
+        padding: 0 12px 12px;
+        justify-content: flex-start;
       }
 
       .sidebar:hover .sidebar-header h2,
       .sidebar:has(:focus-visible) .sidebar-header h2 {
-        font-size: 0.95rem;
+        font-size: 0.84rem;
         justify-content: flex-start;
         gap: 8px;
       }
 
-      .sidebar:hover .sidebar-header p,
-      .sidebar:has(:focus-visible) .sidebar-header p {
+      .sidebar:hover .sidebar-section-label,
+      .sidebar:has(:focus-visible) .sidebar-section-label {
         display: block;
       }
 
@@ -243,6 +300,17 @@
       .sidebar:has(:focus-visible) .sidebar-btn {
         justify-content: space-between;
         padding: 9px 11px;
+      }
+
+      .sidebar:hover .sidebar-footer,
+      .sidebar:has(:focus-visible) .sidebar-footer {
+        justify-content: flex-start;
+        padding: 10px 4px 2px;
+      }
+
+      .sidebar:hover .side-status-text,
+      .sidebar:has(:focus-visible) .side-status-text {
+        display: inline;
       }
     }
 
@@ -1232,17 +1300,25 @@
       }
 
       .sidebar {
+        position: static;
         width: 100%;
         height: auto;
+        margin: 0;
         align-self: stretch;
         flex-direction: row;
         align-items: center;
         padding: 6px 8px;
+        border: none;
         border-radius: 0 0 12px 12px;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
       }
 
-      .sidebar-header {
+      .sidebar-header,
+      .sidebar-section-label,
+      .sidebar-divider,
+      .sidebar-actions,
+      .sidebar-bottom,
+      .sidebar-footer {
         display: none;
       }
 
@@ -1396,13 +1472,13 @@
   </div>
 
   <div class="app-layout">
-    <!-- BARRA LATERAL: VISTAS TEMPORALES -->
+    <!-- BARRA LATERAL SMART FLOTANTE -->
     <aside class="sidebar" id="sidebarNav">
       <div class="sidebar-header">
-        <h2><i class="fa-solid fa-layer-group"></i> NAVEGACIÓN</h2>
-        <p>Vistas Temporales</p>
+        <h2><i class="fa-solid fa-layer-group"></i> PTC · MARINADO</h2>
       </div>
 
+      <div class="sidebar-section-label">Vistas</div>
       <nav class="sidebar-menu">
         <button class="sidebar-btn" id="sideTabDiario" title="Vista Diario" onclick="cambiarVista('diario')">
           <div class="btn-info"><i class="fa-regular fa-calendar-days"></i><span>Diario</span></div>
@@ -1421,6 +1497,33 @@
           <span class="sidebar-badge" id="badgeAnual">0</span>
         </button>
       </nav>
+
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-section-label">Acciones</div>
+      <div class="sidebar-actions">
+        <button type="button" class="sidebar-btn" title="Actualizar datos desde SQL" onclick="consultarReporte()">
+          <div class="btn-info"><i class="fa-solid fa-arrows-rotate"></i><span>Actualizar</span></div>
+        </button>
+        <button type="button" class="sidebar-btn" title="Exportar Data Plana SQL (.xlsx)" onclick="exportarDataPlanaSQL()">
+          <div class="btn-info"><i class="fa-solid fa-file-excel"></i><span>Data Plana (.xlsx)</span></div>
+        </button>
+        <button type="button" class="sidebar-btn" title="Reestablecer filtros por defecto" onclick="resetFiltros()">
+          <div class="btn-info"><i class="fa-solid fa-rotate-left"></i><span>Reestablecer</span></div>
+        </button>
+        <button type="button" class="sidebar-btn" id="btnSideFullscreen" title="Pantalla completa" onclick="togglePantallaCompleta()">
+          <div class="btn-info"><i class="fa-solid fa-expand"></i><span>Pantalla completa</span></div>
+        </button>
+      </div>
+
+      <div class="sidebar-bottom">
+        <a href="index.html" class="sidebar-btn" title="Regresar al Menú Principal">
+          <div class="btn-info"><i class="fa-solid fa-house"></i><span>Menú Principal</span></div>
+        </a>
+        <div class="sidebar-footer" title="Estado de conexión con la API">
+          <span class="status-dot" id="sideStatusDot"></span>
+          <span class="side-status-text" id="sideStatusText">Listo</span>
+        </div>
+      </div>
     </aside>
 
     <!-- CONTENIDO PRINCIPAL -->
@@ -2620,10 +2723,23 @@
       mostrarToast('Filtros reestablecidos');
     }
 
+    function togglePantallaCompleta() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen?.().catch(() => {});
+      } else {
+        document.exitFullscreen?.().catch(() => {});
+      }
+    }
+
     function actualizarEstadoUI(estado, texto) {
       const dot = document.getElementById('statusDot');
       dot.className = 'status-dot' + (estado ? ` ${estado}` : '');
       document.getElementById('statusText').textContent = texto;
+
+      const sDot = document.getElementById('sideStatusDot');
+      const sTxt = document.getElementById('sideStatusText');
+      if (sDot) sDot.className = 'status-dot' + (estado ? ` ${estado}` : '');
+      if (sTxt) sTxt.textContent = estado === 'online' ? 'API En Línea' : (estado === 'loading' ? 'Consultando...' : (estado === 'error' ? 'Sin conexión' : 'Listo'));
     }
 
     function mostrarError(msg) {
