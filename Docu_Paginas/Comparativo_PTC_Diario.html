@@ -14,7 +14,7 @@
         rel="stylesheet">
 
     <!-- Chart.js y Plugins -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
     <!-- SheetJS para exportar a Excel (.xlsx) -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -94,7 +94,6 @@
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: var(--bg-canvas);
             color: var(--text-dark);
-            padding: 18px 24px 26px;
             line-height: 1.45;
             -webkit-font-smoothing: antialiased;
         }
@@ -672,16 +671,17 @@
             color: var(--color-heading);
         }
 
+        /* Código corto como texto plano (regla 5: sin fondo, borde ni caja) */
         .sku-code-badge {
-            display: inline-block;
-            background: var(--bg-card-alt);
+            display: inline;
+            background: transparent;
+            border: none;
+            padding: 0;
+            border-radius: 0;
             color: var(--pantone-dark);
-            border: 1px solid var(--border-ui);
             font-family: 'JetBrains Mono', monospace;
-            font-size: 0.75rem;
+            font-size: 0.78rem;
             font-weight: 700;
-            padding: 2px 7px;
-            border-radius: 5px;
             margin-right: 8px;
         }
 
@@ -953,6 +953,122 @@
             flex-wrap: wrap;
         }
 
+        /* Combo múltiple de semanas de la matriz (regla de filtros por vista) */
+        .semana-combo {
+            position: relative;
+            width: 250px;
+            max-width: 100%;
+        }
+
+        .semana-combo-btn {
+            border: 1px solid var(--border-ui);
+            padding: 8px 12px;
+            border-radius: 8px;
+            background: #FFFFFF;
+            color: var(--text-dark);
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            font-family: inherit;
+            width: 100%;
+            min-width: 0;
+        }
+
+        .semana-combo-btn:hover,
+        .semana-combo.abierto .semana-combo-btn {
+            border-color: var(--color-primary);
+        }
+
+        #semanasMatrizTexto {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .semana-panel {
+            display: none;
+            position: absolute;
+            top: calc(100% + 4px);
+            right: 0;
+            z-index: 200;
+            min-width: 290px;
+            background: #FFFFFF;
+            border: 1px solid var(--border-ui);
+            border-radius: 10px;
+            box-shadow: var(--shadow-md);
+            padding: 8px;
+        }
+
+        .semana-combo.abierto .semana-panel {
+            display: block;
+        }
+
+        .semana-acciones {
+            display: flex;
+            gap: 6px;
+            padding: 2px 2px 8px;
+            margin-bottom: 6px;
+            border-bottom: 1px solid var(--border-ui);
+        }
+
+        .semana-accion {
+            flex: 1;
+            border: 1px solid var(--border-ui);
+            background: var(--bg-card-alt);
+            color: var(--color-heading);
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 5px 6px;
+            border-radius: 6px;
+            cursor: pointer;
+            white-space: nowrap;
+            font-family: inherit;
+        }
+
+        .semana-accion:hover {
+            border-color: var(--color-primary);
+            background: var(--pantone-yellow-soft);
+        }
+
+        .semana-lista {
+            max-height: 280px;
+            overflow-y: auto;
+        }
+
+        .semana-opcion {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 8px;
+            font-size: 0.82rem;
+            border-radius: 6px;
+            cursor: pointer;
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+
+        .semana-opcion:hover {
+            background: rgba(186, 160, 99, 0.10);
+        }
+
+        /* Año de la semana junto a la etiqueta: texto plano atenuado */
+        .week-year {
+            margin-left: 6px;
+            font-size: 0.74rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        /* Separación visual entre semanas consecutivas de la matriz */
+        .matrix-table tbody tr.level-1 + tr.level-1 td,
+        .matrix-table tbody tr:not(.level-1) + tr.level-1 td {
+            border-top: 2px solid rgba(186, 160, 99, 0.40) !important;
+        }
+
         .search-box {
             display: flex;
             align-items: center;
@@ -1028,6 +1144,22 @@
 
         .matrix-table thead th.col-hier {
             text-align: left;
+            min-width: 260px;
+        }
+
+        /* Etiqueta del nivel Semana y columna de Producción Real (antes estilos inline) */
+        .week-label {
+            color: var(--pantone-dark);
+            font-weight: 800;
+        }
+
+        .matrix-table td.cell-real {
+            color: var(--pantone-dark);
+            font-weight: 600;
+        }
+
+        .cell-empty {
+            color: rgba(120, 116, 121, 0.55);
         }
 
         /* Divisiones entre grupos de columnas en la matriz */
@@ -1105,6 +1237,11 @@
             color: var(--pantone-dark);
         }
 
+        .toggle-icon:focus-visible {
+            outline: 2px solid var(--color-primary);
+            outline-offset: 2px;
+        }
+
         /* Nivel 3: SubPlanta · Nivel 4: CódigoCorto - Nombre */
         .level-3 td,
         .level-4 td {
@@ -1169,10 +1306,6 @@
 
         /* ============================ RESPONSIVE (autónomo) ============================ */
         @media screen and (max-width: 1600px) {
-            body {
-                padding: 10px 14px 20px;
-            }
-
             .dashboard-container {
                 gap: 12px;
             }
@@ -1239,6 +1372,17 @@
         }
 
         @media screen and (max-width: 768px) {
+            /* Combo de semanas de la matriz a lo ancho en celular */
+            .semana-combo {
+                width: 100%;
+            }
+
+            .semana-panel {
+                left: 0;
+                right: 0;
+                min-width: 0;
+            }
+
             .kpi-grid {
                 grid-template-columns: 1fr;
             }
@@ -1488,7 +1632,7 @@
                 <div>
                     <div class="header-title">
                         Comparativo Semanal
-                        <span class="badge-tag">PTC · Semanal</span>                       
+                        <span class="badge-tag">PTC · Semanal</span>
                     </div>
                     <div class="header-subtitle">
                         Comparativo <b>Producción Real</b>,
@@ -1660,8 +1804,8 @@
         <section class="matrix-card">
             <div class="matrix-toolbar">
                 <div class="matrix-toolbar-left">
-                    <div class="chart-title" id="matrixTitle">Comparativo Semana / Día / SubPlanta / CódigoCorto - Nombre</div>
-                    <div class="chart-sub" id="matrixSubtitle">Misma semana · Detalle por día · Producción Real,
+                    <div class="chart-title" id="matrixTitle">Análisis Diario · Semana / Día / SubPlanta / CódigoCorto - Nombre</div>
+                    <div class="chart-sub" id="matrixSubtitle">Detalle por día · Producción Real,
                         Programa de Producción y Pedido de Distribución</div>
                 </div>
                 <div class="matrix-actions">
@@ -1671,10 +1815,35 @@
                         <button class="filter-quick-btn active" id="btnVistaDiaria"
                             onclick="cambiarVistaMatriz('diaria')">Diaria</button>
                     </div>
+                    <!-- Regla 9: selección múltiple de semanas propia de cada vista -->
+                    <div class="semana-combo" id="semanaComboMatriz">
+                        <button type="button" class="semana-combo-btn" onclick="toggleComboSemanasMatriz(event)"
+                            aria-label="Semanas de la matriz">
+                            <span id="semanasMatrizTexto">Sin semanas</span>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </button>
+                        <div class="semana-panel">
+                            <div class="semana-acciones">
+                                <button type="button" class="semana-accion" id="btnSemanasMatrizDefecto"
+                                    onclick="semanasMatrizPorDefecto()">Últimas 2</button>
+                                <button type="button" class="semana-accion"
+                                    onclick="semanasMatrizTodas()">Todas</button>
+                            </div>
+                            <div class="semana-lista" id="semanasMatrizLista"></div>
+                        </div>
+                    </div>
                     <div class="search-box">
-                        <span style="color: var(--color-text-muted);">&#128269;</span>
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+                            style="color: var(--color-text-muted); flex-shrink: 0;">
+                            <circle cx="11" cy="11" r="7"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
                         <input type="text" id="inputBusquedaMatriz"
-                            placeholder="Buscar día, SubPlanta, código o nombre..." oninput="filtrarMatriz()">
+                            placeholder="Buscar semana, día, SubPlanta, código o nombre..." oninput="filtrarMatriz()">
                     </div>
                     <button class="btn btn-icon" onclick="expandirTodo(true)">Expandir Todo</button>
                     <button class="btn btn-icon" onclick="expandirTodo(false)">Colapsar Todo</button>
@@ -1685,7 +1854,7 @@
                 <table class="matrix-table">
                     <thead>
                         <tr>
-                            <th class="col-hier" id="matrixHierHeader" style="min-width:260px;">Semana / Día / SubPlanta / CódigoCorto - Nombre</th>
+                            <th class="col-hier" id="matrixHierHeader">Semana / Día / SubPlanta / CódigoCorto - Nombre</th>
                             <th class="num-col">Prod. Real (kg)</th>
                             <th class="num-col col-group-prog-start">Prog. Producción (kg)</th>
                             <th class="num-col">% Cumpl. Prog.</th>
@@ -1707,8 +1876,9 @@
             <b>GET /api/CumplimientoPtcDiario</b> ·
             Comparativo dentro de la <b>misma semana</b>: <b>Producción Real</b> (T_Produccion), <b>Programa de
                 Producción</b> (T_ResProd_Py_DB) y <b>Pedido de Distribución</b> (T_Distribucion) · Matriz con vista
-            <b>Semanal</b> (Semana &rarr; SubPlanta &rarr; CódigoCorto) y vista <b>Diaria</b> (Semana &rarr; Día &rarr;
-            SubPlanta &rarr; CódigoCorto) · Agrupación semanal ISO-8601 con inicio en Lunes · Paleta Finanza Industrial
+            <b>Semanal</b> (Semana &rarr; SubPlanta &rarr; CódigoCorto · 12 últimas semanas por defecto) y vista
+            <b>Diaria</b> (Semana &rarr; Día &rarr; SubPlanta &rarr; CódigoCorto · 2 últimas semanas por defecto) ·
+            Agrupación semanal ISO-8601 con inicio en Lunes · Paleta Finanza Industrial
         </footer>
             </div>
         </main>
@@ -1792,7 +1962,12 @@
         let busquedaMatriz = '';
         let vistaMatriz = 'diaria';   // 'diaria' = Semana -> Día -> SubPlanta -> SKU · 'semanal' = Semana -> SubPlanta -> SKU
         const expandidos = new Set();
-        let semanaExpandidaInicial = null;   // Semana para la que ya se aplicó la expansión inicial
+        let firmaExpansionInicial = null;    // Vista + semanas para las que ya se aplicó la expansión inicial
+
+        // Regla 9: cada vista de la matriz conserva su propia selección múltiple de semanas.
+        // null = sin inicializar (toma el valor por defecto) · Set vacío = todas las semanas.
+        const seleccionSemanasMatriz = { semanal: null, diaria: null };
+        const SEMANAS_DEFECTO_VISTA = { semanal: 12, diaria: 2 };
 
         const charts = {
             semana: null,
@@ -1918,6 +2093,7 @@
         document.addEventListener('DOMContentLoaded', async () => {
             initChartDefaults();
             iniciarSincronizacionEstado();
+            inicializarTogglesMatriz();
             await inicializarDashboard();
         });
 
@@ -1994,6 +2170,7 @@
                 normalizarDatos(registrosCrudos);
                 construirSemanas();
                 construirPildorasSubPlanta();
+                reiniciarSeleccionMatriz();   // Regla 9: nueva consulta = selección por defecto en cada vista
                 actualizarVista();
 
                 const urlObj = new URL(apiBaseActiva);
@@ -2613,6 +2790,19 @@
                 ];
             };
 
+            // Etiquetas de datos sobre cada barra; ocultas en celular (regla 4) y en barras en cero
+            opciones.plugins.datalabels = {
+                display: (ctx) => window.innerWidth > 768 && Math.abs(ctx.dataset.data[ctx.dataIndex] || 0) > 0,
+                anchor: 'end',
+                align: 'end',
+                offset: 1,
+                color: '#4A4650',
+                font: { size: 9, weight: '700' },
+                formatter: (value) => formatKg(value, unidadGrafico === 'Tn' ? 1 : 0)
+            };
+            // Espacio superior para que las etiquetas de las barras más altas no se corten
+            opciones.scales.y.grace = '12%';
+
             const datasets = ['produccion', 'programa', 'distribucion'].map(clave => ({
                 label: ETIQUETAS_ORIGEN[clave],
                 data: detalle.map(grupo => valorGrafico(grupo.totales[clave])),
@@ -2653,9 +2843,20 @@
             }
 
             const opciones = opcionesEscala(`Kilos (${etiquetaUnidad()})`);
+            // Los puntos vacíos (null) no aparecen en el tooltip
+            opciones.plugins.tooltip.filter = (item) => item.parsed.y !== null && !isNaN(item.parsed.y);
+
+            // Día sin kilos en un origen = punto vacío (null): la línea se corta en lugar de caer a cero.
+            // El día se mantiene en el eje X para conservar la semana completa de Lunes a Domingo.
+            const valorDia = (fecha, clave) => {
+                const kilos = (mapa.get(fecha) || {})[clave] || 0;
+                return Math.abs(kilos) > 0 ? valorGrafico(kilos) : null;
+            };
+
             const datasets = ['produccion', 'programa', 'distribucion'].map(clave => ({
                 label: ETIQUETAS_ORIGEN[clave],
-                data: dias.map(dia => valorGrafico((mapa.get(dia.fecha) || {})[clave] || 0)),
+                data: dias.map(dia => valorDia(dia.fecha, clave)),
+                spanGaps: false,
                 borderColor: COLORES[clave],
                 backgroundColor: COLORES[clave],
                 borderWidth: 2.4,
@@ -2717,7 +2918,9 @@
         }
 
         // =========================================================================
-        // 🧮 MATRIZ JERÁRQUICA: Semana -> SubPlanta -> CódigoCorto (misma semana)
+        // 🧮 MATRIZ JERÁRQUICA MULTISEMANA
+        //  · Semanal : Semana -> SubPlanta -> CódigoCorto      (12 últimas semanas por defecto)
+        //  · Diaria  : Semana -> Día -> SubPlanta -> CódigoCorto (2 últimas semanas por defecto)
         // =========================================================================
         function filtrarMatriz() {
             const input = document.getElementById('inputBusquedaMatriz');
@@ -2730,64 +2933,231 @@
             if (vista !== 'diaria' && vista !== 'semanal') return;
             vistaMatriz = vista;
             expandidos.clear();
-            semanaExpandidaInicial = null;
+            firmaExpansionInicial = null;
 
             const btnSemanal = document.getElementById('btnVistaSemanal');
             const btnDiaria = document.getElementById('btnVistaDiaria');
             if (btnSemanal) btnSemanal.classList.toggle('active', vista === 'semanal');
             if (btnDiaria) btnDiaria.classList.toggle('active', vista === 'diaria');
 
+            construirListaSemanasMatriz();
             renderizarMatriz();
         }
 
-        function toggleNodo(idNodo) {
+        // "Últimas N" se cuenta desde la última semana con Producción Real (misma ancla que la
+        // semana de análisis); las semanas futuras con sólo Programa/Distribución quedan elegibles.
+        function semanasPorDefectoMatriz(vista) {
+            const n = SEMANAS_DEFECTO_VISTA[vista] || 12;
+            const conProduccion = new Set(registros.filter(r => r.produccion > 0).map(r => r.weekKey));
+            const ancla = [...semanas].reverse().find(meta => conProduccion.has(meta.key))
+                || semanas[semanas.length - 1];
+            if (!ancla) return new Set();
+            const hastaAncla = semanas.filter(meta => meta.key <= ancla.key);
+            return new Set(hastaAncla.slice(-n).map(meta => meta.key));
+        }
+
+        function seleccionActualMatriz() {
+            if (seleccionSemanasMatriz[vistaMatriz] === null) {
+                seleccionSemanasMatriz[vistaMatriz] = semanasPorDefectoMatriz(vistaMatriz);
+            }
+            return seleccionSemanasMatriz[vistaMatriz];
+        }
+
+        // Una nueva consulta devuelve ambas vistas a su selección por defecto
+        function reiniciarSeleccionMatriz() {
+            seleccionSemanasMatriz.semanal = null;
+            seleccionSemanasMatriz.diaria = null;
+            firmaExpansionInicial = null;
+            expandidos.clear();
+            construirListaSemanasMatriz();
+        }
+
+        // Semanas visibles en la matriz, de la más reciente a la más antigua (vacío = todas)
+        function semanasDeMatriz() {
+            const seleccion = seleccionActualMatriz();
+            return semanas
+                .map(meta => meta.key)
+                .filter(key => seleccion.size === 0 || seleccion.has(key))
+                .reverse();
+        }
+
+        function construirListaSemanasMatriz() {
+            const lista = document.getElementById('semanasMatrizLista');
+            const btnDefecto = document.getElementById('btnSemanasMatrizDefecto');
+            if (btnDefecto) btnDefecto.textContent = `Últimas ${SEMANAS_DEFECTO_VISTA[vistaMatriz]}`;
+            if (!lista) return;
+
+            if (!semanas.length) {
+                lista.innerHTML = '<div class="matrix-empty">Sin semanas disponibles.</div>';
+            } else {
+                const seleccion = seleccionActualMatriz();
+                lista.innerHTML = semanas.slice().reverse().map(meta => {
+                    const marcada = seleccion.size === 0 || seleccion.has(meta.key);
+                    return `
+                        <label class="semana-opcion">
+                            <input type="checkbox" value="${escaparHtml(meta.key)}" ${marcada ? 'checked' : ''}
+                                onchange="onSemanaMatrizChange(this)">
+                            <span>${escaparHtml(etiquetaSemana(meta))} · ${meta.anio}</span>
+                        </label>`;
+                }).join('');
+            }
+            actualizarTextoSemanasMatriz();
+        }
+
+        function actualizarTextoSemanasMatriz() {
+            const texto = document.getElementById('semanasMatrizTexto');
+            if (!texto) return;
+            const total = semanas.length;
+            const seleccion = total ? seleccionActualMatriz() : new Set();
+
+            if (!total) {
+                texto.textContent = 'Sin semanas';
+            } else if (seleccion.size === 0) {
+                texto.textContent = `Todas las semanas (${total})`;
+            } else if (seleccion.size === 1) {
+                const meta = metaSemana([...seleccion][0]);
+                texto.textContent = meta ? etiquetaSemana(meta) : '1 semana';
+            } else {
+                texto.textContent = `${seleccion.size} semanas seleccionadas`;
+            }
+        }
+
+        function onSemanaMatrizChange(checkbox) {
+            const todas = semanas.map(meta => meta.key);
+            const actual = seleccionActualMatriz();
+            const seleccion = actual.size === 0 ? new Set(todas) : new Set(actual);
+
+            if (checkbox.checked) seleccion.add(checkbox.value);
+            else seleccion.delete(checkbox.value);
+
+            // Si se desmarcan todas (o se marcan todas) se muestran todas las semanas
+            if (seleccion.size === 0 || seleccion.size === todas.length) {
+                seleccionSemanasMatriz[vistaMatriz] = new Set();
+                construirListaSemanasMatriz();
+            } else {
+                seleccionSemanasMatriz[vistaMatriz] = seleccion;
+                actualizarTextoSemanasMatriz();
+            }
+            renderizarMatriz();
+        }
+
+        function semanasMatrizPorDefecto() {
+            seleccionSemanasMatriz[vistaMatriz] = semanasPorDefectoMatriz(vistaMatriz);
+            construirListaSemanasMatriz();
+            renderizarMatriz();
+        }
+
+        function semanasMatrizTodas() {
+            seleccionSemanasMatriz[vistaMatriz] = new Set();
+            construirListaSemanasMatriz();
+            renderizarMatriz();
+        }
+
+        function toggleComboSemanasMatriz(evento) {
+            if (evento) evento.stopPropagation();
+            document.getElementById('semanaComboMatriz')?.classList.toggle('abierto');
+        }
+
+        document.addEventListener('click', (evento) => {
+            const combo = document.getElementById('semanaComboMatriz');
+            if (combo && !combo.contains(evento.target)) combo.classList.remove('abierto');
+        });
+
+        function toggleNodo(idNodo, conservarFoco = false) {
             if (expandidos.has(idNodo)) {
                 expandidos.delete(idNodo);
             } else {
                 expandidos.add(idNodo);
             }
             renderizarMatriz();
+
+            // Al operar con teclado, el foco vuelve al mismo control tras re-renderizar
+            if (conservarFoco) {
+                const control = [...document.querySelectorAll('#matrixBody .toggle-icon')]
+                    .find(el => el.dataset.nodo === idNodo);
+                if (control) control.focus();
+            }
+        }
+
+        // Control de expansión: el id del nodo viaja en data-nodo (escapado), no dentro de un onclick,
+        // para que SubPlantas con comillas u otros caracteres no rompan el HTML
+        function htmlToggle(idNodo, abierto) {
+            return `<span class="toggle-icon" role="button" tabindex="0" data-nodo="${escaparHtml(idNodo)}"
+                aria-expanded="${abierto}" aria-label="${abierto ? 'Colapsar' : 'Expandir'}">${abierto ? '−' : '+'}</span>`;
+        }
+
+        function inicializarTogglesMatriz() {
+            const tbody = document.getElementById('matrixBody');
+            if (!tbody) return;
+            tbody.addEventListener('click', evento => {
+                const control = evento.target.closest('.toggle-icon[data-nodo]');
+                if (control) toggleNodo(control.dataset.nodo);
+            });
+            tbody.addEventListener('keydown', evento => {
+                if (evento.key !== 'Enter' && evento.key !== ' ') return;
+                const control = evento.target.closest('.toggle-icon[data-nodo]');
+                if (!control) return;
+                evento.preventDefault();
+                toggleNodo(control.dataset.nodo, true);
+            });
+        }
+
+        // Filas filtradas por SubPlanta, agrupadas por semana (una sola pasada)
+        function filasPorSemanaMatriz() {
+            const mapa = new Map();
+            registrosFiltrados().forEach(fila => {
+                if (!mapa.has(fila.weekKey)) mapa.set(fila.weekKey, []);
+                mapa.get(fila.weekKey).push(fila);
+            });
+            return mapa;
+        }
+
+        function detalleSemanaMatriz(filas) {
+            return vistaMatriz === 'diaria' ? construirDetalleSemanaPorDia(filas) : construirDetalleSemana(filas);
+        }
+
+        // Expande la semana y su primer nivel (Días en la vista diaria, SubPlantas en la semanal)
+        function expandirSemana(key, detalle, incluirSegundoNivel = false) {
+            expandidos.add(`sem_${key}`);
+            if (vistaMatriz === 'diaria') {
+                detalle.forEach(dia => {
+                    expandidos.add(`sem_${key}_dia_${dia.fecha}`);
+                    if (incluirSegundoNivel) {
+                        dia.subPlantas.forEach(grupo =>
+                            expandidos.add(`sem_${key}_dia_${dia.fecha}_sp_${grupo.subPlanta}`));
+                    }
+                });
+            } else {
+                detalle.forEach(grupo => expandidos.add(`sem_${key}_sp_${grupo.subPlanta}`));
+            }
         }
 
         function expandirTodo(expandir) {
             expandidos.clear();
-            if (expandir && semanaKey) {
-                expandidos.add(`sem_${semanaKey}`);
-
-                if (vistaMatriz === 'diaria') {
-                    construirDetalleSemanaPorDia(filasDeSemana(semanaKey)).forEach(dia => {
-                        expandidos.add(`sem_${semanaKey}_dia_${dia.fecha}`);
-                        dia.subPlantas.forEach(grupo =>
-                            expandidos.add(`sem_${semanaKey}_dia_${dia.fecha}_sp_${grupo.subPlanta}`));
-                    });
-                } else {
-                    construirDetalleSemana(filasDeSemana(semanaKey))
-                        .forEach(grupo => expandidos.add(`sem_${semanaKey}_sp_${grupo.subPlanta}`));
-                }
+            if (expandir) {
+                const filasPorSemana = filasPorSemanaMatriz();
+                semanasDeMatriz().forEach(key => {
+                    const filas = filasPorSemana.get(key) || [];
+                    if (filas.length) expandirSemana(key, detalleSemanaMatriz(filas), true);
+                });
             }
-            semanaExpandidaInicial = semanaKey;
+            firmaExpansionInicial = `${vistaMatriz}|${semanasDeMatriz().join(',')}`;
             renderizarMatriz();
         }
 
-        // Jerarquía de la matriz con dos vistas:
-        //  · Diaria  : Semana -> Día -> SubPlanta -> (CódigoCorto + Nombre)
-        //  · Semanal : Semana -> SubPlanta -> (CódigoCorto + Nombre)
         function renderizarMatriz() {
             const tbody = document.getElementById('matrixBody');
             if (!tbody) return;
 
             const esDiaria = vistaMatriz === 'diaria';
-            const meta = metaSemana(semanaKey);
             const subtitulo = document.getElementById('matrixSubtitle');
             const titulo = document.getElementById('matrixTitle');
             const encabezado = document.getElementById('matrixHierHeader');
-            const filasSemana = filasDeSemana(semanaKey);
-            const detalle = esDiaria ? construirDetalleSemanaPorDia(filasSemana) : construirDetalleSemana(filasSemana);
 
             if (titulo) {
                 titulo.textContent = esDiaria
-                    ? 'Comparativo Semana / Día / SubPlanta / CódigoCorto - Nombre'
-                    : 'Comparativo Semana / SubPlanta / CódigoCorto - Nombre';
+                    ? 'Análisis Diario · Semana / Día / SubPlanta / CódigoCorto - Nombre'
+                    : 'Análisis Semanal · Semana / SubPlanta / CódigoCorto - Nombre';
             }
 
             if (encabezado) {
@@ -2796,81 +3166,89 @@
                     : 'Semana / SubPlanta / CódigoCorto - Nombre';
             }
 
-            if (subtitulo) {
-                const modoTexto = esDiaria ? 'Detalle por día' : 'Consolidado semanal';
-                subtitulo.textContent = meta
-                    ? `${etiquetaSemana(meta)} · ${modoTexto} · Producción Real vs Programa de Producción vs Pedido de Distribución`
-                    : `Misma semana · ${modoTexto} · Producción Real, Programa de Producción y Pedido de Distribución`;
-            }
-
             if (!registros.length) {
+                if (subtitulo) subtitulo.textContent = 'Sin datos cargados';
                 tbody.innerHTML = '<tr><td colspan="6" class="matrix-empty">Sin datos cargados desde la API.</td></tr>';
                 return;
             }
 
-            if (!detalle.length) {
-                tbody.innerHTML = '<tr><td colspan="6" class="matrix-empty">No hay registros para la semana seleccionada.</td></tr>';
-                return;
+            const claves = semanasDeMatriz();
+            const filasPorSemana = filasPorSemanaMatriz();
+
+            if (subtitulo) {
+                const modoTexto = esDiaria ? 'Detalle por día' : 'Consolidado por semana';
+                const metaReciente = metaSemana(claves[0]);
+                const metaAntigua = metaSemana(claves[claves.length - 1]);
+                const rango = claves.length > 1 && metaReciente && metaAntigua
+                    ? ` · de ${etiquetaSemana(metaAntigua)} a ${etiquetaSemana(metaReciente)}`
+                    : '';
+                subtitulo.textContent = `${claves.length} semana(s)${rango} · ${modoTexto} · ` +
+                    'Producción Real vs Programa de Producción vs Pedido de Distribución';
             }
 
-            // Al cambiar de semana/vista se expanden una sola vez la Semana y su primer nivel
-            if (semanaExpandidaInicial !== semanaKey) {
-                expandidos.add(`sem_${semanaKey}`);
-                if (esDiaria) {
-                    detalle.forEach(dia => expandidos.add(`sem_${semanaKey}_dia_${dia.fecha}`));
-                } else {
-                    detalle.forEach(grupo => expandidos.add(`sem_${semanaKey}_sp_${grupo.subPlanta}`));
-                }
-                semanaExpandidaInicial = semanaKey;
+            // Expansión inicial (una vez por vista + selección): sólo la semana más reciente y su primer nivel
+            const firma = `${vistaMatriz}|${claves.join(',')}`;
+            if (firmaExpansionInicial !== firma) {
+                expandidos.clear();
+                const reciente = claves.find(key => (filasPorSemana.get(key) || []).length);
+                if (reciente) expandirSemana(reciente, detalleSemanaMatriz(filasPorSemana.get(reciente)));
+                firmaExpansionInicial = firma;
             }
 
             const termino = busquedaMatriz;
-            const totalSemana = totalesDeFilas(filasSemana);
-            const etiquetaSemanaNodo = meta
-                ? `Semana ${semanaKey} (${meta.rango})`
-                : `Semana ${semanaKey || 'sin seleccionar'}`;
+            let html = '';
 
-            const coincideSemana = !termino ||
-                etiquetaSemanaNodo.toLowerCase().includes(termino) ||
-                String(semanaKey).toLowerCase().includes(termino);
+            claves.forEach(key => {
+                const filasSemana = filasPorSemana.get(key) || [];
+                if (!filasSemana.length) return;
 
-            // Nodos hijos según la vista activa (Días o SubPlantas)
-            const hijos = esDiaria
-                ? htmlNodosVistaDiaria(detalle, termino)
-                : htmlNodosVistaSemanal(detalle, termino);
+                const meta = metaSemana(key);
+                const detalle = detalleSemanaMatriz(filasSemana);
+                // Regla de semanas: en tablas se muestra "Sem. XX (DD/MM al DD/MM)"
+                const etiquetaSemanaNodo = meta ? etiquetaSemana(meta) : `Sem. ${key}`;
+                const coincideSemana = !termino ||
+                    etiquetaSemanaNodo.toLowerCase().includes(termino) ||
+                    key.toLowerCase().includes(termino);
 
-            if (!coincideSemana && !hijos.visible) {
-                const mensaje = (!esDiaria && esTerminoDeDia(termino))
-                    ? 'La vista Semanal no muestra días. Cambia a la vista Diaria para buscar por día.'
-                    : 'No hay datos que coincidan con la búsqueda.';
+                // Si el término coincide con la semana, se muestran todos sus hijos
+                const terminoHijos = coincideSemana ? '' : termino;
+                const hijos = esDiaria
+                    ? htmlNodosVistaDiaria(key, detalle, terminoHijos)
+                    : htmlNodosVistaSemanal(key, detalle, terminoHijos);
+
+                if (!coincideSemana && !hijos.visible) return;
+
+                const idSem = `sem_${key}`;
+                const semAbierta = termino ? true : expandidos.has(idSem);
+
+                html += construirFilaJerarquia({
+                    nivel: 1,
+                    celdasNombre: `
+                        ${htmlToggle(idSem, semAbierta)}
+                        <span class="week-label">${escaparHtml(etiquetaSemanaNodo)}</span>
+                        <span class="week-year">${meta ? meta.anio : ''}</span>`,
+                    totales: totalesDeFilas(filasSemana),
+                    negrita: true
+                });
+
+                if (semAbierta) html += hijos.html;
+            });
+
+            if (!html) {
+                const mensaje = !termino
+                    ? 'No hay registros para las semanas seleccionadas.'
+                    : (!esDiaria && esTerminoDeDia(termino))
+                        ? 'La vista Semanal no muestra días. Cambia a la vista Diaria para buscar por día.'
+                        : 'No hay datos que coincidan con la búsqueda.';
                 tbody.innerHTML = `<tr><td colspan="6" class="matrix-empty">${escaparHtml(mensaje)}</td></tr>`;
                 return;
             }
-
-            const idSem = `sem_${semanaKey}`;
-            const semAbierta = termino ? true : expandidos.has(idSem);
-
-            let html = construirFilaJerarquia({
-                nivel: 1,
-                celdasNombre: `
-                        <span class="toggle-icon" onclick="toggleNodo('${idSem}')">${semAbierta ? '−' : '+'}</span>
-                        <b style="color:var(--pantone-dark);">${escaparHtml(etiquetaSemanaNodo)}</b>`,
-                totales: totalSemana,
-                negrita: true
-            });
-
-            if (!semAbierta) {
-                tbody.innerHTML = html;
-                return;
-            }
-
-            html += hijos.html;
 
             tbody.innerHTML = html;
         }
 
         // Vista diaria: Semana -> Día -> SubPlanta -> SKU (con filtro aplicado en cada nivel)
-        function htmlNodosVistaDiaria(detalle, termino) {
+        function htmlNodosVistaDiaria(key, detalle, termino) {
             const diasVisibles = [];
 
             detalle.forEach(dia => {
@@ -2898,14 +3276,14 @@
             let html = '';
 
             diasVisibles.forEach(({ dia, subPlantasVisibles }) => {
-                const idDia = `sem_${semanaKey}_dia_${dia.fecha}`;
+                const idDia = `sem_${key}_dia_${dia.fecha}`;
                 const diaAbierto = termino ? true : expandidos.has(idDia);
 
                 html += construirFilaJerarquia({
                     nivel: 2,
                     sangria: 36,
                     celdasNombre: `
-                        <span class="toggle-icon" onclick="toggleNodo('${idDia}')">${diaAbierto ? '−' : '+'}</span>
+                        ${htmlToggle(idDia, diaAbierto)}
                         <span class="day-label">${escaparHtml(dia.etiqueta)}</span>`,
                     totales: dia.totales
                 });
@@ -2913,14 +3291,14 @@
                 if (!diaAbierto) return;
 
                 subPlantasVisibles.forEach(({ grupo, codigosVisibles }) => {
-                    const idSp = `sem_${semanaKey}_dia_${dia.fecha}_sp_${grupo.subPlanta}`;
+                    const idSp = `sem_${key}_dia_${dia.fecha}_sp_${grupo.subPlanta}`;
                     const spAbierta = termino ? true : expandidos.has(idSp);
 
                     html += construirFilaJerarquia({
                         nivel: 3,
                         sangria: 68,
                         celdasNombre: `
-                        <span class="toggle-icon" onclick="toggleNodo('${idSp}')">${spAbierta ? '−' : '+'}</span>
+                        ${htmlToggle(idSp, spAbierta)}
                         <span class="tag-subplanta">${escaparHtml(grupo.subPlanta)}</span>`,
                         totales: grupo.totales
                     });
@@ -2946,7 +3324,7 @@
         }
 
         // Vista semanal: Semana -> SubPlanta -> SKU (consolidado de la semana, sin nivel de día)
-        function htmlNodosVistaSemanal(detalle, termino) {
+        function htmlNodosVistaSemanal(key, detalle, termino) {
             const gruposVisibles = [];
 
             detalle.forEach(grupo => {
@@ -2963,14 +3341,14 @@
             let html = '';
 
             gruposVisibles.forEach(({ grupo, codigosVisibles, coincideGrupo }) => {
-                const idSp = `sem_${semanaKey}_sp_${grupo.subPlanta}`;
+                const idSp = `sem_${key}_sp_${grupo.subPlanta}`;
                 const spAbierta = termino ? true : expandidos.has(idSp);
 
                 html += construirFilaJerarquia({
                     nivel: 2,
                     sangria: 36,
                     celdasNombre: `
-                        <span class="toggle-icon" onclick="toggleNodo('${idSp}')">${spAbierta ? '−' : '+'}</span>
+                        ${htmlToggle(idSp, spAbierta)}
                         <span class="tag-subplanta">${escaparHtml(grupo.subPlanta)}</span>`,
                     totales: grupo.totales
                 });
@@ -3020,7 +3398,7 @@
             const valor = (texto) => negrita ? `<b>${texto}</b>` : texto;
 
             return `
-                    <td class="num-cell" style="color:var(--pantone-dark); font-weight:600;">${valor(formatKgMatriz(totales.produccion))}</td>
+                    <td class="num-cell cell-real">${valor(formatKgMatriz(totales.produccion))}</td>
                     <td class="num-cell col-group-prog-start">${valor(formatKgMatriz(totales.programa))}</td>
                     <td class="num-cell">${badgeHtml(calcPct(totales.produccion, totales.programa))}</td>
                     <td class="num-cell col-group-dist-start">${valor(formatKgMatriz(totales.distribucion))}</td>
@@ -3036,14 +3414,16 @@
         }
 
         // % Cumplimiento = Producción Real / Plan del mismo origen (criterio ResumenPl_PTC_Detalle)
+        // Sin plan (meta = 0) el cumplimiento no es calculable: se devuelve null
         function calcPct(real, meta) {
-            if (!meta) return 0;
+            if (!meta) return null;
             return (real / meta) * 100;
         }
 
         function badgeHtml(pct) {
+            // Sin plan del origen: guion neutro en vez de un 0.0% en rojo que sugiere incumplimiento
             if (pct === null || pct === undefined || isNaN(pct) || !isFinite(pct)) {
-                return '<span class="badge-kpi badge-low">0.0%</span>';
+                return '<span class="cell-empty" title="Sin plan para este origen">–</span>';
             }
             let cls = 'badge-good';
             if (pct < 85) cls = 'badge-low';
@@ -3092,52 +3472,43 @@
                     'Cobertura_vs_Produccion_%': null
                 });
 
-                // Hoja 2: detalle de la misma semana según la vista activa de la matriz
+                // Hoja 2: detalle de las semanas seleccionadas en la matriz, según su vista activa
                 const esVistaDiaria = vistaMatriz === 'diaria';
                 const filasDetalle = [];
+                const filasPorSemana = filasPorSemanaMatriz();
 
-                if (esVistaDiaria) {
-                    construirDetalleSemanaPorDia(filas).forEach(dia => {
-                        filasDetalle.push(filaExportacionSemana('Día', dia.etiqueta, dia.fecha, '', '', '', dia.totales));
-                        dia.subPlantas.forEach(grupo => {
-                            filasDetalle.push(filaExportacionSemana(
-                                'SubPlanta',
-                                dia.etiqueta,
-                                dia.fecha,
-                                grupo.subPlanta,
-                                '',
-                                '',
-                                grupo.totales
-                            ));
-                            grupo.codigos.forEach(codigo => {
-                                filasDetalle.push(filaExportacionSemana(
-                                    'CódigoCorto',
-                                    dia.etiqueta,
-                                    dia.fecha,
-                                    grupo.subPlanta,
-                                    codigo.codigo,
-                                    codigo.nombre,
-                                    codigo.totales
-                                ));
+                semanasDeMatriz().forEach(key => {
+                    const filasSemana = filasPorSemana.get(key) || [];
+                    if (!filasSemana.length) return;
+                    const metaFila = metaSemana(key);
+                    const sem = metaFila ? etiquetaSemana(metaFila) : key;
+                    const fila = (nivel, dia, fecha, subPlanta, codigo, nombre, tot) =>
+                        filaExportacionSemana(sem, metaFila ? metaFila.anio : '', esVistaDiaria,
+                            nivel, dia, fecha, subPlanta, codigo, nombre, tot);
+
+                    filasDetalle.push(fila('Semana', '', '', '', '', '', totalesDeFilas(filasSemana)));
+
+                    if (esVistaDiaria) {
+                        construirDetalleSemanaPorDia(filasSemana).forEach(dia => {
+                            filasDetalle.push(fila('Día', dia.etiqueta, dia.fecha, '', '', '', dia.totales));
+                            dia.subPlantas.forEach(grupo => {
+                                filasDetalle.push(fila('SubPlanta', dia.etiqueta, dia.fecha, grupo.subPlanta, '', '', grupo.totales));
+                                grupo.codigos.forEach(codigo => {
+                                    filasDetalle.push(fila('CódigoCorto', dia.etiqueta, dia.fecha, grupo.subPlanta,
+                                        codigo.codigo, codigo.nombre, codigo.totales));
+                                });
                             });
                         });
-                    });
-                } else {
-                    construirDetalleSemana(filas).forEach(grupo => {
-                        filasDetalle.push(filaExportacionSemana('SubPlanta', '', '', grupo.subPlanta, '', '', grupo.totales));
-                        grupo.codigos.forEach(codigo => {
-                            filasDetalle.push(filaExportacionSemana(
-                                'CódigoCorto',
-                                '',
-                                '',
-                                grupo.subPlanta,
-                                codigo.codigo,
-                                codigo.nombre,
-                                codigo.totales
-                            ));
+                    } else {
+                        construirDetalleSemana(filasSemana).forEach(grupo => {
+                            filasDetalle.push(fila('SubPlanta', '', '', grupo.subPlanta, '', '', grupo.totales));
+                            grupo.codigos.forEach(codigo => {
+                                filasDetalle.push(fila('CódigoCorto', '', '', grupo.subPlanta,
+                                    codigo.codigo, codigo.nombre, codigo.totales));
+                            });
                         });
-                    });
-                }
+                    }
+                });
 
                 // Hoja 3: histórico semanal de los tres orígenes
                 const resumenSemanal = agruparPorSemana(registrosFiltrados()).map(fila => ({
@@ -3178,14 +3549,15 @@
             }
         }
 
-        function filaExportacionSemana(nivel, dia, fecha, subPlanta, codigo, nombre, totales) {
+        function filaExportacionSemana(semana, anio, incluirDia, nivel, dia, fecha, subPlanta, codigo, nombre, totales) {
             const cobertura = (valor) => totales.produccion
                 ? Number(((valor / totales.produccion) * 100).toFixed(2))
                 : null;
 
-            const fila = { 'Nivel': nivel };
-            // Las columnas de día sólo existen en la vista diaria (en la semanal el detalle se consolida)
-            if (dia) {
+            const fila = { 'Semana': semana, 'Año': anio, 'Nivel': nivel };
+            // Las columnas de día sólo existen en la vista diaria (en la semanal el detalle se consolida);
+            // se declaran en todas sus filas para que el orden de columnas del Excel sea estable
+            if (incluirDia) {
                 fila['Dia'] = dia;
                 fila['Fecha'] = fecha;
             }

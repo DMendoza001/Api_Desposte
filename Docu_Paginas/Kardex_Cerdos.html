@@ -872,6 +872,33 @@
             width: 100%;
         }
 
+        /* Columna de jerarquía fija al desplazar horizontalmente (en celular
+           responsive.css la libera para deslizar toda la tabla) */
+        .matrix-table th.col-hier,
+        .matrix-table td.col-hier {
+            position: sticky;
+            left: 0;
+            white-space: nowrap;
+        }
+
+        .matrix-table th.col-hier {
+            z-index: 12;
+        }
+
+        .matrix-table td.col-hier {
+            z-index: 2;
+            box-shadow: inset -1px 0 0 var(--border-ui);
+        }
+
+        /* Resaltado de fila al pasar el cursor (respeta las columnas destacadas) */
+        .matrix-table tbody tr.level-1:hover td:not(.cell-disp):not(.cell-ajuste):not(.cell-saldo) {
+            background-color: #EEEFF2 !important;
+        }
+
+        .matrix-table tbody tr.level-2:hover td:not(.cell-disp):not(.cell-ajuste):not(.cell-saldo) {
+            background-color: #FBF8EF !important;
+        }
+
         .matrix-table td {
             padding: 8px 12px;
             border-bottom: 1px solid var(--border-ui);
@@ -960,6 +987,11 @@
 
         .toggle-icon:hover {
             background: var(--pantone-yellow);
+        }
+
+        .toggle-icon:focus-visible {
+            outline: 2px solid var(--color-primary);
+            outline-offset: 2px;
         }
 
         .matrix-empty {
@@ -1192,9 +1224,6 @@
         }
 
         /* Contención de ancho: evita que la matriz desborde el layout */
-        .dashboard-container > *,
-        .card,
-        .matrix-card,
         .table-responsive {
             min-width: 0;
         }
@@ -1536,12 +1565,21 @@
                 <!-- FILTROS: PERIODO DEL SP Y SEMANAS A MOSTRAR -->
                 <section class="card">
                     <div class="filter-section-header">
-                     
+                        <div class="filter-title">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                            Periodo del kardex
+                        </div>
                         <div class="filter-quick-actions">
-                            <button class="filter-quick-btn" onclick="aplicarPeriodoRapido('anio-actual')">Año
-                                actual</button>
-                            <button class="filter-quick-btn" onclick="aplicarPeriodoRapido('12-meses')">Últimos 12
-                                meses</button>
+                            <button class="filter-quick-btn" data-periodo="anio-actual"
+                                onclick="aplicarPeriodoRapido('anio-actual')">Año actual</button>
+                            <button class="filter-quick-btn" data-periodo="12-meses"
+                                onclick="aplicarPeriodoRapido('12-meses')">Últimos 12 meses</button>
                             <button class="filter-quick-btn" onclick="reestablecerFiltros()">Reestablecer</button>
                         </div>
                     </div>
@@ -1962,8 +2000,18 @@
         document.addEventListener('DOMContentLoaded', () => {
             inicializarFechas();
             inicializarTooltipSaldo();
+            // Si el usuario edita las fechas a mano, ningún periodo rápido queda activo
+            ['fechaInicio', 'fechaFin'].forEach(id => {
+                document.getElementById(id)?.addEventListener('change', () => marcarPeriodoRapido(null));
+            });
             consultarKardex(false);
         });
+
+        function marcarPeriodoRapido(tipo) {
+            document.querySelectorAll('.filter-quick-btn[data-periodo]').forEach(boton => {
+                boton.classList.toggle('active', boton.dataset.periodo === tipo);
+            });
+        }
 
         document.addEventListener('click', (event) => {
             const combo = document.getElementById('semanaCombo');
@@ -1976,6 +2024,7 @@
             const inputFin = document.getElementById('fechaFin');
             if (inputInicio) inputInicio.value = fechaIso(new Date(hoy.getFullYear(), 0, 1));
             if (inputFin) inputFin.value = fechaIso(hoy);
+            marcarPeriodoRapido('anio-actual');
         }
 
         function aplicarPeriodoRapido(tipo) {
@@ -1988,6 +2037,7 @@
 
             if (inputInicio) inputInicio.value = fechaIso(inicio);
             if (inputFin) inputFin.value = fechaIso(hoy);
+            marcarPeriodoRapido(tipo);
             consultarKardex(true);
         }
 
@@ -2157,11 +2207,26 @@
             }
         }
 
-        function toggleSemana(tipo, clave) {
+        function toggleSemana(tipo, clave, conservarFoco = false) {
             const abiertas = semanasAbiertas[tipo];
             if (abiertas.has(clave)) abiertas.delete(clave);
             else abiertas.add(clave);
             renderizarMatriz(tipo);
+
+            // Al operar con teclado, el foco vuelve al mismo control tras re-renderizar
+            if (conservarFoco) {
+                const tbody = document.getElementById(KARDEX_CONFIG[tipo].tbody);
+                const control = tbody
+                    ? [...tbody.querySelectorAll('.toggle-icon')].find(el => el.dataset.semana === clave)
+                    : null;
+                if (control) control.focus();
+            }
+        }
+
+        function toggleSemanaTecla(evento, tipo, clave) {
+            if (evento.key !== 'Enter' && evento.key !== ' ') return;
+            evento.preventDefault();
+            toggleSemana(tipo, clave, true);
         }
 
         function expandirTodas(tipo, expandir) {
@@ -2213,8 +2278,10 @@
 
                 html += `<tr class="level-1">
                     <td class="col-hier">
-                        <span class="toggle-icon" role="button" tabindex="0" aria-label="Expandir semana"
-                            onclick="toggleSemana('${tipo}', '${escaparHtml(grupo.clave)}')">${abierta ? '−' : '+'}</span>
+                        <span class="toggle-icon" role="button" tabindex="0" data-semana="${escaparHtml(grupo.clave)}"
+                            aria-expanded="${abierta}" aria-label="${abierta ? 'Colapsar' : 'Expandir'} ${escaparHtml(etiqueta)}"
+                            onclick="toggleSemana('${tipo}', '${escaparHtml(grupo.clave)}')"
+                            onkeydown="toggleSemanaTecla(event, '${tipo}', '${escaparHtml(grupo.clave)}')">${abierta ? '−' : '+'}</span>
                         ${escaparHtml(etiqueta)}
                     </td>`;
 
@@ -2261,22 +2328,26 @@
             }
 
             const tipos = new Set();
-            let saldoFinal = 0;
             let totalFilas = 0;
 
             grupos.forEach(grupo => {
                 grupo.registros.forEach(registro => {
                     tipos.add(String(registro.TipoCerdo ?? 'SIN TIPO').trim());
-                    saldoFinal += num(registro.SaldoFinal);
                     totalFilas += 1;
                 });
             });
+
+            // El saldo es una foto de inventario: sumarlo entre semanas no tiene sentido,
+            // se muestra el de la semana visible más reciente (grupos viene descendente)
+            const ultima = grupos[0];
+            const saldoUltima = ultima.registros.reduce((suma, registro) => suma + num(registro.SaldoFinal), 0);
+            const semanaUltima = ultima.meta && ultima.meta.semana ? `Sem. ${pad2(ultima.meta.semana)}` : ultima.clave;
 
             contenedor.innerHTML = `
                 <span>Semanas visibles: <b>${grupos.length}</b></span>
                 <span>Tipos de cerdo: <b>${tipos.size}</b></span>
                 <span>Filas: <b>${totalFilas}</b></span>
-                <span>Saldo final acumulado: <b>${formatearNumero(saldoFinal)}</b></span>`;
+                <span>Saldo final ${escaparHtml(semanaUltima)}: <b>${formatearNumero(saldoUltima)}</b></span>`;
         }
 
         // =========================================================================
