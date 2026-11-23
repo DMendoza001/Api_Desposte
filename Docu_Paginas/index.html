@@ -670,14 +670,25 @@
             },
             {
                 id: 'comparativo-ptc-diario',
-                titulo: 'Comparativo PTC Diario: Producción vs Programa vs Distribución',
+                titulo: 'Comparativo Semanal PTC: Producción vs Programa vs Distribución',
                 archivo: 'Comparativo_PTC_Diario.html',
                 categoria: 'CUMPLIMIENTOS',
                 categoriaNombre: 'Cumplimientos PTC',
                 categoriaClase: 'cat-cumplimientos',
                 icono: '⚖️',
                 endpoint: 'GET /api/CumplimientoPtcDiario',
-                descripcion: 'Comparativo Semanal (Lunes a Domingo): Producción Real, Programa de Producción y Pedido de Distribución'
+                descripcion: 'Comparativo Semanal (Lunes a Domingo): Producción Real, Programa de Producción y Pedido de Distribución. Incluye barra lateral con la vista Kardex de Cerdos.'
+            },
+            {
+                id: 'kardex-cerdos',
+                titulo: 'Kardex de Cerdos: Saldos PBC y PTC por Semana',
+                archivo: 'Kardex_Cerdos.html',
+                categoria: 'OPERACIONES',
+                categoriaNombre: 'Operaciones',
+                categoriaClase: 'cat-operaciones',
+                icono: '🐖',
+                endpoint: 'GET /api/KardexUnCerdos/PBC · GET /api/KardexUnCerdos/PTC',
+                descripcion: 'Kardex semanal de unidades de cerdos con dos matrices: Planta Beneficio de Cerdos (PBC) y Planta Trozado de Cerdos (PTC), por tipo de cerdo, con saldos, disponibles, ajustes y exportación de data plana SQL.'
             },
             {
                 id: 'resumen-pl-9semanas',

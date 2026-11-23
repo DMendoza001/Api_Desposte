@@ -1,0 +1,2640 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kardex de Cerdos - PBC y PTC</title>
+
+    <!-- Fuentes Google Fonts: Inter y JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- SheetJS para exportar la data plana de SQL Server a Excel (.xlsx) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <!-- Configuración compartida de conexión a la API -->
+    <script src="config.js"></script>
+
+    <style>
+        /* =========================================================================
+           🎨 TEMA: PANTONE INDUSTRIAL PALETTE (PaletaFinanza_Industrial.json)
+           Bronce Mate, Piedra Taupe y Pizarra Suave
+           ========================================================================= */
+        :root {
+            --color-header-bg: #38353B;
+            --color-header-gradient: linear-gradient(135deg, #38353B 0%, #434B57 100%);
+            --color-header-text: #FFFFFF;
+            --color-header-subtext: #E2D5B5;
+            --color-heading: #38353B;
+            --color-text: #4A474C;
+            --color-text-muted: #787479;
+            --color-primary: #BAA063;
+            --color-secondary: #7A828E;
+            --color-accent: #BAA063;
+            --color-bg: #F2F4F8;
+            --color-surface: #FFFFFF;
+            --color-border: #E2E8F0;
+
+            /* Tokens complementarios de la paleta */
+            --isg-gold-bronze: #C4B282;
+            --isg-slate-charcoal: #434B57;
+            --isg-slate-stone: #948E88;
+            --isg-slate-silver: #B5B2AA;
+            --isg-stone-taupe: #A89F91;
+            --isg-slate-gray: #6B727D;
+
+            --chart-slate-navy: #38353B;
+            --chart-steel-blue: #7A828E;
+            --chart-cerulean-slate: #948E88;
+            --chart-pewter-blue: #A89F91;
+            --chart-plomo-neutro: #878994;
+            --chart-plomo-pizarra: #B5B2AA;
+
+            --pantone-yellow: #BAA063;
+            --pantone-yellow-light: #C4B282;
+            --pantone-yellow-soft: rgba(186, 160, 99, 0.16);
+            --pantone-yellow-border: rgba(186, 160, 99, 0.45);
+            --pantone-gold: #7A828E;
+            --pantone-dark: #38353B;
+            --pantone-darker: #434B57;
+            --pantone-gray-dark: #4A474C;
+            --pantone-gray-med: #787479;
+            --pantone-gray-light: #B5B2AA;
+
+            --bg-canvas: var(--color-bg);
+            --bg-card: var(--color-surface);
+            --bg-card-alt: #F8FAFC;
+            --text-dark: var(--color-text);
+            --text-muted: var(--color-text-muted);
+            --border-ui: var(--color-border);
+            --radius-sm: 8px;
+            --shadow-sm: 0 1px 3px rgba(56, 53, 59, 0.07), 0 1px 2px rgba(56, 53, 59, 0.04);
+            --shadow-md: 0 8px 20px -6px rgba(56, 53, 59, 0.18);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-canvas);
+            color: var(--text-dark);
+            line-height: 1.45;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* =========================================================================
+           🧭 LAYOUT CON BARRA LATERAL (navegación entre las vistas del módulo)
+           Dock flotante de iconos (60px); al pasar el cursor se despliega a 215px
+           SOBRE el contenido (margin-right negativo) sin redimensionar la matriz.
+           ========================================================================= */
+        html body {
+            padding: 0 !important;
+        }
+
+        .app-layout {
+            display: flex;
+            min-height: 100vh;
+            width: 100%;
+        }
+
+        .sidebar {
+            position: sticky;
+            top: 10px;
+            align-self: flex-start;
+            height: calc(100vh - 20px);
+            margin: 10px 0 10px 10px;
+            width: 60px;
+            overflow: hidden;
+            background: linear-gradient(180deg, #38353B 0%, #434B57 100%);
+            color: var(--color-header-text);
+            display: flex;
+            flex-direction: column;
+            padding: 14px 0 12px;
+            flex-shrink: 0;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 26px rgba(30, 27, 34, 0.22);
+            z-index: 100;
+            transition: width 0.22s ease, margin-right 0.22s ease, box-shadow 0.22s ease;
+        }
+
+        .sidebar-header {
+            padding: 0 8px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sidebar-header h2 {
+            font-size: 0;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            color: #FFFFFF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            white-space: nowrap;
+        }
+
+        .sidebar-header h2 svg {
+            width: 18px;
+            height: 18px;
+            color: var(--color-primary);
+            flex-shrink: 0;
+        }
+
+        .sidebar-section-label {
+            display: none;
+            font-size: 0.64rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: rgba(226, 213, 181, 0.55);
+            padding: 4px 14px;
+            white-space: nowrap;
+        }
+
+        .sidebar-divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.09);
+            margin: 10px;
+        }
+
+        .main-content {
+            flex: 1;
+            min-width: 0;
+            padding: 18px 24px 26px;
+            overflow-x: hidden;
+        }
+
+        .dashboard-container {
+            max-width: 1920px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .dashboard-container > * {
+            min-width: 0;
+        }
+
+        .sidebar-menu,
+        .sidebar-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 0 8px;
+        }
+
+        .sidebar-btn {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 9px 0;
+            border-radius: 9px;
+            border: 1px solid transparent;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.72);
+            font-size: 0.81rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            text-align: left;
+            text-decoration: none;
+            font-family: inherit;
+        }
+
+        .sidebar-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #FFFFFF;
+        }
+
+        .sidebar-btn.active {
+            background: rgba(186, 160, 99, 0.22);
+            border-color: rgba(186, 160, 99, 0.35);
+            color: #FFFFFF;
+            font-weight: 700;
+            box-shadow: inset 3px 0 0 var(--color-primary);
+        }
+
+        .sidebar-btn .btn-info {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            min-width: 0;
+        }
+
+        .sidebar-btn .btn-info svg {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-btn.active .btn-info svg {
+            color: var(--color-primary);
+        }
+
+        .sidebar-btn .btn-info span,
+        .side-status-text {
+            display: none;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sidebar-bottom {
+            margin-top: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 0 8px;
+        }
+
+        .sidebar-footer {
+            padding: 10px 0 2px;
+            border-top: 1px solid rgba(255, 255, 255, 0.09);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 0.74rem;
+            font-weight: 600;
+            color: var(--color-header-subtext);
+            white-space: nowrap;
+        }
+
+        .side-status-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: var(--pantone-gray-med);
+            flex-shrink: 0;
+        }
+
+        .side-status-dot.online {
+            background: #10B981;
+            box-shadow: 0 0 8px #10B981;
+        }
+
+        .side-status-dot.loading {
+            background: var(--pantone-yellow);
+            animation: pulse 1s infinite alternate;
+        }
+
+        .side-status-dot.error {
+            background: #EF4444;
+        }
+
+        @media screen and (min-width: 981px) and (hover: hover) {
+
+            .sidebar:hover,
+            .sidebar:has(:focus-visible) {
+                width: 215px;
+                margin-right: -155px;
+                box-shadow: 10px 12px 30px rgba(30, 27, 34, 0.32);
+            }
+
+            .sidebar:hover .sidebar-header,
+            .sidebar:has(:focus-visible) .sidebar-header {
+                padding: 0 12px 12px;
+                justify-content: flex-start;
+            }
+
+            .sidebar:hover .sidebar-header h2,
+            .sidebar:has(:focus-visible) .sidebar-header h2 {
+                font-size: 0.84rem;
+                justify-content: flex-start;
+                gap: 8px;
+            }
+
+            .sidebar:hover .sidebar-section-label,
+            .sidebar:has(:focus-visible) .sidebar-section-label {
+                display: block;
+            }
+
+            .sidebar:hover .sidebar-btn .btn-info span,
+            .sidebar:has(:focus-visible) .sidebar-btn .btn-info span {
+                display: inline;
+            }
+
+            .sidebar:hover .sidebar-btn,
+            .sidebar:has(:focus-visible) .sidebar-btn {
+                justify-content: space-between;
+                padding: 9px 11px;
+            }
+
+            .sidebar:hover .sidebar-footer,
+            .sidebar:has(:focus-visible) .sidebar-footer {
+                justify-content: flex-start;
+                padding: 10px 4px 2px;
+            }
+
+            .sidebar:hover .side-status-text,
+            .sidebar:has(:focus-visible) .side-status-text {
+                display: inline;
+            }
+        }
+
+        /* ============================ HEADER ============================ */
+        .dashboard-header {
+            background: var(--color-header-gradient);
+            color: var(--color-header-text);
+            border-radius: 14px;
+            padding: 20px 26px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 18px;
+            flex-wrap: wrap;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+        }
+
+        .dashboard-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--color-primary), var(--color-secondary), var(--isg-gold-bronze));
+        }
+
+        .header-title-group {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            min-width: 0;
+        }
+
+        .header-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            background: var(--pantone-yellow-soft);
+            border: 1px solid var(--pantone-yellow-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--pantone-yellow);
+            flex-shrink: 0;
+        }
+
+        .header-title {
+            font-size: 1.42rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: var(--color-header-text);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .badge-tag {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            border-radius: 6px;
+            background: rgba(186, 160, 99, 0.20);
+            color: var(--color-header-subtext);
+            border: 1px solid rgba(226, 213, 181, 0.40);
+        }
+
+        .header-subtitle {
+            font-size: 0.84rem;
+            color: var(--color-header-subtext);
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 0.78rem;
+            padding: 6px 14px;
+            border-radius: 9999px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #FFFFFF;
+            font-weight: 600;
+        }
+
+        .status-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background-color: var(--pantone-gray-med);
+            display: inline-block;
+        }
+
+        .status-dot.online {
+            background-color: #10B981;
+            box-shadow: 0 0 8px #10B981;
+        }
+
+        .status-dot.loading {
+            background-color: var(--pantone-yellow);
+            animation: pulse 1s infinite alternate;
+        }
+
+        .status-dot.error {
+            background-color: #EF4444;
+        }
+
+        @keyframes pulse {
+            from {
+                opacity: 0.4;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* ============================ BOTONES ============================ */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid var(--border-ui);
+            background: #FFFFFF;
+            color: var(--pantone-dark);
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .btn:hover {
+            background: var(--bg-card-alt);
+            border-color: var(--chart-pewter-blue);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--pantone-yellow) 0%, var(--pantone-yellow-light) 100%);
+            border: 1px solid rgba(186, 160, 99, 0.65);
+            color: #FFFFFF;
+            font-weight: 700;
+            box-shadow: 0 2px 6px rgba(186, 160, 99, 0.35);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--pantone-yellow-light) 0%, var(--pantone-yellow) 100%);
+            color: #FFFFFF;
+        }
+
+        .btn-excel {
+            background: rgba(122, 130, 142, 0.24);
+            border: 1px solid rgba(226, 213, 181, 0.38);
+            color: #FFFFFF;
+            font-weight: 700;
+        }
+
+        .btn-excel:hover {
+            background: var(--color-secondary);
+            border-color: var(--color-secondary);
+            color: #FFFFFF;
+        }
+
+        .btn:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-icon {
+            padding: 7px 11px;
+            font-size: 0.78rem;
+        }
+
+        /* ============================ TARJETAS BASE ============================ */
+        .card,
+        .matrix-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-ui);
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+            min-width: 0;
+        }
+
+        .card {
+            padding: 18px 22px;
+        }
+
+        .matrix-card {
+            padding: 18px 20px;
+        }
+
+        /* ============================ FILTROS ============================ */
+        .filter-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .filter-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--pantone-dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: -0.01em;
+        }
+
+        .filter-quick-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .filter-quick-btn {
+            background: var(--bg-card-alt);
+            border: 1px solid var(--border-ui);
+            color: var(--text-muted);
+            padding: 6px 13px;
+            border-radius: 6px;
+            font-size: 0.77rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            font-family: inherit;
+        }
+
+        .filter-quick-btn:hover {
+            color: var(--text-dark);
+            background: #EEF2F6;
+            border-color: var(--chart-pewter-blue);
+        }
+
+        .filter-quick-btn.active {
+            background: var(--chart-slate-navy);
+            border-color: var(--chart-slate-navy);
+            color: #FFFFFF;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: 165px 165px minmax(230px, 280px) auto;
+            gap: 12px;
+            align-items: end;
+        }
+
+        .filter-field {
+            min-width: 0;
+        }
+
+        .filter-field > label {
+            display: block;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .filter-field input[type="date"] {
+            width: 100%;
+            padding: 8px 11px;
+            border: 1px solid #CBD5E1;
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--pantone-dark);
+            background: #FFFFFF;
+            font-family: inherit;
+            min-width: 0;
+        }
+
+        .filter-field input[type="date"]:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(186, 160, 99, 0.18);
+        }
+
+        .filter-field-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        /* Combo múltiple de semanas (regla de filtros por vista) */
+        .semana-combo {
+            position: relative;
+        }
+
+        .semana-combo-btn {
+            border: 1px solid #CBD5E1;
+            padding: 9px 12px;
+            border-radius: var(--radius-sm);
+            background: #FFFFFF;
+            color: var(--text-dark);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            font-family: inherit;
+            min-width: 0;
+            width: 100%;
+        }
+
+        .semana-combo-btn:hover,
+        .semana-combo.abierto .semana-combo-btn {
+            border-color: var(--color-primary);
+        }
+
+        #semanaSelectedText {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .semana-panel {
+            display: none;
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            z-index: 200;
+            min-width: 280px;
+            background: #FFFFFF;
+            border: 1px solid var(--border-ui);
+            border-radius: 10px;
+            box-shadow: var(--shadow-md);
+            padding: 8px;
+        }
+
+        .semana-combo.abierto .semana-panel {
+            display: block;
+        }
+
+        .semana-acciones {
+            display: flex;
+            gap: 6px;
+            padding: 2px 2px 8px;
+            margin-bottom: 6px;
+            border-bottom: 1px solid var(--border-ui);
+        }
+
+        .semana-accion {
+            flex: 1;
+            border: 1px solid var(--border-ui);
+            background: var(--bg-card-alt);
+            color: var(--color-heading);
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 5px 6px;
+            border-radius: 6px;
+            cursor: pointer;
+            white-space: nowrap;
+            font-family: inherit;
+        }
+
+        .semana-accion:hover {
+            border-color: var(--color-primary);
+            background: var(--pantone-yellow-soft);
+        }
+
+        .semana-lista {
+            max-height: 280px;
+            overflow-y: auto;
+        }
+
+        .semana-opcion {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 8px;
+            font-size: 0.82rem;
+            border-radius: 6px;
+            cursor: pointer;
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+
+        .semana-opcion:hover {
+            background: rgba(186, 160, 99, 0.10);
+        }
+
+        .selection-summary-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border-ui);
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .selection-summary-bar b {
+            color: var(--pantone-dark);
+        }
+
+        /* ============================ MATRIZ ============================ */
+        .matrix-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .matrix-toolbar-left {
+            min-width: 0;
+        }
+
+        .matrix-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .chart-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            color: var(--pantone-dark);
+            text-transform: uppercase;
+        }
+
+        .chart-sub {
+            font-size: 0.74rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+            font-weight: 500;
+        }
+
+        .matrix-meta {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 6px;
+        }
+
+        .matrix-meta span {
+            font-size: 0.71rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            background: var(--bg-card-alt);
+            border: 1px solid var(--border-ui);
+            border-radius: 999px;
+            padding: 2px 9px;
+        }
+
+        .matrix-meta span b {
+            color: var(--pantone-dark);
+        }
+
+        .table-responsive {
+            width: 100%;
+            max-width: 100%;
+            max-height: 520px;
+            overflow-x: auto;
+            overflow-y: auto;
+            border: 1px solid var(--border-ui);
+            border-radius: 8px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .matrix-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 0.84rem;
+            text-align: left;
+        }
+
+        .matrix-table th {
+            background-color: var(--pantone-dark);
+            color: #FFFFFF;
+            font-weight: 700;
+            font-size: 0.77rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            padding: 9px 11px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            white-space: nowrap;
+            text-align: right;
+            border-bottom: 3px solid var(--pantone-yellow);
+        }
+
+        .matrix-table th.col-hier {
+            text-align: left;
+            width: 100%;
+        }
+
+        .matrix-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--border-ui);
+            color: var(--text-dark);
+        }
+
+        .matrix-table th.num-col,
+        .matrix-table td.num-cell {
+            width: 1%;
+            white-space: nowrap;
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+            font-family: 'JetBrains Mono', 'Inter', monospace;
+        }
+
+        /* Fila de semana: total del periodo + control de expansión */
+        .level-1 td {
+            background-color: #F5F6F8 !important;
+            color: var(--pantone-dark) !important;
+            font-weight: 700;
+            border-top: 2px solid rgba(186, 160, 99, 0.40) !important;
+            border-bottom: 1px solid var(--border-ui) !important;
+        }
+
+        .level-1 td.col-hier {
+            color: var(--color-heading) !important;
+        }
+
+        /* Fila de tipo de cerdo: jerarquía por sangría y tipografía */
+        .level-2 td {
+            background-color: #FFFFFF !important;
+        }
+
+        .level-2 td.col-hier {
+            padding-left: 40px;
+            font-weight: 600;
+            color: var(--color-heading);
+        }
+
+        /* Columnas destacadas del kardex */
+        .matrix-table td.cell-disp {
+            background-color: rgba(186, 160, 99, 0.22) !important;
+            color: #5F5127 !important;
+            font-weight: 700;
+        }
+
+        .matrix-table td.cell-ajuste {
+            background-color: rgba(122, 130, 142, 0.13) !important;
+        }
+
+        .matrix-table td.cell-saldo {
+            background-color: rgba(168, 159, 145, 0.20) !important;
+            font-weight: 700;
+        }
+
+        .matrix-table th.col-disp-start,
+        .matrix-table td.col-disp-start {
+            border-left: 2px solid rgba(186, 160, 99, 0.55);
+        }
+
+        .matrix-table th.col-saldo-start,
+        .matrix-table td.col-saldo-start {
+            border-left: 2px solid rgba(56, 53, 59, 0.20);
+        }
+
+        /* Único icono permitido: control de expansión / colapso */
+        .toggle-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            border-radius: 5px;
+            background: var(--pantone-yellow-soft);
+            color: var(--pantone-dark);
+            border: 1px solid var(--pantone-yellow-border);
+            font-family: monospace;
+            font-size: 0.8rem;
+            font-weight: 800;
+            cursor: pointer;
+            margin-right: 8px;
+            user-select: none;
+            transition: all 0.15s ease;
+            flex-shrink: 0;
+        }
+
+        .toggle-icon:hover {
+            background: var(--pantone-yellow);
+        }
+
+        .matrix-empty {
+            padding: 30px 14px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.86rem;
+        }
+
+        .cell-empty {
+            color: rgba(120, 116, 121, 0.55);
+        }
+
+        .val-negative {
+            color: #991B1B;
+        }
+
+        .matrix-legend {
+            margin-top: 10px;
+            font-size: 0.73rem;
+            color: var(--text-muted);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px 14px;
+            font-weight: 500;
+        }
+
+        .matrix-legend b {
+            color: var(--pantone-dark);
+        }
+
+        /* ==================== TOOLTIP INFORMATIVO: SALDO FINAL ==================== */
+        .matrix-table td.cell-saldo-tip {
+            cursor: help;
+        }
+
+        .matrix-table td.cell-saldo-tip:hover {
+            box-shadow: inset 0 0 0 1px rgba(56, 53, 59, 0.30);
+        }
+
+        .saldo-tip {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 4000;
+            width: max-content;
+            min-width: 252px;
+            max-width: 310px;
+            padding: 10px 12px;
+            background: #FFFFFF;
+            border: 1px solid var(--border-ui);
+            border-left: 4px solid var(--color-primary);
+            border-radius: 10px;
+            box-shadow: 0 16px 34px -12px rgba(56, 53, 59, 0.48);
+            font-family: 'Inter', sans-serif;
+            pointer-events: none;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(4px);
+            transition: opacity 0.14s ease, transform 0.14s ease, visibility 0.14s ease;
+        }
+
+        .saldo-tip.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .saldo-tip-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .saldo-tip-title {
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: var(--color-heading);
+            line-height: 1.25;
+        }
+
+        .saldo-tip-badge {
+            font-size: 0.6rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            padding: 2px 6px;
+            border-radius: 999px;
+            background: var(--pantone-yellow-soft);
+            border: 1px solid var(--pantone-yellow-border);
+            color: #5F5127;
+            white-space: nowrap;
+        }
+
+        .saldo-tip-sub {
+            margin: 2px 0 8px;
+            font-size: 0.69rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .saldo-tip-row {
+            display: grid;
+            grid-template-columns: 9px minmax(0, 1fr) auto;
+            align-items: start;
+            gap: 7px;
+            padding: 5px 0;
+            border-top: 1px dashed var(--border-ui);
+        }
+
+        .saldo-tip-sub + .saldo-tip-row {
+            border-top: none;
+        }
+
+        .saldo-tip-dot {
+            width: 8px;
+            height: 8px;
+            margin-top: 4px;
+            border-radius: 50%;
+            background: var(--chart-plomo-pizarra);
+        }
+
+        .saldo-tip-row.grupo-cerdos .saldo-tip-dot {
+            background: var(--chart-slate-navy);
+        }
+
+        .saldo-tip-row.grupo-otros .saldo-tip-dot {
+            background: var(--color-primary);
+        }
+
+        .saldo-tip-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            line-height: 1.25;
+        }
+
+        .saldo-tip-label small {
+            display: block;
+            font-size: 0.62rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .saldo-tip-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--color-heading);
+            white-space: nowrap;
+        }
+
+        .saldo-tip-row.total {
+            margin-top: 2px;
+            padding-top: 7px;
+            border-top: 1px solid rgba(56, 53, 59, 0.20);
+        }
+
+        .saldo-tip-row.total .saldo-tip-label {
+            font-size: 0.67rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .saldo-tip-row.total .saldo-tip-value {
+            font-size: 0.9rem;
+            font-weight: 800;
+        }
+
+        .saldo-tip-row.is-active .saldo-tip-dot {
+            box-shadow: 0 0 0 3px rgba(186, 160, 99, 0.30);
+        }
+
+        .saldo-tip-row.is-active .saldo-tip-label {
+            color: var(--color-heading);
+        }
+
+        .saldo-tip-foot {
+            margin-top: 8px;
+            font-size: 0.61rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            line-height: 1.35;
+        }
+
+        .saldo-tip-foot b {
+            color: var(--color-heading);
+        }
+
+        @media screen and (max-width: 768px) {
+            .saldo-tip {
+                min-width: 0;
+                max-width: 268px;
+            }
+        }
+
+        /* ============================ PIE Y TOAST ============================ */
+        .page-footer {
+            text-align: center;
+            font-size: 0.74rem;
+            color: var(--text-muted);
+            padding: 6px 0 2px;
+            font-weight: 500;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 22px;
+            right: 22px;
+            background: var(--pantone-dark);
+            color: #FFFFFF;
+            padding: 12px 18px;
+            border-radius: 10px;
+            box-shadow: 0 12px 26px -8px rgba(56, 53, 59, 0.45);
+            opacity: 0;
+            transform: translateY(12px);
+            transition: all 0.25s ease;
+            z-index: 3000;
+            max-width: 400px;
+            font-size: 0.83rem;
+            border-left: 4px solid var(--color-primary);
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Contención de ancho: evita que la matriz desborde el layout */
+        .dashboard-container > *,
+        .card,
+        .matrix-card,
+        .table-responsive {
+            min-width: 0;
+        }
+
+        /* ============================ RESPONSIVE (autónomo) ============================ */
+        @media screen and (max-width: 1600px) {
+            .main-content {
+                padding: 10px 14px 20px;
+            }
+
+            .dashboard-container {
+                gap: 12px;
+            }
+
+            .dashboard-header {
+                padding: 14px 18px;
+                gap: 12px;
+            }
+
+            .header-title {
+                font-size: 1.16rem;
+            }
+
+            .card,
+            .matrix-card {
+                padding: 12px 16px;
+            }
+
+            .table-responsive {
+                max-height: 440px;
+            }
+        }
+
+        @media screen and (max-width: 980px) {
+            .dashboard-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .header-actions {
+                justify-content: flex-start;
+            }
+
+            .filters-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .filter-field-actions {
+                grid-column: 1 / -1;
+            }
+
+            .semana-panel {
+                min-width: 0;
+                width: 100%;
+            }
+        }
+
+        @media screen and (max-width: 768px) {
+            /* Barra lateral compacta: sólo navegación horizontal en celular */
+            .app-layout {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                position: static;
+                width: 100%;
+                height: auto;
+                margin: 0;
+                align-self: stretch;
+                flex-direction: row;
+                align-items: center;
+                padding: 6px 8px;
+                border: none;
+                border-radius: 0 0 12px 12px;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+            }
+
+            .sidebar-header,
+            .sidebar-section-label,
+            .sidebar-divider,
+            .sidebar-actions,
+            .sidebar-bottom,
+            .sidebar-footer {
+                display: none;
+            }
+
+            .sidebar-menu {
+                flex-direction: row;
+                gap: 6px;
+                padding: 0;
+                width: 100%;
+            }
+
+            .sidebar-btn {
+                flex: 1 1 0;
+                min-width: 0;
+                justify-content: center;
+                padding: 7px 4px;
+                font-size: 0.72rem;
+            }
+
+            .sidebar-btn .btn-info svg {
+                display: none;
+            }
+
+            .sidebar-btn .btn-info span {
+                display: inline;
+            }
+
+            .main-content {
+                padding: 10px 8px 24px;
+            }
+
+            .header-actions {
+                width: 100%;
+            }
+
+            .header-actions .btn {
+                flex: 1 1 auto;
+                justify-content: center;
+            }
+
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-field input[type="date"],
+            .semana-combo-btn {
+                width: 100%;
+                min-width: 0;
+            }
+
+            .filter-field-actions .btn {
+                flex: 1 1 140px;
+                justify-content: center;
+            }
+
+            .filter-quick-actions {
+                width: 100%;
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 6px;
+            }
+
+            .matrix-toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .matrix-actions {
+                width: 100%;
+            }
+
+            .matrix-actions .btn {
+                flex: 1 1 auto;
+                justify-content: center;
+            }
+
+            .matrix-table th.col-hier,
+            .matrix-table td.col-hier {
+                min-width: 150px;
+                max-width: 220px;
+                white-space: normal;
+                word-break: break-word;
+            }
+
+            .matrix-table tr.level-2 td.col-hier {
+                padding-left: 22px !important;
+            }
+
+            .toast {
+                left: 14px;
+                right: 14px;
+                max-width: none;
+                bottom: 14px;
+            }
+        }
+    </style>
+
+    <!-- Hoja de estilos responsive compartida -->
+    <link rel="stylesheet" href="responsive.css?v=3">
+</head>
+<body>
+    <div class="app-layout">
+
+        <!-- BARRA LATERAL: NAVEGACIÓN DEL MÓDULO DE CERDOS -->
+        <aside class="sidebar" id="sidebarNav" aria-label="Navegación del módulo de cerdos">
+            <div class="sidebar-header">
+                <h2>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" aria-hidden="true">
+                        <path d="m12 2 9 5-9 5-9-5 9-5Z"></path>
+                        <path d="m3 12 9 5 9-5"></path>
+                        <path d="m3 17 9 5 9-5"></path>
+                    </svg>
+                    <span>CERDOS · PTC</span>
+                </h2>
+            </div>
+
+            <div class="sidebar-section-label">Vistas</div>
+            <nav class="sidebar-menu">
+                <a href="Comparativo_PTC_Diario.html" class="sidebar-btn" title="Comparativo Semanal">
+                    <div class="btn-info">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="12" y1="20" x2="12" y2="10"></line>
+                            <line x1="18" y1="20" x2="18" y2="4"></line>
+                            <line x1="6" y1="20" x2="6" y2="16"></line>
+                        </svg>
+                        <span>Comparativo Semanal</span>
+                    </div>
+                </a>
+                <a href="Kardex_Cerdos.html" class="sidebar-btn active" title="Kardex de Cerdos">
+                    <div class="btn-info">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <rect x="8" y="2" width="8" height="4" rx="1"></rect>
+                            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                            <path d="M9 12h6"></path>
+                            <path d="M9 16h6"></path>
+                        </svg>
+                        <span>Kardex de Cerdos</span>
+                    </div>
+                </a>
+            </nav>
+
+            <div class="sidebar-divider"></div>
+            <div class="sidebar-section-label">Acciones</div>
+            <div class="sidebar-actions">
+                <button type="button" class="sidebar-btn" title="Consultar los SP en SQL Server"
+                    onclick="consultarKardex(true)">
+                    <div class="btn-info">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+                        </svg>
+                        <span>Actualizar</span>
+                    </div>
+                </button>
+                <button type="button" class="sidebar-btn" title="Exportar Data Plana SQL (.xlsx)"
+                    onclick="exportarDataPlanaSQL()">
+                    <div class="btn-info">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="8" y1="13" x2="16" y2="13"></line>
+                            <line x1="8" y1="17" x2="16" y2="17"></line>
+                        </svg>
+                        <span>Data Plana (.xlsx)</span>
+                    </div>
+                </button>
+                <button type="button" class="sidebar-btn" id="btnSideFullscreen" title="Pantalla completa"
+                    onclick="togglePantallaCompleta()">
+                    <div class="btn-info">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M8 3H5a2 2 0 0 0-2 2v3"></path>
+                            <path d="M16 3h3a2 2 0 0 1 2 2v3"></path>
+                            <path d="M8 21H5a2 2 0 0 1-2-2v-3"></path>
+                            <path d="M16 21h3a2 2 0 0 0 2-2v-3"></path>
+                        </svg>
+                        <span>Pantalla completa</span>
+                    </div>
+                </button>
+            </div>
+
+            <div class="sidebar-bottom">
+                <a href="index.html" class="sidebar-btn" title="Regresar al Menú Principal">
+                    <div class="btn-info">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                        </svg>
+                        <span>Menú Principal</span>
+                    </div>
+                </a>
+                <div class="sidebar-footer" title="Estado de conexión con la API">
+                    <span class="side-status-dot" id="sideStatusDot"></span>
+                    <span class="side-status-text" id="sideStatusText">Listo</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- CONTENIDO PRINCIPAL -->
+        <main class="main-content">
+            <div class="dashboard-container">
+                <!-- HEADER -->
+                <header class="dashboard-header">
+                    <div class="header-title-group">
+                        <div class="header-icon">
+                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="8" y="2" width="8" height="4" rx="1"></rect>
+                                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                                <path d="M9 12h6"></path>
+                                <path d="M9 16h6"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="header-title">
+                                Kardex de Cerdos
+                                <span class="badge-tag">PBC · PTC</span>
+                            </div>
+                            <div class="header-subtitle">
+                                Saldos semanales de <b>Planta Beneficio de Cerdos (PBC)</b> y <b>Planta Trozado de
+                                    Cerdos (PTC)</b>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="header-actions">
+                        <div class="status-badge" id="apiStatusBadge">
+                            <span class="status-dot"></span>
+                            <span id="apiStatusText">Buscando servidor...</span>
+                        </div>
+
+                        <button class="btn btn-excel" id="btnExportarPlana" onclick="exportarDataPlanaSQL()"
+                            title="Exportar la data plana tal cual viene de SQL Server">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            Data Plana SQL (.xlsx)
+                        </button>
+
+                        <button class="btn btn-primary" id="btnActualizar" onclick="consultarKardex(true)">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+                            </svg>
+                            Actualizar
+                        </button>
+                    </div>
+                </header>
+                <!-- FILTROS: PERIODO DEL SP Y SEMANAS A MOSTRAR -->
+                <section class="card">
+                    <div class="filter-section-header">
+                     
+                        <div class="filter-quick-actions">
+                            <button class="filter-quick-btn" onclick="aplicarPeriodoRapido('anio-actual')">Año
+                                actual</button>
+                            <button class="filter-quick-btn" onclick="aplicarPeriodoRapido('12-meses')">Últimos 12
+                                meses</button>
+                            <button class="filter-quick-btn" onclick="reestablecerFiltros()">Reestablecer</button>
+                        </div>
+                    </div>
+
+                    <div class="filters-grid">
+                        <div class="filter-field">
+                            <label for="fechaInicio">Fecha inicio</label>
+                            <input type="date" id="fechaInicio">
+                        </div>
+                        <div class="filter-field">
+                            <label for="fechaFin">Fecha fin</label>
+                            <input type="date" id="fechaFin">
+                        </div>
+                        <div class="filter-field">
+                            <label id="semanasFilterLabel">Semanas (vista semanal)</label>
+                            <div class="semana-combo" id="semanaCombo">
+                                <button type="button" class="semana-combo-btn" onclick="toggleSemanaDropdown(event)">
+                                    <span id="semanaSelectedText">Sin datos</span>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"
+                                        aria-hidden="true">
+                                        <polyline points="6 9 12 15 18 9"></polyline>
+                                    </svg>
+                                </button>
+                                <div class="semana-panel" id="semanaPanel">
+                                    <div class="semana-acciones">
+                                        <button type="button" class="semana-accion"
+                                            onclick="seleccionarSemanasPorDefecto()">Últimas 12</button>
+                                        <button type="button" class="semana-accion"
+                                            onclick="seleccionarTodasSemanas()">Todas</button>
+                                    </div>
+                                    <div class="semana-lista" id="semanaLista"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="filter-field filter-field-actions">
+                            <button class="btn btn-primary" id="btnConsultar" onclick="consultarKardex(false)">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="11" cy="11" r="7"></circle>
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                </svg>
+                                Consultar
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="selection-summary-bar">
+                        <span id="resumenPeriodo">Consultando el kardex en SQL Server...</span>
+                        <span id="resumenRegistros">Sin datos cargados</span>
+                    </div>
+                </section>
+                <!-- MATRIZ PBC: PLANTA BENEFICIO DE CERDOS -->
+                <section class="matrix-card">
+                    <div class="matrix-toolbar">
+                        <div class="matrix-toolbar-left">
+                            <div class="chart-title">Planta Beneficio de Cerdos (PBC)</div>
+                            <div class="chart-sub">SP_Kardex_UnCerdos_PBC · Semana / TipoCerdo · saldos de beneficio</div>
+                            <div class="matrix-meta" id="metaPbc"></div>
+                        </div>
+                        <div class="matrix-actions">
+                            <button class="btn btn-icon" onclick="expandirTodas('PBC', true)">Expandir Todo</button>
+                            <button class="btn btn-icon" onclick="expandirTodas('PBC', false)">Colapsar Todo</button>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="matrix-table">
+                            <thead>
+                                <tr>
+                                    <th class="col-hier">Semana / TipoCerdo</th>
+                                    <th class="num-col">Saldo Inicial</th>
+                                    <th class="num-col">Beneficiado</th>
+                                    <th class="num-col">Ingreso Dev.</th>
+                                    <th class="num-col col-disp-start">Disp. Beneficiado</th>
+                                    <th class="num-col">Carcasa</th>
+                                    <th class="num-col">Enviado PTC</th>
+                                    <th class="num-col">Harinas</th>
+                                    <th class="num-col">Ajuste</th>
+                                    <th class="num-col col-saldo-start">Saldo Final</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bodyPbc">
+                                <tr>
+                                    <td colspan="10" class="matrix-empty">Cargando información de la API...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="matrix-legend">
+                        <span><b>Disp. Beneficiado</b> = Saldo Inicial + Beneficiado + Ingreso Dev. (cálculo en
+                            pantalla)</span>
+                        <span>Los guiones (–) representan valores nulos o en cero.</span>
+                        <span>Negativos entre paréntesis.</span>
+                        <span>Pase el cursor sobre <b>Saldo Final</b> para ver el resumen <b>Cerdos</b> y <b>Otros
+                                Cerdos</b>.</span>
+                    </div>
+                </section>
+                <!-- MATRIZ PTC: PLANTA TROZADO DE CERDOS -->
+                <section class="matrix-card">
+                    <div class="matrix-toolbar">
+                        <div class="matrix-toolbar-left">
+                            <div class="chart-title">Planta Trozado de Cerdos (PTC)</div>
+                            <div class="chart-sub">SP_Kardex_UnCerdos_PTC · Semana / TipoCerdo · saldos de trozado</div>
+                            <div class="matrix-meta" id="metaPtc"></div>
+                        </div>
+                        <div class="matrix-actions">
+                            <button class="btn btn-icon" onclick="expandirTodas('PTC', true)">Expandir Todo</button>
+                            <button class="btn btn-icon" onclick="expandirTodas('PTC', false)">Colapsar Todo</button>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="matrix-table">
+                            <thead>
+                                <tr>
+                                    <th class="col-hier">Semana / TipoCerdo</th>
+                                    <th class="num-col">Saldo Inicial</th>
+                                    <th class="num-col">Ingreso PBC</th>
+                                    <th class="num-col">Ingreso Dev.</th>
+                                    <th class="num-col col-disp-start">Disp. para Trozado</th>
+                                    <th class="num-col">Producción</th>
+                                    <th class="num-col">Salida Despacho</th>
+                                    <th class="num-col">Ajuste</th>
+                                    <th class="num-col col-saldo-start">Saldo Final</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bodyPtc">
+                                <tr>
+                                    <td colspan="9" class="matrix-empty">Cargando información de la API...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="matrix-legend">
+                        <span><b>Disp. para Trozado</b> = Saldo Inicial + Ingreso PBC + Ingreso Dev. (cálculo en
+                            pantalla)</span>
+                        <span>Los guiones (–) representan valores nulos o en cero.</span>
+                        <span>Negativos entre paréntesis.</span>
+                        <span>Pase el cursor sobre <b>Saldo Final</b> para ver el resumen <b>Cerdos</b> y <b>Otros
+                                Cerdos</b>.</span>
+                    </div>
+                </section>
+
+                <footer class="page-footer">
+                    Vista <b>Kardex de Cerdos</b> · Fuente: SQL Server <b>Desposte.dbo.SP_Kardex_UnCerdos_PBC</b> y
+                    <b>SP_Kardex_UnCerdos_PTC</b> · Endpoints <b>GET /api/KardexUnCerdos/PBC</b> y
+                    <b>GET /api/KardexUnCerdos/PTC</b> · Agrupación semanal ISO-8601 con inicio en Lunes ·
+                    TipoCerdo en orden fijo: <b>INDUSTRIAL · COMERCIAL · GORRINAS · 2DA · MARRANAS · LECHONES · VERRACOS</b> ·
+                    Paleta Finanza Industrial
+                </footer>
+            </div>
+        </main>
+    </div>
+
+    <div class="saldo-tip" id="saldoTip" role="tooltip" aria-hidden="true"></div>
+    <div class="toast" id="toast"></div>
+    <script>
+        // =========================================================================
+        // ⚙️ CONFIGURACIÓN DE CONEXIÓN HÍBRIDA A LA API .NET
+        // =========================================================================
+        const APP_CONFIG = {
+            servidor: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.servidor)
+                ? GLOBAL_CONFIG.servidor
+                : "RAEVSALL001",
+            puertos: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.puertos)
+                ? GLOBAL_CONFIG.puertos
+                : [8080, 5000],
+            // Ruta canónica única del controlador; cada matriz usa su acción (PBC / PTC)
+            controllerPath: "/api/KardexUnCerdos",
+            timeoutMs: 180000
+        };
+
+        function generarBasesApi() {
+            if (typeof generarBasesApiGlobal === 'function') {
+                return generarBasesApiGlobal();
+            }
+            const bases = [];
+            for (const puerto of APP_CONFIG.puertos) {
+                bases.push(`http://${APP_CONFIG.servidor}:${puerto}`);
+            }
+            return bases;
+        }
+
+        async function fetchConTimeout(url, timeoutMs = 10000) {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+                const res = await fetch(url, { signal: controller.signal });
+                clearTimeout(id);
+                return res;
+            } catch (err) {
+                clearTimeout(id);
+                throw err;
+            }
+        }
+
+        async function detectarServidorApi() {
+            const bases = generarBasesApi();
+            const hoy = fechaIso(new Date());
+            for (const base of bases) {
+                try {
+                    const res = await fetchConTimeout(
+                        `${base}${APP_CONFIG.controllerPath}/PBC?fechaInicio=${hoy}&fechaFin=${hoy}`, 3500);
+                    if (res.ok) return base;
+                } catch (e) {
+                    try {
+                        const pingRes = await fetchConTimeout(`${base}/`, 2500);
+                        if (pingRes.ok) return base;
+                    } catch (errPing) { }
+                }
+            }
+            return null;
+        }
+
+        // =========================================================================
+        // 🗂️ ESTADO GLOBAL
+        // =========================================================================
+        let apiBaseActiva = null;
+        let rawSqlDataPbc = [];         // Data plana tal cual viene del SP PBC
+        let rawSqlDataPtc = [];         // Data plana tal cual viene del SP PTC
+        let rawSqlData = [];            // Unión de ambas fuentes planas (sin transformar)
+        let semanasDisponibles = [];    // [{ clave, anio, semana, etiqueta, rango }] descendente
+        let seleccionSemanas = new Set();  // Selección múltiple (vacío = todas)
+        let consultando = false;
+        const semanasAbiertas = { PBC: new Set(), PTC: new Set() };
+
+        // Definición de cada matriz: columnas del SP + columna disponible calculada
+        const KARDEX_CONFIG = {
+            PBC: {
+                tbody: 'bodyPbc',
+                meta: 'metaPbc',
+                disponible: 'Disp. Beneficiado',
+                sumaDisponible: ['SaldoInicial', 'Beneficiado', 'IngresoDev'],
+                columnas: [
+                    { key: 'SaldoInicial', label: 'Saldo Inicial' },
+                    { key: 'Beneficiado', label: 'Beneficiado' },
+                    { key: 'IngresoDev', label: 'Ingreso Dev.' },
+                    { key: '__disponible', label: 'Disp. Beneficiado', clase: 'cell-disp col-disp-start' },
+                    { key: 'Carcasa', label: 'Carcasa' },
+                    { key: 'EnviadoPTC', label: 'Enviado PTC' },
+                    { key: 'Harinas', label: 'Harinas' },
+                    { key: 'Ajuste', label: 'Ajuste', clase: 'cell-ajuste' },
+                    { key: 'SaldoFinal', label: 'Saldo Final', clase: 'cell-saldo col-saldo-start' }
+                ]
+            },
+            PTC: {
+                tbody: 'bodyPtc',
+                meta: 'metaPtc',
+                disponible: 'Disp. para Trozado',
+                sumaDisponible: ['SaldoInicial', 'IngresoPBC', 'IngresoDev'],
+                columnas: [
+                    { key: 'SaldoInicial', label: 'Saldo Inicial' },
+                    { key: 'IngresoPBC', label: 'Ingreso PBC' },
+                    { key: 'IngresoDev', label: 'Ingreso Dev.' },
+                    { key: '__disponible', label: 'Disp. para Trozado', clase: 'cell-disp col-disp-start' },
+                    { key: 'Producción', label: 'Producción' },
+                    { key: 'SalidaDespacho', label: 'Salida Despacho' },
+                    { key: 'Ajuste', label: 'Ajuste', clase: 'cell-ajuste' },
+                    { key: 'SaldoFinal', label: 'Saldo Final', clase: 'cell-saldo col-saldo-start' }
+                ]
+            }
+        };
+
+        // =========================================================================
+        // 🔢 ORDEN FIJO DE TIPOS DE CERDO (regla de negocio del kardex)
+        // INDUSTRIAL · COMERCIAL · GORRINAS · 2DA · MARRANAS · LECHONES · VERRACOS
+        // =========================================================================
+        const ORDEN_TIPO_CERDO = ['INDUSTRIAL', 'COMERCIAL', 'GORRINAS', '2DA', 'MARRANAS', 'LECHONES', 'VERRACOS'];
+
+        function normalizarTipoCerdo(valor) {
+            return String(valor ?? '')
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .toUpperCase()
+                .trim();
+        }
+
+        function tipoCerdoCanonico(valor) {
+            const tipo = normalizarTipoCerdo(valor);
+            if (tipo === 'SEGUNDA' || tipo === '2DA.' || tipo === '2DA ') return '2DA';
+            return tipo;
+        }
+
+        function pesoOrdenTipoCerdo(valor) {
+            const tipo = tipoCerdoCanonico(valor);
+            if (!tipo) return ORDEN_TIPO_CERDO.length + 1;                  // sin tipo: al final
+            const indice = ORDEN_TIPO_CERDO.indexOf(tipo);
+            return indice === -1 ? ORDEN_TIPO_CERDO.length : indice;        // no catalogados: después de los conocidos
+        }
+
+        function ordenarTiposCerdo(registros) {
+            return [...registros].sort((a, b) => {
+                const diferencia = pesoOrdenTipoCerdo(a.TipoCerdo) - pesoOrdenTipoCerdo(b.TipoCerdo);
+                if (diferencia !== 0) return diferencia;
+                return normalizarTipoCerdo(a.TipoCerdo).localeCompare(normalizarTipoCerdo(b.TipoCerdo), 'es');
+            });
+        }
+
+        // Clasificación informativa del Saldo Final: Cerdos vs Otros cerdos
+        const SALDO_GRUPO_CERDOS = ['INDUSTRIAL', 'COMERCIAL', 'GORRINAS', '2DA'];
+        const SALDO_GRUPO_OTROS = ['MARRANAS', 'LECHONES', 'VERRACOS'];
+
+        function grupoSaldoFinal(tipoCerdo) {
+            const tipo = tipoCerdoCanonico(tipoCerdo);
+            if (SALDO_GRUPO_CERDOS.includes(tipo)) return 'cerdos';
+            if (SALDO_GRUPO_OTROS.includes(tipo)) return 'otros';
+            return 'sin-clasificar';
+        }
+
+        // =========================================================================
+        // 🔧 UTILIDADES GENERALES
+        // =========================================================================
+        function num(valor) {
+            const n = Number(valor);
+            return isFinite(n) ? n : 0;
+        }
+
+        function pad2(n) {
+            return String(n).padStart(2, '0');
+        }
+
+        function fechaIso(fecha) {
+            return `${fecha.getFullYear()}-${pad2(fecha.getMonth() + 1)}-${pad2(fecha.getDate())}`;
+        }
+
+        function escaparHtml(texto) {
+            return String(texto ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function mostrarToast(mensaje, icono = 'ℹ️') {
+            const toast = document.getElementById('toast');
+            if (!toast) return;
+            toast.textContent = `${icono} ${mensaje}`;
+            toast.classList.add('show');
+            clearTimeout(mostrarToast._timer);
+            mostrarToast._timer = setTimeout(() => toast.classList.remove('show'), 4500);
+        }
+
+        // Número de kardex: guion para nulos/ceros y negativos entre paréntesis
+        function numeroTexto(valor) {
+            if (valor === null || valor === undefined || valor === '' || isNaN(Number(valor))) {
+                return '–';
+            }
+            const numero = Number(valor);
+            // El cero se muestra como guion para no ensuciar la lectura de la matriz
+            if (Math.abs(numero) < 0.005) {
+                return '–';
+            }
+            const texto = Math.abs(numero).toLocaleString('es-PE', { maximumFractionDigits: 2 });
+            return numero < 0 ? `(${texto})` : texto;
+        }
+
+        function formatearNumero(valor, negrita = false) {
+            const texto = numeroTexto(valor);
+            if (texto === '–') {
+                return '<span class="cell-empty">–</span>';
+            }
+            if (texto.startsWith('(')) {
+                return negrita ? `<b class="val-negative">${texto}</b>` : `<span class="val-negative">${texto}</span>`;
+            }
+            return negrita ? `<b>${texto}</b>` : texto;
+        }
+
+        // Semana ISO "yyyyww" -> año, semana y rango Lunes-Domingo (ISO-8601)
+        function parseSemana(valor) {
+            const texto = String(valor ?? '').trim();
+            if (!/^\d{5,6}$/.test(texto)) return null;
+            const anio = Number(texto.substring(0, 4));
+            const semana = Number(texto.substring(4));
+            if (!anio || !semana || semana > 53) return null;
+            return { clave: texto, anio, semana };
+        }
+
+        function lunesSemanaIso(anio, semana) {
+            const enero4 = new Date(anio, 0, 4);
+            const desplazamiento = (enero4.getDay() + 6) % 7;   // ISO: lunes = 0
+            const lunes = new Date(enero4.getFullYear(), 0, 4 - desplazamiento);
+            lunes.setDate(lunes.getDate() + (semana - 1) * 7);
+            return lunes;
+        }
+
+        function metaSemana(valor) {
+            const partes = parseSemana(valor);
+            if (!partes) {
+                return {
+                    clave: String(valor ?? '').trim(),
+                    anio: null,
+                    semana: null,
+                    rango: '',
+                    etiqueta: `Sem. ${valor}`
+                };
+            }
+            const lunes = lunesSemanaIso(partes.anio, partes.semana);
+            const domingo = new Date(lunes.getTime());
+            domingo.setDate(lunes.getDate() + 6);
+            const ddmm = (d) => `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}`;
+            const rango = `${ddmm(lunes)} al ${ddmm(domingo)}`;
+            return {
+                clave: partes.clave,
+                anio: partes.anio,
+                semana: partes.semana,
+                rango,
+                etiqueta: `Sem. ${pad2(partes.semana)} (${rango})`
+            };
+        }
+
+        // =========================================================================
+        // 🚀 INICIALIZACIÓN Y FILTROS
+        // =========================================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            inicializarFechas();
+            inicializarTooltipSaldo();
+            consultarKardex(false);
+        });
+
+        document.addEventListener('click', (event) => {
+            const combo = document.getElementById('semanaCombo');
+            if (combo && !combo.contains(event.target)) combo.classList.remove('abierto');
+        });
+
+        function inicializarFechas() {
+            const hoy = new Date();
+            const inputInicio = document.getElementById('fechaInicio');
+            const inputFin = document.getElementById('fechaFin');
+            if (inputInicio) inputInicio.value = fechaIso(new Date(hoy.getFullYear(), 0, 1));
+            if (inputFin) inputFin.value = fechaIso(hoy);
+        }
+
+        function aplicarPeriodoRapido(tipo) {
+            const hoy = new Date();
+            const inputInicio = document.getElementById('fechaInicio');
+            const inputFin = document.getElementById('fechaFin');
+            const inicio = tipo === '12-meses'
+                ? new Date(hoy.getFullYear(), hoy.getMonth() - 11, 1)
+                : new Date(hoy.getFullYear(), 0, 1);
+
+            if (inputInicio) inputInicio.value = fechaIso(inicio);
+            if (inputFin) inputFin.value = fechaIso(hoy);
+            consultarKardex(true);
+        }
+
+        function reestablecerFiltros() {
+            inicializarFechas();
+            consultarKardex(false);
+            mostrarToast('Filtros reestablecidos: año actual y últimas 12 semanas', '↩️');
+        }
+
+        function claveSemanaRegistro(registro) {
+            return String(registro.Semana ?? '').trim();
+        }
+
+        function construirSemanas() {
+            const claves = new Set();
+            rawSqlData.forEach(registro => {
+                const clave = claveSemanaRegistro(registro);
+                if (clave) claves.add(clave);
+            });
+            semanasDisponibles = [...claves]
+                .map(clave => metaSemana(clave))
+                .sort((a, b) => b.clave.localeCompare(a.clave));   // más reciente primero
+        }
+
+        // Regla 9: vista semanal -> las 12 últimas semanas disponibles
+        function seleccionPorDefecto() {
+            return new Set(semanasDisponibles.slice(0, 12).map(meta => meta.clave));
+        }
+
+        function registrosFiltrados(filas) {
+            if (seleccionSemanas.size === 0) return filas;   // sin selección = todas
+            return filas.filter(registro => seleccionSemanas.has(claveSemanaRegistro(registro)));
+        }
+
+        function construirListaSemanas() {
+            const lista = document.getElementById('semanaLista');
+            if (!lista) return;
+
+            if (semanasDisponibles.length === 0) {
+                lista.innerHTML = '<div class="matrix-empty">Sin semanas disponibles.</div>';
+            } else {
+                lista.innerHTML = semanasDisponibles.map(meta => {
+                    const marcada = seleccionSemanas.size === 0 || seleccionSemanas.has(meta.clave);
+                    return `
+                        <label class="semana-opcion">
+                            <input type="checkbox" value="${escaparHtml(meta.clave)}"
+                                ${marcada ? 'checked' : ''} onchange="onSemanaChange(this)">
+                            <span>${escaparHtml(meta.etiqueta)} · ${meta.anio ?? ''}</span>
+                        </label>`;
+                }).join('');
+            }
+
+            actualizarTextoPeriodo();
+        }
+
+        function onSemanaChange(checkbox) {
+            let seleccion = seleccionSemanas.size === 0
+                ? new Set(semanasDisponibles.map(meta => meta.clave))
+                : new Set(seleccionSemanas);
+
+            if (checkbox.checked) seleccion.add(checkbox.value);
+            else seleccion.delete(checkbox.value);
+
+            if (seleccion.size === 0 || seleccion.size === semanasDisponibles.length) {
+                seleccionSemanas = new Set();       // vacío = todas las semanas
+                construirListaSemanas();
+            } else {
+                seleccionSemanas = seleccion;
+                actualizarTextoPeriodo();
+            }
+
+            reiniciarExpandidos();
+            renderizarMatrices();
+            actualizarResumen();
+        }
+
+        function seleccionarSemanasPorDefecto() {
+            seleccionSemanas = seleccionPorDefecto();
+            construirListaSemanas();
+            reiniciarExpandidos();
+            renderizarMatrices();
+            actualizarResumen();
+        }
+
+        function seleccionarTodasSemanas() {
+            seleccionSemanas = new Set();
+            construirListaSemanas();
+            reiniciarExpandidos();
+            renderizarMatrices();
+            actualizarResumen();
+        }
+
+        function actualizarTextoPeriodo() {
+            const texto = document.getElementById('semanaSelectedText');
+            if (!texto) return;
+
+            const total = semanasDisponibles.length;
+            if (total === 0) {
+                texto.textContent = 'Sin datos';
+            } else if (seleccionSemanas.size === 0) {
+                texto.textContent = `Todas las semanas (${total})`;
+            } else if (seleccionSemanas.size === 1) {
+                const meta = semanasDisponibles.find(s => s.clave === [...seleccionSemanas][0]);
+                texto.textContent = meta ? meta.etiqueta : '1 semana seleccionada';
+            } else {
+                texto.textContent = `${seleccionSemanas.size} semanas seleccionadas`;
+            }
+        }
+
+        function toggleSemanaDropdown(event) {
+            if (event) event.stopPropagation();
+            const combo = document.getElementById('semanaCombo');
+            if (combo) combo.classList.toggle('abierto');
+        }
+
+        // =========================================================================
+        // 🧮 AGREGACIONES Y MATRICES
+        // =========================================================================
+        function valorCelda(registro, config, clave) {
+            if (clave === '__disponible') {
+                const partes = config.sumaDisponible;
+                const hayDatos = partes.some(k => registro[k] !== null && registro[k] !== undefined);
+                if (!hayDatos) return null;
+                return partes.reduce((suma, k) => suma + num(registro[k]), 0);
+            }
+            const valor = registro[clave];
+            return valor === null || valor === undefined ? null : num(valor);
+        }
+
+        function totalesGrupo(filas, config) {
+            const totales = {};
+            config.columnas.forEach(columna => {
+                let suma = 0;
+                let hayDatos = false;
+                filas.forEach(registro => {
+                    const valor = valorCelda(registro, config, columna.key);
+                    if (valor !== null) {
+                        suma += valor;
+                        hayDatos = true;
+                    }
+                });
+                totales[columna.key] = hayDatos ? suma : null;
+            });
+            return totales;
+        }
+
+        function agruparPorSemana(filas) {
+            const mapa = new Map();
+            filas.forEach(registro => {
+                const clave = claveSemanaRegistro(registro);
+                if (!mapa.has(clave)) mapa.set(clave, []);
+                mapa.get(clave).push(registro);
+            });
+            return [...mapa.entries()]
+                .map(([clave, registros]) => ({ clave, meta: metaSemana(clave), registros: ordenarTiposCerdo(registros) }))
+                .sort((a, b) => b.clave.localeCompare(a.clave));   // más reciente primero
+        }
+
+        // Sólo la semana más reciente queda expandida; el resto se muestra como total
+        function reiniciarExpandidos() {
+            semanasAbiertas.PBC.clear();
+            semanasAbiertas.PTC.clear();
+            const primera = semanasDisponibles[0];
+            if (primera) {
+                semanasAbiertas.PBC.add(primera.clave);
+                semanasAbiertas.PTC.add(primera.clave);
+            }
+        }
+
+        function toggleSemana(tipo, clave) {
+            const abiertas = semanasAbiertas[tipo];
+            if (abiertas.has(clave)) abiertas.delete(clave);
+            else abiertas.add(clave);
+            renderizarMatriz(tipo);
+        }
+
+        function expandirTodas(tipo, expandir) {
+            const abiertas = semanasAbiertas[tipo];
+            abiertas.clear();
+            if (expandir) {
+                registrosFiltrados(tipo === 'PBC' ? rawSqlDataPbc : rawSqlDataPtc).forEach(registro => {
+                    const clave = claveSemanaRegistro(registro);
+                    if (clave) abiertas.add(clave);
+                });
+            }
+            renderizarMatriz(tipo);
+        }
+
+        function renderizarMatrices() {
+            renderizarMatriz('PBC');
+            renderizarMatriz('PTC');
+        }
+
+        function renderizarMatriz(tipo) {
+            const config = KARDEX_CONFIG[tipo];
+            const tbody = document.getElementById(config.tbody);
+            if (!tbody) return;
+            // El tooltip de Saldo Final se recalcula desde la data vigente en cada render
+            ocultarTooltipSaldo();
+
+            const totalColumnas = config.columnas.length + 1;
+            const filas = registrosFiltrados(tipo === 'PBC' ? rawSqlDataPbc : rawSqlDataPtc);
+
+            if (!filas.length) {
+                tbody.innerHTML = `<tr><td colspan="${totalColumnas}" class="matrix-empty">
+                    Sin datos del kardex ${tipo} para el periodo consultado.</td></tr>`;
+                resumenSaldoSemana[tipo] = new Map();
+                actualizarMetaMatriz(tipo, []);
+                return;
+            }
+
+            const grupos = agruparPorSemana(filas);
+            // Resumen de Saldo Final por semana para el tooltip informativo
+            resumenSaldoSemana[tipo] = new Map(
+                grupos.map(grupo => [grupo.clave, resumenSaldoFinal(grupo.registros)])
+            );
+            let html = '';
+
+            grupos.forEach(grupo => {
+                const abierta = semanasAbiertas[tipo].has(grupo.clave);
+                const totales = totalesGrupo(grupo.registros, config);
+                const etiqueta = grupo.meta ? grupo.meta.etiqueta : `Sem. ${grupo.clave}`;
+
+                html += `<tr class="level-1">
+                    <td class="col-hier">
+                        <span class="toggle-icon" role="button" tabindex="0" aria-label="Expandir semana"
+                            onclick="toggleSemana('${tipo}', '${escaparHtml(grupo.clave)}')">${abierta ? '−' : '+'}</span>
+                        ${escaparHtml(etiqueta)}
+                    </td>`;
+
+                config.columnas.forEach(columna => {
+                    const clase = `num-cell ${columna.clase || ''}`.trim();
+                    const atributos = columna.key === 'SaldoFinal'
+                        ? ` class="${clase} cell-saldo-tip" data-tipo-matriz="${tipo}" data-semana="${escaparHtml(grupo.clave)}"`
+                        : ` class="${clase}"`;
+                    html += `<td${atributos}>${formatearNumero(totales[columna.key], true)}</td>`;
+                });
+                html += '</tr>';
+
+                if (!abierta) return;
+
+                grupo.registros.forEach(registro => {
+                    const tipoCerdo = String(registro.TipoCerdo ?? '').trim() || 'SIN TIPO';
+                    const tipoCerdoClave = tipoCerdoCanonico(registro.TipoCerdo) || 'SIN TIPO';
+                    html += `<tr class="level-2">
+                        <td class="col-hier">${escaparHtml(tipoCerdo)}</td>`;
+
+                    config.columnas.forEach(columna => {
+                        const clase = `num-cell ${columna.clase || ''}`.trim();
+                        const atributos = columna.key === 'SaldoFinal'
+                            ? ` class="${clase} cell-saldo-tip" data-tipo-matriz="${tipo}" data-semana="${escaparHtml(grupo.clave)}" data-tipo-cerdo="${escaparHtml(tipoCerdoClave)}"`
+                            : ` class="${clase}"`;
+                        html += `<td${atributos}>${formatearNumero(valorCelda(registro, config, columna.key))}</td>`;
+                    });
+                    html += '</tr>';
+                });
+            });
+
+            tbody.innerHTML = html;
+            actualizarMetaMatriz(tipo, grupos);
+        }
+
+        function actualizarMetaMatriz(tipo, grupos) {
+            const config = KARDEX_CONFIG[tipo];
+            const contenedor = document.getElementById(config.meta);
+            if (!contenedor) return;
+
+            if (!grupos.length) {
+                contenedor.innerHTML = '<span>Sin datos para el filtro actual</span>';
+                return;
+            }
+
+            const tipos = new Set();
+            let saldoFinal = 0;
+            let totalFilas = 0;
+
+            grupos.forEach(grupo => {
+                grupo.registros.forEach(registro => {
+                    tipos.add(String(registro.TipoCerdo ?? 'SIN TIPO').trim());
+                    saldoFinal += num(registro.SaldoFinal);
+                    totalFilas += 1;
+                });
+            });
+
+            contenedor.innerHTML = `
+                <span>Semanas visibles: <b>${grupos.length}</b></span>
+                <span>Tipos de cerdo: <b>${tipos.size}</b></span>
+                <span>Filas: <b>${totalFilas}</b></span>
+                <span>Saldo final acumulado: <b>${formatearNumero(saldoFinal)}</b></span>`;
+        }
+
+        // =========================================================================
+        // 🔄 CONSULTA DE LOS PROCEDIMIENTOS ALMACENADOS
+        // =========================================================================
+        function actualizarEstado(estado, texto) {
+            const badge = document.getElementById('apiStatusBadge');
+            const dot = badge ? badge.querySelector('.status-dot') : null;
+            if (dot) dot.className = 'status-dot' + (estado ? ` ${estado}` : '');
+            const txt = document.getElementById('apiStatusText');
+            if (txt) txt.textContent = texto;
+
+            const dotLateral = document.getElementById('sideStatusDot');
+            if (dotLateral) dotLateral.className = 'side-status-dot' + (estado ? ` ${estado}` : '');
+            const txtLateral = document.getElementById('sideStatusText');
+            if (txtLateral) txtLateral.textContent = texto;
+        }
+
+        function togglePantallaCompleta() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen?.().catch(() => { });
+            } else {
+                document.exitFullscreen?.().catch(() => { });
+            }
+        }
+
+        function bloquearBotones(bloquear) {
+            ['btnConsultar', 'btnActualizar', 'btnExportarPlana'].forEach(id => {
+                const boton = document.getElementById(id);
+                if (boton) boton.disabled = bloquear;
+            });
+        }
+
+        async function consultarKardex(forzar = false) {
+            if (consultando) return;
+
+            const fechaInicio = document.getElementById('fechaInicio')?.value || '';
+            const fechaFin = document.getElementById('fechaFin')?.value || '';
+            if (fechaInicio && fechaFin && fechaInicio > fechaFin) {
+                mostrarToast('La fecha inicial no puede ser mayor que la fecha final', '⚠️');
+                return;
+            }
+
+            consultando = true;
+            bloquearBotones(true);
+            actualizarEstado('loading', forzar ? 'Recargando kardex...' : 'Leyendo kardex...');
+
+            try {
+                if (!apiBaseActiva) {
+                    apiBaseActiva = await detectarServidorApi();
+                    if (!apiBaseActiva) {
+                        throw new Error(`No se pudo conectar a ${APP_CONFIG.servidor} en puertos ${APP_CONFIG.puertos.join('/')}`);
+                    }
+                }
+
+                const resultados = await Promise.all([
+                    obtenerKardex('PBC', fechaInicio, fechaFin, forzar),
+                    obtenerKardex('PTC', fechaInicio, fechaFin, forzar)
+                ]);
+
+                rawSqlDataPbc = resultados[0];
+                rawSqlDataPtc = resultados[1];
+                rawSqlData = [...rawSqlDataPbc, ...rawSqlDataPtc];
+
+                construirSemanas();
+                seleccionSemanas = seleccionPorDefecto();
+                construirListaSemanas();
+                reiniciarExpandidos();
+                renderizarMatrices();
+                actualizarResumen();
+
+                const host = new URL(apiBaseActiva).host;
+                actualizarEstado('online', `En Línea (${host})`);
+                mostrarToast(`Kardex cargado: ${rawSqlDataPbc.length} filas PBC · ${rawSqlDataPtc.length} filas PTC`, '✅');
+            } catch (error) {
+                console.error('Error al consultar el kardex:', error);
+                actualizarEstado('error', 'Sin datos');
+                rawSqlDataPbc = [];
+                rawSqlDataPtc = [];
+                rawSqlData = [];
+                semanasDisponibles = [];
+                seleccionSemanas = new Set();
+                construirListaSemanas();
+                renderizarMatrices();
+                actualizarResumen();
+                mostrarToast(`No se pudo cargar el kardex: ${error.message}`, '❌');
+            } finally {
+                consultando = false;
+                bloquearBotones(false);
+            }
+        }
+
+        async function obtenerKardex(tipo, fechaInicio, fechaFin, forzar) {
+            const parametros = new URLSearchParams();
+            if (fechaInicio) parametros.set('fechaInicio', fechaInicio);
+            if (fechaFin) parametros.set('fechaFin', fechaFin);
+            if (forzar) parametros.set('recargar', 'true');
+
+            const query = parametros.toString();
+            const url = `${apiBaseActiva}${APP_CONFIG.controllerPath}/${tipo}${query ? `?${query}` : ''}`;
+            const res = await fetchConTimeout(url, APP_CONFIG.timeoutMs);
+
+            if (!res.ok) {
+                let detalle = `HTTP ${res.status}`;
+                try {
+                    const jsonError = await res.json();
+                    detalle = jsonError.detalle || jsonError.mensaje || jsonError.title || detalle;
+                } catch (_) { }
+                throw new Error(`${tipo}: ${detalle}`);
+            }
+
+            const json = await res.json();
+            if (!Array.isArray(json)) {
+                throw new Error(`${tipo}: la API no devolvió un arreglo de datos`);
+            }
+            return json;
+        }
+
+        // =========================================================================
+        // 💬 TOOLTIP INFORMATIVO SOBRE LA COLUMNA "SALDO FINAL"
+        // Resume el saldo de la semana en: Cerdos y Otros cerdos
+        // =========================================================================
+        const resumenSaldoSemana = { PBC: new Map(), PTC: new Map() };
+
+        function resumenSaldoFinal(registros) {
+            const resumen = {
+                total: 0,
+                grupos: { cerdos: 0, otros: 0, 'sin-clasificar': 0 },
+                filas: []
+            };
+            registros.forEach(registro => {
+                const tipoCerdo = tipoCerdoCanonico(registro.TipoCerdo) || 'SIN TIPO';
+                const grupo = grupoSaldoFinal(tipoCerdo);
+                const valor = num(registro.SaldoFinal);
+                resumen.grupos[grupo] += valor;
+                resumen.total += valor;
+                resumen.filas.push({ tipoCerdo, grupo, valor });
+            });
+            return resumen;
+        }
+
+        function etiquetaGrupoSaldo(grupo) {
+            if (grupo === 'cerdos') {
+                return { titulo: 'Saldo Cerdos', detalle: 'INDUSTRIAL · COMERCIAL · GORRINAS · 2DA', clase: 'grupo-cerdos' };
+            }
+            if (grupo === 'otros') {
+                return { titulo: 'Saldo Otros Cerdos', detalle: 'MARRANAS · LECHONES · VERRACOS', clase: 'grupo-otros' };
+            }
+            return { titulo: 'Sin clasificar', detalle: 'Tipos no catalogados', clase: 'grupo-otros' };
+        }
+
+        function htmlFilaSaldo(grupo, valor, activo = false) {
+            const etiqueta = etiquetaGrupoSaldo(grupo);
+            return `<div class="saldo-tip-row ${etiqueta.clase}${activo ? ' is-active' : ''}">
+                    <span class="saldo-tip-dot"></span>
+                    <span class="saldo-tip-label">${etiqueta.titulo}<small>${etiqueta.detalle}</small></span>
+                    <span class="saldo-tip-value">${formatearNumero(valor)}</span>
+                </div>`;
+        }
+
+        function construirHtmlTooltipSaldo(tipo, clave, tipoCerdoFila) {
+            const mapa = resumenSaldoSemana[tipo];
+            const resumen = mapa ? mapa.get(clave) : null;
+            if (!resumen) return '';
+
+            const meta = metaSemana(clave);
+            const fila = tipoCerdoFila ? resumen.filas.find(item => item.tipoCerdo === tipoCerdoFila) : null;
+            const grupoFila = fila ? fila.grupo : null;
+
+            const titulo = fila ? escaparHtml(fila.tipoCerdo) : escaparHtml(meta.etiqueta);
+            const subtitulo = fila
+                ? `${escaparHtml(meta.etiqueta)} · ${etiquetaGrupoSaldo(grupoFila).titulo}`
+                : 'Saldo Final acumulado de la semana';
+
+            let html = `<div class="saldo-tip-head">
+                    <span class="saldo-tip-title">${titulo}</span>
+                    <span class="saldo-tip-badge">${tipo}</span>
+                </div>
+                <div class="saldo-tip-sub">${subtitulo}</div>`;
+
+            html += htmlFilaSaldo('cerdos', resumen.grupos.cerdos, grupoFila === 'cerdos');
+            html += htmlFilaSaldo('otros', resumen.grupos.otros, grupoFila === 'otros');
+            if (Math.abs(resumen.grupos['sin-clasificar']) >= 0.005) {
+                html += htmlFilaSaldo('sin-clasificar', resumen.grupos['sin-clasificar'], grupoFila === 'sin-clasificar');
+            }
+
+            html += `<div class="saldo-tip-row total">
+                    <span></span>
+                    <span class="saldo-tip-label">Saldo Final total</span>
+                    <span class="saldo-tip-value">${formatearNumero(resumen.total)}</span>
+                </div>`;
+
+            html += `<div class="saldo-tip-foot">${fila
+                ? `Fila <b>${escaparHtml(fila.tipoCerdo)}</b>: ${numeroTexto(fila.valor)} · Cerdos + Otros cerdos = total de la semana.`
+                : 'Cerdos + Otros cerdos = Saldo Final de la semana.'}</div>`;
+
+            return html;
+        }
+
+        function posicionarTooltipSaldo(x, y) {
+            const tip = document.getElementById('saldoTip');
+            if (!tip) return;
+            const margen = 14;
+            const rect = tip.getBoundingClientRect();
+            let left = x + margen;
+            let top = y + margen;
+            if (left + rect.width > window.innerWidth - 8) left = Math.max(8, x - rect.width - margen);
+            if (top + rect.height > window.innerHeight - 8) top = Math.max(8, y - rect.height - margen);
+            tip.style.left = `${Math.round(left)}px`;
+            tip.style.top = `${Math.round(top)}px`;
+        }
+
+        function mostrarTooltipSaldo(celda, x, y) {
+            const tip = document.getElementById('saldoTip');
+            if (!tip || !celda) return;
+
+            const tipo = celda.dataset.tipoMatriz || '';
+            const clave = celda.dataset.semana || '';
+            const tipoCerdoFila = celda.dataset.tipoCerdo || '';
+            const huella = `${tipo}|${clave}|${tipoCerdoFila}`;
+
+            if (tip.dataset.huella !== huella) {
+                const html = construirHtmlTooltipSaldo(tipo, clave, tipoCerdoFila || null);
+                if (!html) return;
+                tip.innerHTML = html;
+                tip.dataset.huella = huella;
+            }
+
+            tip.classList.add('show');
+            tip.setAttribute('aria-hidden', 'false');
+            posicionarTooltipSaldo(x, y);
+        }
+
+        function ocultarTooltipSaldo() {
+            const tip = document.getElementById('saldoTip');
+            if (!tip) return;
+            tip.classList.remove('show');
+            tip.setAttribute('aria-hidden', 'true');
+        }
+
+        function celdaSaldoDesde(evento) {
+            const objetivo = evento.target;
+            if (!objetivo || typeof objetivo.closest !== 'function') return null;
+            const celda = objetivo.closest('td.cell-saldo-tip');
+            return (celda && celda.dataset.semana) ? celda : null;
+        }
+
+        function inicializarTooltipSaldo() {
+            ['bodyPbc', 'bodyPtc'].forEach(idTabla => {
+                const tbody = document.getElementById(idTabla);
+                if (!tbody || tbody.dataset.saldoTip === 'on') return;
+                tbody.dataset.saldoTip = 'on';
+
+                tbody.addEventListener('mouseover', evento => {
+                    const celda = celdaSaldoDesde(evento);
+                    if (celda) mostrarTooltipSaldo(celda, evento.clientX, evento.clientY);
+                });
+
+                tbody.addEventListener('mousemove', evento => {
+                    if (!celdaSaldoDesde(evento)) return;
+                    posicionarTooltipSaldo(evento.clientX, evento.clientY);
+                });
+
+                tbody.addEventListener('mouseout', evento => {
+                    const celda = celdaSaldoDesde(evento);
+                    if (!celda) return;
+                    if (celda.contains(evento.relatedTarget)) return;
+                    ocultarTooltipSaldo();
+                });
+
+                // Tablets / celulares: un toque sobre la celda muestra el resumen
+                tbody.addEventListener('touchstart', evento => {
+                    const celda = celdaSaldoDesde(evento);
+                    const toque = evento.touches && evento.touches[0];
+                    if (!celda || !toque) {
+                        ocultarTooltipSaldo();
+                        return;
+                    }
+                    mostrarTooltipSaldo(celda, toque.clientX, toque.clientY);
+                }, { passive: true });
+            });
+
+            document.addEventListener('scroll', ocultarTooltipSaldo, true);
+            window.addEventListener('resize', ocultarTooltipSaldo);
+            document.addEventListener('click', evento => {
+                if (!celdaSaldoDesde(evento)) ocultarTooltipSaldo();
+            }, true);
+            document.addEventListener('keydown', evento => {
+                if (evento.key === 'Escape') ocultarTooltipSaldo();
+            });
+        }
+
+        // =========================================================================
+        // 🧾 RESUMEN DEL PERIODO
+        // =========================================================================
+        function actualizarResumen() {
+            const resumenPeriodo = document.getElementById('resumenPeriodo');
+            const resumenRegistros = document.getElementById('resumenRegistros');
+
+            const fechaInicio = document.getElementById('fechaInicio')?.value || '';
+            const fechaFin = document.getElementById('fechaFin')?.value || '';
+            const semanasVisibles = seleccionSemanas.size === 0
+                ? semanasDisponibles.length
+                : seleccionSemanas.size;
+
+            if (resumenPeriodo) {
+                resumenPeriodo.innerHTML = `Consulta: <b>${escaparHtml(fechaInicio || 'sin fecha')}</b> al ` +
+                    `<b>${escaparHtml(fechaFin || 'sin fecha')}</b> · ` +
+                    `<b>${semanasVisibles}</b> de ${semanasDisponibles.length} semana(s) visibles`;
+            }
+
+            if (resumenRegistros) {
+                resumenRegistros.textContent = `${rawSqlDataPbc.length} filas PBC · ${rawSqlDataPtc.length} filas PTC`;
+            }
+        }
+
+        // =========================================================================
+        // 📥 EXPORTACIÓN DE LA DATA PLANA DE SQL SERVER (.xlsx)
+        // =========================================================================
+        function exportarDataPlanaSQL() {
+            if (!rawSqlData.length) {
+                mostrarToast('No hay datos de SQL Server cargados para exportar', '⚠️');
+                return;
+            }
+            if (typeof XLSX === 'undefined') {
+                mostrarToast('La librería SheetJS no está disponible', '❌');
+                return;
+            }
+
+            try {
+                const libro = XLSX.utils.book_new();
+
+                if (rawSqlDataPbc.length) {
+                    XLSX.utils.book_append_sheet(libro, XLSX.utils.json_to_sheet(rawSqlDataPbc), 'Kardex PBC');
+                }
+                if (rawSqlDataPtc.length) {
+                    XLSX.utils.book_append_sheet(libro, XLSX.utils.json_to_sheet(rawSqlDataPtc), 'Kardex PTC');
+                }
+                if (!libro.SheetNames.length) {
+                    mostrarToast('No hay filas para exportar en el periodo consultado', '⚠️');
+                    return;
+                }
+
+                const fechaInicio = document.getElementById('fechaInicio')?.value || '';
+                const fechaFin = document.getElementById('fechaFin')?.value || '';
+                const rango = (fechaInicio && fechaFin)
+                    ? `_${fechaInicio.replace(/-/g, '')}_al_${fechaFin.replace(/-/g, '')}`
+                    : `_${fechaIso(new Date()).replace(/-/g, '')}`;
+
+                const nombreArchivo = `Data_Plana_SQL_KardexCerdos${rango}.xlsx`;
+                XLSX.writeFile(libro, nombreArchivo);
+                mostrarToast(`Data plana SQL exportada (${rawSqlData.length} filas)`, '📄');
+            } catch (error) {
+                console.error('Error al exportar la data plana:', error);
+                mostrarToast(`No se pudo exportar: ${error.message}`, '❌');
+            }
+        }
+    </script>
+</body>
+
+</html>

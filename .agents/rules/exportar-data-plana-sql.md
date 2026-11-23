@@ -12,6 +12,7 @@ Actualmente identificados en el proyecto:
 3. `Docu_Paginas/Indice_Rotacion_Semanal.html` (Controlador: `/api/IndiceRotacionSemanal`, SP: `Sp_Indice_Rotacion_Semanal`)
 4. `Docu_Paginas/Informe_Costo_Produccion.html` (Controlador: `/api/CostosProduccion`, Tabla: `CostoProduccion`)
 5. `Docu_Paginas/InformeMarinado.html` (Controlador: `/api/Marinado`, SP: `Sp_Informe_Marinado_Congelado`)
+6. `Docu_Paginas/Kardex_Cerdos.html` (Controlador: `/api/KardexUnCerdos`, SP: `SP_Kardex_UnCerdos_PBC` y `SP_Kardex_UnCerdos_PTC`)
 *(Cualquier nuevo dashboard que consuma un controlador en `ApiDesposte/Controllers/Sql/` deberá incluir obligatoriamente esta funcionalidad).*
 
 ---
