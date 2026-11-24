@@ -2717,6 +2717,23 @@
       const primarioVals = sortedKeys.map(k => groups[k].primarioUnd);
       const saldoVals = sortedKeys.map(k => groups[k].saldoUnd);
 
+      // Saldo del periodo anterior: se busca en toda la data cargada (no sólo en la vista
+      // filtrada) para que el primer periodo visible también tenga su saldo previo.
+      const saldoPorPeriodo = {};
+      rawData.forEach(item => {
+        if (item.Nivel !== "SALDO PENDIENTE") return;
+        const key = obtenerPeriodoKey(item.FechaOrden);
+        saldoPorPeriodo[key] = (saldoPorPeriodo[key] || 0) + item.Unidades;
+      });
+      const clavesSaldo = Object.keys(saldoPorPeriodo).sort();
+      const saldoAnteriorVals = sortedKeys.map(k => {
+        const previas = clavesSaldo.filter(c => c < k);
+        return previas.length ? saldoPorPeriodo[previas[previas.length - 1]] : null;
+      });
+      // Etiqueta acumulada: Saldo actual + Saldo anterior (sin periodo previo no se muestra)
+      const saldoAcumuladoVals = sortedKeys.map((k, i) =>
+        saldoAnteriorVals[i] === null ? null : saldoVals[i] + saldoAnteriorVals[i]);
+
       if (chartTemporalObj) chartTemporalObj.destroy();
       if (typeof ChartDataLabels !== 'undefined') {
         Chart.register(ChartDataLabels);
@@ -2743,7 +2760,28 @@
               backgroundColor: 'rgba(122, 130, 142, 0.90)',
               borderColor: '#7A828E',
               borderWidth: 1,
-              borderRadius: 4
+              borderRadius: 4,
+              // Dos etiquetas sobre la barra de saldo: su valor y, encima, Saldo actual + anterior
+              datalabels: {
+                labels: {
+                  valor: {},
+                  acumulado: {
+                    anchor: 'end',
+                    align: 'top',
+                    offset: 28,
+                    color: '#FFFFFF',
+                    backgroundColor: '#7A828E',
+                    borderRadius: 4,
+                    padding: { top: 2, bottom: 2, left: 5, right: 5 },
+                    font: { family: "'Inter', sans-serif", weight: '700', size: 9 },
+                    formatter: (val, ctx) => {
+                      const acumulado = saldoAcumuladoVals[ctx.dataIndex];
+                      if (acumulado === null || acumulado === undefined || acumulado === 0) return '';
+                      return 'Σ ' + Number(acumulado).toLocaleString('es-PE');
+                    }
+                  }
+                }
+              }
             }
           ]
         },
@@ -2752,7 +2790,7 @@
           maintainAspectRatio: false,
           layout: {
             padding: {
-              top: 24,
+              top: 56,   // espacio para el valor y la etiqueta "Σ saldo actual + anterior"
               bottom: 8
             }
           },
@@ -2766,7 +2804,15 @@
               borderWidth: 1,
               callbacks: {
                 // El eje X usa la etiqueta corta; el tooltip conserva el rango completo
-                title: (items) => (items.length ? etiquetaPeriodo(sortedKeys[items[0].dataIndex]) : '')
+                title: (items) => (items.length ? etiquetaPeriodo(sortedKeys[items[0].dataIndex]) : ''),
+                // Desglose de la etiqueta Σ: saldo actual + saldo del periodo anterior
+                footer: (items) => {
+                  if (!items.length) return '';
+                  const i = items[0].dataIndex;
+                  if (saldoAnteriorVals[i] === null) return 'Σ Saldo actual + anterior: sin periodo anterior';
+                  const fmt = v => Number(v).toLocaleString('es-PE');
+                  return `Σ Saldo actual + anterior: ${fmt(saldoVals[i])} + ${fmt(saldoAnteriorVals[i])} = ${fmt(saldoAcumuladoVals[i])}`;
+                }
               }
             },
             datalabels: {
