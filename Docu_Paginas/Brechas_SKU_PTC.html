@@ -1,0 +1,3101 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brechas por SKU PTC - Top 10 Sobrantes y Faltantes</title>
+
+    <!-- Fuentes Google Fonts: Inter y JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Chart.js y Plugins -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+    <!-- SheetJS para exportar a Excel (.xlsx) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <!-- Configuración compartida de conexión a la API -->
+    <script src="config.js"></script>
+
+    <style>
+        /* =========================================================================
+           🎨 TEMA: PANTONE INDUSTRIAL PALETTE (Bronce Mate, Piedra Taupe y Pizarra Suave)
+           ========================================================================= */
+        :root {
+            --color-header-bg: #38353B;
+            --color-header-gradient: linear-gradient(135deg, #38353B 0%, #434B57 100%);
+            --color-header-text: #FFFFFF;
+            --color-header-subtext: #E2D5B5;
+            --color-heading: #38353B;
+            --color-text: #4A474C;
+            --color-text-muted: #787479;
+            --color-primary: #BAA063;
+            --color-secondary: #7A828E;
+            --color-accent: #BAA063;
+            --color-bg: #F2F4F8;
+            --color-surface: #FFFFFF;
+            --color-border: #E2E8F0;
+
+            /* Tokens complementarios de la paleta */
+            --isg-gold-bronze: #C4B282;
+            --isg-slate-charcoal: #434B57;
+            --isg-slate-stone: #948E88;
+            --isg-slate-silver: #B5B2AA;
+            --isg-stone-taupe: #A89F91;
+            --isg-slate-gray: #6B727D;
+
+            --chart-slate-navy: #38353B;
+            --chart-steel-blue: #7A828E;
+            --chart-cerulean-slate: #948E88;
+            --chart-pewter-blue: #A89F91;
+            --chart-plomo-neutro: #878994;
+            --chart-plomo-pizarra: #B5B2AA;
+
+            --pantone-yellow: #BAA063;
+            --pantone-yellow-light: #C4B282;
+            --pantone-yellow-soft: rgba(186, 160, 99, 0.16);
+            --pantone-yellow-border: rgba(186, 160, 99, 0.45);
+            --pantone-gold: #7A828E;
+            --pantone-dark: #38353B;
+            --pantone-darker: #434B57;
+            --pantone-gray-dark: #4A474C;
+            --pantone-gray-med: #787479;
+            --pantone-gray-light: #B5B2AA;
+
+            --bg-canvas: var(--color-bg);
+            --bg-card: var(--color-surface);
+            --bg-card-alt: #F8FAFC;
+            --text-dark: var(--color-text);
+            --text-muted: var(--color-text-muted);
+            --border-ui: var(--color-border);
+            --radius-sm: 8px;
+            --shadow-sm: 0 1px 3px rgba(56, 53, 59, 0.07), 0 1px 2px rgba(56, 53, 59, 0.04);
+            --shadow-md: 0 8px 20px -6px rgba(56, 53, 59, 0.18);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-canvas);
+            color: var(--text-dark);
+            line-height: 1.45;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* =========================================================================
+           🧭 LAYOUT CON BARRA LATERAL (navegación entre las vistas del módulo)
+           Dock flotante de iconos (60px); al pasar el cursor se despliega a 215px
+           SOBRE el contenido (margin-right negativo) sin redimensionar gráficos.
+           ========================================================================= */
+        html body {
+            padding: 0 !important;
+        }
+
+        .app-layout {
+            display: flex;
+            min-height: 100vh;
+            width: 100%;
+        }
+
+        .sidebar {
+            position: sticky;
+            top: 10px;
+            align-self: flex-start;
+            height: calc(100vh - 20px);
+            margin: 10px 0 10px 10px;
+            width: 60px;
+            overflow: hidden;
+            background: linear-gradient(180deg, #38353B 0%, #434B57 100%);
+            color: var(--color-header-text);
+            display: flex;
+            flex-direction: column;
+            padding: 14px 0 12px;
+            flex-shrink: 0;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 26px rgba(30, 27, 34, 0.22);
+            z-index: 100;
+            transition: width 0.22s ease, margin-right 0.22s ease, box-shadow 0.22s ease;
+        }
+
+        .sidebar-header {
+            padding: 0 8px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sidebar-header h2 {
+            font-size: 0;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            color: #FFFFFF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            white-space: nowrap;
+        }
+
+        .sidebar-header h2 svg {
+            width: 18px;
+            height: 18px;
+            color: var(--color-primary);
+            flex-shrink: 0;
+        }
+
+        .sidebar-section-label {
+            display: none;
+            font-size: 0.64rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: rgba(226, 213, 181, 0.55);
+            padding: 4px 14px;
+            white-space: nowrap;
+        }
+
+        .sidebar-divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.09);
+            margin: 10px;
+        }
+
+        .sidebar-menu,
+        .sidebar-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 0 8px;
+        }
+
+        .sidebar-btn {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 9px 0;
+            border-radius: 9px;
+            border: 1px solid transparent;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.72);
+            font-size: 0.81rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            text-align: left;
+            text-decoration: none;
+            font-family: inherit;
+        }
+
+        .sidebar-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #FFFFFF;
+        }
+
+        .sidebar-btn.active {
+            background: rgba(186, 160, 99, 0.22);
+            border-color: rgba(186, 160, 99, 0.35);
+            color: #FFFFFF;
+            font-weight: 700;
+            box-shadow: inset 3px 0 0 var(--color-primary);
+        }
+
+        .sidebar-btn .btn-info {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            min-width: 0;
+        }
+
+        .sidebar-btn .btn-info svg {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-btn.active .btn-info svg {
+            color: var(--color-primary);
+        }
+
+        .sidebar-btn .btn-info span,
+        .side-status-text {
+            display: none;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sidebar-bottom {
+            margin-top: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 0 8px;
+        }
+
+        .sidebar-footer {
+            padding: 10px 0 2px;
+            border-top: 1px solid rgba(255, 255, 255, 0.09);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 0.74rem;
+            font-weight: 600;
+            color: var(--color-header-subtext);
+            white-space: nowrap;
+        }
+
+        .side-status-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: var(--pantone-gray-med);
+            flex-shrink: 0;
+        }
+
+        .side-status-dot.online {
+            background: #10B981;
+            box-shadow: 0 0 8px #10B981;
+        }
+
+        .side-status-dot.loading {
+            background: var(--pantone-yellow);
+            animation: pulse 1s infinite alternate;
+        }
+
+        .side-status-dot.error {
+            background: #EF4444;
+        }
+
+        @media screen and (min-width: 981px) and (hover: hover) {
+
+            .sidebar:hover,
+            .sidebar:has(:focus-visible) {
+                width: 215px;
+                margin-right: -155px;
+                box-shadow: 10px 12px 30px rgba(30, 27, 34, 0.32);
+            }
+
+            .sidebar:hover .sidebar-header,
+            .sidebar:has(:focus-visible) .sidebar-header {
+                padding: 0 12px 12px;
+                justify-content: flex-start;
+            }
+
+            .sidebar:hover .sidebar-header h2,
+            .sidebar:has(:focus-visible) .sidebar-header h2 {
+                font-size: 0.84rem;
+                justify-content: flex-start;
+                gap: 8px;
+            }
+
+            .sidebar:hover .sidebar-section-label,
+            .sidebar:has(:focus-visible) .sidebar-section-label {
+                display: block;
+            }
+
+            .sidebar:hover .sidebar-btn .btn-info span,
+            .sidebar:has(:focus-visible) .sidebar-btn .btn-info span {
+                display: inline;
+            }
+
+            .sidebar:hover .sidebar-btn,
+            .sidebar:has(:focus-visible) .sidebar-btn {
+                justify-content: space-between;
+                padding: 9px 11px;
+            }
+
+            .sidebar:hover .sidebar-footer,
+            .sidebar:has(:focus-visible) .sidebar-footer {
+                justify-content: flex-start;
+                padding: 10px 4px 2px;
+            }
+
+            .sidebar:hover .side-status-text,
+            .sidebar:has(:focus-visible) .side-status-text {
+                display: inline;
+            }
+        }
+
+        .main-content {
+            flex: 1;
+            min-width: 0;
+            padding: 18px 24px 26px;
+            overflow-x: hidden;
+        }
+
+        .dashboard-container {
+            max-width: 1920px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* ============================ HEADER ============================ */
+        .dashboard-header {
+            background: var(--color-header-gradient);
+            color: var(--color-header-text);
+            border-radius: 14px;
+            padding: 20px 26px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 18px;
+            flex-wrap: wrap;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+        }
+
+        .dashboard-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--color-primary), var(--color-secondary), var(--isg-gold-bronze));
+        }
+
+        .header-title-group {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            min-width: 0;
+        }
+
+        .header-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            background: var(--pantone-yellow-soft);
+            border: 1px solid var(--pantone-yellow-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--pantone-yellow);
+            flex-shrink: 0;
+        }
+
+        .header-title {
+            font-size: 1.42rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: var(--color-header-text);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .badge-tag {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            border-radius: 6px;
+            background: rgba(186, 160, 99, 0.20);
+            color: var(--color-header-subtext);
+            border: 1px solid rgba(226, 213, 181, 0.40);
+        }
+
+        .header-subtitle {
+            font-size: 0.84rem;
+            color: var(--color-header-subtext);
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 0.78rem;
+            padding: 6px 14px;
+            border-radius: 9999px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #FFFFFF;
+            font-weight: 600;
+        }
+
+        .status-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background-color: var(--pantone-gray-med);
+            display: inline-block;
+        }
+
+        .status-dot.online {
+            background-color: #10B981;
+            box-shadow: 0 0 8px #10B981;
+        }
+
+        .status-dot.loading {
+            background-color: var(--pantone-yellow);
+            animation: pulse 1s infinite alternate;
+        }
+
+        .status-dot.error {
+            background-color: #EF4444;
+        }
+
+        @keyframes pulse {
+            from { opacity: 0.4; }
+            to { opacity: 1; }
+        }
+
+        /* ============================ BOTONES ============================ */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid var(--border-ui);
+            background: #FFFFFF;
+            color: var(--pantone-dark);
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .btn:hover {
+            background: var(--bg-card-alt);
+            border-color: var(--chart-pewter-blue);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--pantone-yellow) 0%, var(--pantone-yellow-light) 100%);
+            border: 1px solid rgba(186, 160, 99, 0.65);
+            color: #FFFFFF;
+            font-weight: 700;
+            box-shadow: 0 2px 6px rgba(186, 160, 99, 0.35);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--pantone-yellow-light) 0%, var(--pantone-yellow) 100%);
+            color: #FFFFFF;
+        }
+
+        .btn-excel {
+            background: rgba(122, 130, 142, 0.24);
+            border: 1px solid rgba(226, 213, 181, 0.38);
+            color: #FFFFFF;
+            font-weight: 700;
+        }
+
+        .btn-excel:hover {
+            background: var(--color-secondary);
+            border-color: var(--color-secondary);
+            color: #FFFFFF;
+        }
+
+        .btn-icon {
+            padding: 7px 11px;
+            font-size: 0.78rem;
+        }
+
+        /* ============================ TARJETAS BASE ============================ */
+        .card,
+        .chart-card,
+        .matrix-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-ui);
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+            min-width: 0;
+        }
+
+        .card {
+            padding: 18px 22px;
+        }
+
+        /* ============================ FILTROS ============================ */
+        .filter-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .filter-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--pantone-dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: -0.01em;
+        }
+
+        .filter-quick-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .filter-quick-btn {
+            background: var(--bg-card-alt);
+            border: 1px solid var(--border-ui);
+            color: var(--text-muted);
+            padding: 6px 13px;
+            border-radius: 6px;
+            font-size: 0.77rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            font-family: inherit;
+        }
+
+        .filter-quick-btn:hover {
+            color: var(--text-dark);
+            background: #EEF2F6;
+            border-color: var(--chart-pewter-blue);
+        }
+
+        .filter-quick-btn.active {
+            background: var(--chart-slate-navy);
+            border-color: var(--chart-slate-navy);
+            color: #FFFFFF;
+        }
+
+        .filter-quick-btn.active-subplanta {
+            background: var(--chart-steel-blue);
+            border-color: var(--chart-slate-navy);
+            color: #FFFFFF;
+        }
+
+        .divider-ui {
+            border-top: 1px solid var(--border-ui);
+            margin: 10px 0;
+        }
+
+        /* SELECTOR DE LA SEMANA DE ANÁLISIS (una sola semana) */
+        .week-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 560px);
+            align-items: end;
+            gap: 12px;
+        }
+
+        .compare-select-box {
+            min-width: 0;
+        }
+
+        .compare-select-box label {
+            display: block;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .compare-select-box select {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid #CBD5E1;
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--pantone-dark);
+            background: #FFFFFF;
+            font-family: inherit;
+            cursor: pointer;
+            min-width: 0;
+        }
+
+        .compare-select-box select:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(186, 160, 99, 0.18);
+        }
+
+        .compare-hint {
+            display: block;
+            margin-top: 5px;
+            font-size: 0.73rem;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Jerarquía de la matriz: texto plano, sólo tipografía y color */
+        .tag-subplanta {
+            display: inline;
+            padding: 0;
+            border: none;
+            border-radius: 0;
+            background: transparent;
+            box-shadow: none;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--color-heading);
+        }
+
+        /* Código corto como texto plano (regla 5: sin fondo, borde ni caja) */
+        .sku-code-badge {
+            display: inline;
+            background: transparent;
+            border: none;
+            padding: 0;
+            border-radius: 0;
+            color: var(--pantone-dark);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78rem;
+            font-weight: 700;
+            margin-right: 8px;
+        }
+
+        .sku-name-text {
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        /* Nivel Día: texto plano, sin fondo ni borde decorativo */
+        .day-label {
+            display: inline;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.01em;
+            color: var(--color-heading);
+        }
+
+        /* PÍLDORAS SUBPLANTA */
+        .subplanta-pills-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            max-height: 150px;
+            overflow-y: auto;
+            padding: 4px 2px;
+        }
+
+        .subplanta-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            background: #FFFFFF;
+            border: 1px solid var(--border-ui);
+            color: var(--text-dark);
+            transition: all 0.15s ease;
+            user-select: none;
+        }
+
+        .subplanta-pill:hover {
+            border-color: var(--chart-pewter-blue);
+            background: var(--bg-card-alt);
+        }
+
+        .subplanta-pill.selected {
+            background: rgba(186, 160, 99, 0.18);
+            border-color: var(--color-secondary);
+            color: var(--color-heading);
+            font-weight: 700;
+        }
+
+        .selection-summary-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px solid var(--border-ui);
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .selection-summary-bar b {
+            color: var(--pantone-dark);
+        }
+
+        /* ============================ KPI GRID ============================ */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .kpi-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-ui);
+            border-top: 4px solid var(--kpi-accent, var(--chart-slate-navy));
+            border-radius: 10px;
+            padding: 16px 20px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 0;
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--chart-pewter-blue);
+            box-shadow: var(--shadow-md);
+        }
+
+        .kpi-label {
+            font-size: 0.73rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .kpi-value {
+            font-size: 1.65rem;
+            font-weight: 800;
+            color: var(--pantone-darker);
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+        }
+
+        .kpi-unit {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .kpi-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.75rem;
+            color: var(--pantone-gray-dark);
+            padding-top: 6px;
+            border-top: 1px solid var(--border-ui);
+            font-weight: 500;
+            flex-wrap: wrap;
+        }
+
+        .badge-kpi {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.74rem;
+            font-family: 'JetBrains Mono', 'Inter', monospace;
+            text-align: center;
+            min-width: 52px;
+            background: #EDF2F7;
+            color: var(--pantone-dark);
+        }
+
+        .badge-good {
+            background-color: #DCFCE7 !important;
+            color: #166534 !important;
+            border: 1px solid #86EFAC !important;
+        }
+
+        .badge-mid {
+            background-color: var(--pantone-yellow-soft) !important;
+            color: #854D0E !important;
+            border: 1px solid var(--pantone-yellow-border) !important;
+        }
+
+        .badge-low {
+            background-color: #FEE2E2 !important;
+            color: #991B1B !important;
+            border: 1px solid #FCA5A5 !important;
+        }
+
+        .val-positive {
+            color: #166534 !important;
+            font-weight: 700;
+        }
+
+        .val-negative {
+            color: #991B1B !important;
+            font-weight: 700;
+        }
+
+        /* ============================ GRÁFICOS ============================ */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .chart-card {
+            padding: 18px 20px;
+        }
+
+        .chart-top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-ui);
+        }
+
+        .chart-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            color: var(--pantone-dark);
+            text-transform: uppercase;
+        }
+
+        .chart-sub {
+            font-size: 0.74rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+            font-weight: 500;
+        }
+
+        .chart-box {
+            position: relative;
+            width: 100%;
+            min-width: 0;
+            height: 320px;
+            margin-top: 12px;
+        }
+
+        .unit-toggle {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            background: #E5E9F0;
+            padding: 3px 4px;
+            border-radius: 8px;
+            border: 1px solid var(--border-ui);
+        }
+
+        .unit-toggle .filter-quick-btn {
+            padding: 3px 9px;
+            font-size: 0.72rem;
+        }
+
+        /* Selector de vista de la matriz: Semanal / Diaria */
+        .matrix-actions .unit-toggle {
+            flex-shrink: 0;
+        }
+
+        .matrix-actions .unit-toggle .filter-quick-btn {
+            padding: 6px 13px;
+            font-size: 0.78rem;
+        }
+
+        /* ============================ MATRIZ ============================ */
+        .matrix-card {
+            padding: 18px 20px;
+        }
+
+        .matrix-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .matrix-toolbar-left {
+            min-width: 0;
+        }
+
+        .matrix-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        /* Combo múltiple de semanas de la matriz (regla de filtros por vista) */
+        .semana-combo {
+            position: relative;
+            width: 250px;
+            max-width: 100%;
+        }
+
+        .semana-combo-btn {
+            border: 1px solid var(--border-ui);
+            padding: 8px 12px;
+            border-radius: 8px;
+            background: #FFFFFF;
+            color: var(--text-dark);
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            font-family: inherit;
+            width: 100%;
+            min-width: 0;
+        }
+
+        .semana-combo-btn:hover,
+        .semana-combo.abierto .semana-combo-btn {
+            border-color: var(--color-primary);
+        }
+
+        #semanasMatrizTexto {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .semana-panel {
+            display: none;
+            position: absolute;
+            top: calc(100% + 4px);
+            right: 0;
+            z-index: 200;
+            min-width: 290px;
+            background: #FFFFFF;
+            border: 1px solid var(--border-ui);
+            border-radius: 10px;
+            box-shadow: var(--shadow-md);
+            padding: 8px;
+        }
+
+        .semana-combo.abierto .semana-panel {
+            display: block;
+        }
+
+        .semana-acciones {
+            display: flex;
+            gap: 6px;
+            padding: 2px 2px 8px;
+            margin-bottom: 6px;
+            border-bottom: 1px solid var(--border-ui);
+        }
+
+        .semana-accion {
+            flex: 1;
+            border: 1px solid var(--border-ui);
+            background: var(--bg-card-alt);
+            color: var(--color-heading);
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 5px 6px;
+            border-radius: 6px;
+            cursor: pointer;
+            white-space: nowrap;
+            font-family: inherit;
+        }
+
+        .semana-accion:hover {
+            border-color: var(--color-primary);
+            background: var(--pantone-yellow-soft);
+        }
+
+        .semana-lista {
+            max-height: 280px;
+            overflow-y: auto;
+        }
+
+        .semana-opcion {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 8px;
+            font-size: 0.82rem;
+            border-radius: 6px;
+            cursor: pointer;
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+
+        .semana-opcion:hover {
+            background: rgba(186, 160, 99, 0.10);
+        }
+
+        /* Año de la semana junto a la etiqueta: texto plano atenuado */
+        .week-year {
+            margin-left: 6px;
+            font-size: 0.74rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        /* Separación visual entre semanas consecutivas de la matriz */
+        .matrix-table tbody tr.level-1 + tr.level-1 td,
+        .matrix-table tbody tr:not(.level-1) + tr.level-1 td {
+            border-top: 2px solid rgba(186, 160, 99, 0.40) !important;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #FFFFFF;
+            border: 1px solid var(--border-ui);
+            padding: 8px 14px;
+            border-radius: 8px;
+            width: 300px;
+            max-width: 100%;
+            transition: all 0.2s ease;
+        }
+
+        .search-box:focus-within {
+            border-color: var(--pantone-gold);
+            box-shadow: 0 0 0 3px var(--pantone-yellow-soft);
+        }
+
+        .search-box input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-dark);
+            font-size: 0.84rem;
+            width: 100%;
+            font-family: inherit;
+        }
+
+        .table-responsive {
+            width: 100%;
+            max-width: 100%;
+            max-height: 540px;
+            overflow-x: auto;
+            overflow-y: auto;
+            border: 1px solid var(--border-ui);
+            border-radius: 8px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .matrix-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 0.84rem;
+            text-align: left;
+        }
+
+        .matrix-table th {
+            background-color: var(--pantone-dark);
+            color: #FFFFFF;
+            font-weight: 700;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            padding: 9px 11px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            white-space: nowrap;
+            border-bottom: 3px solid var(--pantone-yellow);
+        }
+
+        .matrix-table th:first-child {
+            width: 100%;
+        }
+
+        /* Encabezado de una sola fila: jerarquía + grupos de origen */
+        .matrix-table thead th {
+            height: 40px;
+            vertical-align: middle;
+            text-align: right;
+        }
+
+        .matrix-table thead th.col-hier {
+            text-align: left;
+            min-width: 260px;
+        }
+
+        /* Etiqueta del nivel Semana y columna de Producción Real (antes estilos inline) */
+        .week-label {
+            color: var(--pantone-dark);
+            font-weight: 800;
+        }
+
+        .matrix-table td.cell-real {
+            color: var(--pantone-dark);
+            font-weight: 600;
+        }
+
+        .cell-empty {
+            color: rgba(120, 116, 121, 0.55);
+        }
+
+        /* Divisiones entre grupos de columnas en la matriz */
+        .matrix-table th.col-group-prog-start,
+        .matrix-table th.col-group-dist-start {
+            border-left: 2px solid rgba(186, 160, 99, 0.45) !important;
+        }
+
+        .matrix-table td.col-group-prog-start,
+        .matrix-table td.col-group-dist-start {
+            border-left: 2px solid var(--border-ui) !important;
+        }
+
+        .matrix-table th.num-col,
+        .matrix-table td.num-cell {
+            width: 1%;
+            white-space: nowrap;
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+            font-family: 'JetBrains Mono', 'Inter', monospace;
+        }
+
+        .matrix-table td {
+            padding: 8px 13px;
+            border-bottom: 1px solid var(--border-ui);
+            color: var(--text-dark);
+        }
+
+        .level-1 td {
+            background-color: #F8F9FA !important;
+            color: var(--pantone-dark) !important;
+            font-weight: 700;
+            border-bottom: 2px solid var(--border-ui) !important;
+            border-top: 1px solid var(--border-ui) !important;
+        }
+
+        .level-1:hover td {
+            background-color: var(--pantone-yellow-soft) !important;
+        }
+
+        .level-2 td {
+            background-color: rgba(186, 160, 99, 0.06) !important;
+            color: var(--color-heading) !important;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-ui) !important;
+        }
+
+        .level-2:hover td {
+            background-color: rgba(186, 160, 99, 0.08) !important;
+        }
+
+        /* Único icono permitido: control de expansión / colapso */
+        .toggle-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            border-radius: 5px;
+            background: var(--pantone-yellow-soft);
+            color: var(--pantone-dark);
+            border: 1px solid var(--pantone-yellow-border);
+            font-family: monospace;
+            font-size: 0.8rem;
+            font-weight: 800;
+            cursor: pointer;
+            margin-right: 8px;
+            user-select: none;
+            transition: all 0.15s ease;
+            flex-shrink: 0;
+        }
+
+        .toggle-icon:hover {
+            background: var(--pantone-yellow);
+            color: var(--pantone-dark);
+        }
+
+        .toggle-icon:focus-visible {
+            outline: 2px solid var(--color-primary);
+            outline-offset: 2px;
+        }
+
+        /* Nivel 3: SubPlanta · Nivel 4: CódigoCorto - Nombre */
+        .level-3 td,
+        .level-4 td {
+            background-color: #FFFFFF !important;
+            color: var(--text-dark) !important;
+        }
+
+        .level-3:hover td,
+        .level-4:hover td {
+            background-color: rgba(186, 160, 99, 0.08) !important;
+        }
+
+        .matrix-empty {
+            padding: 34px 14px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.86rem;
+        }
+
+        /* ============================ PIE Y TOAST ============================ */
+        .page-footer {
+            text-align: center;
+            font-size: 0.74rem;
+            color: var(--text-muted);
+            padding: 6px 0 2px;
+            font-weight: 500;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 22px;
+            right: 22px;
+            background: var(--pantone-dark);
+            color: #FFFFFF;
+            padding: 12px 18px;
+            border-radius: 10px;
+            box-shadow: 0 12px 26px -8px rgba(56, 53, 59, 0.45);
+            opacity: 0;
+            transform: translateY(12px);
+            transition: all 0.25s ease;
+            z-index: 3000;
+            max-width: 400px;
+            font-size: 0.83rem;
+            border-left: 4px solid var(--color-primary);
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Contención de ancho: evita que tablas/gráficos desborden el layout */
+        .dashboard-container > *,
+        .kpi-grid > *,
+        .kpi-card,
+        .card,
+        .chart-card,
+        .matrix-card {
+            min-width: 0;
+        }
+
+        /* ============================ RESPONSIVE (autónomo) ============================ */
+        @media screen and (max-width: 1600px) {
+            .dashboard-container {
+                gap: 12px;
+            }
+
+            .dashboard-header {
+                padding: 14px 18px;
+                gap: 12px;
+            }
+
+            .header-title {
+                font-size: 1.16rem;
+            }
+
+            .card,
+            .chart-card,
+            .matrix-card {
+                padding: 12px 16px;
+            }
+
+            .kpi-value {
+                font-size: 1.3rem;
+            }
+
+            .chart-box {
+                height: 285px;
+            }
+
+            .main-content {
+                padding: 10px 14px 20px;
+            }
+
+            .table-responsive {
+                max-height: 460px;
+            }
+        }
+
+        @media screen and (max-width: 1100px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media screen and (max-width: 980px) {
+            .kpi-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .dashboard-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .header-actions {
+                justify-content: flex-start;
+            }
+
+            .week-grid {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .chart-box {
+                height: 270px;
+            }
+        }
+
+        @media screen and (max-width: 768px) {
+            /* Combo de semanas de la matriz a lo ancho en celular */
+            .semana-combo {
+                width: 100%;
+            }
+
+            .semana-panel {
+                left: 0;
+                right: 0;
+                min-width: 0;
+            }
+
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-actions,
+            .search-box,
+            .compare-select-box select {
+                width: 100% !important;
+                min-width: 0 !important;
+                max-width: 100% !important;
+            }
+
+            .filter-quick-actions {
+                width: 100%;
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 6px;
+            }
+
+            .chart-box {
+                height: 235px;
+            }
+
+            .matrix-toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .matrix-actions {
+                width: 100%;
+            }
+
+            .matrix-table th:first-child,
+            .matrix-table td:first-child {
+                min-width: 150px;
+                max-width: 220px;
+                white-space: normal;
+                word-break: break-word;
+            }
+
+            /* Sangrías reducidas en móvil para conservar ancho del nombre */
+            .matrix-table tr.level-2 td:first-child {
+                padding-left: 20px !important;
+            }
+
+            .matrix-table tr.level-3 td:first-child {
+                padding-left: 34px !important;
+            }
+
+            .matrix-table tr.level-4 td:first-child {
+                padding-left: 48px !important;
+            }
+
+            /* El selector Semanal / Diaria ocupa su propia fila en celular */
+            .matrix-actions .unit-toggle {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .matrix-actions .unit-toggle .filter-quick-btn {
+                flex: 1 1 0;
+            }
+
+            /* Barra lateral compacta: sólo navegación horizontal en celular */
+            .app-layout {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                position: static;
+                width: 100%;
+                height: auto;
+                margin: 0;
+                align-self: stretch;
+                flex-direction: row;
+                align-items: center;
+                padding: 6px 8px;
+                border: none;
+                border-radius: 0 0 12px 12px;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+            }
+
+            .sidebar-header,
+            .sidebar-section-label,
+            .sidebar-divider,
+            .sidebar-actions,
+            .sidebar-bottom,
+            .sidebar-footer {
+                display: none;
+            }
+
+            .sidebar-menu {
+                flex-direction: row;
+                gap: 6px;
+                padding: 0;
+                width: 100%;
+            }
+
+            .sidebar-btn {
+                flex: 1 1 0;
+                min-width: 0;
+                justify-content: center;
+                padding: 7px 4px;
+                font-size: 0.72rem;
+            }
+
+            .sidebar-btn .btn-info svg {
+                display: none;
+            }
+
+            .sidebar-btn .btn-info span {
+                display: inline;
+            }
+
+            .main-content {
+                padding: 10px 8px 24px;
+            }
+
+            .toast {
+                left: 14px;
+                right: 14px;
+                max-width: none;
+                bottom: 14px;
+            }
+        }
+
+        /* =========================================================================
+           ⚖️ PÁGINA BRECHAS POR SKU (Top 10 sobrantes y faltantes)
+           Brecha = Producción Real - Referencia (Programa o Pedido de Distribución)
+           ========================================================================= */
+        :root {
+            --falta-color: #B03A2E;
+            --falta-soft: rgba(176, 58, 46, 0.08);
+            --sobra-color: #8A6D2B;
+            --sobra-soft: rgba(186, 160, 99, 0.12);
+        }
+
+        .periodo-grid {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .periodo-grid .semana-combo {
+            width: 360px;
+        }
+
+        .periodo-grid .semana-panel {
+            left: 0;
+            right: auto;
+        }
+
+        .semana-acciones {
+            flex-wrap: wrap;
+        }
+
+        .periodo-hint {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .eje-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .eje-bar .unit-toggle .filter-quick-btn {
+            padding: 7px 16px;
+            font-size: 0.8rem;
+        }
+
+        .eje-nota {
+            font-size: 0.76rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .eje-nota .brecha-falta,
+        .eje-nota .brecha-sobra {
+            font-weight: 700;
+        }
+
+        .brecha-falta {
+            color: var(--falta-color);
+            font-weight: 700;
+        }
+
+        .brecha-sobra {
+            color: var(--sobra-color);
+            font-weight: 700;
+        }
+
+        .chart-card.card-falta {
+            border-top: 4px solid var(--falta-color);
+        }
+
+        .chart-card.card-sobra {
+            border-top: 4px solid var(--color-primary);
+        }
+
+        .chart-box.tall {
+            height: 360px;
+        }
+
+        .chart-empty {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .chart-empty[hidden] {
+            display: none;
+        }
+
+        .top-table-wrap {
+            margin-top: 14px;
+            max-height: none;
+        }
+
+        .matrix-table.top-table th:first-child {
+            width: 1%;
+        }
+
+        .matrix-table th.col-hier,
+        .matrix-table.top-table th.col-hier {
+            width: 100%;
+            text-align: left;
+        }
+
+        .matrix-table th.th-left {
+            text-align: left;
+            width: 1%;
+        }
+
+        .top-table {
+            font-size: 0.78rem;
+        }
+
+        .matrix-table.top-table th {
+            font-size: 0.68rem;
+            letter-spacing: 0.02em;
+            padding: 7px 8px;
+        }
+
+        .matrix-table.top-table td {
+            padding: 6px 8px;
+        }
+
+        .top-table .sku-code-badge {
+            margin-right: 5px;
+        }
+
+        .top-table td.rank {
+            color: var(--text-muted);
+            font-weight: 700;
+        }
+
+        .sku-sub {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+            font-weight: 500;
+        }
+
+        .recurrencia {
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .matrix-table td.td-sub {
+            white-space: nowrap;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        /* Columnas de la arista activa, resaltadas en el detalle */
+        .matrix-table.eje-programa td.g-prog,
+        .matrix-table.eje-distribucion td.g-dist {
+            background: rgba(186, 160, 99, 0.07);
+        }
+
+        .matrix-table tfoot td {
+            position: sticky;
+            bottom: 0;
+            background: #F8F9FA;
+            font-weight: 800;
+            color: var(--pantone-dark);
+            border-top: 2px solid var(--border-ui);
+            padding: 9px 13px;
+        }
+
+        .select-orden {
+            padding: 8px 10px;
+            border: 1px solid var(--border-ui);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            background: #FFFFFF;
+            cursor: pointer;
+            max-width: 100%;
+        }
+
+        .select-orden:focus {
+            outline: none;
+            border-color: var(--color-primary);
+        }
+
+        @media screen and (max-width: 1600px) {
+            .chart-box.tall {
+                height: 320px;
+            }
+        }
+
+        @media screen and (max-width: 980px) {
+            .periodo-grid .semana-combo {
+                width: 100%;
+            }
+        }
+
+        @media screen and (max-width: 768px) {
+            .chart-box.tall {
+                height: 300px;
+            }
+
+            .eje-bar .unit-toggle {
+                width: 100%;
+            }
+
+            .eje-bar .unit-toggle .filter-quick-btn {
+                flex: 1 1 0;
+                padding: 7px 6px;
+                font-size: 0.74rem;
+            }
+
+            .select-orden {
+                width: 100%;
+            }
+        }
+    </style>
+
+    <!-- Hoja de estilos responsive compartida -->
+    <link rel="stylesheet" href="responsive.css?v=3">
+</head>
+<body>
+    <div class="app-layout">
+
+        <!-- BARRA LATERAL: NAVEGACIÓN DEL MÓDULO DE CERDOS -->
+        <aside class="sidebar" id="sidebarNav" aria-label="Navegación del módulo de cerdos">
+            <div class="sidebar-header">
+                <h2>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" aria-hidden="true">
+                        <path d="m12 2 9 5-9 5-9-5 9-5Z"></path>
+                        <path d="m3 12 9 5 9-5"></path>
+                        <path d="m3 17 9 5 9-5"></path>
+                    </svg>
+                    <span>CERDOS · PTC</span>
+                </h2>
+            </div>
+
+            <div class="sidebar-section-label">Vistas</div>
+            <nav class="sidebar-menu">
+                <a href="Comparativo_PTC_Diario.html" class="sidebar-btn" title="Comparativo Semanal">
+                    <div class="btn-info">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="12" y1="20" x2="12" y2="10"></line>
+                            <line x1="18" y1="20" x2="18" y2="4"></line>
+                            <line x1="6" y1="20" x2="6" y2="16"></line>
+                        </svg>
+                        <span>Comparativo Semanal</span>
+                    </div>
+                </a>
+                <a href="Brechas_SKU_PTC.html" class="sidebar-btn active" title="Brechas por SKU (Top 10)">
+                    <div class="btn-info">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M7 20V4"></path>
+                            <path d="m3 8 4-4 4 4"></path>
+                            <path d="M17 4v16"></path>
+                            <path d="m21 16-4 4-4-4"></path>
+                        </svg>
+                        <span>Brechas por SKU</span>
+                    </div>
+                </a>
+                <a href="Kardex_Cerdos.html" class="sidebar-btn" title="Kardex de Cerdos">
+                    <div class="btn-info">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <rect x="8" y="2" width="8" height="4" rx="1"></rect>
+                            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                            <path d="M9 12h6"></path>
+                            <path d="M9 16h6"></path>
+                        </svg>
+                        <span>Kardex de Cerdos</span>
+                    </div>
+                </a>
+            </nav>
+
+            <div class="sidebar-divider"></div>
+            <div class="sidebar-section-label">Acciones</div>
+            <div class="sidebar-actions">
+                <button type="button" class="sidebar-btn" title="Actualizar datos desde la API"
+                    onclick="recargarDatosAPI(true)">
+                    <div class="btn-info">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+                        </svg>
+                        <span>Actualizar</span>
+                    </div>
+                </button>
+                <button type="button" class="sidebar-btn" title="Exportar brechas (.xlsx)"
+                    onclick="exportarBrechas()">
+                    <div class="btn-info">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        <span>Exportar (.xlsx)</span>
+                    </div>
+                </button>
+                <button type="button" class="sidebar-btn" title="Pantalla completa"
+                    onclick="togglePantallaCompleta()">
+                    <div class="btn-info">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M8 3H5a2 2 0 0 0-2 2v3"></path>
+                            <path d="M16 3h3a2 2 0 0 1 2 2v3"></path>
+                            <path d="M8 21H5a2 2 0 0 1-2-2v-3"></path>
+                            <path d="M16 21h3a2 2 0 0 0 2-2v-3"></path>
+                        </svg>
+                        <span>Pantalla completa</span>
+                    </div>
+                </button>
+            </div>
+
+            <div class="sidebar-bottom">
+                <a href="index.html" class="sidebar-btn" title="Regresar al Menú Principal">
+                    <div class="btn-info">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                        </svg>
+                        <span>Menú Principal</span>
+                    </div>
+                </a>
+                <div class="sidebar-footer" title="Estado de conexión con la API">
+                    <span class="side-status-dot" id="sideStatusDot"></span>
+                    <span class="side-status-text" id="sideStatusText">Listo</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- CONTENIDO PRINCIPAL -->
+        <main class="main-content">
+            <div class="dashboard-container">
+
+                <!-- HEADER -->
+                <header class="dashboard-header">
+                    <div class="header-title-group">
+                        <div class="header-icon">
+                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M7 20V4"></path>
+                                <path d="m3 8 4-4 4 4"></path>
+                                <path d="M17 4v16"></path>
+                                <path d="m21 16-4 4-4-4"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="header-title">
+                                Brechas por SKU
+                                <span class="badge-tag">Top 10 · Sobrantes y Faltantes</span>
+                            </div>
+                            <div class="header-subtitle">
+                                <b>Producción Real</b> frente al <b>Programa de Producción</b> y al
+                                <b>Pedido de Distribución</b> · SKUs que más se alejan de lo requerido
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="header-actions">
+                        <div class="status-badge" id="apiStatusBadge">
+                            <span class="status-dot"></span>
+                            <span id="apiStatusText">Buscando servidor...</span>
+                        </div>
+
+                        <button class="btn btn-excel" onclick="exportarBrechas()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            Exportar Brechas (.xlsx)
+                        </button>
+
+                        <button class="btn btn-primary" onclick="recargarDatosAPI(true)">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+                            </svg>
+                            Actualizar
+                        </button>
+                    </div>
+                </header>
+
+                <!-- FILTROS: PERIODO Y SUBPLANTA -->
+                <section class="card">
+                    <div class="filter-section-header">
+                        <div class="filter-title">1. Periodo de análisis (semanas ISO-8601 · Lunes a Domingo)</div>
+                    </div>
+
+                    <div class="periodo-grid">
+                        <div class="semana-combo" id="semanaCombo">
+                            <button type="button" class="semana-combo-btn" onclick="toggleComboSemanas(event)"
+                                aria-label="Semanas del periodo de análisis">
+                                <span id="semanasMatrizTexto">Sin semanas</span>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                            </button>
+                            <div class="semana-panel">
+                                <div class="semana-acciones">
+                                    <button type="button" class="semana-accion"
+                                        onclick="seleccionarUltimasSemanas(1)">Última</button>
+                                    <button type="button" class="semana-accion"
+                                        onclick="seleccionarUltimasSemanas(4)">Últimas 4</button>
+                                    <button type="button" class="semana-accion"
+                                        onclick="seleccionarUltimasSemanas(12)">Últimas 12</button>
+                                    <button type="button" class="semana-accion"
+                                        onclick="seleccionarTodasSemanas()">Todas</button>
+                                </div>
+                                <div class="semana-lista" id="semanasLista"></div>
+                            </div>
+                        </div>
+                        <span class="periodo-hint" id="periodoHint">-</span>
+                    </div>
+
+                    <div class="divider-ui"></div>
+
+                    <div class="filter-section-header">
+                        <div class="filter-title" style="color: var(--chart-steel-blue);">2. Filtro por SubPlanta</div>
+                        <div class="filter-quick-actions">
+                            <button class="filter-quick-btn active-subplanta"
+                                onclick="seleccionarTodasSubPlantas()">Todas las SubPlantas</button>
+                        </div>
+                    </div>
+                    <div class="subplanta-pills-container" id="subplantaPillsContainer"></div>
+
+                    <div class="selection-summary-bar">
+                        <span id="selectionSummary">Cargando semanas...</span>
+                        <span id="registrosSummary">Sin datos cargados</span>
+                    </div>
+                </section>
+
+                <!-- ARISTA DE ANÁLISIS -->
+                <section class="card eje-bar">
+                    <div>
+                        <div class="filter-title">3. Arista de análisis</div>
+                        <div class="eje-nota">
+                            Brecha = Producción Real − <span id="ejeNotaRef">Programa de Producción</span> ·
+                            <span class="brecha-falta">negativa = faltante</span> (se produjo menos) ·
+                            <span class="brecha-sobra">positiva = sobrante</span> (se produjo de más)
+                        </div>
+                    </div>
+                    <div class="unit-toggle" role="group" aria-label="Arista de análisis">
+                        <button class="filter-quick-btn active" id="btnEjePrograma"
+                            onclick="cambiarEje('programa')">Real vs Programa</button>
+                        <button class="filter-quick-btn" id="btnEjeDistribucion"
+                            onclick="cambiarEje('distribucion')">Real vs Distribución</button>
+                    </div>
+                </section>
+
+                <!-- KPIs DE LA ARISTA ACTIVA -->
+                <section class="kpi-grid">
+                    <div class="kpi-card" style="--kpi-accent: #B03A2E;">
+                        <span class="kpi-label">Faltante total</span>
+                        <div class="kpi-value" id="kpiFaltante">0<span class="kpi-unit">kg</span></div>
+                        <div class="kpi-footer">
+                            <span id="kpiFaltanteDetalle">0 SKU(s) con faltante</span>
+                            <span class="badge-kpi" id="kpiFaltanteBadge">-</span>
+                        </div>
+                    </div>
+
+                    <div class="kpi-card" style="--kpi-accent: #BAA063;">
+                        <span class="kpi-label">Sobrante total</span>
+                        <div class="kpi-value" id="kpiSobrante">0<span class="kpi-unit">kg</span></div>
+                        <div class="kpi-footer">
+                            <span id="kpiSobranteDetalle">0 SKU(s) con sobrante</span>
+                            <span class="badge-kpi" id="kpiSobranteBadge">-</span>
+                        </div>
+                    </div>
+
+                    <div class="kpi-card" style="--kpi-accent: #7A828E;">
+                        <span class="kpi-label" id="kpiCumplimientoLabel">Cumplimiento global</span>
+                        <div class="kpi-value" id="kpiCumplimiento">-</div>
+                        <div class="kpi-footer">
+                            <span id="kpiCumplimientoDetalle">Real 0 kg vs 0 kg</span>
+                            <span class="badge-kpi" id="kpiNetoBadge">Neto 0 kg</span>
+                        </div>
+                    </div>
+
+                    <div class="kpi-card" style="--kpi-accent: #38353B;">
+                        <span class="kpi-label">Concentración del Top 10</span>
+                        <div class="kpi-value" id="kpiConcentracion">-</div>
+                        <div class="kpi-footer">
+                            <span id="kpiConcentracionDetalle">del faltante total</span>
+                            <span class="badge-kpi" id="kpiConcentracionBadge">Sobr. -</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TOP 10 FALTANTES Y SOBRANTES -->
+                <section class="charts-grid">
+                    <article class="chart-card card-falta">
+                        <div class="chart-top-bar">
+                            <div>
+                                <div class="chart-title">Top 10 faltantes</div>
+                                <div class="chart-sub" id="subFaltantes">Producción Real por debajo de la referencia</div>
+                            </div>
+                        </div>
+                        <div class="chart-box tall">
+                            <canvas id="chartFaltantes"></canvas>
+                            <div class="chart-empty" id="vacioFaltantes" hidden>Sin SKUs con faltante en el periodo.</div>
+                        </div>
+                        <div class="table-responsive top-table-wrap">
+                            <table class="matrix-table top-table">
+                                <thead>
+                                    <tr>
+                                        <th class="num-col">#</th>
+                                        <th class="col-hier">CódigoCorto - Nombre</th>
+                                        <th class="num-col">Real</th>
+                                        <th class="num-col" id="thRefFaltantes">Prog. (kg)</th>
+                                        <th class="num-col">Faltante</th>
+                                        <th class="num-col">% Cumpl.</th>
+                                        <th class="num-col" title="Semanas con faltante / semanas con movimiento">Recurr.</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyFaltantes">
+                                    <tr><td colspan="7" class="matrix-empty">Cargando información de la API...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </article>
+
+                    <article class="chart-card card-sobra">
+                        <div class="chart-top-bar">
+                            <div>
+                                <div class="chart-title">Top 10 sobrantes</div>
+                                <div class="chart-sub" id="subSobrantes">Producción Real por encima de la referencia</div>
+                            </div>
+                        </div>
+                        <div class="chart-box tall">
+                            <canvas id="chartSobrantes"></canvas>
+                            <div class="chart-empty" id="vacioSobrantes" hidden>Sin SKUs con sobrante en el periodo.</div>
+                        </div>
+                        <div class="table-responsive top-table-wrap">
+                            <table class="matrix-table top-table">
+                                <thead>
+                                    <tr>
+                                        <th class="num-col">#</th>
+                                        <th class="col-hier">CódigoCorto - Nombre</th>
+                                        <th class="num-col">Real</th>
+                                        <th class="num-col" id="thRefSobrantes">Prog. (kg)</th>
+                                        <th class="num-col">Sobrante</th>
+                                        <th class="num-col">% Cumpl.</th>
+                                        <th class="num-col" title="Semanas con sobrante / semanas con movimiento">Recurr.</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodySobrantes">
+                                    <tr><td colspan="7" class="matrix-empty">Cargando información de la API...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </article>
+                </section>
+
+                <!-- DETALLE DE TODOS LOS SKU CON LAS DOS ARISTAS -->
+                <section class="matrix-card">
+                    <div class="matrix-toolbar">
+                        <div class="matrix-toolbar-left">
+                            <div class="chart-title">Detalle por SKU · ambas aristas</div>
+                            <div class="chart-sub" id="detalleSubtitulo">Todos los SKU con movimiento en el periodo</div>
+                        </div>
+                        <div class="matrix-actions">
+                            <select class="select-orden" id="selectOrden" onchange="cambiarOrden(this.value)"
+                                aria-label="Ordenar detalle por">
+                                <option value="falta">Mayor faltante (arista activa)</option>
+                                <option value="sobra">Mayor sobrante (arista activa)</option>
+                                <option value="abs">Mayor brecha absoluta (arista activa)</option>
+                                <option value="real">Mayor Producción Real</option>
+                                <option value="codigo">CódigoCorto</option>
+                            </select>
+                            <div class="search-box">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+                                    style="color: var(--color-text-muted); flex-shrink: 0;">
+                                    <circle cx="11" cy="11" r="7"></circle>
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                </svg>
+                                <input type="text" id="inputBusqueda" placeholder="Buscar código, nombre o SubPlanta..."
+                                    oninput="filtrarDetalle()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="matrix-table eje-programa" id="tablaDetalle">
+                            <thead>
+                                <tr>
+                                    <th class="col-hier">CódigoCorto - Nombre</th>
+                                    <th class="th-left">SubPlanta</th>
+                                    <th class="num-col">Prod. Real (kg)</th>
+                                    <th class="num-col col-group-prog-start">Prog. Producción (kg)</th>
+                                    <th class="num-col">Brecha Prog. (kg)</th>
+                                    <th class="num-col">% Cumpl. Prog.</th>
+                                    <th class="num-col col-group-dist-start">Ped. Distribución (kg)</th>
+                                    <th class="num-col">Brecha Dist. (kg)</th>
+                                    <th class="num-col">% Cumpl. Dist.</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyDetalle">
+                                <tr><td colspan="9" class="matrix-empty">Cargando información de la API...</td></tr>
+                            </tbody>
+                            <tfoot id="tfootDetalle"></tfoot>
+                        </table>
+                    </div>
+                </section>
+
+                <footer class="page-footer">
+                    Vista <b>Brechas por SKU</b> · Fuente: Excel <b>Cumplimiento_PTC_Diario</b> · Endpoint
+                    <b>GET /api/CumplimientoPtcDiario</b> · Brecha = <b>Producción Real</b> (T_Produccion) menos
+                    <b>Programa de Producción</b> (T_ResProd_Py_DB) o <b>Pedido de Distribución</b> (T_Distribucion),
+                    acumulada por SKU en las semanas seleccionadas · Recurrencia = semanas con la misma brecha ·
+                    Semanas ISO-8601 con inicio en Lunes
+                </footer>
+            </div>
+        </main>
+    </div>
+
+    <div class="toast" id="toast"></div>
+    <script>
+        // =========================================================================
+        // ⚙️ CONFIGURACIÓN DE CONEXIÓN HÍBRIDA A LA API .NET
+        // =========================================================================
+        const APP_CONFIG = {
+            servidor: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.servidor)
+                ? GLOBAL_CONFIG.servidor
+                : "RAEVSALL001",
+            puertos: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.puertos)
+                ? GLOBAL_CONFIG.puertos
+                : [8080, 5000],
+            controllerPath: "/api/CumplimientoPtcDiario",
+            timeoutMs: 60000
+        };
+
+        function generarBasesApi() {
+            if (typeof generarBasesApiGlobal === 'function') {
+                return generarBasesApiGlobal();
+            }
+            const bases = [];
+            for (const puerto of APP_CONFIG.puertos) {
+                bases.push(`http://${APP_CONFIG.servidor}:${puerto}`);
+            }
+            return bases;
+        }
+
+        let apiBaseActiva = null;
+        let cachedInitialPayload = null;
+
+        async function fetchConTimeout(url, timeoutMs = 10000) {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+                const res = await fetch(url, { signal: controller.signal });
+                clearTimeout(id);
+                return res;
+            } catch (err) {
+                clearTimeout(id);
+                throw err;
+            }
+        }
+
+        async function detectarServidorApi() {
+            const bases = generarBasesApi();
+            for (const base of bases) {
+                try {
+                    const res = await fetchConTimeout(`${base}${APP_CONFIG.controllerPath}`, 3500);
+                    if (res.ok) {
+                        try { cachedInitialPayload = await res.json(); } catch (_) { }
+                        return base;
+                    }
+                } catch (e) {
+                    try {
+                        const pingRes = await fetchConTimeout(`${base}/`, 2500);
+                        if (pingRes.ok) return base;
+                    } catch (errPing) { }
+                }
+            }
+            return null;
+        }
+
+        // =========================================================================
+        // 🗂️ ESTADO GLOBAL
+        // =========================================================================
+        let registrosCrudos = [];          // Respuesta original de la API (data plana, sin filtros)
+        let registros = [];                // Registros normalizados
+        let semanas = [];                  // Semanas ISO disponibles (orden ascendente)
+        let semanasConProduccion = [];     // Claves de semanas con Producción Real registrada
+        let subPlantasDisponibles = [];
+        const selectedSubPlantas = new Set();
+
+        // null = sin inicializar (toma la última semana con producción) · Set vacío = todas las semanas
+        let semanasSeleccionadas = null;
+        let ejeActivo = 'programa';
+        let ordenDetalle = 'falta';
+        let busquedaDetalle = '';
+        let skusPeriodo = [];              // SKUs agregados del periodo y SubPlantas seleccionadas
+
+        const TOP_N = 10;
+        const TOLERANCIA_KG = 0.5;         // Diferencias menores se consideran cumplidas (redondeo)
+
+        const EJES = {
+            programa: {
+                nombre: 'Programa de Producción',
+                corto: 'Programa',
+                abreviado: 'Prog.',
+                columnaExcel: 'Programa_Produccion_Kg'
+            },
+            distribucion: {
+                nombre: 'Pedido de Distribución',
+                corto: 'Distribución',
+                abreviado: 'Dist.',
+                columnaExcel: 'Pedido_Distribucion_Kg'
+            }
+        };
+
+        const COLORES = {
+            faltante: 'rgba(176, 58, 46, 0.85)',
+            sobrante: 'rgba(186, 160, 99, 0.90)',
+            grid: 'rgba(122, 130, 142, 0.16)'
+        };
+
+        const charts = { faltantes: null, sobrantes: null };
+
+        // =========================================================================
+        // 🔧 UTILIDADES GENERALES
+        // =========================================================================
+        function num(valor) {
+            const n = Number(valor);
+            return isFinite(n) ? n : 0;
+        }
+
+        function pad2(n) {
+            return String(n).padStart(2, '0');
+        }
+
+        function formatKg(valor, decimales = 0) {
+            return num(valor).toLocaleString('es-PE', {
+                minimumFractionDigits: decimales,
+                maximumFractionDigits: decimales
+            });
+        }
+
+        function redondear2(valor) {
+            return Number(num(valor).toFixed(2));
+        }
+
+        function escaparHtml(texto) {
+            return String(texto ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function claveSemana(anio, semana) {
+            return `${anio}-${pad2(semana)}`;
+        }
+
+        // Etiqueta visual obligatoria en tablas y filtros: Sem. XX (DD/MM al DD/MM)
+        function etiquetaSemana(meta) {
+            return `Sem. ${pad2(meta.semana)} (${meta.rango})`;
+        }
+
+        function metaSemana(key) {
+            return semanas.find(s => s.key === key) || null;
+        }
+
+        // % Cumplimiento = Producción Real / Referencia (null cuando no hay referencia)
+        function calcPct(real, meta) {
+            if (!meta) return null;
+            return (real / meta) * 100;
+        }
+
+        function badgeHtml(pct) {
+            if (pct === null || pct === undefined || isNaN(pct) || !isFinite(pct)) {
+                return '<span class="cell-empty" title="Sin referencia para esta arista">–</span>';
+            }
+            let cls = 'badge-good';
+            if (pct < 85) cls = 'badge-low';
+            else if (pct < 98) cls = 'badge-mid';
+            return `<span class="badge-kpi ${cls}">${pct.toFixed(1)}%</span>`;
+        }
+
+        function brechaHtml(valor) {
+            if (Math.abs(valor) < TOLERANCIA_KG) return '<span class="cell-empty">0</span>';
+            const texto = formatKg(Math.abs(valor));
+            return valor < 0
+                ? `<span class="brecha-falta">-${texto}</span>`
+                : `<span class="brecha-sobra">+${texto}</span>`;
+        }
+
+        function mostrarToast(mensaje, icono = 'ℹ️') {
+            const toast = document.getElementById('toast');
+            if (!toast) return;
+            toast.textContent = `${icono} ${mensaje}`;
+            toast.classList.add('show');
+            clearTimeout(mostrarToast._timer);
+            mostrarToast._timer = setTimeout(() => toast.classList.remove('show'), 4500);
+        }
+
+        // =========================================================================
+        // 🧭 BARRA LATERAL: PANTALLA COMPLETA Y ESTADO DE CONEXIÓN
+        // =========================================================================
+        function togglePantallaCompleta() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen?.().catch(() => { });
+            } else {
+                document.exitFullscreen?.().catch(() => { });
+            }
+        }
+
+        function iniciarSincronizacionEstado() {
+            const badge = document.getElementById('apiStatusBadge');
+            const dotLateral = document.getElementById('sideStatusDot');
+            const textoLateral = document.getElementById('sideStatusText');
+            if (!badge || !dotLateral || !textoLateral) return;
+
+            const sincronizar = () => {
+                const dot = badge.querySelector('.status-dot');
+                const estado = dot
+                    ? (dot.classList.contains('online') ? 'online'
+                        : dot.classList.contains('loading') ? 'loading'
+                            : dot.classList.contains('error') ? 'error' : '')
+                    : '';
+                dotLateral.className = 'side-status-dot' + (estado ? ` ${estado}` : '');
+                const texto = document.getElementById('apiStatusText');
+                textoLateral.textContent = texto ? texto.textContent : 'Listo';
+            };
+
+            sincronizar();
+            new MutationObserver(sincronizar).observe(badge, {
+                subtree: true, childList: true, attributes: true, characterData: true
+            });
+        }
+
+        // =========================================================================
+        // 🔄 CARGA DE DATOS DESDE LA API
+        // =========================================================================
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (typeof ChartDataLabels !== 'undefined') Chart.register(ChartDataLabels);
+            if (typeof Chart !== 'undefined') {
+                Chart.defaults.color = '#787479';
+                Chart.defaults.font.family = "'Inter', sans-serif";
+            }
+            iniciarSincronizacionEstado();
+
+            // Cierra el combo de semanas al hacer clic fuera o con Escape
+            document.addEventListener('click', (e) => {
+                const combo = document.getElementById('semanaCombo');
+                if (combo && !combo.contains(e.target)) combo.classList.remove('abierto');
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') document.getElementById('semanaCombo')?.classList.remove('abierto');
+            });
+
+            await inicializarDashboard();
+        });
+
+        async function inicializarDashboard() {
+            const statusText = document.getElementById('apiStatusText');
+            const statusDot = document.querySelector('.status-dot');
+            statusText.textContent = `Buscando ${APP_CONFIG.servidor}...`;
+            if (statusDot) statusDot.className = 'status-dot loading';
+
+            try {
+                apiBaseActiva = await detectarServidorApi();
+                if (!apiBaseActiva) {
+                    throw new Error(`No se pudo conectar a ${APP_CONFIG.servidor} en puertos ${APP_CONFIG.puertos.join('/')}`);
+                }
+
+                const urlObj = new URL(apiBaseActiva);
+                statusText.textContent = `Conectado (${urlObj.host})`;
+                if (statusDot) statusDot.className = 'status-dot online';
+                await recargarDatosAPI(false);
+            } catch (err) {
+                console.error('Error al inicializar:', err);
+                statusText.textContent = 'Sin Conexión';
+                if (statusDot) statusDot.className = 'status-dot error';
+                mostrarToast(`Error de conexión: ${err.message}`, '⚠️');
+                actualizarVista();
+            }
+        }
+
+        async function recargarDatosAPI(forzar = false) {
+            const statusText = document.getElementById('apiStatusText');
+            try {
+                if (!apiBaseActiva) {
+                    apiBaseActiva = await detectarServidorApi();
+                    if (!apiBaseActiva) {
+                        throw new Error(`No se pudo conectar a ${APP_CONFIG.servidor} en puertos ${APP_CONFIG.puertos.join('/')}`);
+                    }
+                }
+
+                if (statusText) statusText.textContent = forzar ? 'Recargando datos...' : 'Leyendo datos...';
+                let payload = null;
+
+                if (!forzar && cachedInitialPayload) {
+                    payload = cachedInitialPayload;
+                    cachedInitialPayload = null;
+                } else {
+                    const url = `${apiBaseActiva}${APP_CONFIG.controllerPath}${forzar ? '?recargar=true' : ''}`;
+                    const res = await fetchConTimeout(url, APP_CONFIG.timeoutMs);
+                    if (!res.ok) {
+                        let detalle = `HTTP ${res.status}`;
+                        try {
+                            const errorJson = await res.json();
+                            detalle = errorJson.mensaje || errorJson.title || detalle;
+                        } catch (_) { }
+                        throw new Error(detalle);
+                    }
+                    payload = await res.json();
+                }
+
+                if (!payload || payload.exito === false) {
+                    throw new Error((payload && payload.mensaje) || 'La API no devolvió datos válidos');
+                }
+
+                registrosCrudos = Array.isArray(payload.registros) ? payload.registros : [];
+                normalizarDatos(registrosCrudos);
+                construirSemanas();
+                construirPildorasSubPlanta();
+                semanasSeleccionadas = null;   // Nueva consulta = periodo por defecto
+                construirListaSemanas();
+                actualizarVista();
+
+                const urlObj = new URL(apiBaseActiva);
+                if (statusText) statusText.textContent = `En Línea (${urlObj.host})`;
+                const dotOnline = document.querySelector('.status-dot');
+                if (dotOnline) dotOnline.className = 'status-dot online';
+                mostrarToast(`Cargados ${registros.length} registros consolidados`, '✅');
+            } catch (err) {
+                console.error('Error al cargar datos:', err);
+                if (statusText) statusText.textContent = 'Sin datos';
+                const dot = document.querySelector('.status-dot');
+                if (dot) dot.className = 'status-dot error';
+                mostrarToast(`No se pudieron cargar los datos: ${err.message}`, '❌');
+                actualizarVista();
+            }
+        }
+
+        // =========================================================================
+        // 🧹 NORMALIZACIÓN, SEMANAS Y SUBPLANTAS
+        // =========================================================================
+        function normalizarDatos(data) {
+            registros = (data || []).map(r => {
+                const anio = num(r.anioSemana);
+                const semana = num(r.semana);
+                return {
+                    fecha: String(r.fecha || ''),
+                    anio,
+                    semana,
+                    weekKey: claveSemana(anio, semana),
+                    rango: String(r.rangoSemana || ''),
+                    lunes: String(r.lunes || ''),
+                    domingo: String(r.domingo || ''),
+                    codigo: String(r.codigoCorto || '').trim(),
+                    nombre: String(r.nombre || '').trim(),
+                    subPlanta: String(r.subPlanta || '').trim() || 'SIN SUBPLANTA',
+                    produccion: num(r.kilosProduccion),
+                    programa: num(r.kilosResProdPyDb),
+                    distribucion: num(r.kilosDistribucion)
+                };
+            }).filter(r => r.semana > 0 && r.anio > 0);
+        }
+
+        function rangoDesdeFechas(meta) {
+            if (meta.rango) return meta.rango;
+            const fmt = (iso) => (!iso || iso.length < 10) ? '' : `${iso.substring(8, 10)}/${iso.substring(5, 7)}`;
+            const l = fmt(meta.lunes);
+            const d = fmt(meta.domingo);
+            return (l && d) ? `${l} al ${d}` : '';
+        }
+
+        function construirSemanas() {
+            const mapa = new Map();
+            const conProduccion = new Set();
+            registros.forEach(r => {
+                if (!mapa.has(r.weekKey)) {
+                    mapa.set(r.weekKey, {
+                        key: r.weekKey, anio: r.anio, semana: r.semana,
+                        lunes: r.lunes, domingo: r.domingo, rango: r.rango
+                    });
+                }
+                if (r.produccion > 0) conProduccion.add(r.weekKey);
+            });
+
+            semanas = [...mapa.values()]
+                .map(meta => { meta.rango = rangoDesdeFechas(meta); return meta; })
+                .sort((a, b) => a.key.localeCompare(b.key));
+            semanasConProduccion = semanas.map(s => s.key).filter(k => conProduccion.has(k));
+        }
+
+        // "Últimas N" se cuenta desde la última semana con Producción Real: las semanas futuras
+        // sólo tienen programa o pedido y mostrarían todo como faltante.
+        function ultimasSemanas(n) {
+            const keys = semanas.map(s => s.key);
+            if (!keys.length) return [];
+            const ancla = semanasConProduccion.length
+                ? semanasConProduccion[semanasConProduccion.length - 1]
+                : keys[keys.length - 1];
+            const idx = keys.indexOf(ancla);
+            return keys.slice(Math.max(0, idx - n + 1), idx + 1);
+        }
+
+        function semanasActivas() {
+            if (semanasSeleccionadas === null) semanasSeleccionadas = new Set(ultimasSemanas(1));
+            const keys = semanas.map(s => s.key);
+            if (semanasSeleccionadas.size === 0) return keys;
+            return keys.filter(k => semanasSeleccionadas.has(k));
+        }
+
+        function construirListaSemanas() {
+            const lista = document.getElementById('semanasLista');
+            if (!lista) return;
+            semanasActivas();   // Inicializa la selección por defecto si hace falta
+
+            lista.innerHTML = semanas.slice().reverse().map(meta => `
+                <label class="semana-opcion">
+                    <input type="checkbox" value="${meta.key}" ${semanasSeleccionadas.has(meta.key) ? 'checked' : ''}
+                        onchange="onSemanaChange(this)">
+                    <span>${escaparHtml(etiquetaSemana(meta))}</span>
+                    <span class="week-year">${meta.anio}</span>
+                </label>`).join('') || '<div class="semana-opcion">Sin semanas disponibles</div>';
+
+            actualizarTextoSemanas();
+        }
+
+        function actualizarTextoSemanas() {
+            const texto = document.getElementById('semanasMatrizTexto');
+            const hint = document.getElementById('periodoHint');
+            const activas = semanasActivas();
+
+            if (texto) {
+                if (!activas.length) texto.textContent = 'Sin semanas';
+                else if (semanasSeleccionadas.size === 0) texto.textContent = `Todas las semanas (${activas.length})`;
+                else if (activas.length === 1) texto.textContent = etiquetaSemana(metaSemana(activas[0]));
+                else texto.textContent = `${activas.length} semanas seleccionadas`;
+            }
+
+            if (hint) {
+                const ini = metaSemana(activas[0]);
+                const fin = metaSemana(activas[activas.length - 1]);
+                hint.textContent = !ini ? '-'
+                    : activas.length === 1
+                        ? `${etiquetaSemana(ini)} · ${ini.anio}`
+                        : `De ${etiquetaSemana(ini)} ${ini.anio} a ${etiquetaSemana(fin)} ${fin.anio}`;
+            }
+        }
+
+        function onSemanaChange(checkbox) {
+            if (checkbox.checked) semanasSeleccionadas.add(checkbox.value);
+            else semanasSeleccionadas.delete(checkbox.value);
+            actualizarTextoSemanas();
+            actualizarVista();
+        }
+
+        function seleccionarUltimasSemanas(n) {
+            semanasSeleccionadas = new Set(ultimasSemanas(n));
+            construirListaSemanas();
+            actualizarVista();
+        }
+
+        function seleccionarTodasSemanas() {
+            semanasSeleccionadas = new Set();
+            construirListaSemanas();
+            actualizarVista();
+        }
+
+        function toggleComboSemanas(evento) {
+            evento.stopPropagation();
+            document.getElementById('semanaCombo')?.classList.toggle('abierto');
+        }
+
+        function construirPildorasSubPlanta() {
+            const contenedor = document.getElementById('subplantaPillsContainer');
+            if (!contenedor) return;
+
+            subPlantasDisponibles = [...new Set(registros.map(r => r.subPlanta))].filter(Boolean).sort();
+            if (selectedSubPlantas.size === 0) {
+                subPlantasDisponibles.forEach(sp => selectedSubPlantas.add(sp));
+            }
+
+            contenedor.innerHTML = '';
+            subPlantasDisponibles.forEach(sp => {
+                const boton = document.createElement('button');
+                boton.type = 'button';
+                boton.className = 'subplanta-pill' + (selectedSubPlantas.has(sp) ? ' selected' : '');
+                boton.textContent = sp;
+                boton.addEventListener('click', () => {
+                    if (selectedSubPlantas.has(sp)) selectedSubPlantas.delete(sp);
+                    else selectedSubPlantas.add(sp);
+                    construirPildorasSubPlanta();
+                    actualizarVista();
+                });
+                contenedor.appendChild(boton);
+            });
+        }
+
+        function seleccionarTodasSubPlantas() {
+            selectedSubPlantas.clear();
+            subPlantasDisponibles.forEach(sp => selectedSubPlantas.add(sp));
+            construirPildorasSubPlanta();
+            actualizarVista();
+        }
+
+        // =========================================================================
+        // 📐 AGREGACIÓN POR SKU Y ANÁLISIS DE BRECHAS
+        // =========================================================================
+        function registrosPeriodo() {
+            const activas = new Set(semanasActivas());
+            return registros.filter(r => activas.has(r.weekKey) &&
+                (selectedSubPlantas.size === 0 || selectedSubPlantas.has(r.subPlanta)));
+        }
+
+        function agregarPorSku(filas) {
+            const mapa = new Map();
+
+            filas.forEach(f => {
+                const clave = f.codigo || f.nombre || 'SIN CÓDIGO';
+                let sku = mapa.get(clave);
+                if (!sku) {
+                    sku = {
+                        clave, codigo: f.codigo, nombre: f.nombre, subPlantas: new Set(),
+                        produccion: 0, programa: 0, distribucion: 0, porSemana: new Map()
+                    };
+                    mapa.set(clave, sku);
+                }
+                if (!sku.nombre && f.nombre) sku.nombre = f.nombre;
+                sku.subPlantas.add(f.subPlanta);
+                sku.produccion += f.produccion;
+                sku.programa += f.programa;
+                sku.distribucion += f.distribucion;
+
+                let sem = sku.porSemana.get(f.weekKey);
+                if (!sem) {
+                    sem = { produccion: 0, programa: 0, distribucion: 0 };
+                    sku.porSemana.set(f.weekKey, sem);
+                }
+                sem.produccion += f.produccion;
+                sem.programa += f.programa;
+                sem.distribucion += f.distribucion;
+            });
+
+            return [...mapa.values()]
+                .filter(sku => sku.produccion || sku.programa || sku.distribucion)
+                .map(sku => {
+                    sku.subPlanta = [...sku.subPlantas].sort().join(' / ');
+                    sku.brecha = {
+                        programa: sku.produccion - sku.programa,
+                        distribucion: sku.produccion - sku.distribucion
+                    };
+                    return sku;
+                });
+        }
+
+        // Semanas en que el SKU repitió la brecha (signo -1 = faltante, 1 = sobrante)
+        function recurrencia(sku, eje, signo) {
+            let n = 0;
+            let total = 0;
+            sku.porSemana.forEach(s => {
+                if (!s.produccion && !s[eje]) return;
+                total++;
+                const d = s.produccion - s[eje];
+                if (signo < 0 ? d <= -TOLERANCIA_KG : d >= TOLERANCIA_KG) n++;
+            });
+            return { n, total };
+        }
+
+        function analisisEje(lista, eje) {
+            const faltantes = lista.filter(s => s.brecha[eje] <= -TOLERANCIA_KG)
+                .sort((a, b) => a.brecha[eje] - b.brecha[eje]);
+            const sobrantes = lista.filter(s => s.brecha[eje] >= TOLERANCIA_KG)
+                .sort((a, b) => b.brecha[eje] - a.brecha[eje]);
+            const topF = faltantes.slice(0, TOP_N);
+            const topS = sobrantes.slice(0, TOP_N);
+            const suma = (arr) => arr.reduce((acc, s) => acc + Math.abs(s.brecha[eje]), 0);
+
+            return {
+                faltantes, sobrantes, topF, topS,
+                totalFalta: suma(faltantes),
+                totalSobra: suma(sobrantes),
+                sumaTopF: suma(topF),
+                sumaTopS: suma(topS),
+                totalReal: lista.reduce((acc, s) => acc + s.produccion, 0),
+                totalRef: lista.reduce((acc, s) => acc + s[eje], 0),
+                sinReferencia: sobrantes.filter(s => !s[eje]).length
+            };
+        }
+
+        // =========================================================================
+        // 🖥️ RENDERIZADO
+        // =========================================================================
+        function actualizarVista() {
+            skusPeriodo = agregarPorSku(registrosPeriodo());
+            const analisis = analisisEje(skusPeriodo, ejeActivo);
+
+            actualizarResumen();
+            actualizarEtiquetasEje();
+            actualizarKPIs(analisis);
+            renderizarTop('faltantes', analisis);
+            renderizarTop('sobrantes', analisis);
+            renderizarDetalle();
+        }
+
+        function actualizarResumen() {
+            const resumen = document.getElementById('selectionSummary');
+            const registrosResumen = document.getElementById('registrosSummary');
+            const activas = semanasActivas();
+
+            if (resumen) {
+                resumen.innerHTML = activas.length
+                    ? `Periodo: <b>${activas.length} semana(s)</b> · Arista: <b>Producción Real vs ${escaparHtml(EJES[ejeActivo].nombre)}</b>`
+                    : 'Sin semanas disponibles';
+            }
+            if (registrosResumen) {
+                registrosResumen.textContent = `${registros.length} registros API · ` +
+                    `${selectedSubPlantas.size} de ${subPlantasDisponibles.length} SubPlantas · ` +
+                    `${skusPeriodo.length} SKU(s) con movimiento`;
+            }
+        }
+
+        function actualizarEtiquetasEje() {
+            const info = EJES[ejeActivo];
+            document.getElementById('btnEjePrograma')?.classList.toggle('active', ejeActivo === 'programa');
+            document.getElementById('btnEjeDistribucion')?.classList.toggle('active', ejeActivo === 'distribucion');
+
+            const nota = document.getElementById('ejeNotaRef');
+            if (nota) nota.textContent = info.nombre;
+            ['thRefFaltantes', 'thRefSobrantes'].forEach(id => {
+                const th = document.getElementById(id);
+                if (th) th.textContent = info.abreviado;
+            });
+
+            const tabla = document.getElementById('tablaDetalle');
+            if (tabla) {
+                tabla.classList.toggle('eje-programa', ejeActivo === 'programa');
+                tabla.classList.toggle('eje-distribucion', ejeActivo === 'distribucion');
+            }
+        }
+
+        function fijarTexto(id, texto) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = texto;
+        }
+
+        function fijarKg(id, valor) {
+            const el = document.getElementById(id);
+            if (el) el.innerHTML = `${formatKg(valor)}<span class="kpi-unit">kg</span>`;
+        }
+
+        function pctTexto(parte, total) {
+            return total ? `${((parte / total) * 100).toFixed(1)}%` : '-';
+        }
+
+        function actualizarKPIs(a) {
+            const info = EJES[ejeActivo];
+
+            fijarKg('kpiFaltante', a.totalFalta);
+            fijarTexto('kpiFaltanteDetalle', `${a.faltantes.length} SKU(s) bajo el ${info.corto}`);
+            fijarTexto('kpiFaltanteBadge', `${pctTexto(a.totalFalta, a.totalRef)} del ${info.abreviado}`);
+
+            fijarKg('kpiSobrante', a.totalSobra);
+            fijarTexto('kpiSobranteDetalle', `${a.sobrantes.length} SKU(s) por encima` +
+                (a.sinReferencia ? ` · ${a.sinReferencia} sin ${info.corto.toLowerCase()}` : ''));
+            fijarTexto('kpiSobranteBadge', `${pctTexto(a.totalSobra, a.totalRef)} del ${info.abreviado}`);
+
+            const cumplimiento = calcPct(a.totalReal, a.totalRef);
+            fijarTexto('kpiCumplimientoLabel', `Cumplimiento vs ${info.corto}`);
+            fijarTexto('kpiCumplimiento', cumplimiento === null ? '-' : `${cumplimiento.toFixed(1)}%`);
+            fijarTexto('kpiCumplimientoDetalle', `Real ${formatKg(a.totalReal)} kg vs ${formatKg(a.totalRef)} kg`);
+            const neto = a.totalReal - a.totalRef;
+            fijarTexto('kpiNetoBadge', `Neto ${neto >= 0 ? '+' : '-'}${formatKg(Math.abs(neto))} kg`);
+
+            fijarTexto('kpiConcentracion', pctTexto(a.sumaTopF, a.totalFalta));
+            fijarTexto('kpiConcentracionDetalle', `del faltante está en ${a.topF.length} SKU(s)`);
+            fijarTexto('kpiConcentracionBadge', `Sobr. ${pctTexto(a.sumaTopS, a.totalSobra)}`);
+        }
+
+        function etiquetaCortaSku(sku) {
+            const nombre = sku.nombre || 'SIN NOMBRE';
+            const corto = nombre.length > 24 ? `${nombre.slice(0, 23)}…` : nombre;
+            return `${sku.codigo || 'S/C'} · ${corto}`;
+        }
+
+        function renderizarTop(tipo, a) {
+            const esFalta = tipo === 'faltantes';
+            const eje = ejeActivo;
+            const info = EJES[eje];
+            const top = esFalta ? a.topF : a.topS;
+            const total = esFalta ? a.faltantes.length : a.sobrantes.length;
+            const sufijo = esFalta ? 'Faltantes' : 'Sobrantes';
+
+            fijarTexto(`sub${sufijo}`, esFalta
+                ? `Producción Real por debajo del ${info.nombre} · ${total} SKU(s) con faltante · valores en kg`
+                : `Producción Real por encima del ${info.nombre} · ${total} SKU(s) con sobrante · valores en kg`);
+
+            // Gráfico de barras horizontales
+            const vacio = document.getElementById(`vacio${sufijo}`);
+            if (vacio) vacio.hidden = top.length > 0;
+            if (charts[tipo]) {
+                charts[tipo].destroy();
+                charts[tipo] = null;
+            }
+
+            const canvas = document.getElementById(`chart${sufijo}`);
+            if (top.length && canvas && typeof Chart !== 'undefined') {
+                charts[tipo] = new Chart(canvas, {
+                    type: 'bar',
+                    data: {
+                        labels: top.map(etiquetaCortaSku),
+                        datasets: [{
+                            label: esFalta ? 'Faltante (kg)' : 'Sobrante (kg)',
+                            data: top.map(s => Math.abs(s.brecha[eje])),
+                            backgroundColor: esFalta ? COLORES.faltante : COLORES.sobrante,
+                            borderRadius: 4,
+                            maxBarThickness: 22
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: '#2E2C31',
+                                titleFont: { size: 12, weight: '700' },
+                                bodyFont: { size: 11 },
+                                padding: 10,
+                                cornerRadius: 8,
+                                callbacks: {
+                                    title: (items) => {
+                                        const s = top[items[0].dataIndex];
+                                        return `${s.codigo || 'S/C'} · ${s.nombre || 'SIN NOMBRE'}`;
+                                    },
+                                    label: (ctx) => ` ${esFalta ? 'Faltante' : 'Sobrante'}: ${formatKg(ctx.parsed.x)} kg`,
+                                    afterLabel: (ctx) => {
+                                        const s = top[ctx.dataIndex];
+                                        const pct = calcPct(s.produccion, s[eje]);
+                                        const rec = recurrencia(s, eje, esFalta ? -1 : 1);
+                                        return [
+                                            `Producción Real: ${formatKg(s.produccion)} kg`,
+                                            `${info.nombre}: ${formatKg(s[eje])} kg`,
+                                            `Cumplimiento: ${pct === null ? 'sin ' + info.corto.toLowerCase() : pct.toFixed(1) + '%'}`,
+                                            `SubPlanta: ${s.subPlanta}`,
+                                            `Recurrencia: ${rec.n} de ${rec.total} semana(s)`
+                                        ];
+                                    }
+                                }
+                            },
+                            // Etiquetas de datos ocultas en celular (regla 4)
+                            datalabels: {
+                                display: () => window.innerWidth > 768,
+                                anchor: 'end',
+                                align: 'end',
+                                offset: 2,
+                                color: '#4A4650',
+                                font: { size: 10, weight: '700' },
+                                formatter: (v) => formatKg(v)
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                grace: '15%',
+                                grid: { color: COLORES.grid },
+                                ticks: { font: { size: 10 }, callback: (v) => formatKg(v) },
+                                title: { display: true, text: 'Kilos', font: { size: 10, weight: '700' } }
+                            },
+                            y: {
+                                grid: { display: false },
+                                ticks: { autoSkip: false, font: { size: 10, weight: '600' } }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Tabla del Top 10
+            const tbody = document.getElementById(`tbody${sufijo}`);
+            if (!tbody) return;
+            if (!top.length) {
+                tbody.innerHTML = `<tr><td colspan="7" class="matrix-empty">${registros.length
+                    ? `Sin SKUs con ${esFalta ? 'faltante' : 'sobrante'} en el periodo seleccionado.`
+                    : 'Sin datos cargados desde la API.'}</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = top.map((s, i) => {
+                const rec = recurrencia(s, eje, esFalta ? -1 : 1);
+                return `
+                    <tr>
+                        <td class="num-cell rank">${i + 1}</td>
+                        <td>
+                            <span class="sku-code-badge">${escaparHtml(s.codigo || 'S/C')}</span>
+                            <span class="sku-name-text">${escaparHtml(s.nombre || 'SIN NOMBRE')}</span>
+                            <div class="sku-sub">${escaparHtml(s.subPlanta)}</div>
+                        </td>
+                        <td class="num-cell">${formatKg(s.produccion)}</td>
+                        <td class="num-cell">${formatKg(s[eje])}</td>
+                        <td class="num-cell">${brechaHtml(s.brecha[eje])}</td>
+                        <td class="num-cell">${badgeHtml(calcPct(s.produccion, s[eje]))}</td>
+                        <td class="num-cell recurrencia">${rec.n}/${rec.total} sem</td>
+                    </tr>`;
+            }).join('');
+        }
+
+        function cambiarEje(eje) {
+            if (!EJES[eje] || eje === ejeActivo) return;
+            ejeActivo = eje;
+            actualizarVista();
+        }
+
+        function cambiarOrden(valor) {
+            ordenDetalle = valor;
+            renderizarDetalle();
+        }
+
+        function filtrarDetalle() {
+            busquedaDetalle = (document.getElementById('inputBusqueda')?.value || '').trim().toLowerCase();
+            renderizarDetalle();
+        }
+
+        function ordenarDetalle(lista) {
+            const eje = ejeActivo;
+            const copia = lista.slice();
+            switch (ordenDetalle) {
+                case 'sobra': return copia.sort((a, b) => b.brecha[eje] - a.brecha[eje]);
+                case 'abs': return copia.sort((a, b) => Math.abs(b.brecha[eje]) - Math.abs(a.brecha[eje]));
+                case 'real': return copia.sort((a, b) => b.produccion - a.produccion);
+                case 'codigo': return copia.sort((a, b) => String(a.codigo).localeCompare(String(b.codigo), 'es', { numeric: true }));
+                default: return copia.sort((a, b) => a.brecha[eje] - b.brecha[eje]);
+            }
+        }
+
+        function renderizarDetalle() {
+            const tbody = document.getElementById('tbodyDetalle');
+            const tfoot = document.getElementById('tfootDetalle');
+            if (!tbody) return;
+
+            const termino = busquedaDetalle;
+            const visibles = ordenarDetalle(skusPeriodo.filter(s => !termino ||
+                String(s.codigo || '').toLowerCase().includes(termino) ||
+                String(s.nombre || '').toLowerCase().includes(termino) ||
+                s.subPlanta.toLowerCase().includes(termino)));
+
+            fijarTexto('detalleSubtitulo', `${visibles.length} de ${skusPeriodo.length} SKU(s) con movimiento en el periodo · ` +
+                `columnas resaltadas = arista activa (${EJES[ejeActivo].corto})`);
+
+            if (!visibles.length) {
+                const mensaje = !registros.length ? 'Sin datos cargados desde la API.'
+                    : termino ? 'No hay SKUs que coincidan con la búsqueda.'
+                        : 'No hay SKUs con movimiento en el periodo seleccionado.';
+                tbody.innerHTML = `<tr><td colspan="9" class="matrix-empty">${escaparHtml(mensaje)}</td></tr>`;
+                if (tfoot) tfoot.innerHTML = '';
+                return;
+            }
+
+            const filaCeldas = (s) => `
+                <td class="num-cell cell-real">${formatKg(s.produccion)}</td>
+                <td class="num-cell col-group-prog-start g-prog">${formatKg(s.programa)}</td>
+                <td class="num-cell g-prog">${brechaHtml(s.produccion - s.programa)}</td>
+                <td class="num-cell g-prog">${badgeHtml(calcPct(s.produccion, s.programa))}</td>
+                <td class="num-cell col-group-dist-start g-dist">${formatKg(s.distribucion)}</td>
+                <td class="num-cell g-dist">${brechaHtml(s.produccion - s.distribucion)}</td>
+                <td class="num-cell g-dist">${badgeHtml(calcPct(s.produccion, s.distribucion))}</td>`;
+
+            tbody.innerHTML = visibles.map(s => `
+                <tr>
+                    <td>
+                        <span class="sku-code-badge">${escaparHtml(s.codigo || 'S/C')}</span>
+                        <span class="sku-name-text">${escaparHtml(s.nombre || 'SIN NOMBRE')}</span>
+                    </td>
+                    <td class="td-sub">${escaparHtml(s.subPlanta)}</td>
+                    ${filaCeldas(s)}
+                </tr>`).join('');
+
+            if (tfoot) {
+                const total = visibles.reduce((acc, s) => {
+                    acc.produccion += s.produccion;
+                    acc.programa += s.programa;
+                    acc.distribucion += s.distribucion;
+                    return acc;
+                }, { produccion: 0, programa: 0, distribucion: 0 });
+                tfoot.innerHTML = `
+                    <tr>
+                        <td>Total (${visibles.length} SKU)</td>
+                        <td></td>
+                        ${filaCeldas(total)}
+                    </tr>`;
+            }
+        }
+
+        // =========================================================================
+        // 📥 EXPORTACIÓN A EXCEL (.xlsx)
+        // =========================================================================
+        function filaTopExcel(s, i, eje, signo) {
+            const rec = recurrencia(s, eje, signo);
+            const pct = calcPct(s.produccion, s[eje]);
+            return {
+                'Rank': i + 1,
+                'CodigoCorto': s.codigo,
+                'Nombre': s.nombre,
+                'SubPlanta': s.subPlanta,
+                'Produccion_Real_Kg': redondear2(s.produccion),
+                [EJES[eje].columnaExcel]: redondear2(s[eje]),
+                'Brecha_Kg': redondear2(s.brecha[eje]),
+                'Cumplimiento_%': pct === null ? null : redondear2(pct),
+                'Semanas_con_brecha': rec.n,
+                'Semanas_con_movimiento': rec.total
+            };
+        }
+
+        function exportarBrechas() {
+            if (!registrosCrudos.length) {
+                mostrarToast('No hay datos cargados para exportar', '⚠️');
+                return;
+            }
+            if (typeof XLSX === 'undefined') {
+                mostrarToast('La librería SheetJS no está disponible', '❌');
+                return;
+            }
+
+            try {
+                const activas = semanasActivas();
+                const ini = metaSemana(activas[0]);
+                const fin = metaSemana(activas[activas.length - 1]);
+                const rango = !ini ? 'SinPeriodo'
+                    : activas.length === 1 ? `Sem${pad2(ini.semana)}-${ini.anio}`
+                        : `Sem${pad2(ini.semana)}-${ini.anio}_a_Sem${pad2(fin.semana)}-${fin.anio}`;
+                const nombreArchivo = `Brechas_SKU_PTC_${rango}.xlsx`;
+                const libro = XLSX.utils.book_new();
+                const agregarHoja = (filas, nombre) => XLSX.utils.book_append_sheet(libro,
+                    XLSX.utils.json_to_sheet(filas.length ? filas : [{ 'Mensaje': 'Sin datos' }]), nombre);
+
+                agregarHoja([{
+                    'Semanas': activas.map(k => { const m = metaSemana(k); return m ? `${etiquetaSemana(m)} ${m.anio}` : k; }).join(' | '),
+                    'SubPlantas': [...selectedSubPlantas].sort().join(' | '),
+                    'Criterio': 'Brecha = Producción Real - Referencia · negativa = faltante · positiva = sobrante',
+                    'Tolerancia_Kg': TOLERANCIA_KG
+                }], 'Parametros');
+
+                [['programa', 'Prog'], ['distribucion', 'Dist']].forEach(([eje, abrev]) => {
+                    const a = analisisEje(skusPeriodo, eje);
+                    agregarHoja(a.topF.map((s, i) => filaTopExcel(s, i, eje, -1)), `Top10 Faltantes ${abrev}`);
+                    agregarHoja(a.topS.map((s, i) => filaTopExcel(s, i, eje, 1)), `Top10 Sobrantes ${abrev}`);
+                });
+
+                agregarHoja(ordenarDetalle(skusPeriodo).map(s => ({
+                    'CodigoCorto': s.codigo,
+                    'Nombre': s.nombre,
+                    'SubPlanta': s.subPlanta,
+                    'Produccion_Real_Kg': redondear2(s.produccion),
+                    'Programa_Produccion_Kg': redondear2(s.programa),
+                    'Brecha_Programa_Kg': redondear2(s.brecha.programa),
+                    'Cumplimiento_Programa_%': s.programa ? redondear2(calcPct(s.produccion, s.programa)) : null,
+                    'Pedido_Distribucion_Kg': redondear2(s.distribucion),
+                    'Brecha_Distribucion_Kg': redondear2(s.brecha.distribucion),
+                    'Cumplimiento_Distribucion_%': s.distribucion ? redondear2(calcPct(s.produccion, s.distribucion)) : null
+                })), 'Detalle SKU');
+
+                XLSX.utils.book_append_sheet(libro, XLSX.utils.json_to_sheet(registrosCrudos), 'Data Plana API');
+
+                XLSX.writeFile(libro, nombreArchivo);
+                mostrarToast(`Archivo exportado: ${nombreArchivo}`, '✅');
+            } catch (err) {
+                console.error('Error al exportar:', err);
+                mostrarToast(`No se pudo exportar: ${err.message}`, '❌');
+            }
+        }
+    </script>
+</body>
+
+</html>
