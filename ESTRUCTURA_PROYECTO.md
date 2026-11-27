@@ -39,13 +39,15 @@ Api_Desposte/
 │   │   └── Portal/                     configuración del portal (PortalConfigController)
 │   ├── Funciones/                   ← código reutilizable del backend (namespace ApiDesposte.Funciones.<Área>)
 │   │   ├── Excel/LectorTablasExcel.cs   apertura segura de Excel + lectura de tablas + caché
+│   │   ├── Excel/EditorTablasExcel.cs   CRUD sobre tablas de Excel (con respaldo previo a cada escritura)
 │   │   ├── Sql/EjecutorSql.cs           ejecución de SP devolviendo filas tal cual
 │   │   ├── Fechas/ParametrosFecha.cs    lectura de fechas de la query string
 │   │   ├── Portal/EstadoDashboards.cs   ruta y lectura de Datos/dashboards_estado.json
 │   │   └── IA/                          DeepSeek y Gemini con respaldo automático (GeneradorJsonIA)
 │   └── Datos/                       ← datos de ejecución, fuera de la web (excluido de compilación y publicación)
 │       ├── dashboards_estado.json      dashboards activos / en prueba (los "en prueba" solo los ve el administrador)
-│       └── sps/                        caché de diagramas de SPs generados con IA, una carpeta por base (se crea sola)
+│       ├── sps/                        caché de diagramas de SPs generados con IA, una carpeta por base (se crea sola)
+│       └── RespaldosExcel/             copia del Excel antes de cada escritura del CRUD (últimas 30; no se sube a git)
 │
 └── Docu_Paginas/                 ← carpeta web que sirve la API (http://RAEVSALL001:8080/)
     ├── Funciones/                   ← código reutilizable del frontend
@@ -99,7 +101,19 @@ La carpeta web se busca en `../Docu_Paginas` y, si no existe, en `./Docu_Paginas
 | `LectorTablasExcel.AbrirEnMemoria(ruta)` | Copia el archivo a memoria con `FileShare.ReadWrite \| FileShare.Delete`, elimina tablas dinámicas y devuelve el `XLWorkbook`. |
 | `LectorTablasExcel.LeerTablaTalCual(wb, hoja, tabla)` | Lee una tabla estructurada con las columnas de su encabezado (fallback al rango usado). |
 | `LectorTablasExcel.ObtenerValorCelda(celda)` | Convierte la celda a un valor JSON simple. |
-| `new CacheTablasExcel(TimeSpan)` + `.Obtener(ruta, mapeo, forzarRecarga)` | Caché en memoria de las tablas de un libro. |
+| `new CacheTablasExcel(TimeSpan)` + `.Obtener(ruta, mapeo, forzarRecarga)` | Caché en memoria de las tablas de un libro. Se relee si cambia la fecha de modificación del archivo. |
+
+### 3.1.1 `Excel/EditorTablasExcel.cs` — CRUD sobre tablas de Excel
+
+| Miembro | Qué hace |
+|---|---|
+| `EditorTablasExcel.Leer(ruta, hoja, tabla)` | Columnas (con marca de columna calculada) y registros; cada registro lleva `_fila` (posición en la tabla). |
+| `EditorTablasExcel.Insertar(ruta, respaldos, hoja, tabla, valores)` | Agrega una fila al final, copia formato y fórmulas de columnas calculadas. |
+| `EditorTablasExcel.Actualizar(ruta, respaldos, hoja, tabla, fila, valores, original)` | Escribe sólo las celdas que cambiaron; ignora columnas calculadas. 409 si `original` ya no coincide. |
+| `EditorTablasExcel.Eliminar(ruta, respaldos, hoja, tabla, fila, original)` | Elimina la fila (desplaza sólo las columnas de la tabla). 409 si `original` ya no coincide. |
+| `EditorTablasExcel.Lote(ruta, respaldos, hoja, tabla, crear, actualizar, eliminar)` | Varias operaciones en una sola escritura, todo o nada (actualiza, elimina de abajo hacia arriba y luego crea). Es lo que usan los formularios. |
+
+Cada escritura: respaldo en `Datos/RespaldosExcel/`, recálculo de fórmulas antes de guardar (ClosedXML no conserva los valores calculados) y restauración de las fórmulas de columna calculada que ClosedXML descarta. No usar `AbrirEnMemoria` para escribir: quita las tablas dinámicas.
 
 La ruta se resuelve en cada controlador con `ObtenerRutaExcel()` a partir del perfil del usuario (regla 3).
 
@@ -161,6 +175,7 @@ Orden por defecto: DeepSeek → Gemini. Se cambia con la configuración `IA:Orde
 | `GET /api/CumplimientosJorge` · `/{tabla}` | Excel | `Resumen_Pl_9Semanas*.html`, `Balance_Escenarios_MP.html` |
 | `GET /api/IndicadoresN3` | Excel | `InformeN3.html` |
 | `GET /api/InformeDiario` | Excel | `InformeDiario.html` |
+| `GET /api/InformeDiarioCrud` · `GET /{tabla}` · `POST /{tabla}` · `PUT /{tabla}/{fila}` · `DELETE /{tabla}/{fila}` · `POST /{tabla}/lote` | Excel (lectura y escritura) | `CapturaInformeDiario.html` |
 | `GET /api/NumeroCerdos` | Excel | `NumeroCerdos.html` |
 | `GET /api/PersonalExcel/listar` · `POST crear` | Excel | `Personal_Prueba.html` |
 | `GET /api/Presupuesto/dashboard-data` | Excel | `Presupuestos_Final.html` |

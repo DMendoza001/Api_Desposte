@@ -24,3 +24,5 @@ Desktop.ini
 ## Paquetes locales
 *.nupkg
 *.snupkg
+## Respaldos del CRUD de Excel (datos del negocio)
+ApiDesposte/Datos/RespaldosExcel/

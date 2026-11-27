@@ -13,16 +13,20 @@ namespace ApiDesposte.Funciones.Excel
     /// </summary>
     public static class LectorTablasExcel
     {
-        public static XLWorkbook AbrirEnMemoria(string rutaExcel)
-        {
-            byte[] fileBytes;
-            using (var fileStream = new FileStream(rutaExcel, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
-            using (var ms = new MemoryStream())
-            {
-                fileStream.CopyTo(ms);
-                fileBytes = ms.ToArray();
-            }
+        public static XLWorkbook AbrirEnMemoria(string rutaExcel) => AbrirDesdeBytes(LeerBytesCompartido(rutaExcel));
 
+        /// <summary>Lee el archivo completo en modo compartido (no bloquea a Excel ni a OneDrive).</summary>
+        public static byte[] LeerBytesCompartido(string rutaExcel)
+        {
+            using var fileStream = new FileStream(rutaExcel, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+            using var ms = new MemoryStream();
+            fileStream.CopyTo(ms);
+            return ms.ToArray();
+        }
+
+        /// <summary>Abre una copia en memoria para LECTURA, limpiando las tablas dinámicas. No guardar este libro.</summary>
+        public static XLWorkbook AbrirDesdeBytes(byte[] fileBytes)
+        {
             // Stream expandible: SpreadsheetDocument necesita poder reescribir el paquete
             var msModificado = new MemoryStream();
             msModificado.Write(fileBytes, 0, fileBytes.Length);
@@ -216,6 +220,7 @@ namespace ApiDesposte.Funciones.Excel
         private readonly TimeSpan _duracion;
         private Dictionary<string, List<Dictionary<string, object?>>>? _tablas;
         private DateTime _timestamp = DateTime.MinValue;
+        private DateTime _fechaArchivo = DateTime.MinValue;
 
         public CacheTablasExcel(TimeSpan duracion)
         {
@@ -232,14 +237,16 @@ namespace ApiDesposte.Funciones.Excel
         {
             lock (_lock)
             {
-                if (!forzarRecarga && _tablas != null && (DateTime.UtcNow - _timestamp) < _duracion)
-                {
-                    return _tablas;
-                }
-
                 if (!File.Exists(rutaExcel))
                 {
                     throw new FileNotFoundException($"No se encontró el archivo Excel en la ruta: {rutaExcel}");
+                }
+
+                // Si el archivo se modificó (Excel, OneDrive o la API) se relee aunque el cache siga vigente
+                var fechaArchivo = File.GetLastWriteTimeUtc(rutaExcel);
+                if (!forzarRecarga && _tablas != null && fechaArchivo == _fechaArchivo && (DateTime.UtcNow - _timestamp) < _duracion)
+                {
+                    return _tablas;
                 }
 
                 using var workbook = LectorTablasExcel.AbrirEnMemoria(rutaExcel);
@@ -252,6 +259,7 @@ namespace ApiDesposte.Funciones.Excel
 
                 _tablas = resultado;
                 _timestamp = DateTime.UtcNow;
+                _fechaArchivo = fechaArchivo;
                 return _tablas;
             }
         }

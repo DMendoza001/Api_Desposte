@@ -1408,6 +1408,9 @@
                 const fecha = parsearFecha(r['Fecha']);
                 const valor = typeof r['Valor'] === 'number' ? r['Valor'] : parseFloat(r['Valor']);
                 if (!fecha || isNaN(valor)) return;
+                // Valor 0 sin Var1 ni Var2 = fórmula del Excel sin datos cargados: es "sin dato", no un cero real
+                const vacio = v => v == null || String(v).trim() === '';
+                if (valor === 0 && vacio(r['Var1']) && vacio(r['Var2'])) return;
 
                 const sem = calcularSemanaConInicioLunes(fecha);
                 salida.push({
@@ -2009,11 +2012,16 @@
             return { min: yMin, max: yMax };
         }
 
-        function crearGrafico(canvas, vista, puntos, ind) {
+        function crearGrafico(canvas, vista, puntosTodos, ind) {
             const f = ind.formato;
             const color = PALETA.primary;
+            // Las semanas / días sin dato no se grafican: se quitan del eje X
+            const idxConDato = ind.serie.map((v, i) => v != null ? i : -1).filter(i => i >= 0);
+            const puntos = idxConDato.map(i => puntosTodos[i]);
+            const serie = idxConDato.map(i => ind.serie[i]);
+            const diasSerie = idxConDato.map(i => ind.dias[i]);
             const paso = Math.ceil(puntos.length / MAX_ETIQUETAS);
-            const ultimoIdx = ind.idxUltima;
+            const ultimoIdx = serie.length - 1;
             const escalaY = calcularEscalaY(ind);
             return new Chart(canvas, {
                 type: 'line',
@@ -2022,7 +2030,7 @@
                     datasets: [
                         {
                             label: ind.nombre,
-                            data: ind.serie,
+                            data: serie,
                             borderColor: color,
                             backgroundColor: 'rgba(186, 160, 99, 0.12)',
                             borderWidth: 2,
@@ -2048,7 +2056,7 @@
                         },
                         {
                             label: 'Promedio de la selección',
-                            data: ind.serie.map(() => ind.promedio),
+                            data: serie.map(() => ind.promedio),
                             borderColor: PALETA.secondary,
                             borderWidth: 1.5,
                             borderDash: [5, 4],
@@ -2078,7 +2086,7 @@
                                     if (item.datasetIndex === 1) return `Promedio selección: ${f.valor(item.raw)}`;
                                     if (item.raw == null) return 'Sin registros';
                                     if (vista === 'diario') return `Valor: ${f.valor(item.raw)}`;
-                                    const dias = ind.dias[item.dataIndex];
+                                    const dias = diasSerie[item.dataIndex];
                                     return `Valor: ${f.valor(item.raw)} (${dias} ${dias === 1 ? 'día' : 'días'})`;
                                 }
                             }

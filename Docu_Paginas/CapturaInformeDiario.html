@@ -1,0 +1,2207 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Captura Informe Diario</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Diseño responsive compartido (laptops, tablets y celulares) -->
+  <link rel="stylesheet" href="Funciones/responsive.css?v=3">
+
+  <!-- Configuración compartida de conexión a la API -->
+  <script src="Funciones/config.js"></script>
+
+  <style>
+    /* =========================================================================
+       TEMA: Pantone Industrial Palette (PaletaFinanza_Industrial.json)
+       ========================================================================= */
+    :root {
+      --color-header-bg: #38353B;
+      --color-header-gradient: linear-gradient(135deg, #38353B 0%, #434B57 100%);
+      --color-header-text: #FFFFFF;
+      --color-header-subtext: #E2D5B5;
+      --color-heading: #38353B;
+      --color-text: #4A474C;
+      --color-text-muted: #787479;
+      --color-primary: #BAA063;
+      --color-secondary: #7A828E;
+      --color-accent: #BAA063;
+      --color-bg: #F2F4F8;
+      --color-surface: #FFFFFF;
+      --color-border: #E2E8F0;
+
+      --color-primary-soft-bg: rgba(186, 160, 99, 0.16);
+      --color-primary-border: rgba(186, 160, 99, 0.45);
+      --color-secondary-soft-bg: rgba(122, 130, 142, 0.14);
+      --color-hover-tint: rgba(186, 160, 99, 0.10);
+      --color-ok: #2F855A;
+      --color-ok-bg: #E6F4EA;
+      --color-warn: #9C6B10;
+      --color-warn-bg: #FDF3DC;
+      --color-error: #B42318;
+      --color-error-bg: #FEE4E2;
+
+      --shadow-sm: 0 1px 3px rgba(56, 53, 59, 0.06), 0 1px 2px rgba(56, 53, 59, 0.04);
+      --shadow-lg: 0 10px 15px -3px rgba(56, 53, 59, 0.12), 0 4px 6px -2px rgba(56, 53, 59, 0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--color-bg);
+      color: var(--color-text);
+      min-height: 100vh;
+    }
+
+    /* responsive.css aplica padding al body; con barra lateral el margen lo da .main-content */
+    html body {
+      padding: 0 !important;
+    }
+
+    .is-hidden {
+      display: none !important;
+    }
+
+    .app-layout {
+      display: flex;
+      min-height: 100vh;
+      width: 100%;
+    }
+
+    /* =========================================================================
+       BARRA LATERAL SMART FLOTANTE (AUTO-PLEGABLE) · sidebarNav
+       ========================================================================= */
+    .sidebar {
+      position: sticky;
+      top: 10px;
+      align-self: flex-start;
+      height: calc(100vh - 20px);
+      margin: 10px 0 10px 10px;
+      width: 60px;
+      overflow: hidden;
+      background: linear-gradient(180deg, #38353B 0%, #434B57 100%);
+      color: var(--color-header-text);
+      display: flex;
+      flex-direction: column;
+      padding: 14px 0 12px;
+      flex-shrink: 0;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 10px 26px rgba(30, 27, 34, 0.22);
+      z-index: 100;
+      transition: width 0.22s ease, margin-right 0.22s ease, box-shadow 0.22s ease;
+    }
+
+    .sidebar-header {
+      padding: 0 8px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sidebar-header h2 {
+      font-size: 0;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      white-space: nowrap;
+    }
+
+    .sidebar-header h2 i {
+      font-size: 1rem;
+      color: var(--color-primary);
+    }
+
+    .sidebar-section-label {
+      display: none;
+      font-size: 0.64rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(226, 213, 181, 0.55);
+      padding: 4px 14px 4px;
+      white-space: nowrap;
+    }
+
+    .sidebar-divider {
+      height: 1px;
+      background: rgba(255, 255, 255, 0.09);
+      margin: 10px 10px;
+    }
+
+    .sidebar-menu,
+    .sidebar-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 0 8px;
+    }
+
+    .sidebar-btn {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 9px 0;
+      border-radius: 9px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: rgba(255, 255, 255, 0.72);
+      font-size: 0.81rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      text-align: left;
+      text-decoration: none;
+    }
+
+    .sidebar-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #FFFFFF;
+    }
+
+    .sidebar-btn.active {
+      background: rgba(186, 160, 99, 0.22);
+      border-color: rgba(186, 160, 99, 0.35);
+      color: #FFFFFF;
+      font-weight: 700;
+      box-shadow: inset 3px 0 0 var(--color-primary);
+    }
+
+    .sidebar-btn.active i {
+      color: var(--color-primary);
+    }
+
+    .sidebar-btn .btn-info {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .sidebar-btn .btn-info i {
+      width: 16px;
+      text-align: center;
+      font-size: 0.88rem;
+      flex-shrink: 0;
+    }
+
+    .sidebar-btn .btn-info span,
+    .side-status-text {
+      display: none;
+      white-space: nowrap;
+    }
+
+    /* Punto de "cambios sin guardar" visible aun con la barra plegada */
+    .sidebar-btn.sucio::after {
+      content: '';
+      position: absolute;
+      top: 6px;
+      right: 8px;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #F59E0B;
+      box-shadow: 0 0 0 2px #38353B;
+    }
+
+    .sidebar-badge {
+      display: none;
+      background: rgba(255, 255, 255, 0.10);
+      color: rgba(255, 255, 255, 0.82);
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-size: 0.68rem;
+      font-weight: 700;
+    }
+
+    .sidebar-badge.vacio {
+      background: rgba(245, 158, 11, 0.22);
+      color: #FCD34D;
+    }
+
+    .sidebar-btn.active .sidebar-badge {
+      background: var(--color-primary);
+      color: #38353B;
+    }
+
+    .sidebar-bottom {
+      margin-top: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 0 8px;
+    }
+
+    .sidebar-footer {
+      padding: 10px 0 2px;
+      border-top: 1px solid rgba(255, 255, 255, 0.09);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: var(--color-header-subtext);
+      white-space: nowrap;
+    }
+
+    @media screen and (min-width: 981px) and (hover: hover) {
+
+      .sidebar:hover,
+      .sidebar:has(:focus-visible) {
+        width: 215px;
+        margin-right: -155px;
+        box-shadow: 10px 12px 30px rgba(30, 27, 34, 0.32);
+      }
+
+      .sidebar:hover .sidebar-header,
+      .sidebar:has(:focus-visible) .sidebar-header {
+        padding: 0 12px 12px;
+        justify-content: flex-start;
+      }
+
+      .sidebar:hover .sidebar-header h2,
+      .sidebar:has(:focus-visible) .sidebar-header h2 {
+        font-size: 0.84rem;
+        justify-content: flex-start;
+        gap: 8px;
+      }
+
+      .sidebar:hover .sidebar-section-label,
+      .sidebar:has(:focus-visible) .sidebar-section-label {
+        display: block;
+      }
+
+      .sidebar:hover .sidebar-btn .btn-info span,
+      .sidebar:has(:focus-visible) .sidebar-btn .btn-info span {
+        display: inline;
+      }
+
+      .sidebar:hover .sidebar-badge,
+      .sidebar:has(:focus-visible) .sidebar-badge {
+        display: inline-block;
+      }
+
+      .sidebar:hover .sidebar-btn,
+      .sidebar:has(:focus-visible) .sidebar-btn {
+        justify-content: space-between;
+        padding: 9px 11px;
+      }
+
+      .sidebar:hover .sidebar-btn.sucio::after,
+      .sidebar:has(:focus-visible) .sidebar-btn.sucio::after {
+        top: 50%;
+        right: auto;
+        left: 4px;
+        transform: translateY(-50%);
+      }
+
+      .sidebar:hover .sidebar-footer,
+      .sidebar:has(:focus-visible) .sidebar-footer {
+        justify-content: flex-start;
+        padding: 10px 4px 2px;
+      }
+
+      .sidebar:hover .side-status-text,
+      .sidebar:has(:focus-visible) .side-status-text {
+        display: inline;
+      }
+    }
+
+    /* =========================================================================
+       CONTENIDO
+       ========================================================================= */
+    .main-content {
+      flex: 1;
+      padding: 20px 25px 40px;
+      overflow-x: hidden;
+      min-width: 0;
+    }
+
+    .dashboard-wrapper {
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+
+    .dashboard-wrapper,
+    .dashboard-wrapper>*,
+    .resumen-dia>*,
+    .catalogos-grid>*,
+    .card,
+    .matrix-card {
+      min-width: 0;
+    }
+
+    .header-banner {
+      background: var(--color-header-gradient);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-left: 6px solid var(--color-primary);
+      color: var(--color-header-text);
+      padding: 18px 24px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .header-info h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--color-header-text);
+    }
+
+    .header-info p {
+      font-size: 0.85rem;
+      color: var(--color-header-subtext);
+      margin-top: 4px;
+    }
+
+    /* ---------- Selector de fecha ---------- */
+    .fecha-control {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .fecha-control input[type="date"] {
+      height: 38px;
+      padding: 0 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.10);
+      color: #FFFFFF;
+      font-size: 0.92rem;
+      font-weight: 600;
+      color-scheme: dark;
+    }
+
+    .btn-head {
+      height: 38px;
+      min-width: 38px;
+      padding: 0 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      background: rgba(255, 255, 255, 0.08);
+      color: #FFFFFF;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-head:hover {
+      background: rgba(186, 160, 99, 0.30);
+      border-color: var(--color-primary);
+    }
+
+    .fecha-texto {
+      color: var(--color-header-subtext);
+      font-size: 0.82rem;
+      font-weight: 600;
+      margin-left: 4px;
+    }
+
+    /* ---------- Resumen del día (estado de cada pestaña) ---------- */
+    .resumen-dia {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .estado-chip {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-top: 3px solid var(--color-border);
+      border-radius: 10px;
+      padding: 9px 12px;
+      cursor: pointer;
+      text-align: left;
+      box-shadow: var(--shadow-sm);
+      transition: border-color 0.15s ease;
+    }
+
+    .estado-chip:hover {
+      border-color: var(--color-primary-border);
+    }
+
+    .estado-chip .chip-titulo {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--color-text-muted);
+    }
+
+    .estado-chip .chip-valor {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--color-heading);
+      margin-top: 3px;
+    }
+
+    .estado-chip.ok {
+      border-top-color: var(--color-ok);
+    }
+
+    .estado-chip.ok .chip-valor {
+      color: var(--color-ok);
+    }
+
+    .estado-chip.pendiente {
+      border-top-color: #F59E0B;
+    }
+
+    .estado-chip.pendiente .chip-valor {
+      color: var(--color-warn);
+    }
+
+    .estado-chip.sucio {
+      border-top-color: var(--color-primary);
+      background: var(--color-primary-soft-bg);
+    }
+
+    /* ---------- Tarjeta de captura ---------- */
+    .card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+      padding: 16px 18px;
+      margin-bottom: 16px;
+    }
+
+    .card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .card-head h2 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--color-heading);
+    }
+
+    .card-head p {
+      font-size: 0.8rem;
+      color: var(--color-text-muted);
+      margin-top: 3px;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      height: 36px;
+      padding: 0 14px;
+      border-radius: 8px;
+      border: 1px solid var(--color-border);
+      background: var(--color-surface);
+      color: var(--color-heading);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+
+    .btn:hover:not(:disabled) {
+      border-color: var(--color-primary);
+      background: var(--color-hover-tint);
+    }
+
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .btn-primario {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+      color: #2B2930;
+    }
+
+    .btn-primario:hover:not(:disabled) {
+      background: #A88E52;
+      border-color: #A88E52;
+    }
+
+    .btn-icono {
+      width: 30px;
+      height: 30px;
+      padding: 0;
+      justify-content: center;
+      border-radius: 7px;
+      color: var(--color-text-muted);
+    }
+
+    .aviso {
+      display: none;
+      align-items: flex-start;
+      gap: 9px;
+      padding: 9px 12px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      margin-bottom: 10px;
+      line-height: 1.4;
+    }
+
+    .aviso.mostrar {
+      display: flex;
+    }
+
+    .aviso.info {
+      background: var(--color-secondary-soft-bg);
+      color: var(--color-heading);
+    }
+
+    .aviso.exito {
+      background: var(--color-ok-bg);
+      color: var(--color-ok);
+    }
+
+    .aviso.alerta {
+      background: var(--color-warn-bg);
+      color: var(--color-warn);
+    }
+
+    .aviso.error {
+      background: var(--color-error-bg);
+      color: var(--color-error);
+    }
+
+    .aviso i {
+      margin-top: 2px;
+    }
+
+    /* ---------- Grilla editable (datagridview) ---------- */
+    .table-responsive {
+      width: 100%;
+      overflow: auto;
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      max-height: 62vh;
+    }
+
+    .grid {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 0.83rem;
+    }
+
+    .grid thead th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: var(--color-header-bg);
+      color: #FFFFFF;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      padding: 8px 8px;
+      text-align: left;
+      vertical-align: bottom;
+      line-height: 1.25;
+      /* Encabezados largos ("PLAZAS ASIGNADAS") en dos líneas para no desbordar en laptop */
+      white-space: normal;
+    }
+
+    .grid thead th.calc {
+      background: #4A4650;
+      color: var(--color-header-subtext);
+    }
+
+    .grid thead th .req {
+      color: var(--color-primary);
+      margin-left: 2px;
+    }
+
+    .grid td {
+      padding: 4px 5px;
+      border-bottom: 1px solid var(--color-border);
+      vertical-align: middle;
+      background: var(--color-surface);
+    }
+
+    .grid td.num-fila {
+      color: var(--color-text-muted);
+      font-size: 0.72rem;
+      text-align: center;
+      width: 34px;
+    }
+
+    .grid td.calc {
+      background: #F7F7F9;
+      color: var(--color-heading);
+      font-weight: 600;
+      text-align: right;
+      white-space: nowrap;
+      padding-right: 10px;
+    }
+
+    .grid td.acciones {
+      width: 40px;
+      text-align: center;
+    }
+
+    .grid input,
+    .grid select,
+    .grid textarea {
+      width: 100%;
+      min-width: 0;
+      height: 32px;
+      padding: 0 8px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--color-heading);
+      font-size: 0.83rem;
+    }
+
+    .grid textarea {
+      height: auto;
+      min-height: 32px;
+      padding: 6px 8px;
+      resize: vertical;
+      line-height: 1.35;
+    }
+
+    .grid input:hover,
+    .grid select:hover,
+    .grid textarea:hover {
+      border-color: var(--color-border);
+    }
+
+    .grid input:focus,
+    .grid select:focus,
+    .grid textarea:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      background: #FFFFFF;
+      box-shadow: 0 0 0 3px var(--color-primary-soft-bg);
+    }
+
+    .grid input.num {
+      text-align: right;
+    }
+
+    .grid td.invalido input,
+    .grid td.invalido select,
+    .grid td.invalido textarea {
+      border-color: var(--color-error);
+      background: var(--color-error-bg);
+    }
+
+    /* Anchos mínimos por tipo de columna */
+    .w-xs { min-width: 72px; }
+    .w-sm { min-width: 96px; }
+    .w-md { min-width: 140px; }
+    .w-lg { min-width: 220px; }
+    .w-xl { min-width: 320px; }
+
+    /* Estados de fila */
+    .grid tr.nueva td:first-child {
+      box-shadow: inset 3px 0 0 var(--color-primary);
+    }
+
+    .grid tr.modificada td {
+      background: #FBF7EE;
+    }
+
+    .grid tr.modificada td:first-child {
+      box-shadow: inset 3px 0 0 #F59E0B;
+    }
+
+    .grid tr.borrada td {
+      background: #FAFAFA;
+      opacity: 0.55;
+    }
+
+    .grid tr.borrada td:not(.acciones) {
+      text-decoration: line-through;
+    }
+
+    .grid tr.borrada td:first-child {
+      box-shadow: inset 3px 0 0 var(--color-error);
+    }
+
+    .grid tr.vacia td {
+      background: #FCFCFD;
+    }
+
+    .grid tbody tr:hover td:not(.calc) {
+      background: var(--color-hover-tint);
+    }
+
+    .grid .sin-filas {
+      padding: 26px;
+      text-align: center;
+      color: var(--color-text-muted);
+    }
+
+    .card-foot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .leyenda {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      font-size: 0.74rem;
+      color: var(--color-text-muted);
+    }
+
+    .leyenda span::before {
+      content: '';
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      margin-right: 5px;
+      vertical-align: -1px;
+    }
+
+    .leyenda .l-nueva::before { background: var(--color-primary); }
+    .leyenda .l-mod::before { background: #F59E0B; }
+    .leyenda .l-borrada::before { background: var(--color-error); }
+    .leyenda .l-calc::before { background: #4A4650; }
+
+    /* ---------- Catálogos ---------- */
+    .catalogos-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .catalogos-grid .card {
+      margin-bottom: 0;
+    }
+
+    .catalogos-grid .table-responsive {
+      max-height: 340px;
+    }
+
+    .catalogos-grid .card-foot .btn {
+      height: 32px;
+      padding: 0 11px;
+    }
+
+    /* ---------- Carga y notificaciones ---------- */
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(56, 53, 59, 0.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .loading-overlay.show {
+      display: flex;
+    }
+
+    .loading-box {
+      background: var(--color-surface);
+      border-radius: 14px;
+      padding: 24px 30px;
+      text-align: center;
+      box-shadow: var(--shadow-lg);
+      max-width: 90vw;
+    }
+
+    .loading-box h4 {
+      color: var(--color-heading);
+      margin-top: 12px;
+    }
+
+    .loading-box p {
+      color: var(--color-text-muted);
+      font-size: 0.85rem;
+      margin-top: 4px;
+    }
+
+    .spinner {
+      width: 38px;
+      height: 38px;
+      margin: 0 auto;
+      border: 4px solid var(--color-primary-soft-bg);
+      border-top-color: var(--color-primary);
+      border-radius: 50%;
+      animation: girar 0.8s linear infinite;
+    }
+
+    @keyframes girar {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .status-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background-color: var(--color-text-muted);
+      display: inline-block;
+    }
+
+    .status-dot.online {
+      background-color: #10B981;
+      box-shadow: 0 0 8px #10B981;
+    }
+
+    .status-dot.loading {
+      background-color: var(--color-primary);
+    }
+
+    .status-dot.error {
+      background-color: #EF4444;
+    }
+
+    .toast {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      max-width: min(420px, calc(100vw - 32px));
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      box-shadow: var(--shadow-lg);
+      z-index: 1100;
+      display: none;
+      align-items: flex-start;
+      gap: 9px;
+    }
+
+    .toast.show {
+      display: flex;
+    }
+
+    .toast.exito {
+      background: #1F4D36;
+      color: #FFFFFF;
+    }
+
+    .toast.error {
+      background: var(--color-error);
+      color: #FFFFFF;
+    }
+
+    .toast.info {
+      background: var(--color-header-bg);
+      color: #FFFFFF;
+    }
+
+    /* =========================================================================
+       RESPONSIVE (autónomo si el archivo se comparte sin responsive.css)
+       ========================================================================= */
+
+    /* LAPTOPS (<= 1600px, incluye Full HD con escala 125% = 1536px) */
+    @media screen and (max-width: 1600px) {
+      .main-content {
+        padding: 12px 16px 30px;
+      }
+
+      .header-banner {
+        padding: 14px 18px;
+        margin-bottom: 12px;
+      }
+
+      .header-info h1 {
+        font-size: 1.2rem;
+      }
+
+      .card {
+        padding: 12px 16px;
+        margin-bottom: 12px;
+      }
+
+      .resumen-dia {
+        margin-bottom: 12px;
+        gap: 8px;
+      }
+
+      .table-responsive {
+        max-height: 460px;
+      }
+
+      .grid {
+        font-size: 0.8rem;
+      }
+    }
+
+    /* TABLETS (<= 980px) */
+    @media screen and (max-width: 980px) {
+      .resumen-dia {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .catalogos-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    /* CELULARES (<= 768px) */
+    @media screen and (max-width: 768px) {
+      .app-layout {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        position: sticky;
+        top: 0;
+        width: 100%;
+        height: auto;
+        margin: 0;
+        align-self: stretch;
+        flex-direction: row;
+        align-items: center;
+        padding: 6px 8px;
+        border: none;
+        border-radius: 0 0 12px 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+      }
+
+      .sidebar-header,
+      .sidebar-section-label,
+      .sidebar-divider,
+      .sidebar-actions,
+      .sidebar-bottom,
+      .sidebar-footer {
+        display: none;
+      }
+
+      .sidebar-menu {
+        flex-direction: row;
+        gap: 6px;
+        padding: 0;
+        width: 100%;
+        overflow-x: auto;
+        scrollbar-width: none;
+      }
+
+      .sidebar-btn {
+        flex: 0 0 auto;
+        justify-content: center;
+        gap: 4px;
+        padding: 7px 10px;
+        font-size: 0.74rem;
+      }
+
+      .sidebar-btn .btn-info i {
+        display: none;
+      }
+
+      .sidebar-btn .btn-info span {
+        display: inline;
+      }
+
+      .sidebar-btn.sucio::after {
+        top: 3px;
+        right: 3px;
+      }
+
+      .main-content {
+        padding: 10px 8px 24px;
+      }
+
+      .header-banner {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 12px 14px;
+      }
+
+      .fecha-control input[type="date"] {
+        flex: 1 1 auto;
+        min-width: 0;
+      }
+
+      .resumen-dia {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .catalogos-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .card-head .toolbar,
+      .card-foot>div {
+        width: 100%;
+      }
+
+      .toolbar .btn,
+      .card-foot .btn {
+        flex: 1 1 auto;
+        justify-content: center;
+      }
+
+      .table-responsive {
+        max-height: none;
+      }
+
+      .toast {
+        right: 16px;
+        bottom: 16px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Overlay de carga -->
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-box">
+      <div class="spinner"></div>
+      <h4 id="loadingTitle">Cargando</h4>
+      <p id="loadingMessage">Leyendo el Excel del Informe Diario...</p>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <div class="app-layout">
+    <!-- BARRA LATERAL SMART FLOTANTE -->
+    <aside class="sidebar" id="sidebarNav">
+      <div class="sidebar-header">
+        <h2><i class="fa-solid fa-clipboard-list"></i> INFORME DIARIO</h2>
+      </div>
+
+      <div class="sidebar-section-label">Captura del día</div>
+      <nav class="sidebar-menu" id="sidebarMenu"></nav>
+
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-section-label">Acciones</div>
+      <div class="sidebar-actions">
+        <button type="button" class="sidebar-btn" title="Recargar datos desde el Excel" onclick="recargarTodo()">
+          <div class="btn-info"><i class="fa-solid fa-arrows-rotate"></i><span>Recargar</span></div>
+        </button>
+        <a href="InformeDiario.html" class="sidebar-btn" title="Ver el dashboard del Informe Diario">
+          <div class="btn-info"><i class="fa-solid fa-chart-column"></i><span>Ver informe</span></div>
+        </a>
+      </div>
+
+      <div class="sidebar-bottom">
+        <a href="index.html" class="sidebar-btn" title="Regresar al Menú Principal">
+          <div class="btn-info"><i class="fa-solid fa-house"></i><span>Menú Principal</span></div>
+        </a>
+        <div class="sidebar-footer" title="Estado de conexión con la API">
+          <span class="status-dot" id="sideStatusDot"></span>
+          <span class="side-status-text" id="sideStatusText">Conectando</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="main-content">
+      <div class="dashboard-wrapper">
+
+        <header class="header-banner">
+          <div class="header-info">
+            <h1>Captura del Informe Diario</h1>
+            <p>Registro diario de personal, SSO, horarios, producción, calidad y paradas · Informe Diario 2026 - Base de Datos.xlsx</p>
+          </div>
+          <div class="fecha-control">
+            <button type="button" class="btn-head" title="Día anterior" onclick="moverDia(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+            <input type="date" id="fechaCaptura" aria-label="Fecha de captura">
+            <button type="button" class="btn-head" title="Día siguiente" onclick="moverDia(1)"><i class="fa-solid fa-chevron-right"></i></button>
+            <button type="button" class="btn-head" onclick="irAHoy()">Hoy</button>
+            <span class="fecha-texto" id="fechaTexto"></span>
+          </div>
+        </header>
+
+        <div id="alertaGeneral" class="aviso error"></div>
+
+        <!-- Estado de cada pestaña para la fecha elegida -->
+        <section class="resumen-dia" id="resumenDia" aria-label="Estado de la captura del día"></section>
+
+        <!-- Paneles generados por JS (uno por pestaña) -->
+        <div id="paneles"></div>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // =========================================================================
+    // ⚙️ CONFIGURACIÓN DE CONEXIÓN HÍBRIDA A LA API .NET
+    // =========================================================================
+    const APP_CONFIG = {
+      servidor: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.servidor)
+        ? GLOBAL_CONFIG.servidor
+        : "RAEVSALL001",
+      puertos: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.puertos)
+        ? GLOBAL_CONFIG.puertos
+        : [8080, 5000]
+    };
+
+    function generarBasesApi() {
+      if (typeof generarBasesApiGlobal === 'function') {
+        return generarBasesApiGlobal();
+      }
+      const bases = [];
+      for (const puerto of APP_CONFIG.puertos) {
+        bases.push(`http://${APP_CONFIG.servidor}:${puerto}`);
+      }
+      return bases;
+    }
+
+    APP_CONFIG.controllerPath = "/api/InformeDiarioCrud";
+    APP_CONFIG.timeoutMs = 25000;
+    APP_CONFIG.timeoutEscrituraMs = 60000;
+
+    // Estado global de conexión
+    let apiBaseActiva = null;
+
+    // =========================================================================
+    // 🌐 UTILIDADES DE RED Y DETECCIÓN RESILIENTE
+    // =========================================================================
+
+    // Fetch con AbortController y timeout configurable (opciones: método, cuerpo, cabeceras)
+    async function fetchConTimeout(url, timeoutMs = 10000, opciones = {}) {
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        const res = await fetch(url, { ...opciones, signal: controller.signal });
+        clearTimeout(id);
+        return res;
+      } catch (err) {
+        clearTimeout(id);
+        throw err;
+      }
+    }
+
+    // Detección automática del host API activo (con fallback a ping raíz)
+    async function detectarServidorApi() {
+      const bases = generarBasesApi();
+      for (const base of bases) {
+        try {
+          const res = await fetchConTimeout(`${base}${APP_CONFIG.controllerPath}`, 3500);
+          if (res.ok) {
+            return base;
+          }
+        } catch (e) {
+          try {
+            const pingRes = await fetchConTimeout(`${base}/`, 2000);
+            if (pingRes.ok) return base;
+          } catch (errPing) {
+            // Siguiente candidato
+          }
+        }
+      }
+      return null;
+    }
+
+    async function asegurarServidor() {
+      if (apiBaseActiva) return apiBaseActiva;
+      apiBaseActiva = await detectarServidorApi();
+      if (!apiBaseActiva) {
+        throw new Error(`No se pudo conectar a ${APP_CONFIG.servidor} en puertos ${APP_CONFIG.puertos.join('/')}`);
+      }
+      return apiBaseActiva;
+    }
+
+    // Llamada al controlador; lanza Error con .status y el mensaje de la API
+    async function llamarApi(ruta, metodo = 'GET', cuerpo = null) {
+      const base = await asegurarServidor();
+      const opciones = { method: metodo, headers: {} };
+      if (cuerpo !== null) {
+        opciones.headers['Content-Type'] = 'application/json';
+        opciones.body = JSON.stringify(cuerpo);
+      }
+      const timeout = metodo === 'GET' ? APP_CONFIG.timeoutMs : APP_CONFIG.timeoutEscrituraMs;
+      let res;
+      try {
+        res = await fetchConTimeout(`${base}${APP_CONFIG.controllerPath}${ruta}`, timeout, opciones);
+      } catch (err) {
+        apiBaseActiva = null;
+        throw new Error(err.name === 'AbortError' ? 'La API no respondió a tiempo.' : 'Sin conexión con la API.');
+      }
+      let json = null;
+      try { json = await res.json(); } catch (e) { /* respuesta sin cuerpo */ }
+      if (!res.ok) {
+        const error = new Error((json && (json.error || json.mensaje)) || `Error HTTP ${res.status}`);
+        error.status = res.status;
+        throw error;
+      }
+      return json;
+    }
+
+    // =========================================================================
+    // 🧩 DEFINICIÓN DE PESTAÑAS
+    //   Las columnas se buscan por nombre normalizado (sin tildes ni símbolos),
+    //   así "N° PERSONAS" o "PRODUCCIÓN" se resuelven aunque cambie la codificación.
+    //   tipos: lista | entero | decimal | pct (se captura en %, se guarda como fracción)
+    //          hora (HH:mm) | horaFecha (HH:mm + fecha del día) | texto | largo
+    // =========================================================================
+    const CATALOGOS = {
+      areas: { titulo: 'Áreas', icono: 'fa-industry', cols: [{ n: 'AREA', tipo: 'texto', req: true, mayus: true, w: 'w-md' }, { n: 'ETIQUETA (REPORTE)', tipo: 'texto', w: 'w-md' }] },
+      turnos: { titulo: 'Turnos', icono: 'fa-clock', cols: [{ n: 'TURNO', tipo: 'texto', req: true, mayus: true, w: 'w-md' }] },
+      conceptos: { titulo: 'Conceptos de producción', icono: 'fa-boxes-stacked', cols: [{ n: 'CONCEPTO', tipo: 'texto', req: true, mayus: true, w: 'w-md' }] },
+      secciones: { titulo: 'Secciones de calidad', icono: 'fa-list-check', cols: [{ n: 'SECCION', tipo: 'texto', req: true, mayus: true, w: 'w-md' }] },
+      categorias: { titulo: 'Categorías de calidad', icono: 'fa-tags', cols: [{ n: 'CATEGORIA', tipo: 'texto', req: true, mayus: true, w: 'w-md' }] },
+      tipos: { titulo: 'Tipos de parada', icono: 'fa-triangle-exclamation', cols: [{ n: 'TIPO', tipo: 'texto', req: true, mayus: true, w: 'w-md' }] }
+    };
+
+    // Dónde se usa cada catálogo (para avisar antes de renombrar o eliminar un valor en uso)
+    const USOS_CATALOGO = {
+      areas: [['personal', 'AREA'], ['sso', 'AREA'], ['horarios', 'AREA'], ['produccion', 'AREA']],
+      turnos: [['horarios', 'TURNO']],
+      conceptos: [['produccion', 'CONCEPTO']],
+      secciones: [['detalle', 'SECCION']],
+      categorias: [['detalle', 'CATEGORIA']],
+      tipos: [['paradas', 'TIPO']]
+    };
+
+    const PESTANAS = {
+      personal: {
+        tabla: 'personal', titulo: 'Personal', icono: 'fa-user-group', modo: 'dia',
+        descripcion: 'Asistencia por área. Una fila por área; las columnas oscuras se calculan solas.',
+        claves: ['AREA'], plantilla: 'catalogoAreas', clonar: true,
+        cols: [
+          { n: 'AREA', tipo: 'lista', cat: 'areas', req: true, w: 'w-md' },
+          { n: 'PLAZAS ASIGNADAS', tipo: 'entero', req: true, w: 'w-sm' },
+          { n: 'VACACIONES', tipo: 'entero', w: 'w-xs' },
+          { n: 'PROGRAMADO', tipo: 'entero', req: true, w: 'w-sm' },
+          { n: 'FALTA', tipo: 'entero', w: 'w-xs' },
+          { n: 'DM', tipo: 'entero', w: 'w-xs' },
+          { n: 'SUBSIDIO', tipo: 'entero', w: 'w-xs' },
+          { n: 'OTROS', tipo: 'entero', w: 'w-xs' },
+          { n: 'OBSERVACION', tipo: 'texto', w: 'w-md', noClonar: true }
+        ],
+        muestra: [
+          { n: 'AUSENCIAS', tipo: 'entero', f: v => suma(v, ['FALTA', 'DM', 'SUBSIDIO', 'OTROS']) },
+          { n: 'ASISTENCIA REAL', tipo: 'entero', f: v => (num(v.PROGRAMADO) == null ? null : num(v.PROGRAMADO) - suma(v, ['FALTA', 'DM', 'SUBSIDIO', 'OTROS'])) },
+          { n: '% ASISTENCIA', tipo: 'pct', f: v => { const p = num(v.PROGRAMADO); return p ? (p - suma(v, ['FALTA', 'DM', 'SUBSIDIO', 'OTROS'])) / p : null; } }
+        ]
+      },
+      sso: {
+        tabla: 'sso', titulo: 'SSO', icono: 'fa-helmet-safety', modo: 'dia',
+        descripcion: 'Seguridad y salud ocupacional. Plantilla vacía con una fila por área.',
+        claves: ['AREA'], plantilla: 'catalogoAreas', ceros: true,
+        cols: [
+          { n: 'AREA', tipo: 'lista', cat: 'areas', req: true, w: 'w-md' },
+          { n: 'ACC. MORTAL', tipo: 'entero', req: true, w: 'w-sm' },
+          { n: 'ACC. INCAPACITANTE', tipo: 'entero', req: true, w: 'w-sm' },
+          { n: 'PRIMER AUXILIO', tipo: 'entero', req: true, w: 'w-sm' },
+          { n: 'INCIDENTE DE SEGURIDAD', tipo: 'entero', req: true, w: 'w-sm' },
+          { n: 'OBSERVACION', tipo: 'texto', w: 'w-lg' }
+        ],
+        muestra: []
+      },
+      horarios: {
+        tabla: 'horarios', titulo: 'Horarios', icono: 'fa-clock', modo: 'dia',
+        descripcion: 'Turnos por área. Las horas y horas hombre las calcula el Excel al guardar (descuenta el refrigerio).',
+        claves: ['AREA', 'TURNO'], plantilla: 'diaProximo', clonar: true, agregar: true,
+        cols: [
+          { n: 'AREA', tipo: 'lista', cat: 'areas', req: true, w: 'w-md' },
+          { n: 'TURNO', tipo: 'lista', cat: 'turnos', req: true, w: 'w-md' },
+          { n: 'HR. INGRESO', tipo: 'hora', req: true, w: 'w-sm' },
+          { n: 'HR. SALIDA', tipo: 'hora', req: true, w: 'w-sm' },
+          { n: 'N° PERSONAS', tipo: 'entero', req: true, w: 'w-sm' }
+        ],
+        muestra: [
+          { n: 'HORAS', tipo: 'decimal' },
+          { n: 'HORAS HOMBRE (HH)', tipo: 'decimal' }
+        ]
+      },
+      produccion: {
+        tabla: 'produccion', titulo: 'Producción', icono: 'fa-industry', modo: 'dia',
+        descripcion: 'Plantilla vacía con las combinaciones área / concepto del último día registrado. Rendimiento y % extra se escriben en %.',
+        claves: ['AREA', 'CONCEPTO'], plantilla: 'diaProximo', agregar: true,
+        cols: [
+          { n: 'AREA', tipo: 'lista', cat: 'areas', req: true, w: 'w-md' },
+          { n: 'CONCEPTO', tipo: 'lista', cat: 'conceptos', req: true, w: 'w-lg' },
+          { n: 'PROGRAMA', tipo: 'decimal', w: 'w-sm' },
+          { n: 'PRODUCCION', tipo: 'decimal', req: true, w: 'w-sm' },
+          { n: 'RENDIMIENTO', tipo: 'pct', w: 'w-sm' },
+          { n: '% EXTRA / INYECCION', tipo: 'pct', w: 'w-sm' }
+        ],
+        muestra: [
+          { n: '% CUMPLIMIENTO', tipo: 'pct', f: v => { const p = num(v.PROGRAMA), r = num(v.PRODUCCION); return p && r != null ? r / p : null; } }
+        ]
+      },
+      detalle: {
+        tabla: 'detalle', titulo: 'Datos de Calidad', icono: 'fa-magnifying-glass', modo: 'dia',
+        descripcion: 'Hallazgos de calidad del día. Agrega una fila por hallazgo.',
+        claves: [], plantilla: null, agregar: true,
+        cols: [
+          { n: 'SECCION', tipo: 'lista', cat: 'secciones', req: true, w: 'w-md' },
+          { n: 'CATEGORIA', tipo: 'lista', cat: 'categorias', req: true, w: 'w-md' },
+          { n: 'DETALLE DEL HALLAZGO', tipo: 'largo', req: true, w: 'w-xl' }
+        ],
+        muestra: []
+      },
+      paradas: {
+        tabla: 'paradas', titulo: 'Paradas', icono: 'fa-circle-pause', modo: 'dia',
+        descripcion: 'Paradas de planta o equipo. Si la hora fin es menor que la de inicio se toma como el día siguiente.',
+        claves: [], plantilla: null, agregar: true,
+        cols: [
+          { n: 'TIPO', tipo: 'lista', cat: 'tipos', req: true, w: 'w-sm' },
+          { n: 'AREA AFECTADA', tipo: 'texto', sugerencias: 'areasEtiqueta', req: true, w: 'w-md' },
+          { n: 'EQUIPO', tipo: 'texto', req: true, w: 'w-lg' },
+          { n: 'CAUSA', tipo: 'texto', req: true, w: 'w-lg' },
+          { n: 'INICIO', tipo: 'horaFecha', req: true, w: 'w-sm' },
+          { n: 'FIN', tipo: 'horaFecha', req: true, w: 'w-sm' },
+          { n: 'MEDIDA CORRECTIVA', tipo: 'texto', w: 'w-lg' }
+        ],
+        muestra: [
+          { n: 'DURACION (MIN)', tipo: 'entero', f: v => duracionMin(v.INICIO, v.FIN) }
+        ]
+      }
+    };
+
+    // Catálogos como pestañas internas (modo "todo": sin fecha)
+    Object.entries(CATALOGOS).forEach(([clave, c]) => {
+      PESTANAS['cat_' + clave] = {
+        tabla: clave, titulo: c.titulo, icono: c.icono, modo: 'todo', catalogo: clave,
+        claves: [], plantilla: null, agregar: true, cols: c.cols, muestra: []
+      };
+    });
+
+    const ORDEN_MENU = ['personal', 'sso', 'horarios', 'produccion', 'detalle', 'paradas', 'catalogos'];
+
+    // =========================================================================
+    // 🗂️ ESTADO
+    // =========================================================================
+    const datos = {};          // tabla -> { columnas, registros } tal cual responde la API
+    const edicion = {};        // pestaña -> { filas, origen, aviso }
+    let pestanaActiva = 'personal';
+    let fechaSel = hoyIso();
+    let uidSiguiente = 1;
+
+    // =========================================================================
+    // 🔧 UTILIDADES
+    // =========================================================================
+    const $ = id => document.getElementById(id);
+    const DIAS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+
+    function normalizar(s) {
+      return String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase().replace(/[^A-Z0-9%]/g, '');
+    }
+
+    function escaparHtml(s) {
+      return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    function hoyIso() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    function fechaDeIso(iso) {
+      const [a, m, d] = iso.split('-').map(Number);
+      return new Date(a, m - 1, d);
+    }
+
+    function isoDeFecha(f) {
+      return `${f.getFullYear()}-${String(f.getMonth() + 1).padStart(2, '0')}-${String(f.getDate()).padStart(2, '0')}`;
+    }
+
+    function textoFecha(iso) {
+      const f = fechaDeIso(iso);
+      return `${DIAS[f.getDay()]} ${String(f.getDate()).padStart(2, '0')}/${String(f.getMonth() + 1).padStart(2, '0')}/${f.getFullYear()}`;
+    }
+
+    // Número desde el texto del formulario (acepta coma decimal); null si vacío o inválido
+    function num(s) {
+      if (s == null) return null;
+      const t = String(s).trim().replace(',', '.');
+      if (t === '') return null;
+      const n = Number(t);
+      return Number.isFinite(n) ? n : null;
+    }
+
+    function suma(v, campos) {
+      return campos.reduce((a, c) => a + (num(v[c]) ?? 0), 0);
+    }
+
+    function duracionMin(inicio, fin) {
+      if (!/^\d{2}:\d{2}$/.test(inicio || '') || !/^\d{2}:\d{2}$/.test(fin || '')) return null;
+      const [h1, m1] = inicio.split(':').map(Number);
+      const [h2, m2] = fin.split(':').map(Number);
+      let d = (h2 * 60 + m2) - (h1 * 60 + m1);
+      if (d < 0) d += 1440;
+      return d;
+    }
+
+    function formatoMuestra(tipo, v) {
+      if (v == null || v === '' || Number.isNaN(v)) return '—';
+      if (tipo === 'pct') return `${(Number(v) * 100).toLocaleString('es-PE', { maximumFractionDigits: 1 })}%`;
+      if (typeof v === 'number') return v.toLocaleString('es-PE', { maximumFractionDigits: 2 });
+      return escaparHtml(v);
+    }
+
+    function fechaDeRegistro(r) {
+      return (r.FECHA ?? '').toString().slice(0, 10);
+    }
+
+    // Columna real del Excel a partir del nombre normalizado
+    function columnaReal(tabla, nombre) {
+      const cols = datos[tabla]?.columnas || [];
+      const n = normalizar(nombre);
+      return cols.find(c => normalizar(c.nombre) === n)?.nombre ?? null;
+    }
+
+    function valoresCatalogo(cat) {
+      const t = datos[cat];
+      if (!t) return [];
+      const col = t.columnas[0]?.nombre;
+      return [...new Set(t.registros.map(r => (r[col] ?? '').toString().trim()).filter(Boolean))];
+    }
+
+    function sugerencias(tipo) {
+      if (tipo === 'areasEtiqueta') {
+        const t = datos.areas;
+        const colEt = t ? columnaReal('areas', 'ETIQUETA (REPORTE)') : null;
+        const deCatalogo = t && colEt ? t.registros.map(r => r[colEt]).filter(Boolean) : [];
+        const colAf = columnaReal('paradas', 'AREA AFECTADA');
+        const usados = colAf ? (datos.paradas?.registros || []).map(r => r[colAf]).filter(Boolean) : [];
+        return [...new Set([...deCatalogo, ...usados])];
+      }
+      return [];
+    }
+
+    // =========================================================================
+    // 🔁 CONVERSIÓN API <-> FORMULARIO
+    //   En el formulario todo es texto; se convierte al guardar.
+    // =========================================================================
+    function aFormulario(col, valor) {
+      if (valor == null) return '';
+      switch (col.tipo) {
+        case 'pct': return String(+(Number(valor) * 100).toFixed(4));
+        case 'hora': return String(valor).slice(0, 5);
+        case 'horaFecha': return String(valor).length >= 16 ? String(valor).slice(11, 16) : String(valor).slice(0, 5);
+        default: return String(valor);
+      }
+    }
+
+    function aApi(col, texto, v) {
+      const t = (texto ?? '').toString().trim();
+      if (t === '') return null;
+      switch (col.tipo) {
+        case 'entero': return parseInt(t, 10);
+        case 'decimal': return num(t);
+        case 'pct': return +(num(t) / 100).toFixed(6);
+        case 'hora': return t;
+        case 'horaFecha': {
+          // INICIO con la fecha del día; FIN al día siguiente si es menor que INICIO
+          let f = fechaSel;
+          if (col.n === 'FIN' && /^\d{2}:\d{2}$/.test(v.INICIO || '') && t < v.INICIO) {
+            const d = fechaDeIso(fechaSel); d.setDate(d.getDate() + 1); f = isoDeFecha(d);
+          }
+          return `${f} ${t}`;
+        }
+        default: return col.mayus ? t.toUpperCase() : t;
+      }
+    }
+
+    function validar(col, texto) {
+      const t = (texto ?? '').toString().trim();
+      if (t === '') return col.req ? 'Obligatorio' : null;
+      switch (col.tipo) {
+        case 'entero': return /^-?\d+$/.test(t) ? null : 'Número entero';
+        case 'decimal':
+        case 'pct': return num(t) == null ? 'Número' : null;
+        case 'hora':
+        case 'horaFecha': return /^\d{2}:\d{2}$/.test(t) ? null : 'Hora HH:mm';
+        default: return null;
+      }
+    }
+
+    // =========================================================================
+    // 🧱 MODELO DE FILAS
+    // =========================================================================
+    function nuevaFila(def, valores = {}, registro = null) {
+      const val = {};
+      def.cols.forEach(c => { val[c.n] = valores[c.n] ?? ''; });
+      return { uid: uidSiguiente++, fila: registro ? registro._fila : null, raw: registro, base: registro ? { ...val } : null, val, borrada: false };
+    }
+
+    function filaDesdeRegistro(def, registro) {
+      const v = {};
+      def.cols.forEach(c => {
+        const real = columnaReal(def.tabla, c.n);
+        v[c.n] = real ? aFormulario(c, registro[real]) : '';
+      });
+      return nuevaFila(def, v, registro);
+    }
+
+    function registrosDelDia(def, fecha = fechaSel) {
+      const t = datos[def.tabla];
+      if (!t) return [];
+      return def.modo === 'todo' ? t.registros : t.registros.filter(r => fechaDeRegistro(r) === fecha);
+    }
+
+    // Día con datos más cercano a la fecha elegida (empate: el anterior)
+    function diaMasProximo(def) {
+      const t = datos[def.tabla];
+      if (!t) return null;
+      const objetivo = fechaDeIso(fechaSel).getTime();
+      const fechas = [...new Set(t.registros.map(fechaDeRegistro).filter(f => f && f !== fechaSel))];
+      let mejor = null, distMejor = Infinity;
+      fechas.forEach(f => {
+        const ms = fechaDeIso(f).getTime();
+        const dist = Math.abs(ms - objetivo) + (ms > objetivo ? 1 : 0);
+        if (dist < distMejor) { distMejor = dist; mejor = f; }
+      });
+      return mejor;
+    }
+
+    function claveFila(def, v) {
+      return def.claves.map(k => normalizar(v[k])).join('|');
+    }
+
+    function tieneDatos(def, fila) {
+      return def.cols.some(c => !def.claves.includes(c.n) && (fila.val[c.n] ?? '').toString().trim() !== '');
+    }
+
+    function filaCambiada(def, fila) {
+      if (fila.fila == null) return !fila.borrada && tieneDatos(def, fila);
+      if (fila.borrada) return true;
+      return def.cols.some(c => (fila.val[c.n] ?? '') !== (fila.base[c.n] ?? ''));
+    }
+
+    function pestanaSucia(id) {
+      const def = PESTANAS[id];
+      return (edicion[id]?.filas || []).some(f => filaCambiada(def, f));
+    }
+
+    // Construye las filas de la pestaña: datos guardados del día o, si no hay, la plantilla
+    function construirPestana(id) {
+      const def = PESTANAS[id];
+      const guardados = registrosDelDia(def).slice().sort((a, b) => a._fila - b._fila);
+      const ed = { filas: [], origen: 'guardado', aviso: null };
+
+      if (guardados.length) {
+        ed.filas = guardados.map(r => filaDesdeRegistro(def, r));
+        if (def.modo === 'dia') {
+          ed.aviso = { tipo: 'exito', texto: `Datos guardados del ${textoFecha(fechaSel)}. Puedes corregirlos y guardar.` };
+        }
+        // Duplicados por clave (ej. dos filas de DESPOSTE el mismo día)
+        if (def.claves.length) {
+          const conteo = {};
+          ed.filas.forEach(f => { const k = claveFila(def, f.val); conteo[k] = (conteo[k] || 0) + 1; });
+          const dup = ed.filas.filter((f, i, arr) => conteo[claveFila(def, f.val)] > 1 && arr.findIndex(x => claveFila(def, x.val) === claveFila(def, f.val)) === i)
+            .map(f => `${def.claves.map(k => f.val[k]).join(' · ')} (${conteo[claveFila(def, f.val)]})`);
+          if (dup.length) {
+            ed.aviso = { tipo: 'alerta', texto: `Hay filas repetidas para este día: ${dup.join(', ')}. Elimina las sobrantes con la papelera y guarda.` };
+          }
+        }
+      } else if (def.modo === 'dia') {
+        ed.origen = 'plantilla';
+        ed.filas = filasPlantilla(def);
+        ed.aviso = ed.filas.length
+          ? { tipo: 'info', texto: `Sin datos para el ${textoFecha(fechaSel)}. Plantilla vacía: completa los valores (las filas que dejes vacías no se guardan).` }
+          : { tipo: 'info', texto: `Sin registros para el ${textoFecha(fechaSel)}. Usa "Agregar fila".` };
+      }
+      edicion[id] = ed;
+    }
+
+    function filasPlantilla(def) {
+      if (def.plantilla === 'catalogoAreas') {
+        return valoresCatalogo('areas').map(a => nuevaFila(def, { AREA: a }));
+      }
+      if (def.plantilla === 'diaProximo') {
+        const dia = diaMasProximo(def);
+        if (!dia) return [];
+        const vistos = new Set();
+        return registrosDelDia(def, dia).sort((a, b) => a._fila - b._fila).reduce((acc, r) => {
+          const v = {};
+          def.claves.forEach(k => { const real = columnaReal(def.tabla, k); v[k] = real ? (r[real] ?? '').toString() : ''; });
+          const k = claveFila(def, v);
+          if (!vistos.has(k)) { vistos.add(k); acc.push(nuevaFila(def, v)); }
+          return acc;
+        }, []);
+      }
+      return [];
+    }
+
+    // =========================================================================
+    // 🖼️ RENDER
+    // =========================================================================
+    function construirMenu() {
+      const menu = $('sidebarMenu');
+      menu.innerHTML = ORDEN_MENU.map(id => {
+        const def = id === 'catalogos' ? { titulo: 'Catálogos', icono: 'fa-book' } : PESTANAS[id];
+        return `<button type="button" class="sidebar-btn" id="side_${id}" title="${escaparHtml(def.titulo)}" onclick="cambiarPestana('${id}')">
+          <div class="btn-info"><i class="fa-solid ${def.icono}"></i><span>${escaparHtml(def.titulo)}</span></div>
+          <span class="sidebar-badge" id="badge_${id}">0</span>
+        </button>`;
+      }).join('');
+    }
+
+    function construirPaneles() {
+      const cont = $('paneles');
+      const panelCaptura = id => {
+        const def = PESTANAS[id];
+        const botones = [];
+        if (def.clonar) botones.push(`<button type="button" class="btn" onclick="clonarDiaProximo('${id}')" title="Copia los valores del día con datos más cercano"><i class="fa-solid fa-clone"></i> Clonar día más próximo</button>`);
+        if (def.ceros) botones.push(`<button type="button" class="btn" onclick="ponerCeros('${id}')" title="Llena con 0 los conteos vacíos"><i class="fa-solid fa-circle-check"></i> Sin incidentes (0)</button>`);
+        if (def.agregar) botones.push(`<button type="button" class="btn" onclick="agregarFila('${id}')"><i class="fa-solid fa-plus"></i> Agregar fila</button>`);
+        return `<section class="panel is-hidden" id="panel_${id}">
+          <div class="card">
+            <div class="card-head">
+              <div><h2>${escaparHtml(def.titulo)}</h2><p>${escaparHtml(def.descripcion || '')}</p></div>
+              <div class="toolbar">${botones.join('')}</div>
+            </div>
+            <div class="aviso" id="aviso_${id}"></div>
+            <div class="table-responsive"><table class="grid" id="grid_${id}"></table></div>
+            ${pieTarjeta(id)}
+          </div>
+        </section>`;
+      };
+
+      const tarjetaCatalogo = id => {
+        const def = PESTANAS[id];
+        return `<div class="card">
+            <div class="card-head"><div><h2><i class="fa-solid ${def.icono}" style="color:var(--color-primary);margin-right:6px"></i>${escaparHtml(def.titulo)}</h2></div></div>
+            <div class="aviso" id="aviso_${id}"></div>
+            <div class="table-responsive"><table class="grid" id="grid_${id}"></table></div>
+            <div class="card-foot">
+              <button type="button" class="btn" onclick="agregarFila('${id}')"><i class="fa-solid fa-plus"></i> Agregar</button>
+              <div class="toolbar">
+                <button type="button" class="btn" id="descartar_${id}" onclick="descartar('${id}')">Descartar</button>
+                <button type="button" class="btn btn-primario" id="guardar_${id}" onclick="guardarPestana('${id}')"><i class="fa-solid fa-floppy-disk"></i> Guardar</button>
+              </div>
+            </div>
+          </div>`;
+      };
+
+      cont.innerHTML = ORDEN_MENU.filter(id => id !== 'catalogos').map(panelCaptura).join('') +
+        `<section class="panel is-hidden" id="panel_catalogos">
+          <div class="card">
+            <div class="card-head"><div><h2>Mantenimiento de catálogos</h2>
+              <p>Hoja CATALOGOS del Excel. Alimentan las listas de las otras pestañas y las listas desplegables del Excel. Renombrar un valor no cambia los registros que ya lo usan.</p></div></div>
+          </div>
+          <div class="catalogos-grid">${Object.keys(CATALOGOS).map(c => tarjetaCatalogo('cat_' + c)).join('')}</div>
+        </section>`;
+
+      // Delegación de eventos de las grillas
+      cont.addEventListener('input', alEditarCelda);
+      cont.addEventListener('change', alEditarCelda);
+      cont.addEventListener('click', alClickGrilla);
+      cont.addEventListener('keydown', alTeclaGrilla);
+    }
+
+    function pieTarjeta(id) {
+      return `<div class="card-foot">
+        <div class="leyenda"><span class="l-nueva">Nueva</span><span class="l-mod">Modificada</span><span class="l-borrada">Por eliminar</span><span class="l-calc">Calculada</span></div>
+        <div class="toolbar">
+          <button type="button" class="btn" id="descartar_${id}" onclick="descartar('${id}')"><i class="fa-solid fa-rotate-left"></i> Descartar cambios</button>
+          <button type="button" class="btn btn-primario" id="guardar_${id}" onclick="guardarPestana('${id}')"><i class="fa-solid fa-floppy-disk"></i> Guardar</button>
+        </div>
+      </div>`;
+    }
+
+    function celdaEditor(def, fila, col) {
+      const valor = escaparHtml(fila.val[col.n] ?? '');
+      const atr = `data-uid="${fila.uid}" data-col="${escaparHtml(col.n)}" aria-label="${escaparHtml(col.n)}"`;
+      switch (col.tipo) {
+        case 'lista': {
+          const opciones = valoresCatalogo(col.cat);
+          const actual = fila.val[col.n] ?? '';
+          const extra = actual && !opciones.includes(actual) ? `<option value="${valor}" selected>${valor} (no está en el catálogo)</option>` : '';
+          return `<select ${atr}><option value=""></option>${opciones.map(o => `<option value="${escaparHtml(o)}"${o === actual ? ' selected' : ''}>${escaparHtml(o)}</option>`).join('')}${extra}</select>`;
+        }
+        case 'entero':
+        case 'decimal':
+        case 'pct':
+          return `<input type="text" inputmode="decimal" class="num" ${atr} value="${valor}">`;
+        case 'hora':
+        case 'horaFecha':
+          return `<input type="time" ${atr} value="${valor}">`;
+        case 'largo':
+          return `<textarea rows="2" ${atr}>${valor}</textarea>`;
+        default: {
+          const lista = col.sugerencias ? `list="dl_${col.sugerencias}"` : '';
+          return `<input type="text" ${atr} ${lista} value="${valor}">`;
+        }
+      }
+    }
+
+    function valorMuestra(def, fila, m) {
+      if (m.f) return formatoMuestra(m.tipo, m.f(fila.val));
+      // Sin fórmula en el navegador: se muestra el valor guardado si la fila no cambió
+      if (fila.raw && !filaCambiada(def, fila)) {
+        const real = columnaReal(def.tabla, m.n);
+        return formatoMuestra(m.tipo, real ? fila.raw[real] : null);
+      }
+      return '<span title="Se calcula al guardar">al guardar</span>';
+    }
+
+    function claseFila(def, fila) {
+      if (fila.borrada) return 'borrada';
+      if (fila.fila == null) return tieneDatos(def, fila) ? 'nueva' : 'vacia';
+      return filaCambiada(def, fila) ? 'modificada' : '';
+    }
+
+    function renderGrilla(id) {
+      const def = PESTANAS[id];
+      const ed = edicion[id];
+      const tabla = $('grid_' + id);
+      if (!tabla || !ed) return;
+
+      const cabeza = `<thead><tr><th>#</th>${def.cols.map(c => `<th class="${c.w || ''}">${escaparHtml(columnaReal(def.tabla, c.n) || c.n)}${c.tipo === 'pct' ? ' (%)' : ''}${c.req ? '<span class="req" title="Obligatorio">*</span>' : ''}</th>`).join('')}${def.muestra.map(m => `<th class="calc" title="Columna calculada">${escaparHtml(columnaReal(def.tabla, m.n) || m.n)}</th>`).join('')}<th><span class="is-hidden">Acciones</span></th></tr></thead>`;
+
+      const filas = ed.filas.map((f, i) => `<tr class="${claseFila(def, f)}" data-uid="${f.uid}">
+          <td class="num-fila">${f.fila ?? '+'}</td>
+          ${def.cols.map(c => `<td data-c="${escaparHtml(c.n)}">${celdaEditor(def, f, c)}</td>`).join('')}
+          ${def.muestra.map(m => `<td class="calc" data-m="${escaparHtml(m.n)}">${valorMuestra(def, f, m)}</td>`).join('')}
+          <td class="acciones">${f.borrada
+            ? `<button type="button" class="btn btn-icono" data-accion="restaurar" data-uid="${f.uid}" title="Restaurar fila"><i class="fa-solid fa-rotate-left"></i></button>`
+            : `<button type="button" class="btn btn-icono" data-accion="borrar" data-uid="${f.uid}" title="Eliminar fila"><i class="fa-solid fa-trash-can"></i></button>`}</td>
+        </tr>`).join('');
+
+      const vacio = `<tr><td class="sin-filas" colspan="${def.cols.length + def.muestra.length + 2}">Sin filas. ${def.agregar ? 'Usa "Agregar".' : ''}</td></tr>`;
+      tabla.innerHTML = cabeza + `<tbody>${filas || vacio}</tbody>`;
+
+      const aviso = $('aviso_' + id);
+      if (aviso) {
+        aviso.className = 'aviso' + (ed.aviso ? ` mostrar ${ed.aviso.tipo}` : '');
+        const icono = { exito: 'fa-circle-check', info: 'fa-circle-info', alerta: 'fa-triangle-exclamation', error: 'fa-circle-xmark' }[ed.aviso?.tipo] || 'fa-circle-info';
+        aviso.innerHTML = ed.aviso ? `<i class="fa-solid ${icono}"></i><span>${escaparHtml(ed.aviso.texto)}</span>` : '';
+      }
+      actualizarIndicadores();
+    }
+
+    function renderDatalists() {
+      let cont = $('datalists');
+      if (!cont) { cont = document.createElement('div'); cont.id = 'datalists'; document.body.appendChild(cont); }
+      cont.innerHTML = `<datalist id="dl_areasEtiqueta">${sugerencias('areasEtiqueta').map(s => `<option value="${escaparHtml(s)}">`).join('')}</datalist>`;
+    }
+
+    function idsCaptura() {
+      return Object.keys(PESTANAS);
+    }
+
+    function actualizarIndicadores() {
+      ORDEN_MENU.forEach(id => {
+        const ids = id === 'catalogos' ? Object.keys(CATALOGOS).map(c => 'cat_' + c) : [id];
+        const sucia = ids.some(pestanaSucia);
+        const guardados = id === 'catalogos'
+          ? ids.reduce((a, x) => a + registrosDelDia(PESTANAS[x]).length, 0)
+          : registrosDelDia(PESTANAS[id]).length;
+        const btn = $('side_' + id);
+        const badge = $('badge_' + id);
+        if (btn) {
+          btn.classList.toggle('active', id === pestanaActiva);
+          btn.classList.toggle('sucio', sucia);
+          btn.title = `${id === 'catalogos' ? 'Catálogos' : PESTANAS[id].titulo}${sucia ? ' · cambios sin guardar' : ''}`;
+        }
+        if (badge) {
+          badge.textContent = guardados;
+          badge.classList.toggle('vacio', id !== 'catalogos' && guardados === 0);
+        }
+        ids.forEach(x => {
+          const sucioX = pestanaSucia(x);
+          const g = $('guardar_' + x), d = $('descartar_' + x);
+          if (g) g.disabled = !sucioX;
+          if (d) d.disabled = !sucioX;
+        });
+      });
+      renderResumenDia();
+    }
+
+    function renderResumenDia() {
+      const cont = $('resumenDia');
+      cont.innerHTML = ORDEN_MENU.filter(id => id !== 'catalogos').map(id => {
+        const def = PESTANAS[id];
+        const n = registrosDelDia(def).length;
+        const sucia = pestanaSucia(id);
+        const opcional = id === 'paradas' || id === 'detalle';
+        const clase = sucia ? 'sucio' : (n ? 'ok' : (opcional ? '' : 'pendiente'));
+        const valor = sucia ? 'Sin guardar' : (n ? `${n} ${n === 1 ? 'registro' : 'registros'}` : (opcional ? 'Sin registros' : 'Pendiente'));
+        return `<button type="button" class="estado-chip ${clase}" onclick="cambiarPestana('${id}')">
+          <div class="chip-titulo">${escaparHtml(def.titulo)}</div><div class="chip-valor">${valor}</div></button>`;
+      }).join('');
+    }
+
+    function cambiarPestana(id) {
+      pestanaActiva = id;
+      document.querySelectorAll('#paneles > .panel').forEach(p => p.classList.toggle('is-hidden', p.id !== 'panel_' + id));
+      actualizarIndicadores();
+      try { localStorage.setItem('capturaDiario.pestana', id); } catch (e) { /* sin almacenamiento */ }
+    }
+
+    // =========================================================================
+    // ✏️ EDICIÓN
+    // =========================================================================
+    function buscarFila(uid) {
+      for (const id of idsCaptura()) {
+        const f = edicion[id]?.filas.find(x => x.uid === uid);
+        if (f) return { id, def: PESTANAS[id], fila: f };
+      }
+      return null;
+    }
+
+    function alEditarCelda(e) {
+      const el = e.target;
+      if (!el.dataset || !el.dataset.uid || !el.dataset.col) return;
+      const r = buscarFila(Number(el.dataset.uid));
+      if (!r) return;
+      r.fila.val[el.dataset.col] = el.value;
+      el.closest('td')?.classList.remove('invalido');
+      const tr = el.closest('tr');
+      tr.className = claseFila(r.def, r.fila);
+      r.def.muestra.forEach(m => {
+        const td = tr.querySelector(`td[data-m="${CSS.escape(m.n)}"]`);
+        if (td) td.innerHTML = valorMuestra(r.def, r.fila, m);
+      });
+      actualizarIndicadores();
+    }
+
+    function alClickGrilla(e) {
+      const btn = e.target.closest('button[data-accion]');
+      if (!btn) return;
+      const r = buscarFila(Number(btn.dataset.uid));
+      if (!r) return;
+      if (btn.dataset.accion === 'borrar') {
+        if (r.fila.fila == null) edicion[r.id].filas = edicion[r.id].filas.filter(f => f !== r.fila);
+        else r.fila.borrada = true;
+      } else {
+        r.fila.borrada = false;
+      }
+      renderGrilla(r.id);
+    }
+
+    // Enter baja a la misma columna de la fila siguiente (como en Excel)
+    function alTeclaGrilla(e) {
+      if (e.key !== 'Enter' || e.target.tagName === 'TEXTAREA' || !e.target.dataset?.col) return;
+      e.preventDefault();
+      const td = e.target.closest('td');
+      const siguiente = td?.parentElement?.nextElementSibling?.querySelector(`td[data-c="${CSS.escape(e.target.dataset.col)}"] [data-col]`);
+      if (siguiente) siguiente.focus();
+    }
+
+    function agregarFila(id) {
+      const def = PESTANAS[id];
+      const ed = edicion[id];
+      // Hereda las claves de la última fila para agilizar (ej. misma área)
+      const ultima = ed.filas.filter(f => !f.borrada).slice(-1)[0];
+      const base = {};
+      if (ultima && def.claves.length) base[def.claves[0]] = ultima.val[def.claves[0]];
+      ed.filas.push(nuevaFila(def, base));
+      renderGrilla(id);
+      const filas = $('grid_' + id).querySelectorAll('tbody tr');
+      filas[filas.length - 1]?.querySelector('[data-col]')?.focus();
+    }
+
+    function clonarDiaProximo(id) {
+      const def = PESTANAS[id];
+      const dia = diaMasProximo(def);
+      if (!dia) { mostrarToast('No hay otro día con datos para clonar.', 'info'); return; }
+      const ed = edicion[id];
+      const fuente = registrosDelDia(def, dia).sort((a, b) => a._fila - b._fila).map(r => filaDesdeRegistro(def, r));
+      let actualizadas = 0, agregadas = 0;
+      fuente.forEach(src => {
+        const destino = def.claves.length ? ed.filas.find(f => !f.borrada && claveFila(def, f.val) === claveFila(def, src.val)) : null;
+        const valores = {};
+        def.cols.forEach(c => { if (!c.noClonar) valores[c.n] = src.val[c.n]; });
+        if (destino) { Object.assign(destino.val, valores); actualizadas++; }
+        else { ed.filas.push(nuevaFila(def, valores)); agregadas++; }
+      });
+      ed.origen = 'clonado';
+      ed.aviso = { tipo: 'alerta', texto: `Valores clonados del ${textoFecha(dia)} (${actualizadas + agregadas} filas). Revisa y ajusta antes de guardar. Las observaciones no se copian.` };
+      renderGrilla(id);
+    }
+
+    function ponerCeros(id) {
+      const def = PESTANAS[id];
+      edicion[id].filas.filter(f => !f.borrada).forEach(f => {
+        def.cols.forEach(c => { if (c.tipo === 'entero' && (f.val[c.n] ?? '') === '') f.val[c.n] = '0'; });
+      });
+      renderGrilla(id);
+    }
+
+    function descartar(id) {
+      construirPestana(id);
+      renderGrilla(id);
+    }
+
+    // =========================================================================
+    // 💾 GUARDADO (una sola escritura por pestaña: /{tabla}/lote)
+    // =========================================================================
+    function originalDe(def, fila) {
+      const o = {};
+      def.cols.forEach(c => {
+        const real = columnaReal(def.tabla, c.n);
+        if (real) o[real] = fila.raw[real] ?? null;
+      });
+      return o;
+    }
+
+    function validarPestana(id) {
+      const def = PESTANAS[id];
+      const tabla = $('grid_' + id);
+      let errores = 0;
+      edicion[id].filas.forEach(f => {
+        if (f.borrada || (f.fila == null && !tieneDatos(def, f))) return;
+        def.cols.forEach(c => {
+          const err = validar(c, f.val[c.n]);
+          const td = tabla.querySelector(`tr[data-uid="${f.uid}"] td[data-c="${CSS.escape(c.n)}"]`);
+          if (td) { td.classList.toggle('invalido', !!err); if (err) td.title = err; else td.removeAttribute('title'); }
+          if (err) errores++;
+        });
+      });
+      // Catálogos: valores únicos
+      if (def.modo === 'todo') {
+        const col = def.cols[0].n;
+        const vistos = {};
+        edicion[id].filas.filter(f => !f.borrada).forEach(f => {
+          const k = normalizar(f.val[col]);
+          if (k && vistos[k]) {
+            errores++;
+            const td = tabla.querySelector(`tr[data-uid="${f.uid}"] td[data-c="${CSS.escape(col)}"]`);
+            if (td) { td.classList.add('invalido'); td.title = 'Valor repetido en el catálogo'; }
+          }
+          vistos[k] = true;
+        });
+      }
+      return errores;
+    }
+
+    function confirmarUsoCatalogo(id) {
+      const def = PESTANAS[id];
+      if (!def.catalogo) return true;
+      const col = def.cols[0].n;
+      const usos = valor => (USOS_CATALOGO[def.catalogo] || []).reduce((a, [tabla, c]) => {
+        const real = columnaReal(tabla, c);
+        return a + (real ? (datos[tabla]?.registros || []).filter(r => normalizar(r[real]) === normalizar(valor)).length : 0);
+      }, 0);
+      const afectados = [];
+      edicion[id].filas.forEach(f => {
+        if (f.fila == null) return;
+        const antes = f.base[col];
+        if (f.borrada || normalizar(f.val[col]) !== normalizar(antes)) {
+          const n = usos(antes);
+          if (n) afectados.push(`"${antes}" (${n} registros)`);
+        }
+      });
+      if (!afectados.length) return true;
+      return confirm(`Vas a eliminar o renombrar valores que ya se usan: ${afectados.join(', ')}.\n\nLos registros existentes NO se actualizan. ¿Continuar?`);
+    }
+
+    async function guardarPestana(id) {
+      const def = PESTANAS[id];
+      const ed = edicion[id];
+      if (!pestanaSucia(id)) { mostrarToast('No hay cambios para guardar.', 'info'); return; }
+
+      const errores = validarPestana(id);
+      if (errores) {
+        ed.aviso = { tipo: 'error', texto: `Revisa las celdas marcadas en rojo (${errores}). Pasa el cursor sobre ellas para ver el motivo.` };
+        const aviso = $('aviso_' + id);
+        aviso.className = 'aviso mostrar error';
+        aviso.innerHTML = `<i class="fa-solid fa-circle-xmark"></i><span>${escaparHtml(ed.aviso.texto)}</span>`;
+        return;
+      }
+      if (!confirmarUsoCatalogo(id)) return;
+
+      const realFecha = columnaReal(def.tabla, 'FECHA');
+      const lote = { crear: [], actualizar: [], eliminar: [] };
+
+      ed.filas.forEach(f => {
+        if (f.fila == null) {
+          if (f.borrada || !tieneDatos(def, f)) return;
+          const valores = {};
+          if (def.modo === 'dia' && realFecha) valores[realFecha] = fechaSel;
+          def.cols.forEach(c => { const real = columnaReal(def.tabla, c.n); if (real) valores[real] = aApi(c, f.val[c.n], f.val); });
+          lote.crear.push(valores);
+        } else if (f.borrada) {
+          lote.eliminar.push({ fila: f.fila, original: originalDe(def, f) });
+        } else if (filaCambiada(def, f)) {
+          const valores = {};
+          def.cols.forEach(c => {
+            const cambio = (f.val[c.n] ?? '') !== (f.base[c.n] ?? '');
+            // INICIO/FIN dependen entre sí (cambio de día): se envían juntos
+            const ligado = c.tipo === 'horaFecha' && def.cols.some(o => o.tipo === 'horaFecha' && (f.val[o.n] ?? '') !== (f.base[o.n] ?? ''));
+            if (cambio || ligado) { const real = columnaReal(def.tabla, c.n); if (real) valores[real] = aApi(c, f.val[c.n], f.val); }
+          });
+          lote.actualizar.push({ fila: f.fila, valores, original: originalDe(def, f) });
+        }
+      });
+
+      mostrarCarga(true, 'Guardando', `${def.titulo}: escribiendo en el Excel...`);
+      try {
+        const r = await llamarApi(`/${def.tabla}/lote`, 'POST', lote);
+        await cargarTabla(def.tabla);
+        reconstruirRelacionadas(def.tabla);
+        const partes = [];
+        if (r.creadas?.length) partes.push(`${r.creadas.length} creadas`);
+        if (r.actualizadas) partes.push(`${r.actualizadas} actualizadas`);
+        if (r.eliminadas) partes.push(`${r.eliminadas} eliminadas`);
+        mostrarToast(`${def.titulo}: ${partes.join(', ') || 'sin cambios'}.`, 'exito');
+      } catch (err) {
+        const texto = err.status === 409
+          ? `${err.message} (Otro usuario o el Excel cambió los datos. Usa "Recargar".)`
+          : err.message;
+        ed.aviso = { tipo: 'error', texto: `No se guardó nada. ${texto}` };
+        renderGrilla(id);
+        mostrarToast('No se pudo guardar.', 'error');
+      } finally {
+        mostrarCarga(false);
+      }
+    }
+
+    // Tras guardar una tabla se reconstruyen las pestañas que la usan
+    function reconstruirRelacionadas(tabla) {
+      idsCaptura().forEach(id => {
+        const def = PESTANAS[id];
+        if (def.tabla === tabla) { construirPestana(id); renderGrilla(id); }
+      });
+      // Un catálogo cambia las listas de las pestañas de captura (sin perder lo que se está escribiendo)
+      if (CATALOGOS[tabla]) {
+        renderDatalists();
+        idsCaptura().filter(id => PESTANAS[id].modo === 'dia').forEach(renderGrilla);
+      }
+    }
+
+    // =========================================================================
+    // 📥 CARGA
+    // =========================================================================
+    async function cargarTabla(tabla) {
+      const r = await llamarApi(`/${tabla}`);
+      datos[tabla] = { columnas: r.columnas, registros: r.registros };
+    }
+
+    async function recargarTodo(confirmar = true) {
+      if (confirmar && idsCaptura().some(pestanaSucia) && !confirm('Hay cambios sin guardar. ¿Recargar y descartarlos?')) return;
+      mostrarCarga(true, 'Cargando', 'Leyendo el Excel del Informe Diario...');
+      setEstado('Conectando', 'loading');
+      $('alertaGeneral').classList.remove('mostrar');
+      try {
+        await asegurarServidor();
+        const tablas = [...new Set(Object.values(PESTANAS).map(d => d.tabla))];
+        await Promise.all(tablas.map(cargarTabla));
+        idsCaptura().forEach(construirPestana);
+        renderDatalists();
+        idsCaptura().forEach(renderGrilla);
+        setEstado('Conectado', 'online');
+      } catch (err) {
+        setEstado('Sin conexión', 'error');
+        const alerta = $('alertaGeneral');
+        alerta.innerHTML = `<i class="fa-solid fa-circle-xmark"></i><span>${escaparHtml(err.message)}</span>`;
+        alerta.classList.add('mostrar');
+      } finally {
+        mostrarCarga(false);
+      }
+    }
+
+    // =========================================================================
+    // 📅 FECHA
+    // =========================================================================
+    function cambiarFecha(iso) {
+      if (!iso || iso === fechaSel) return;
+      const sucias = idsCaptura().filter(id => PESTANAS[id].modo === 'dia' && pestanaSucia(id));
+      if (sucias.length && !confirm(`Hay cambios sin guardar en: ${sucias.map(id => PESTANAS[id].titulo).join(', ')}.\n¿Cambiar de fecha y descartarlos?`)) {
+        $('fechaCaptura').value = fechaSel;
+        return;
+      }
+      fechaSel = iso;
+      $('fechaCaptura').value = iso;
+      $('fechaTexto').textContent = textoFecha(iso);
+      idsCaptura().filter(id => PESTANAS[id].modo === 'dia').forEach(id => { construirPestana(id); renderGrilla(id); });
+      actualizarIndicadores();
+    }
+
+    function moverDia(delta) {
+      const d = fechaDeIso(fechaSel);
+      d.setDate(d.getDate() + delta);
+      cambiarFecha(isoDeFecha(d));
+    }
+
+    function irAHoy() {
+      cambiarFecha(hoyIso());
+    }
+
+    // =========================================================================
+    // 🔔 MENSAJES
+    // =========================================================================
+    function setEstado(texto, clase) {
+      $('sideStatusText').textContent = texto;
+      $('sideStatusDot').className = `status-dot ${clase}`;
+    }
+
+    function mostrarCarga(mostrar, titulo = 'Cargando', detalle = '') {
+      $('loadingOverlay').classList.toggle('show', mostrar);
+      if (mostrar) {
+        $('loadingTitle').textContent = titulo;
+        $('loadingMessage').textContent = detalle;
+      }
+    }
+
+    let toastTimer = null;
+    function mostrarToast(texto, tipo = 'info') {
+      const t = $('toast');
+      const icono = { exito: 'fa-circle-check', error: 'fa-circle-xmark', info: 'fa-circle-info' }[tipo];
+      t.className = `toast show ${tipo}`;
+      t.innerHTML = `<i class="fa-solid ${icono}"></i><span>${escaparHtml(texto)}</span>`;
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove('show'), 4500);
+    }
+
+    // =========================================================================
+    // 🚀 INICIO
+    // =========================================================================
+    window.addEventListener('beforeunload', e => {
+      if (idsCaptura().some(pestanaSucia)) { e.preventDefault(); e.returnValue = ''; }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      construirMenu();
+      construirPaneles();
+      $('fechaCaptura').value = fechaSel;
+      $('fechaTexto').textContent = textoFecha(fechaSel);
+      $('fechaCaptura').addEventListener('change', e => cambiarFecha(e.target.value));
+      let guardada = null;
+      try { guardada = localStorage.getItem('capturaDiario.pestana'); } catch (e) { /* sin almacenamiento */ }
+      cambiarPestana(ORDEN_MENU.includes(guardada) ? guardada : 'personal');
+      recargarTodo(false);
+    });
+  </script>
+</body>
+
+</html>
