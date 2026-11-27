@@ -1,0 +1,141 @@
+﻿{
+  "NombreSP": "Sp_Informe_Destino_All_Mensual",
+  "Esquema": "dbo",
+  "UltimaModificacionSQL": "2025-08-27T14:37:49.62",
+  "FechaGeneracion": "2026-11-27T08:18:18.399029-05:00",
+  "Modelo": "gemini-3.6-flash",
+  "Diagrama": {
+    "spName": "Sp_Informe_Destino_All_Mensual",
+    "esquema": "Desposte.dbo",
+    "badge": "Desposte.dbo \u00B7 Informe Destino Mensual",
+    "subtitulo": "Distribuci\u00F3n mensual de la producci\u00F3n total de desposte por destino (Ventas, Despacho, Congelado, Embutidos)",
+    "ultimaModificacion": "2025-08-27T14:37:49",
+    "etapa1_fuentes": {
+      "titulo": "1. Fuentes y Generaci\u00F3n de Datos Previos",
+      "tarjetas": [
+        {
+          "titulo": "Ejecuci\u00F3n de SPs Previos",
+          "estiloCabecera": "primary",
+          "items": [
+            "Gen_Porduccion_Corregida (@Fecha1, @Fecha2, 1)",
+            "Gen_Produccion_Con_Merma (@Fecha1, @Fecha2, 1)"
+          ]
+        },
+        {
+          "titulo": "Tem_Produccion_Con_Merma",
+          "estiloCabecera": "primary",
+          "items": [
+            "Ingresos / Insumos (ttra=13): Puntos de proceso 1016, 1017, 1024, 1040, 1007, 1008",
+            "Resultantes / Producci\u00F3n (ttra=4): Puntos de proceso 1016, 1017, 1040, 1018, 1019, 1003, 1024, 1007, 1008",
+            "Insumos Marinado/Congelado (ttra=13): Puntos de proceso 1005, 1011"
+          ]
+        },
+        {
+          "titulo": "Tablas Externas de Ventas y Salidas",
+          "estiloCabecera": "secondary",
+          "items": [
+            "Ventas: ClienteCodigo IN (899, 16053), Tipo = \u0027ALMACENES\u0027 en rango de fechas",
+            "Despacho: Entregas filtradas entre @Fecha1 y @Fecha2",
+            "Tabla01: Destino IN (\u0027EMBUTIDOS\u0027,\u0027PREPARADOS\u0027,\u0027DESH. DE POLLO\u0027) del a\u00F1o actual"
+          ]
+        }
+      ]
+    },
+    "etapa2_transformacion": {
+      "titulo": "2. Balance y Cascada de Distribuci\u00F3n por Destino",
+      "tarjetas": [
+        {
+          "titulo": "#Produccion_Tipo_Agrupado",
+          "subbloques": [
+            {
+              "subtitulo": "Consolidaci\u00F3n de Ingresos y Resultantes",
+              "bullets": [
+                "Ingresos (ttra=13): Carcasa (1016/1017), Marranas/Lech\u00F3n (1024/1040), Reprocesos (1007/1008)",
+                "Resultantes (ttra=4): Producci\u00F3n primer/segundo corte, cabezas, porcionados y mermas"
+              ]
+            }
+          ]
+        },
+        {
+          "titulo": "Cascada de Descuento por Destinos",
+          "subbloques": [
+            {
+              "subtitulo": "Paso 1: Ventas Westphalia",
+              "bullets": [
+                "Descuento de kilos y unidades vendidas a clientes Westphalia (899, 16053)",
+                "Genera saldo disponible en #Distribucion_VentaWestphalia"
+              ]
+            },
+            {
+              "subtitulo": "Paso 2: Salidas a Despacho",
+              "bullets": [
+                "C\u00E1lculo de #Saldo_Despacho descontando lo asignado a Westphalia",
+                "Distribuci\u00F3n en #Distribucion_Despacho_Prod y actualizaci\u00F3n de saldo sobrante"
+              ]
+            },
+            {
+              "subtitulo": "Paso 3: Marinado y Congelado",
+              "bullets": [
+                "Asignaci\u00F3n de saldo hacia insumos de marinado y congelado (Puntos 1005, 1011)",
+                "Genera el remanente final no asignado en #Distribucion_MarinadoCong"
+              ]
+            }
+          ]
+        }
+      ],
+      "nodoCentral": {
+        "titulo": "Cascada de Saldos FIFO por Producto",
+        "descripcion": "Distribuci\u00F3n secuencial de Kilos producidos (ttra=4) descontando en orden: Westphalia -\u003E Despachos Frescos -\u003E Marinado/Congelado -\u003E Embutidos/Harinas/Merma.",
+        "formula": "Saldo_Final = Produccion_Inicial - Kilos_Westphalia - Kilos_Despacho - Kilos_MarinadoCong"
+      }
+    },
+    "etapa3_catalogos": {
+      "titulo": "3. Clasificaci\u00F3n de Destinos y Cat\u00E1logos de Art\u00EDculos",
+      "tituloTarjeta": "Cruces de Maestros y Categorizaci\u00F3n",
+      "pasos": [
+        {
+          "caja": "EquiVentaPrimerCorte",
+          "detalle": "Cruza a.Producto con b.Producto1 para clasificar \u0027VENTA FRESCO CORTE PRIMARIO\u0027 vs \u0027VENTA FRESCO\u0027",
+          "tipoJoin": "LEFT JOIN"
+        },
+        {
+          "caja": "#Salida_Embutidos",
+          "detalle": "Cruza saldos no asignados con env\u00EDos a embutidos para asignar \u0027PLANTA DE EMBUTIDOS (PROCESOS)\u0027",
+          "tipoJoin": "LEFT JOIN"
+        },
+        {
+          "caja": "Articulos",
+          "detalle": "Obtiene Nombre y UnidadConsumo asociando a.Producto con b.CodigoArticulo",
+          "tipoJoin": "LEFT JOIN"
+        }
+      ],
+      "badges": [
+        "VENTA WESTPHALIA",
+        "VENTA FRESCO CORTE PRIMARIO",
+        "VENTA FRESCO",
+        "CONGELADO",
+        "PLANTA DE EMBUTIDOS (PROCESOS)",
+        "PLANTA DE HARINAS",
+        "MERMA"
+      ]
+    },
+    "etapa4_salida": {
+      "tituloTarjeta": "Resultado Final - Informe Mensual por Destino",
+      "columnas": [
+        "A\u00F1o",
+        "Mes",
+        "ttra",
+        "NTtra",
+        "Producto",
+        "CodigoCorto",
+        "Nombre",
+        "UnidadConsumo",
+        "Unidades",
+        "Kilos",
+        "Tipo",
+        "Porc"
+      ],
+      "pieFiltro": "C\u00E1lculo de Porc mediante OVER (PARTITION BY a.A\u00F1o, a.Mes) sobre el total de Kilos de ingreso (ttra=13)"
+    }
+  }
+}

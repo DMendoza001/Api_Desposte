@@ -36,7 +36,7 @@ Después de copiar los archivos (paso 6 de la consola), reemplazar los nombres p
 ```powershell
 $Servidor = $env:COMPUTERNAME     # equipo donde correrá la API
 
-$archivos = @("AGENTS.md", "CLAUDE.md", "Docu_Paginas\config.js") +
+$archivos = @("AGENTS.md", "CLAUDE.md", "Docu_Paginas\Funciones\config.js") +
             (Get-ChildItem ".agents\rules\*.md").FullName
 
 foreach ($f in $archivos) {

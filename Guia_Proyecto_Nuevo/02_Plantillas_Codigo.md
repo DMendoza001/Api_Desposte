@@ -159,7 +159,7 @@ namespace ApiPlanta.Controllers.Sql
 Controlador delgado (regla 8): solo resuelve la ruta, declara qué tablas lee y responde. La apertura, la limpieza y la caché las hace `LectorTablasExcel` / `CacheTablasExcel`.
 
 ```csharp
-using ApiPlanta.Infraestructura.Excel;
+using ApiPlanta.Funciones.Excel;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ApiPlanta.Controllers.Excel
@@ -223,9 +223,9 @@ Esqueleto mínimo que ya cumple las reglas de conexión (1), responsive (4) y ex
   <!-- Regla 7: SheetJS para exportar la data plana -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <!-- Regla 4: estilos responsive compartidos -->
-  <link rel="stylesheet" href="responsive.css?v=3">
+  <link rel="stylesheet" href="Funciones/responsive.css?v=3">
   <!-- Regla 1: configuración compartida de la API -->
-  <script src="config.js"></script>
+  <script src="Funciones/config.js"></script>
 
   <style>
     :root {

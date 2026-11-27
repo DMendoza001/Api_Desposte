@@ -1,7 +1,6 @@
-﻿using Dapper;
+using ApiDesposte.Funciones.Sql;
+using Dapper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
-using System.Data;
 
 namespace ApiDesposte.Controllers.Sql;
 
@@ -13,7 +12,7 @@ public class CostosProduccionController : ControllerBase
 
     public CostosProduccionController(IConfiguration configuration)
     {
-        // Obtiene la cadena de conexión configurada en el appsettings.json
+        // Cadena de conexión desde la variable de entorno ConnectionStrings__SqlDesposte
         _connectionString = configuration.GetConnectionString("SqlDesposte")!;
     }
 
@@ -28,8 +27,6 @@ public class CostosProduccionController : ControllerBase
     {
         try
         {
-            using IDbConnection db = new SqlConnection(_connectionString);
-
             string sql = @"
                 SELECT 
                     YEAR(a.Fecha) AS [Año],
@@ -77,7 +74,7 @@ public class CostosProduccionController : ControllerBase
 
             sql += " ORDER BY YEAR(a.Fecha) DESC, MONTH(a.Fecha) DESC, b.CodigoCorto ASC, a.Codigo ASC;";
 
-            var resultados = await db.QueryAsync(sql, parametros, commandTimeout: 1200);
+            var resultados = await EjecutorSql.EjecutarTalCualAsync(_connectionString, sql, parametros);
 
             return Ok(resultados);
         }

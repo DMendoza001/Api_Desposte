@@ -48,22 +48,26 @@ dotnet add $Api package Microsoft.Data.SqlClient  # conexión a SQL Server
 New-Item -ItemType Directory -Force `
     "$Api\Controllers\Sql", `
     "$Api\Controllers\Excel", `
-    "$Api\Infraestructura\Excel", `
-    "Docu_Paginas", `
+    "$Api\Funciones\Excel", `
+    "$Api\Funciones\Sql", `
+    "$Api\Funciones\Fechas", `
+    "Docu_Paginas\Funciones", `
     ".agents\rules" | Out-Null
 ```
 
 ---
 
-## Paso 4. Copiar la infraestructura de Excel
+## Paso 4. Copiar las funciones compartidas del backend
 
-`LectorTablasExcel.cs` es la pieza que exige la regla 8. Se copia y se cambia el namespace:
+`LectorTablasExcel.cs` (regla 8), `EjecutorSql.cs` y `ParametrosFecha.cs` se copian y se cambia el namespace:
 
 ```powershell
-$destino = "$Api\Infraestructura\Excel\LectorTablasExcel.cs"
-Copy-Item "$Origen\ApiDesposte\Infraestructura\Excel\LectorTablasExcel.cs" $destino
-(Get-Content $destino -Raw -Encoding UTF8).Replace("namespace ApiDesposte.", "namespace $Api.") |
-    Set-Content $destino -Encoding UTF8
+foreach ($f in "Excel\LectorTablasExcel.cs", "Sql\EjecutorSql.cs", "Fechas\ParametrosFecha.cs") {
+    $destino = "$Api\Funciones\$f"
+    Copy-Item "$Origen\ApiDesposte\Funciones\$f" $destino
+    (Get-Content $destino -Raw -Encoding UTF8).Replace("namespace ApiDesposte.", "namespace $Api.") |
+        Set-Content $destino -Encoding UTF8
+}
 ```
 
 ---
@@ -71,19 +75,19 @@ Copy-Item "$Origen\ApiDesposte\Infraestructura\Excel\LectorTablasExcel.cs" $dest
 ## Paso 5. Copiar los archivos base del frontend
 
 ```powershell
-Copy-Item "$Origen\Docu_Paginas\config.js"     "Docu_Paginas\"
-Copy-Item "$Origen\Docu_Paginas\responsive.css" "Docu_Paginas\"
+Copy-Item "$Origen\Docu_Paginas\Funciones\config.js"      "Docu_Paginas\Funciones\"
+Copy-Item "$Origen\Docu_Paginas\Funciones\responsive.css" "Docu_Paginas\Funciones\"
 Copy-Item "$Origen\PaletaFinanza_Industrial.json" "."
 ```
 
-Luego abrir `Docu_Paginas\config.js` y cambiar `servidor` por el nombre del equipo donde correrá la API:
+Luego abrir `Docu_Paginas\Funciones\config.js` y cambiar `servidor` por el nombre del equipo donde correrá la API:
 
 ```powershell
 $env:COMPUTERNAME   # nombre de este equipo, para usarlo en config.js
-code Docu_Paginas\config.js
+code Docu_Paginas\Funciones\config.js
 ```
 
-> `index.html` (portal) se puede copiar de `Api_Desposte` y adaptar su lista `LISTA_DASHBOARDS`. No copiar PINs ni contraseñas escritos en el código: si se necesita acceso de administrador, leerlo de `appsettings.json`.
+> `index.html` (portal) se puede copiar de `Api_Desposte` y adaptar su lista `LISTA_DASHBOARDS`. No copiar PINs ni contraseñas escritos en el código: si se necesita acceso de administrador, leerlo de una variable de entorno (ej. `AdminConfig__Pin`).
 
 ---
 

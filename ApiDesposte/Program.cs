@@ -1,3 +1,5 @@
+using ApiDesposte.Funciones.IA;
+using ApiDesposte.Funciones.Portal;
 
 
 
@@ -7,6 +9,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 // 1. Agregar soporte para Controladores API
 builder.Services.AddControllers();
+
+// Cliente HTTP para servicios externos + IA para la documentación de SPs (DeepSeek / Gemini)
+builder.Services.AddHttpClient();
+builder.Services.AddSingleton<GeneradorJsonIA>();
 
 // 2. Configurar CORS (Para permitir solicitudes desde Excel Web y dashboards)
 builder.Services.AddCors(options =>
@@ -20,6 +26,28 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+// =========================================================================
+// 🔐 SECRETOS: se leen de variables de entorno de Windows (no de appsettings.json)
+// =========================================================================
+// ConnectionStrings__SqlDesposte, AdminConfig__Pin, DEEPSEEK_API_KEY y GEMINI_API_KEY.
+// Si falta alguno, la API arranca igual pero se avisa en consola qué variable configurar.
+var secretosRequeridos = new (string Clave, string Variable, string Efecto)[]
+{
+    ("ConnectionStrings:SqlDesposte", "ConnectionStrings__SqlDesposte", "los endpoints SQL no podrán conectarse"),
+    ("AdminConfig:Pin", "AdminConfig__Pin", "el acceso de administrador quedará deshabilitado")
+};
+foreach (var (clave, variable, efecto) in secretosRequeridos)
+{
+    if (string.IsNullOrWhiteSpace(builder.Configuration[clave]))
+    {
+        Console.WriteLine($"⚠️ Falta la variable de entorno '{variable}': {efecto}.");
+    }
+}
+var proveedoresIA = app.Services.GetRequiredService<GeneradorJsonIA>().Activos().Select(p => p.Nombre).ToList();
+Console.WriteLine(proveedoresIA.Count > 0
+    ? $"🤖 IA para documentar SPs: {string.Join(" → ", proveedoresIA)}"
+    : "ℹ️ Sin 'DEEPSEEK_API_KEY' ni 'GEMINI_API_KEY': la documentación de SPs solo mostrará diagramas ya guardados.");
 
 // 3. Activar CORS
 app.UseCors("PermitirExcelWeb");
@@ -38,9 +66,10 @@ if (!Directory.Exists(rutaCarpetaWeb))
 if (Directory.Exists(rutaCarpetaWeb))
 {
     var fileProvider = new PhysicalFileProvider(rutaCarpetaWeb);
+    string rutaEstado = EstadoDashboards.RutaArchivo(builder.Environment.ContentRootPath);
 
     // 🔒 Middleware de protección: Intercepta peticiones directas a archivos HTML en prueba
-    // Consulta dinámicamente dashboards_estado.json sin necesidad de listas fijas
+    // Consulta dinámicamente Datos/dashboards_estado.json sin necesidad de listas fijas
     app.Use(async (context, next) =>
     {
         string path = context.Request.Path.Value ?? "";
@@ -48,47 +77,39 @@ if (Directory.Exists(rutaCarpetaWeb))
             !path.Equals("/index.html", StringComparison.OrdinalIgnoreCase))
         {
             string fileName = Path.GetFileName(path);
-            string adminPin = builder.Configuration["AdminConfig:Pin"] ?? "Top1990@*";
+            // PIN desde la variable de entorno AdminConfig__Pin; sin PIN configurado nadie es administrador
+            string adminPin = (builder.Configuration["AdminConfig:Pin"] ?? "").Trim();
 
             // Verificar si el usuario cuenta con credencial de administrador (Cookie o Query string)
             bool esAdmin = false;
-            if (context.Request.Cookies.TryGetValue("desposte_admin", out var cPin) &&
-                (cPin == adminPin || cPin == "Top1990@*"))
+            if (adminPin.Length > 0)
             {
-                esAdmin = true;
-            }
-            else if (context.Request.Query.TryGetValue("admin", out var qPin) &&
-                     (qPin == adminPin || qPin == "Top1990@*"))
-            {
-                esAdmin = true;
+                if (context.Request.Cookies.TryGetValue("desposte_admin", out var cPin) && cPin == adminPin)
+                {
+                    esAdmin = true;
+                }
+                else if (context.Request.Query.TryGetValue("admin", out var qPin) && qPin == adminPin)
+                {
+                    esAdmin = true;
+                }
             }
 
             if (!esAdmin)
             {
-                string rutaEstado = Path.Combine(rutaCarpetaWeb, "dashboards_estado.json");
-                if (File.Exists(rutaEstado))
+                try
                 {
-                    try
+                    var estados = EstadoDashboards.Leer(rutaEstado);
+                    // Verifica directamente si el archivo HTML está marcado como en prueba (false)
+                    if (estados.TryGetValue(fileName, out bool activo) && !activo)
                     {
-                        string json = File.ReadAllText(rutaEstado);
-                        var estados = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, bool>>(json);
-                        if (estados != null)
-                        {
-                            // Verifica directamente si el archivo HTML está marcado como en prueba (false)
-                            bool estaDeshabilitado = estados.TryGetValue(fileName, out bool activoFile) && !activoFile;
-
-                            if (estaDeshabilitado)
-                            {
-                                // Redirigir al portal principal con aviso de acceso restringido
-                                context.Response.Redirect($"/index.html?bloqueado={Uri.EscapeDataString(fileName)}");
-                                return;
-                            }
-                        }
+                        // Redirigir al portal principal con aviso de acceso restringido
+                        context.Response.Redirect($"/index.html?bloqueado={Uri.EscapeDataString(fileName)}");
+                        return;
                     }
-                    catch
-                    {
-                        // En caso de error leyendo el archivo json, continuar
-                    }
+                }
+                catch
+                {
+                    // En caso de error leyendo el archivo json, continuar
                 }
             }
         }

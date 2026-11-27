@@ -1,0 +1,275 @@
+﻿{
+  "NombreSP": "Sp_Informe_Destino_All_Semanal",
+  "Esquema": "dbo",
+  "UltimaModificacionSQL": "2025-08-27T14:37:28.26",
+  "FechaGeneracion": "2026-11-27T08:37:34.1199197-05:00",
+  "Modelo": "DeepSeek \u00B7 deepseek-chat",
+  "Diagrama": {
+    "spName": "Sp_Informe_Destino_All_Semanal",
+    "esquema": "Desposte.dbo",
+    "badge": "Desposte.dbo \u00B7 Informe Destino Semanal",
+    "subtitulo": "Distribuye toda la producci\u00F3n de desposte por destino (Westphalia, despacho, congelado, embutidos, merma)",
+    "ultimaModificacion": "2025-08-27T14:37:28",
+    "etapa1_fuentes": {
+      "titulo": "1. Fuentes de datos y SPs previos",
+      "tarjetas": [
+        {
+          "titulo": "SPs previos ejecutados",
+          "estiloCabecera": "primary",
+          "items": [
+            "EXEC Gen_Porduccion_Corregida @Fecha1,@Fecha2,1",
+            "EXEC Gen_Produccion_Con_Merma @Fecha1,@Fecha2,1",
+            "Generan tabla base Tem_Produccion_Con_Merma"
+          ]
+        },
+        {
+          "titulo": "Tem_Produccion_Con_Merma",
+          "estiloCabecera": "primary",
+          "joinLabel": "Tabla base de producci\u00F3n",
+          "items": [
+            "Filtro por PuntoProceso (1016,1017,1024,1040,1003,1007,1008,1005,1011)",
+            "Filtro por plantilla (31,1115,32,964,1158,3016,1331,1363,981,983)",
+            "ttra=13 (Origen/Insumo) y ttra=4 (Resultado/Producci\u00F3n)",
+            "Agrupa por a\u00F1o, semana, ttra, Producto, CodigoCorto"
+          ]
+        },
+        {
+          "titulo": "Ventas",
+          "estiloCabecera": "secondary",
+          "joinLabel": "Cliente Westphalia",
+          "items": [
+            "Fecha entre @FechaCorta1 y @FechaCorta2",
+            "ClienteCodigo IN (899,16053)",
+            "Tipo=\u0027ALMACENES\u0027",
+            "Agrupa por a\u00F1o, semana, Codigo"
+          ]
+        },
+        {
+          "titulo": "Despacho",
+          "estiloCabecera": "secondary",
+          "joinLabel": "Salidas a despacho",
+          "items": [
+            "Fecha entre @Fecha1 y @Fecha2",
+            "Agrupa por a\u00F1o, semana, Codigo"
+          ]
+        },
+        {
+          "titulo": "Tabla01",
+          "estiloCabecera": "secondary",
+          "joinLabel": "Env\u00EDos a embutidos",
+          "items": [
+            "Destino IN (\u0027EMBUTIDOS\u0027,\u0027PREPARADOS\u0027,\u0027DESH. DE POLLO\u0027)",
+            "year(Fecha)=year(@Fecha1)",
+            "Agrupa por Producto"
+          ]
+        },
+        {
+          "titulo": "EquiVentaPrimerCorte",
+          "estiloCabecera": "dark",
+          "joinLabel": "LEFT JOIN Producto1=Producto",
+          "items": [
+            "Identifica venta fresco corte primario"
+          ]
+        }
+      ]
+    },
+    "etapa2_transformacion": {
+      "titulo": "2. Transformaci\u00F3n y bloques l\u00F3gicos",
+      "tarjetas": [
+        {
+          "titulo": "#Balance (Ingresos ttra=13)",
+          "subbloques": [
+            {
+              "subtitulo": "Cerdo carcasa",
+              "bullets": [
+                "PuntoProceso IN (1016,1017) AND ttra=13",
+                "Tipo=\u0027CERDO CARCASA\u0027"
+              ]
+            },
+            {
+              "subtitulo": "Marranas y lech\u00F3n",
+              "bullets": [
+                "PuntoProceso=1024 AND plantilla IN (31,1115,32) AND ttra=13",
+                "Tipo=\u0027MARRANAS\u0027 o \u0027LECHON\u0027"
+              ]
+            },
+            {
+              "subtitulo": "Cerdo 2da y lech\u00F3n vac\u00EDo",
+              "bullets": [
+                "PuntoProceso=1040 AND plantilla IN (964,1158) AND ttra=13",
+                "Tipo=\u0027CERDO 2DA\u0027 o \u0027LECHON\u0027"
+              ]
+            },
+            {
+              "subtitulo": "Reprocesos y devoluciones",
+              "bullets": [
+                "PuntoProceso IN (1007,1008) AND ttra=13",
+                "Unidades=0, Tipo=\u0027REPROCESOS Y DEVOLUCIONES\u0027"
+              ]
+            }
+          ]
+        },
+        {
+          "titulo": "#Balance (Salidas ttra=4)",
+          "subbloques": [
+            {
+              "subtitulo": "Mermas",
+              "bullets": [
+                "PP IN (1016,1017) y PP=1040 plantilla 964, Producto=\u0027000000000\u0027",
+                "Tipo=\u0027PRODUCCION\u0027"
+              ]
+            },
+            {
+              "subtitulo": "Resultantes",
+              "bullets": [
+                "PP IN (1018,1019) ttra=4",
+                "PP=1003 plantilla 3016 (cabeza) y plantilla IN (1331,1363) (porcionado)",
+                "PP=1024 plantilla IN (31,1115,32,981,983)",
+                "PP=1040 plantilla 1158 (lech\u00F3n vac\u00EDo)",
+                "PP IN (1007,1008) devoluciones"
+              ]
+            }
+          ]
+        },
+        {
+          "titulo": "#Produccion_Tipo_Agrupado",
+          "subbloques": [
+            {
+              "subtitulo": "Agrupaci\u00F3n",
+              "bullets": [
+                "Suma Unidades y Kilos por A\u00F1o, Semana, ttra, Producto, CodigoCorto, Tipo",
+                "Evita duplicados por SKU"
+              ]
+            }
+          ]
+        },
+        {
+          "titulo": "#Ventas_Westphalia",
+          "subbloques": [
+            {
+              "subtitulo": "C\u00E1lculo",
+              "bullets": [
+                "Suma Unidades, Kilos, Monto por a\u00F1o/semana/Codigo",
+                "Pv=(Monto/Kilos)/1.18"
+              ]
+            }
+          ]
+        },
+        {
+          "titulo": "#Distribucion_VentaWestphalia",
+          "subbloques": [
+            {
+              "subtitulo": "Distribuci\u00F3n FIFO venta",
+              "bullets": [
+                "LEFT JOIN producci\u00F3n ttra=4 con ventas Westphalia",
+                "Calcula UnidadesVenta, KilosVenta, SaldoUnidades, SaldoKilos",
+                "Topa venta al disponible en producci\u00F3n"
+              ]
+            }
+          ]
+        },
+        {
+          "titulo": "#Saldo_Despacho",
+          "subbloques": [
+            {
+              "subtitulo": "Saldo tras Westphalia",
+              "bullets": [
+                "Despacho LEFT JOIN #Total_Venta_Westphalia",
+                "Calcula SaldoUnidades y SaldoKilos"
+              ]
+            }
+          ]
+        },
+        {
+          "titulo": "#Distribucion_Despacho_Prod",
+          "subbloques": [
+            {
+              "subtitulo": "Distribuci\u00F3n despacho",
+              "bullets": [
+                "LEFT JOIN saldo Westphalia con saldo despacho",
+                "Calcula UnidadesDesp, KilosDesp y saldos restantes"
+              ]
+            }
+          ]
+        },
+        {
+          "titulo": "#Res_Marinado_Cong y #Distribucion_MarinadoCong",
+          "subbloques": [
+            {
+              "subtitulo": "Marinado/Congelado",
+              "bullets": [
+                "PP IN (1005,1011) ttra=13, Producto\u003C\u003E\u0027000000000\u0027",
+                "Descuenta del saldo de despacho",
+                "Calcula UnidadesMarCong, KilosMarCong y saldos"
+              ]
+            }
+          ]
+        },
+        {
+          "titulo": "#Informe_Destino",
+          "subbloques": [
+            {
+              "subtitulo": "Consolidaci\u00F3n por destino",
+              "bullets": [
+                "Ingresos ttra=13",
+                "Venta Westphalia",
+                "Despacho (fresco / fresco corte primario)",
+                "Congelado",
+                "Saldos: embutidos, merma, planta harinas"
+              ]
+            }
+          ]
+        }
+      ],
+      "nodoCentral": {
+        "titulo": "Cascada FIFO de descuento",
+        "descripcion": "Producci\u00F3n ttra=4 se descuenta secuencialmente: Westphalia \u2192 Despacho \u2192 Marinado/Congelado \u2192 saldo final",
+        "formula": "Saldo = Producci\u00F3n - VentaWestphalia - Despacho - MarinadoCong"
+      }
+    },
+    "etapa3_catalogos": {
+      "titulo": "3. Cat\u00E1logos maestros",
+      "tituloTarjeta": "Cruces con maestros",
+      "pasos": [
+        {
+          "caja": "Articulos",
+          "detalle": "LEFT JOIN a.Producto=b.CodigoArticulo \u2192 Nombre, UnidadConsumo",
+          "tipoJoin": "LEFT JOIN"
+        },
+        {
+          "caja": "EquiVentaPrimerCorte",
+          "detalle": "LEFT JOIN a.Producto=b.Producto1 \u2192 marca \u0027VENTA FRESCO CORTE PRIMARIO\u0027",
+          "tipoJoin": "LEFT JOIN"
+        }
+      ],
+      "badges": [
+        "ORIGEN (ttra=13)",
+        "RESULTADO (ttra=4)",
+        "VENTA WESTPHALIA",
+        "VENTA FRESCO",
+        "CONGELADO",
+        "PLANTA DE EMBUTIDOS (PROCESOS)",
+        "MERMA",
+        "PLANTA DE HARINAS"
+      ]
+    },
+    "etapa4_salida": {
+      "tituloTarjeta": "Resultado Final",
+      "columnas": [
+        "A\u00F1o",
+        "Semana",
+        "ttra",
+        "NTtra",
+        "Producto",
+        "CodigoCorto",
+        "Nombre",
+        "UnidadConsumo",
+        "Unidades",
+        "Kilos",
+        "Tipo",
+        "Porc"
+      ],
+      "pieFiltro": "LEFT JOIN Articulos; Porc = Kilos / SUM(Kilos ttra=13) OVER (PARTITION BY a\u00F1o, semana)"
+    }
+  }
+}

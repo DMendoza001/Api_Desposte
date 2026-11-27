@@ -1,7 +1,7 @@
 using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Packaging;
 
-namespace ApiDesposte.Infraestructura.Excel
+namespace ApiDesposte.Funciones.Excel
 {
     /// <summary>
     /// Lectura estándar de tablas estructuradas de Excel sincronizadas en OneDrive

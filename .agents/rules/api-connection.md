@@ -7,7 +7,7 @@ Todos los archivos `.html` ubicados en `Docu_Paginas/` (o cualquier nuevo report
 ## 1. Principio del Patrón Híbrido
 
 El sistema debe operar de forma dual sin requerir cambios manuales ni romper dependencias:
-1. **Desarrollo y Portabilidad Local:** Si el archivo compartido `config.js` existe en la misma carpeta, la página toma dinámicamente el host y puertos configurados en `GLOBAL_CONFIG`.
+1. **Desarrollo y Portabilidad Local:** Si el archivo compartido `Funciones/config.js` existe junto a la página, la página toma dinámicamente el host y puertos configurados en `GLOBAL_CONFIG`.
 2. **Archivos Compartidos Autónomos / Red Local:** Si se envía un archivo `.html` individual a un compañero o se abre desde otra máquina de la red (incluso sin `config.js`), el archivo debe funcionar de forma 100% autónoma usando los valores por defecto del servidor central (`RAEVSALL001`, puertos `[8080, 5000]`).
 
 ---
@@ -17,7 +17,7 @@ El sistema debe operar de forma dual sin requerir cambios manuales ni romper dep
 - **En `<head>`:** Incluir únicamente la importación opcional de `config.js` sin bloques `<script>` inline con lógica:
   ```html
   <!-- Configuración compartida de conexión a la API -->
-  <script src="config.js"></script>
+  <script src="Funciones/config.js"></script>
   ```
 - **En `<body>` (Inicio del script principal):** Declarar el bloque de configuración `APP_CONFIG`, `generarBasesApi()`, `fetchConTimeout()` y `detectarServidorApi()`.
 
@@ -116,7 +116,7 @@ async function detectarServidorApi() {
 
 ## 5. Archivo Central `config.js`
 
-El archivo `Docu_Paginas/config.js` define:
+El archivo `Docu_Paginas/Funciones/config.js` define:
 - `servidor`: Nombre de equipo en red (e.g. `"RAEVSALL001"`) o `"localhost"`.
 - `puertos`: Lista priorizada de puertos `[8080, 5000]`.
 - Función `generarBasesApiGlobal()` con detección y fallbacks automáticos a `localhost` y `127.0.0.1`.

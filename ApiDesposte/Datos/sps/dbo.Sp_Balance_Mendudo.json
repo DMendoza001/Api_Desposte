@@ -1,0 +1,130 @@
+﻿{
+  "NombreSP": "Sp_Balance_Mendudo",
+  "Esquema": "dbo",
+  "UltimaModificacionSQL": "2026-03-26T16:47:00.13",
+  "FechaGeneracion": "2026-11-27T08:12:42.9657175-05:00",
+  "Modelo": "gemini-3.6-flash",
+  "Diagrama": {
+    "spName": "Sp_Balance_Mendudo",
+    "esquema": "Desposte.dbo",
+    "badge": "Desposte.dbo \u00B7 Balance Menudo",
+    "subtitulo": "Calcula el balance estimado de masas del menudo ingresado desde PBC",
+    "ultimaModificacion": "2026-03-26T16:47:00",
+    "etapa1_fuentes": {
+      "titulo": "1. Fuentes Base y Tablas Temporales",
+      "tarjetas": [
+        {
+          "titulo": "#Ingreso_PBC (Tabla10)",
+          "estiloCabecera": "primary",
+          "items": [
+            "Filtro: Fecha entre @Fecha1 y @Fecha2",
+            "PuntoProceso = 1000, ttra = 3 (Ingreso por transferencia)",
+            "Art\u00EDculos IN (040504002, 040508029, y otros 15 SKUs de menudo)",
+            "Agrupado por A\u00F1o, Mes y Producto (Unidades y Kilos)"
+          ]
+        },
+        {
+          "titulo": "#Produccion_Filtrada (Tabla10 \u002B Fechas_OrdeProduccion)",
+          "estiloCabecera": "secondary",
+          "joinLabel": "INNER JOIN Fechas_OrdeProduccion por grupopuntoproceso, PuntoProceso, numero",
+          "items": [
+            "Filtro: Fecha entre (@Fecha1 - 7 d\u00EDas) y (@Fecha2 \u002B 7 d\u00EDas)",
+            "plantilla IS NOT NULL, grupopuntoproceso = 1"
+          ]
+        },
+        {
+          "titulo": "#Envio_Procesos (TrasladoProcesos)",
+          "estiloCabecera": "dark",
+          "items": [
+            "Filtro: FechaDespacho entre @Fecha1 y @Fecha2",
+            "Etiqueta LIKE \u0027%[a-zA-Z]%\u0027",
+            "\u00CDndice Cluster creado sobre (A\u00F1o, Mes, CodigoArticulo)"
+          ]
+        }
+      ]
+    },
+    "etapa2_transformacion": {
+      "titulo": "2. Transformaci\u00F3n, Saldos y C\u00E1lculo de Rendimientos",
+      "tarjetas": [
+        {
+          "titulo": "#Detalle_Repeso",
+          "subbloques": [
+            {
+              "subtitulo": "Filtrado de Plantilla y Mermas",
+              "bullets": [
+                "Filtro: plantilla = 1476, PuntoProceso = 1003",
+                "ttra = 13 (Ingreso), ttra = 4 (Salida)",
+                "C\u00E1lculo: Merma = (Ingreso - Salida) / NULLIF(Ingreso, 0)",
+                "HAVING: (Ingreso - Salida) \u003E= 0"
+              ]
+            }
+          ]
+        },
+        {
+          "titulo": "#Distribucion_Envio y #Resumen",
+          "subbloques": [
+            {
+              "subtitulo": "Cruces de Saldo y Aplicaci\u00F3n de Merma",
+              "bullets": [
+                "LEFT JOIN #Ingreso_PBC con #Envio_Procesos (A\u00F1o, Mes, Producto)",
+                "KgEnviado = MIN(KgIngreso, KgProcesos), KgSaldo = MAX(0, KgIngreso - KgProcesos)",
+                "LEFT JOIN con #Detalle_Repeso para calcular KgFinal = KgSaldo * (1 - Merma)",
+                "KgMerma = KgSaldo * Merma, Tipo = IIF(Merma IS NOT NULL, 1, 2)"
+              ]
+            }
+          ]
+        },
+        {
+          "titulo": "#Rend_Cabeza (CTEs)",
+          "subbloques": [
+            {
+              "subtitulo": "Rendimiento de Cabeza",
+              "bullets": [
+                "Filtro: PuntoProceso = 1003, plantilla IN (19, 1274)",
+                "Mapea ttra = 13 a SKU \u0027040508029\u0027",
+                "Calcula Rend_Participacion con OVER (PARTITION BY A\u00F1o, Mes)"
+              ]
+            }
+          ]
+        }
+      ],
+      "nodoCentral": {
+        "titulo": "C\u00E1lculo de Masas, Saldo y Prorrateo de Cabeza",
+        "descripcion": "El saldo sin enviar a procesos aplica el factor de merma de repeso. El producto cabeza (040508029) se distribuye seg\u00FAn el rendimiento de las plantillas 19 y 1274.",
+        "formula": "KgFinal = KgSaldo * (1 - Merma) | Rend_Participacion = Kilos / SUM(Kilos_MP)"
+      }
+    },
+    "etapa3_catalogos": {
+      "titulo": "3. Enriquecimiento con Cat\u00E1logos de Art\u00EDculos",
+      "tituloTarjeta": "Cruces con Funciones Maestras",
+      "pasos": [
+        {
+          "caja": "Articulo_Codigo_Corto()",
+          "detalle": "Cruza V.Producto / a.Producto = CodigoArticulo para obtener CodigoCorto y Nombre",
+          "tipoJoin": "LEFT JOIN"
+        }
+      ],
+      "badges": [
+        "MP (ttra 13)",
+        "PTA. PROCESOS (ttra 4)",
+        "REPESO / STOCK (ttra 4)",
+        "MERMA REP (ttra 4)"
+      ]
+    },
+    "etapa4_salida": {
+      "tituloTarjeta": "Resultado Final Consolidado",
+      "columnas": [
+        "A\u00F1o",
+        "Mes",
+        "Producto",
+        "CodigoCorto",
+        "Nombre",
+        "Kilos",
+        "Ttra",
+        "NTtra",
+        "Tipo"
+      ],
+      "pieFiltro": "CROSS APPLY de #Resumen (Kilos \u003E 0) UNION ALL distribuci\u00F3n #Rend_Cabeza (ttra = 4, Kilos \u003E 0)"
+    }
+  }
+}

@@ -99,10 +99,12 @@ function generarBasesApiGlobal() {
             }
         }
 
-        // 2. Revisar dashboards_estado.json
-        fetch("dashboards_estado.json?_t=" + Date.now())
+        // 2. Consultar la API (solo cuando la página la sirve la propia API; el JSON vive en ApiDesposte/Datos)
+        if (!window.location.protocol.startsWith('http')) return;
+        fetch("/api/PortalConfig/config?_t=" + Date.now())
             .then(function (res) { return res.json(); })
-            .then(function (estados) {
+            .then(function (data) {
+                var estados = data && data.estados;
                 if (estados && estados[fileName] === false) {
                     ejecutarBloqueo();
                 }

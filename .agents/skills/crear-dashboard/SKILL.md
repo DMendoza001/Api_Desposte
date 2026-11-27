@@ -30,7 +30,7 @@ Seguir la **Regla 6** (nombre de clase alineado al archivo, único `[Route("api/
   - Leer `.agents/rules/conexion-excel-onedrive.md`.
   - Crear `ApiDesposte/Controllers/Excel/<Nombre>Controller.cs`.
   - Resolver la ruta dinámicamente con `ObtenerRutaExcel()` usando `Environment.SpecialFolder.UserProfile`.
-  - Delegar apertura, lectura y caché obligatoriamente a `LectorTablasExcel` y `CacheTablasExcel` (`ApiDesposte.Infraestructura.Excel`). Nunca instanciar `FileStream`, `MemoryStream` ni `SpreadsheetDocument` en el controlador.
+  - Delegar apertura, lectura y caché obligatoriamente a `LectorTablasExcel` y `CacheTablasExcel` (`ApiDesposte.Funciones.Excel`). Nunca instanciar `FileStream`, `MemoryStream` ni `SpreadsheetDocument` en el controlador.
 - **Si la fuente es SQL Server:**
   - Crear `ApiDesposte/Controllers/Sql/<Nombre>Controller.cs`.
   - Usar `SqlConnection` (`SqlDesposte` de `appsettings.json`) + `Dapper` devolviendo las columnas originales de la base de datos.
@@ -38,9 +38,9 @@ Seguir la **Regla 6** (nombre de clase alineado al archivo, único `[Route("api/
 ## Paso 3: Crear el dashboard HTML (`Docu_Paginas/<Nombre>.html`)
 
 Consultar las reglas aplicables en `.agents/rules/` antes de generar el archivo:
-- **Conexión API** (`.agents/rules/api-connection.md`): incluir `<script src="config.js"></script>` en `<head>`, declarar `APP_CONFIG` apuntando a la ruta canónica única, usar `generarBasesApi()`, `fetchConTimeout()` y `detectarServidorApi()`.
+- **Conexión API** (`.agents/rules/api-connection.md`): incluir `<script src="Funciones/config.js"></script>` en `<head>`, declarar `APP_CONFIG` apuntando a la ruta canónica única, usar `generarBasesApi()`, `fetchConTimeout()` y `detectarServidorApi()`.
 - **Diseño responsive y tema** (`.agents/rules/responsive-design.md`):
-  - Enlazar `<link rel="stylesheet" href="responsive.css?v=3">` y bloque `@media` autónomo (compacto desde `max-width: 1600px`, tablet `<= 980px`, móvil `<= 768px`).
+  - Enlazar `<link rel="stylesheet" href="Funciones/responsive.css?v=3">` y bloque `@media` autónomo (compacto desde `max-width: 1600px`, tablet `<= 980px`, móvil `<= 768px`).
   - Usar la paleta industrial oficial (`#38353B`, `#434B57`, `#BAA063`, `#7A828E`, `#F2F4F8`).
   - 4 tarjetas KPI en una sola fila en laptop (`repeat(4, minmax(0, 1fr))`), `min-width: 0` en hijos de grid/flex y contenedores de gráficos con clase (sin alturas inline fijas).
   - Si un gráfico usa `chartjs-plugin-datalabels`, ocultarlas en celular con `display: () => window.innerWidth > 768`.

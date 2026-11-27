@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentación de Stored Procedures · Desposte</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap"
+        rel="stylesheet">
+
+    <!-- SheetJS para exportar la data plana SQL (.xlsx) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <!-- Configuración compartida de conexión a la API -->
+    <script src="Funciones/config.js"></script>
+
+    <style>
+        /* =========================================================================
+           🎨 PALETA COMITÉ DE NEGOCIOS (Pantone Blue & Grey)
+           ========================================================================= */
+        :root {
+            --color-header-bg: #353A4C;
+            --color-header-gradient: linear-gradient(135deg, #353A4C 0%, #3C3F4A 100%);
+            --color-header-text: #FFFFFF;
+            --color-header-subtext: #C6D2E0;
+            --color-heading: #353A4C;
+            --color-text: #3C3F4A;
+            --color-text-muted: #656466;
+            --color-primary: #5A77A8;
+            --color-secondary: #748CAB;
+            --color-bg: #F4F6F9;
+            --color-surface: #FFFFFF;
+            --color-border: #E2E8F0;
+            --color-slate-light: #91A6C4;
+            --color-ice: #C6D2E0;
+            --color-ok: #2F855A;
+            --color-warn: #B7791F;
+            --color-error: #C0392B;
+            --shadow-sm: 0 2px 6px rgba(53, 58, 76, 0.06);
+            --shadow-md: 0 6px 16px rgba(53, 58, 76, 0.11);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.4;
+            overflow: hidden;
+        }
+
+        /* responsive.css aplica padding al body: con barra lateral el margen lo da el layout */
+        html body {
+            padding: 0 !important;
+        }
+
+        .app-layout {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+        }
+
+        .app-layout > * {
+            min-width: 0;
+        }
+
+        /* ============================ PANEL LATERAL (LISTA DE SPs) ============================ */
+        .sp-panel {
+            width: 330px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            background: var(--color-header-gradient);
+            color: var(--color-header-text);
+            border-right: 3px solid var(--color-primary);
+        }
+
+        .panel-head {
+            padding: 16px 16px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .panel-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .link-menu {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--color-header-subtext);
+            font-size: 0.74rem;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .link-menu:hover {
+            color: #FFFFFF;
+        }
+
+        .panel-title {
+            font-size: 1.05rem;
+            font-weight: 800;
+            letter-spacing: -0.01em;
+        }
+
+        .panel-sub {
+            font-size: 0.75rem;
+            color: var(--color-header-subtext);
+            margin-top: 2px;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--color-header-subtext);
+            padding: 3px 9px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            max-width: 160px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--color-slate-light);
+            flex-shrink: 0;
+        }
+
+        .dot.ok { background: #48BB78; }
+        .dot.warn { background: #ECC94B; }
+        .dot.error { background: #F56565; }
+        .dot.loading { background: var(--color-ice); animation: pulso 1s infinite alternate; }
+        .dot.sin { background: transparent; border: 1.5px solid var(--color-slate-light); }
+
+        @keyframes pulso {
+            from { opacity: 0.35; }
+            to { opacity: 1; }
+        }
+
+        .base-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .base-box label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--color-header-subtext);
+            white-space: nowrap;
+        }
+
+        .base-box select {
+            flex: 1;
+            min-width: 0;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 8px;
+            padding: 6px 9px;
+            color: #FFFFFF;
+            font-size: 0.82rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+        }
+
+        .base-box select:focus {
+            outline: none;
+            border-color: var(--color-ice);
+        }
+
+        .base-box select option {
+            color: var(--color-heading);
+            background: #FFFFFF;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 12px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 8px;
+            padding: 7px 11px;
+        }
+
+        .search-box:focus-within {
+            border-color: var(--color-ice);
+        }
+
+        .search-box svg {
+            color: var(--color-header-subtext);
+            flex-shrink: 0;
+        }
+
+        .search-box input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #FFFFFF;
+            font-size: 0.84rem;
+            width: 100%;
+            font-family: inherit;
+            min-width: 0;
+        }
+
+        .search-box input::placeholder {
+            color: rgba(198, 210, 224, 0.7);
+        }
+
+        .panel-tools {
+            display: flex;
+            gap: 6px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-panel {
+            flex: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 6px 8px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            background: rgba(255, 255, 255, 0.06);
+            color: #FFFFFF;
+            font-size: 0.74rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            white-space: nowrap;
+        }
+
+        .btn-panel:hover {
+            background: var(--color-primary);
+            border-color: var(--color-primary);
+        }
+
+        .btn-panel svg {
+            width: 13px;
+            height: 13px;
+        }
+
+        .aviso-gemini {
+            margin: 10px 16px 0;
+            padding: 8px 10px;
+            font-size: 0.72rem;
+            line-height: 1.35;
+            border-radius: 6px;
+            background: rgba(236, 201, 75, 0.12);
+            border: 1px solid rgba(236, 201, 75, 0.4);
+            color: #F6E7B0;
+        }
+
+        .leyenda {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding: 10px 16px 6px;
+            font-size: 0.68rem;
+            color: var(--color-header-subtext);
+        }
+
+        .leyenda span {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .sp-lista {
+            flex: 1;
+            overflow-y: auto;
+            padding: 4px 8px 14px;
+        }
+
+        .sp-item {
+            width: 100%;
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid transparent;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.82);
+            cursor: pointer;
+            text-align: left;
+            font-family: inherit;
+            margin-bottom: 2px;
+        }
+
+        .sp-item .dot {
+            margin-top: 5px;
+        }
+
+        .sp-item:hover {
+            background: rgba(255, 255, 255, 0.07);
+            color: #FFFFFF;
+        }
+
+        .sp-item.active {
+            background: rgba(90, 119, 168, 0.35);
+            border-color: rgba(198, 210, 224, 0.35);
+            color: #FFFFFF;
+            box-shadow: inset 3px 0 0 var(--color-ice);
+        }
+
+        .sp-item-text {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .sp-nombre {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.76rem;
+            font-weight: 700;
+            word-break: break-all;
+        }
+
+        .sp-fecha {
+            display: block;
+            font-size: 0.68rem;
+            color: var(--color-header-subtext);
+            margin-top: 2px;
+        }
+
+        .sp-vacio {
+            padding: 24px 12px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--color-header-subtext);
+        }
+
+        /* ============================ ÁREA PRINCIPAL (VISOR) ============================ */
+        .visor-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            background: var(--color-bg);
+        }
+
+        .visor-frame {
+            flex: 1;
+            width: 100%;
+            border: none;
+            min-width: 0;
+            background: var(--color-bg);
+        }
+
+        .bienvenida {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .bienvenida-card {
+            max-width: 560px;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-top: 4px solid var(--color-primary);
+            border-radius: 14px;
+            padding: 28px 30px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .bienvenida-card h1 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--color-heading);
+            margin-bottom: 8px;
+        }
+
+        .bienvenida-card p {
+            font-size: 0.88rem;
+            color: var(--color-text-muted);
+            margin-bottom: 10px;
+        }
+
+        .bienvenida-card ol {
+            padding-left: 18px;
+            font-size: 0.85rem;
+            color: var(--color-text);
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--color-header-bg);
+            color: #FFFFFF;
+            padding: 11px 16px;
+            border-radius: 10px;
+            border-left: 4px solid var(--color-primary);
+            box-shadow: var(--shadow-md);
+            font-size: 0.82rem;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.25s ease;
+            pointer-events: none;
+            z-index: 3000;
+            max-width: 380px;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        [hidden] {
+            display: none !important;
+        }
+
+        /* ============================ RESPONSIVE ============================ */
+        @media screen and (max-width: 1600px) {
+            .panel-head {
+                padding: 12px 12px 10px;
+            }
+        }
+
+        @media screen and (max-width: 980px) {
+            body {
+                overflow: auto;
+            }
+
+            .app-layout {
+                flex-direction: column;
+                height: auto;
+                min-height: 100vh;
+            }
+
+            .sp-panel {
+                width: 100%;
+                border-right: none;
+                border-bottom: 3px solid var(--color-primary);
+            }
+
+            .sp-lista {
+                max-height: 240px;
+            }
+
+            .visor-area {
+                min-height: 85vh;
+            }
+
+            .visor-frame {
+                min-height: 85vh;
+            }
+        }
+
+        @media screen and (max-width: 768px) {
+            .panel-tools .btn-panel {
+                flex: 1 1 100%;
+            }
+
+            .sp-lista {
+                max-height: 200px;
+            }
+
+            .bienvenida {
+                padding: 12px;
+            }
+
+            .bienvenida-card {
+                padding: 20px 18px;
+            }
+
+            .toast {
+                left: 12px;
+                right: 12px;
+                max-width: none;
+            }
+        }
+        /* =========================================================================
+           🧭 PANEL LATERAL SMART FLOTANTE (patrón de InformeCabezas.html)
+           En laptop / escritorio el panel es un dock de iconos de 60px. Al pasar el
+           cursor (o al enfocarlo) se despliega a 320px SOBRE el visor, con margin-right
+           negativo, sin redimensionar el diagrama. Mientras no hay SP elegido queda
+           abierto (.abierto) para que se vea la lista.
+           ========================================================================= */
+        .panel-rail {
+            display: none;
+        }
+
+        .panel-full {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+        }
+
+        @media screen and (min-width: 981px) {
+            .sp-panel {
+                position: relative;
+                align-self: flex-start;
+                width: 60px;
+                height: calc(100vh - 20px);
+                margin: 10px 0 10px 10px;
+                overflow: hidden;
+                border-right: none;
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                border-radius: 16px;
+                box-shadow: 0 10px 26px rgba(30, 33, 45, 0.22);
+                z-index: 100;
+                transition: width 0.22s ease, margin-right 0.22s ease, box-shadow 0.22s ease;
+            }
+
+            /* Ancho fijo del contenido: no se reacomoda mientras el panel se despliega */
+            .panel-full {
+                display: none;
+                width: 320px;
+            }
+
+            .panel-rail {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 6px;
+                height: 100%;
+                padding: 14px 0 12px;
+            }
+
+            .sp-panel.abierto,
+            .sp-panel:hover,
+            .sp-panel:focus-within {
+                width: 320px;
+            }
+
+            .sp-panel:not(.abierto):hover,
+            .sp-panel:not(.abierto):focus-within {
+                margin-right: -260px;
+                box-shadow: 10px 12px 30px rgba(30, 33, 45, 0.32);
+            }
+
+            .sp-panel.abierto .panel-full,
+            .sp-panel:hover .panel-full,
+            .sp-panel:focus-within .panel-full {
+                display: flex;
+            }
+
+            .sp-panel.abierto .panel-rail,
+            .sp-panel:hover .panel-rail,
+            .sp-panel:focus-within .panel-rail {
+                display: none;
+            }
+
+            .visor-area {
+                margin-left: 10px;
+            }
+        }
+
+        .rail-logo {
+            width: 40px;
+            display: flex;
+            justify-content: center;
+            padding-bottom: 12px;
+            margin-bottom: 4px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+            color: var(--color-ice);
+        }
+
+        .rail-btn {
+            position: relative;
+            width: 42px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 9px;
+            border: 1px solid transparent;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.72);
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.18s ease;
+        }
+
+        .rail-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #FFFFFF;
+        }
+
+        .rail-btn.lista {
+            background: rgba(90, 119, 168, 0.38);
+            border-color: rgba(198, 210, 224, 0.3);
+            color: #FFFFFF;
+            box-shadow: inset 3px 0 0 var(--color-ice);
+        }
+
+        .rail-badge {
+            position: absolute;
+            top: -4px;
+            right: -6px;
+            min-width: 20px;
+            padding: 1px 4px;
+            border-radius: 999px;
+            background: var(--color-primary);
+            color: #FFFFFF;
+            font-size: 0.6rem;
+            font-weight: 700;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        .rail-bottom {
+            margin-top: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.09);
+            width: 40px;
+        }
+    </style>
+
+    <!-- Hoja de estilos responsive compartida -->
+    <link rel="stylesheet" href="Funciones/responsive.css?v=3">
+</head>
+
+<body>
+    <div class="app-layout">
+        <!-- PANEL LATERAL: CATÁLOGO EN VIVO DE SPs -->
+        <aside class="sp-panel abierto" id="spPanel" aria-label="Documentación de SPs">
+            <!-- Dock de iconos (panel plegado) -->
+            <div class="panel-rail">
+                <div class="rail-logo" title="Documentación de SPs">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <ellipse cx="12" cy="5" rx="8" ry="3"></ellipse>
+                        <path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"></path>
+                        <path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"></path>
+                    </svg>
+                </div>
+                <button type="button" class="rail-btn lista" title="Lista de SPs" onclick="enfocarBusqueda()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M8 6h13"></path>
+                        <path d="M8 12h13"></path>
+                        <path d="M8 18h13"></path>
+                        <path d="M3 6h.01"></path>
+                        <path d="M3 12h.01"></path>
+                        <path d="M3 18h.01"></path>
+                    </svg>
+                    <span class="rail-badge" id="railTotal">0</span>
+                </button>
+                <button type="button" class="rail-btn" title="Buscar SP" onclick="enfocarBusqueda()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                        stroke-linecap="round" aria-hidden="true">
+                        <circle cx="11" cy="11" r="7"></circle>
+                        <path d="m20 20-3.5-3.5"></path>
+                    </svg>
+                </button>
+                <button type="button" class="rail-btn" title="Actualizar lista" onclick="cargarLista(true)">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+                    </svg>
+                </button>
+                <button type="button" class="rail-btn" title="Data Plana SQL (.xlsx)" onclick="exportarDataPlanaSQL()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                </button>
+                <div class="rail-bottom">
+                    <a href="index.html" class="rail-btn" title="Regresar al Menú Principal">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                        </svg>
+                    </a>
+                    <span class="dot" id="railStatusDot" title="Estado de conexión con la API"></span>
+                </div>
+            </div>
+
+            <!-- Panel desplegado -->
+            <div class="panel-full">
+            <div class="panel-head">
+                <div class="panel-top">
+                    <a href="index.html" class="link-menu" title="Regresar al Menú Principal">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="m15 18-6-6 6-6"></path>
+                        </svg>
+                        Menú Principal
+                    </a>
+                    <span class="status-pill" id="apiStatusBadge" title="Estado de conexión con la API">
+                        <span class="dot" id="apiStatusDot"></span>
+                        <span id="apiStatusText">Buscando…</span>
+                    </span>
+                </div>
+                <div class="panel-title">Documentación de SPs</div>
+                <div class="panel-sub" id="panelSub">Stored Procedures</div>
+
+                <div class="base-box">
+                    <label for="selectBase">Base de datos</label>
+                    <select id="selectBase" onchange="cambiarBase(this.value)" aria-label="Base de datos">
+                        <option value="">Cargando…</option>
+                    </select>
+                </div>
+
+                <div class="search-box">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                        stroke-linecap="round" aria-hidden="true">
+                        <circle cx="11" cy="11" r="7"></circle>
+                        <path d="m20 20-3.5-3.5"></path>
+                    </svg>
+                    <input type="text" id="inputBuscar" placeholder="Buscar SP…" oninput="renderizarLista()"
+                        aria-label="Buscar Stored Procedure">
+                </div>
+
+                <div class="panel-tools">
+                    <button type="button" class="btn-panel" onclick="cargarLista(true)" title="Volver a leer la lista desde SQL Server">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+                        </svg>
+                        Actualizar lista
+                    </button>
+                    <button type="button" class="btn-panel" onclick="exportarDataPlanaSQL()"
+                        title="Descargar el catálogo de SPs tal como lo devuelve SQL Server">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Data Plana SQL (.xlsx)
+                    </button>
+                </div>
+            </div>
+
+            <div class="aviso-gemini" id="avisoGemini" hidden>
+                No hay IA configurada en el servidor (DeepSeek o Gemini): solo se pueden ver los SPs que ya tienen diagrama
+                guardado.
+            </div>
+
+            <div class="leyenda">
+                <span><span class="dot ok"></span>Diagrama al día</span>
+                <span><span class="dot warn"></span>SP cambió</span>
+                <span><span class="dot sin"></span>Sin diagrama</span>
+            </div>
+
+            <nav class="sp-lista" id="spLista">
+                <div class="sp-vacio">Cargando lista de SPs…</div>
+            </nav>
+            </div>
+        </aside>
+
+        <!-- ÁREA PRINCIPAL: VISOR DEL DIAGRAMA -->
+        <main class="visor-area">
+            <div class="bienvenida" id="bienvenida">
+                <div class="bienvenida-card">
+                    <h1>Diagramas de flujo de los Stored Procedures</h1>
+                    <p>Elige un SP de la lista para ver sus fuentes, transformaciones, catálogos y columnas de salida.</p>
+                    <ol>
+                        <li>Elige la base de datos (Desposte, PlantasCore…); la lista se lee en vivo de SQL Server (<code>sys.procedures</code>).</li>
+                        <li>Si el SP no cambió desde la última vez, el diagrama se muestra al instante desde la caché.</li>
+                        <li>Si es nuevo o fue modificado, la IA (DeepSeek, con Gemini de respaldo) analiza el código y genera el diagrama (puede tardar
+                            hasta un minuto).</li>
+                        <li>En el visor, <b>Regenerar desde SQL</b> fuerza un análisis nuevo.</li>
+                    </ol>
+                </div>
+            </div>
+            <iframe class="visor-frame" id="visorFrame" title="Visor del diagrama del SP" hidden></iframe>
+        </main>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // =========================================================================
+        // ⚙️ CONFIGURACIÓN DE CONEXIÓN HÍBRIDA A LA API .NET
+        // =========================================================================
+        const APP_CONFIG = {
+            servidor: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.servidor)
+                ? GLOBAL_CONFIG.servidor
+                : "RAEVSALL001",
+            puertos: (typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.puertos)
+                ? GLOBAL_CONFIG.puertos
+                : [8080, 5000]
+        };
+
+        function generarBasesApi() {
+            if (typeof generarBasesApiGlobal === 'function') {
+                return generarBasesApiGlobal();
+            }
+            const bases = [];
+            for (const puerto of APP_CONFIG.puertos) {
+                bases.push(`http://${APP_CONFIG.servidor}:${puerto}`);
+            }
+            return bases;
+        }
+
+        // Endpoint del controlador SpsController
+        APP_CONFIG.controllerPath = "/api/Sps/lista";
+        APP_CONFIG.timeoutMs = 30000;
+
+        let apiBaseActiva = null;
+        let cachedInitialPayload = null;
+
+        async function fetchConTimeout(url, timeoutMs = 10000) {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+                const res = await fetch(url, { signal: controller.signal });
+                clearTimeout(id);
+                return res;
+            } catch (err) {
+                clearTimeout(id);
+                throw err;
+            }
+        }
+
+        async function detectarServidorApi() {
+            const bases = generarBasesApi();
+            for (const base of bases) {
+                try {
+                    const res = await fetchConTimeout(`${base}${APP_CONFIG.controllerPath}`, 3500);
+                    if (res.ok) {
+                        try { cachedInitialPayload = await res.json(); } catch (_) { }
+                        return base;
+                    }
+                } catch (e) {
+                    try {
+                        const pingRes = await fetchConTimeout(`${base}/`, 2500);
+                        if (pingRes.ok) return base;
+                    } catch (errPing) { }
+                }
+            }
+            return null;
+        }
+
+        // =========================================================================
+        // 🗂️ ESTADO
+        // =========================================================================
+        let rawSqlData = [];        // Catálogo tal cual lo devuelve la API (data plana SQL)
+        let spSeleccionado = null;
+        let baseActual = null;      // Base de datos elegida (null = la predeterminada de la API)
+
+        function escaparHtml(texto) {
+            return String(texto ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function fechaLegible(iso) {
+            if (!iso) return '-';
+            const d = new Date(iso);
+            if (isNaN(d)) return String(iso);
+            const p = (n) => String(n).padStart(2, '0');
+            return `${p(d.getDate())}/${p(d.getMonth() + 1)}/${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`;
+        }
+
+        function mostrarToast(mensaje, icono = 'ℹ️') {
+            const toast = document.getElementById('toast');
+            toast.textContent = `${icono} ${mensaje}`;
+            toast.classList.add('show');
+            clearTimeout(mostrarToast._timer);
+            mostrarToast._timer = setTimeout(() => toast.classList.remove('show'), 4500);
+        }
+
+        function fijarEstadoApi(clase, texto) {
+            ['apiStatusDot', 'railStatusDot'].forEach(id =>
+                document.getElementById(id).className = 'dot' + (clase ? ` ${clase}` : ''));
+            document.getElementById('apiStatusText').textContent = texto;
+            document.getElementById('railStatusDot').title = `API: ${texto}`;
+        }
+
+        // Desde el dock plegado: despliega el panel (por :focus-within) y pone el cursor en el buscador
+        function enfocarBusqueda() {
+            setTimeout(() => document.getElementById('inputBuscar').focus(), 30);
+        }
+
+        // =========================================================================
+        // 🔄 CATÁLOGO DE SPs
+        // =========================================================================
+        document.addEventListener('DOMContentLoaded', async () => {
+            // SP indicado en la dirección (#sp=Nombre) para compartir el enlace directo
+            const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+            spSeleccionado = hash.get('sp') || null;
+            baseActual = hash.get('base') || null;
+
+            // El visor avisa cuando cargó o regeneró un diagrama: se actualiza el indicador del SP
+            window.addEventListener('message', (e) => {
+                const datos = e.data || {};
+                if (datos.tipo !== 'sp-diagrama' || !datos.nombre) return;
+                if (datos.base && baseActual && datos.base.toLowerCase() !== baseActual.toLowerCase()) return;
+                const sp = rawSqlData.find(s => s.nombre === datos.nombre);
+                if (!sp) return;
+                if (['cache', 'ia', 'gemini'].includes(datos.origen)) {
+                    sp.tieneCache = true;
+                    sp.cacheVigente = true;
+                    if (datos.fechaGeneracion) sp.fechaGeneracion = datos.fechaGeneracion;
+                } else if (datos.origen === 'cache-desactualizada') {
+                    sp.tieneCache = true;
+                    sp.cacheVigente = false;
+                }
+                renderizarLista();
+            });
+
+            await cargarBases();
+            await cargarLista(false);
+            if (spSeleccionado) abrirSp(spSeleccionado);
+        });
+
+        // Bases de datos habilitadas en la API (GET /api/Sps/bases)
+        async function cargarBases() {
+            const select = document.getElementById('selectBase');
+            try {
+                if (!apiBaseActiva) apiBaseActiva = await detectarServidorApi();
+                if (!apiBaseActiva) throw new Error('Sin conexión');
+
+                const res = await fetchConTimeout(`${apiBaseActiva}/api/Sps/bases`, APP_CONFIG.timeoutMs);
+                const payload = await res.json();
+                if (!res.ok || !payload || payload.exito === false) throw new Error(payload?.mensaje || `HTTP ${res.status}`);
+
+                const bases = Array.isArray(payload.bases) && payload.bases.length ? payload.bases : [payload.predeterminada];
+                const pedida = baseActual && bases.find(b => b.toLowerCase() === baseActual.toLowerCase());
+                baseActual = pedida || payload.predeterminada || bases[0];
+
+                select.innerHTML = bases.map(b => `<option value="${escaparHtml(b)}">${escaparHtml(b)}</option>`).join('');
+                select.value = baseActual;
+                select.disabled = bases.length < 2;
+            } catch (err) {
+                console.error('Error al cargar las bases de datos:', err);
+                select.innerHTML = `<option value="">${escaparHtml(baseActual || 'Predeterminada')}</option>`;
+                select.disabled = true;
+            }
+        }
+
+        // Cambia de base: limpia la selección, vuelve a la bienvenida y recarga la lista
+        async function cambiarBase(valor) {
+            if (!valor || valor === baseActual) return;
+            baseActual = valor;
+            spSeleccionado = null;
+            rawSqlData = [];
+            history.replaceState(null, '', `#base=${encodeURIComponent(valor)}`);
+
+            document.getElementById('inputBuscar').value = '';
+            document.getElementById('spLista').innerHTML = '<div class="sp-vacio">Cargando lista de SPs…</div>';
+            const frame = document.getElementById('visorFrame');
+            frame.hidden = true;
+            frame.removeAttribute('src');
+            document.getElementById('bienvenida').hidden = false;
+            document.getElementById('spPanel').classList.add('abierto');
+
+            await cargarLista(false);
+        }
+
+        async function cargarLista(forzar) {
+            fijarEstadoApi('loading', forzar ? 'Actualizando…' : 'Conectando…');
+            try {
+                if (!apiBaseActiva) {
+                    apiBaseActiva = await detectarServidorApi();
+                    if (!apiBaseActiva) {
+                        throw new Error(`No se pudo conectar a ${APP_CONFIG.servidor} en puertos ${APP_CONFIG.puertos.join('/')}`);
+                    }
+                }
+
+                let payload = null;
+                // La lista que se obtuvo al detectar el servidor es de la base predeterminada
+                const inicialSirve = cachedInitialPayload &&
+                    (!baseActual || String(cachedInitialPayload.baseDatos || '').toLowerCase() === baseActual.toLowerCase());
+                if (!forzar && inicialSirve) {
+                    payload = cachedInitialPayload;
+                    cachedInitialPayload = null;
+                } else {
+                    cachedInitialPayload = null;
+                    const url = `${apiBaseActiva}${APP_CONFIG.controllerPath}` +
+                        (baseActual ? `?base=${encodeURIComponent(baseActual)}` : '');
+                    const res = await fetchConTimeout(url, APP_CONFIG.timeoutMs);
+                    try { payload = await res.json(); } catch (_) { }
+                    if (!res.ok) throw new Error((payload && payload.mensaje) || `HTTP ${res.status}`);
+                }
+
+                if (!payload || payload.exito === false) {
+                    throw new Error((payload && payload.mensaje) || 'La API no devolvió datos válidos');
+                }
+
+                rawSqlData = Array.isArray(payload.registros) ? payload.registros : [];
+                if (payload.baseDatos) baseActual = payload.baseDatos;
+                document.getElementById('avisoGemini').hidden = payload.iaConfigurada !== false;
+
+                const host = new URL(apiBaseActiva).host;
+                fijarEstadoApi('ok', `En línea (${host})`);
+                renderizarLista();
+                if (forzar) mostrarToast(`${rawSqlData.length} SPs leídos de ${baseActual || 'SQL Server'}`, '✅');
+            } catch (err) {
+                console.error('Error al cargar la lista de SPs:', err);
+                fijarEstadoApi('error', 'Sin conexión');
+                document.getElementById('spLista').innerHTML =
+                    `<div class="sp-vacio">${escaparHtml(err.name === 'AbortError' ? 'La consulta tardó demasiado.' : err.message)}</div>`;
+                mostrarToast(`No se pudo cargar la lista: ${err.message}`, '❌');
+            }
+        }
+
+        function estadoSp(sp) {
+            if (sp.tieneCache && sp.cacheVigente) return ['ok', 'Diagrama al día'];
+            if (sp.tieneCache) return ['warn', 'El SP cambió después de generar el diagrama'];
+            return ['sin', 'Aún sin diagrama: se generará al abrirlo'];
+        }
+
+        function renderizarLista() {
+            const contenedor = document.getElementById('spLista');
+            const termino = (document.getElementById('inputBuscar').value || '').trim().toLowerCase();
+            const visibles = rawSqlData.filter(sp => !termino || sp.nombre.toLowerCase().includes(termino));
+
+            const conDiagrama = rawSqlData.filter(sp => sp.tieneCache).length;
+            document.getElementById('panelSub').textContent =
+                `${rawSqlData.length} SPs · ${conDiagrama} con diagrama` +
+                (termino ? ` · ${visibles.length} coinciden` : '');
+            document.getElementById('railTotal').textContent = rawSqlData.length;
+
+            if (!visibles.length) {
+                contenedor.innerHTML = `<div class="sp-vacio">${rawSqlData.length
+                    ? 'Ningún SP coincide con la búsqueda.' : `No se encontraron SPs en ${escaparHtml(baseActual || 'la base de datos')}.`}</div>`;
+                return;
+            }
+
+            contenedor.innerHTML = visibles.map(sp => {
+                const [clase, titulo] = estadoSp(sp);
+                const esquema = sp.esquema && sp.esquema !== 'dbo' ? `${sp.esquema}.` : '';
+                return `
+                    <button type="button" class="sp-item${sp.nombre === spSeleccionado ? ' active' : ''}"
+                        data-sp="${escaparHtml(sp.nombre)}" title="${escaparHtml(titulo)}">
+                        <span class="dot ${clase}"></span>
+                        <span class="sp-item-text">
+                            <span class="sp-nombre">${escaparHtml(esquema + sp.nombre)}</span>
+                            <span class="sp-fecha">Modificado: ${escaparHtml(fechaLegible(sp.modifyDate))}</span>
+                        </span>
+                    </button>`;
+            }).join('');
+
+            contenedor.querySelectorAll('.sp-item').forEach(boton =>
+                boton.addEventListener('click', () => abrirSp(boton.dataset.sp)));
+        }
+
+        function abrirSp(nombre) {
+            if (!nombre) return;
+            spSeleccionado = nombre;
+            const parteBase = baseActual ? `base=${encodeURIComponent(baseActual)}&` : '';
+            history.replaceState(null, '', `#${parteBase}sp=${encodeURIComponent(nombre)}`);
+
+            document.getElementById('bienvenida').hidden = true;
+            const frame = document.getElementById('visorFrame');
+            frame.hidden = false;
+            frame.src = `visor_sp.html?${parteBase}sp=${encodeURIComponent(nombre)}`;
+
+            document.querySelectorAll('.sp-item').forEach(b =>
+                b.classList.toggle('active', b.dataset.sp === nombre));
+
+            // Con un SP elegido el panel se pliega a dock y el diagrama usa todo el ancho
+            document.getElementById('spPanel').classList.remove('abierto');
+            if (document.activeElement && document.getElementById('spPanel').contains(document.activeElement)) {
+                document.activeElement.blur();
+            }
+        }
+
+        // =========================================================================
+        // 📥 EXPORTACIÓN DE LA DATA PLANA SQL (catálogo sys.procedures tal cual)
+        // =========================================================================
+        function exportarDataPlanaSQL() {
+            if (!rawSqlData.length) {
+                mostrarToast('No hay datos cargados para exportar', '⚠️');
+                return;
+            }
+            if (typeof XLSX === 'undefined') {
+                mostrarToast('La librería SheetJS no está disponible', '❌');
+                return;
+            }
+            try {
+                const hoy = new Date();
+                const p = (n) => String(n).padStart(2, '0');
+                const fecha = `${hoy.getFullYear()}${p(hoy.getMonth() + 1)}${p(hoy.getDate())}`;
+                const nombreArchivo = `Data_Plana_SQL_Documentacion_SPs_${baseActual || 'Base'}_${fecha}.xlsx`;
+
+                const libro = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(libro, XLSX.utils.json_to_sheet(rawSqlData), 'Catalogo SPs');
+                XLSX.writeFile(libro, nombreArchivo);
+                mostrarToast(`Archivo exportado: ${nombreArchivo}`, '✅');
+            } catch (err) {
+                console.error('Error al exportar:', err);
+                mostrarToast(`No se pudo exportar: ${err.message}`, '❌');
+            }
+        }
+    </script>
+</body>
+
+</html>

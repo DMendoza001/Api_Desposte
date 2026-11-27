@@ -33,11 +33,14 @@ Seguir los archivos en orden:
 │   ├── Controllers/
 │   │   ├── Sql/                  # endpoints que ejecutan procedimientos almacenados
 │   │   └── Excel/                # endpoints que leen tablas de Excel en OneDrive
-│   └── Infraestructura/Excel/
-│       └── LectorTablasExcel.cs  # lectura estándar de Excel (regla 8)
+│   └── Funciones/                # código compartido del backend
+│       ├── Excel/LectorTablasExcel.cs  # lectura estándar de Excel (regla 8)
+│       ├── Sql/EjecutorSql.cs          # ejecución de SP devolviendo filas tal cual
+│       └── Fechas/ParametrosFecha.cs   # lectura de fechas de la query string
 └── Docu_Paginas/                 # dashboards HTML servidos por la API
-    ├── config.js                 # servidor y puertos de la API (regla 1)
-    ├── responsive.css            # estilos responsive compartidos (regla 4)
+    ├── Funciones/                # código compartido del frontend
+    │   ├── config.js             # servidor y puertos de la API (regla 1)
+    │   └── responsive.css        # estilos responsive compartidos (regla 4)
     ├── index.html                # portal de dashboards
     └── <Dashboard>.html
 ```

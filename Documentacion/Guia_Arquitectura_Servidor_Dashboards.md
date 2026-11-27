@@ -2,7 +2,7 @@
 **Proyecto:** `Api_Desposte`  
 **Autor:** Antigravity AI Pair Programmer & Dennis Mendoza  
 **Fecha:** Octubre 2026  
-**Ubicación:** `Docu_Paginas/Guia_Arquitectura_Servidor_Dashboards.md`
+**Ubicación:** `Documentacion/Guia_Arquitectura_Servidor_Dashboards.md`
 
 ---
 
@@ -175,7 +175,7 @@ Todos los dashboards del repositorio implementan la regla de resiliencia estable
        return window.location.origin; 
    }
    ```
-2. **Fallback híbrido:** Si alguien abre el archivo localmente con doble clic (`file:///...`), el sistema lee el archivo [`Docu_Paginas/config.js`](file:///c:/DENNIS_MENDOZA/Proyectos_GitHub/Api_Desposte/Docu_Paginas/config.js) e intenta conectarse a los puertos configurados (`8080` y `5000`) con un timeout controlado mediante `AbortController`, evitando que la página se quede congelada esperando indefinidamente.
+2. **Fallback híbrido:** Si alguien abre el archivo localmente con doble clic (`file:///...`), el sistema lee el archivo [`Docu_Paginas/Funciones/config.js`](file:///c:/DENNIS_MENDOZA/Proyectos_GitHub/Api_Desposte/Docu_Paginas/Funciones/config.js) e intenta conectarse a los puertos configurados (`8080` y `5000`) con un timeout controlado mediante `AbortController`, evitando que la página se quede congelada esperando indefinidamente.
 
 ---
 

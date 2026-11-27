@@ -1,8 +1,6 @@
-using Dapper;
+using ApiDesposte.Funciones.Fechas;
+using ApiDesposte.Funciones.Sql;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
-using System.Data;
-using System.Globalization;
 
 namespace ApiDesposte.Controllers.Sql
 {
@@ -15,7 +13,7 @@ namespace ApiDesposte.Controllers.Sql
         public MarinadoController(IConfiguration configuration)
         {
             _connectionString = configuration.GetConnectionString("SqlDesposte")
-                ?? throw new InvalidOperationException("No se encontró la cadena de conexión 'SqlDesposte' en appsettings.json");
+                ?? throw new InvalidOperationException("No se encontró la cadena de conexión 'SqlDesposte' (variable de entorno ConnectionStrings__SqlDesposte)");
         }
 
         /// <summary>
@@ -34,8 +32,8 @@ namespace ApiDesposte.Controllers.Sql
         {
             DateTime hoy = DateTime.Today;
 
-            if (!TryParsearFecha(fechaInicio, hoy.AddDays(-7), out DateTime inicio) ||
-                !TryParsearFecha(fechaFin, hoy, out DateTime fin))
+            if (!ParametrosFecha.TryParsear(fechaInicio, hoy.AddDays(-7), out DateTime inicio) ||
+                !ParametrosFecha.TryParsear(fechaFin, hoy, out DateTime fin))
             {
                 return BadRequest(new { exito = false, error = "Formato de fecha inválido. Use yyyy-MM-dd." });
             }
@@ -50,17 +48,11 @@ namespace ApiDesposte.Controllers.Sql
 
             try
             {
-                using IDbConnection db = new SqlConnection(_connectionString);
-
-                var filas = await db.QueryAsync(
+                var datos = await EjecutorSql.EjecutarTalCualAsync(
+                    _connectionString,
                     "EXEC Desposte.dbo.Sp_Informe_Marinado_Congelado @Fecha1, @Fecha2",
                     new { Fecha1 = fecha1, Fecha2 = fecha2 },
                     commandTimeout: 2800);
-
-                // Cada fila como diccionario columna -> valor, tal cual viene del SP
-                var datos = filas
-                    .Select(f => new Dictionary<string, object?>((IDictionary<string, object?>)f))
-                    .ToList();
 
                 return Ok(new
                 {
@@ -74,18 +66,6 @@ namespace ApiDesposte.Controllers.Sql
             {
                 return StatusCode(500, new { exito = false, error = ex.Message });
             }
-        }
-
-        private static bool TryParsearFecha(string? input, DateTime valorPorDefecto, out DateTime fecha)
-        {
-            if (string.IsNullOrWhiteSpace(input))
-            {
-                fecha = valorPorDefecto;
-                return true;
-            }
-
-            string[] formatos = { "yyyy-MM-dd", "yyyy-MM-ddTHH:mm:ss", "dd/MM/yyyy" };
-            return DateTime.TryParseExact(input.Trim(), formatos, CultureInfo.InvariantCulture, DateTimeStyles.None, out fecha);
         }
     }
 }

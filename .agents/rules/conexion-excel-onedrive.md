@@ -36,9 +36,9 @@ private string ObtenerRutaExcel()
 
 ---
 
-## 3. Uso Obligatorio de Infraestructura (`LectorTablasExcel` y `CacheTablasExcel`)
+## 3. Uso Obligatorio de Funciones Compartidas (`LectorTablasExcel` y `CacheTablasExcel`)
 
-Para evitar duplicar código de bajo nivel en los controladores, es **mandatorio** utilizar los componentes centralizados ubicados en `ApiDesposte/Infraestructura/Excel/`:
+Para evitar duplicar código de bajo nivel en los controladores, es **mandatorio** utilizar los componentes centralizados ubicados en `ApiDesposte/Funciones/Excel/`:
 
 1. **Apertura segura en memoria:**
    - Usar `LectorTablasExcel.AbrirEnMemoria(rutaExcel)`.

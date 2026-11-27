@@ -1,10 +1,11 @@
+using ApiDesposte.Funciones.Portal;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 
 namespace ApiDesposte.Controllers.Portal
 {
     [ApiController]
-    [Route("api/portal")]
+    [Route("api/[controller]")]
     public class PortalConfigController : ControllerBase
     {
         private readonly string _adminPin;
@@ -13,24 +14,16 @@ namespace ApiDesposte.Controllers.Portal
 
         public PortalConfigController(IConfiguration configuration, IWebHostEnvironment env)
         {
-            _adminPin = configuration["AdminConfig:Pin"] ?? "Top1900@*";
+            // PIN desde la variable de entorno AdminConfig__Pin (sin valor por defecto en el código)
+            _adminPin = (configuration["AdminConfig:Pin"] ?? "").Trim();
 
-            // Buscar carpeta Docu_Paginas o raíz de la app
-            string rutaDocu = Path.GetFullPath(Path.Combine(env.ContentRootPath, "..", "Docu_Paginas"));
-            if (!Directory.Exists(rutaDocu))
-            {
-                rutaDocu = Path.GetFullPath(Path.Combine(env.ContentRootPath, "Docu_Paginas"));
-            }
-
-            if (Directory.Exists(rutaDocu))
-            {
-                _archivoConfig = Path.Combine(rutaDocu, "dashboards_estado.json");
-            }
-            else
-            {
-                _archivoConfig = Path.Combine(env.ContentRootPath, "dashboards_estado.json");
-            }
+            // Datos de ejecución fuera de la carpeta web: ApiDesposte/Datos/dashboards_estado.json
+            _archivoConfig = EstadoDashboards.RutaArchivo(env.ContentRootPath);
         }
+
+        // Sin PIN configurado en el servidor no se concede acceso de administrador
+        private bool PinValido(string? pin) =>
+            _adminPin.Length > 0 && (pin ?? "").Trim() == _adminPin;
 
         /// <summary>
         /// Obtiene el estado actual de visibilidad de los dashboards (habilitado / en prueba)
@@ -69,7 +62,7 @@ namespace ApiDesposte.Controllers.Portal
                 return BadRequest(new { exito = false, mensaje = "El PIN es requerido." });
             }
 
-            if (request.Pin.Trim() == _adminPin.Trim() || request.Pin.Trim() == "Top1990@*")
+            if (PinValido(request.Pin))
             {
                 return Ok(new { exito = true, mensaje = "PIN válido. Acceso concedido." });
             }
@@ -88,7 +81,7 @@ namespace ApiDesposte.Controllers.Portal
                 return BadRequest(new { exito = false, mensaje = "El PIN de administrador es requerido." });
             }
 
-            if (request.Pin.Trim() != _adminPin.Trim() && request.Pin.Trim() != "Top1990@*" && request.Pin.Trim() != "Top1900@*")
+            if (!PinValido(request.Pin))
             {
                 return Unauthorized(new { exito = false, mensaje = "PIN incorrecto. No autorizado." });
             }
@@ -136,6 +129,7 @@ namespace ApiDesposte.Controllers.Portal
 
                     var opciones = new JsonSerializerOptions { WriteIndented = true };
                     string nuevoJson = JsonSerializer.Serialize(estadosActuales, opciones);
+                    Directory.CreateDirectory(Path.GetDirectoryName(_archivoConfig)!);
                     System.IO.File.WriteAllText(_archivoConfig, nuevoJson);
 
                     return Ok(new { exito = true, mensaje = "Configuración guardada correctamente.", estados = estadosActuales });

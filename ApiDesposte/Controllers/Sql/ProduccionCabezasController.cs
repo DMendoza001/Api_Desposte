@@ -1,8 +1,8 @@
+using ApiDesposte.Funciones.Fechas;
 using Dapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Data;
-using System.Globalization;
 
 namespace ApiDesposte.Controllers.Sql
 {
@@ -20,50 +20,15 @@ namespace ApiDesposte.Controllers.Sql
         public ProduccionCabezasController(IConfiguration configuration)
         {
             _connectionString = configuration.GetConnectionString("SqlDesposte")
-                ?? throw new InvalidOperationException("No se encontró la cadena de conexión 'SqlDesposte' en appsettings.json");
+                ?? throw new InvalidOperationException("No se encontró la cadena de conexión 'SqlDesposte' (variable de entorno ConnectionStrings__SqlDesposte)");
         }
 
         private static (string f1, string f2) NormalizarFechas(string? fechaInicio, string? fechaFin)
         {
             DateTime hoy = DateTime.Today;
-            DateTime inicioDefault = hoy.AddDays(-7);
-
-            string f1 = FormatearFechaIndividual(fechaInicio, inicioDefault, esFechaFinal: false);
-            string f2 = FormatearFechaIndividual(fechaFin, hoy, esFechaFinal: true);
-
-            return (f1, f2);
-        }
-
-        private static string FormatearFechaIndividual(string? input, DateTime valorPorDefecto, bool esFechaFinal)
-        {
-            string sufijoHora = esFechaFinal ? "T23:59:59" : "T00:00:00";
-
-            if (string.IsNullOrWhiteSpace(input))
-            {
-                return $"{valorPorDefecto:yyyy-MM-dd}{sufijoHora}";
-            }
-
-            string limpio = input.Trim();
-
-            if (limpio.Contains('T') && limpio.Length >= 19)
-            {
-                return limpio;
-            }
-
-            string[] formatos = { "yyyy-MM-dd", "dd/MM/yyyy", "dd-MM-yyyy", "yyyy/MM/dd", "M/d/yyyy", "d/M/yyyy" };
-            if (DateTime.TryParseExact(limpio, formatos, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime fechaExacta) ||
-                DateTime.TryParse(limpio, new CultureInfo("es-PE"), DateTimeStyles.None, out fechaExacta) ||
-                DateTime.TryParse(limpio, CultureInfo.InvariantCulture, DateTimeStyles.None, out fechaExacta))
-            {
-                return $"{fechaExacta:yyyy-MM-dd}{sufijoHora}";
-            }
-
-            if (!limpio.Contains('T') && !limpio.Contains(' '))
-            {
-                return $"{limpio}{sufijoHora}";
-            }
-
-            return limpio;
+            return (
+                ParametrosFecha.FormatearParaSp(fechaInicio, hoy.AddDays(-7), esFechaFinal: false),
+                ParametrosFecha.FormatearParaSp(fechaFin, hoy, esFechaFinal: true));
         }
 
         private async Task<List<ProdCabezaItemDto>> ObtenerDatosSpAsync(string f1, string f2, bool forzarRecarga = false)
@@ -112,10 +77,7 @@ namespace ApiDesposte.Controllers.Sql
         {
             try
             {
-                string? rawF1 = !string.IsNullOrWhiteSpace(fechaInicio) ? fechaInicio : fecha1;
-                string? rawF2 = !string.IsNullOrWhiteSpace(fechaFin) ? fechaFin : fecha2;
-
-                var (f1, f2) = NormalizarFechas(rawF1, rawF2);
+                var (f1, f2) = NormalizarFechas(ParametrosFecha.Primero(fechaInicio, fecha1), ParametrosFecha.Primero(fechaFin, fecha2));
 
                 var lista = await ObtenerDatosSpAsync(f1, f2, recargar);
 

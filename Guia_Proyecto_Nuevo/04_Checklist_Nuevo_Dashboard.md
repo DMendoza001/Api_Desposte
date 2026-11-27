@@ -14,7 +14,7 @@ Usar esta lista cada vez que se agregue un informe.
 
 ## Dashboard HTML
 
-- [ ] Está en `Docu_Paginas/` e incluye `config.js` y `responsive.css?v=3` en el `<head>`.
+- [ ] Está en `Docu_Paginas/` e incluye `Funciones/config.js` y `Funciones/responsive.css?v=3` en el `<head>`.
 - [ ] Tiene el bloque `APP_CONFIG`, `generarBasesApi()`, `fetchConTimeout()` y `detectarServidorApi()`.
 - [ ] `APP_CONFIG.controllerPath` apunta a la ruta canónica del controlador.
 - [ ] Usa la paleta `PaletaFinanza_Industrial.json` (cabecera oscura con texto claro).
@@ -28,6 +28,6 @@ Usar esta lista cada vez que se agregue un informe.
 ## Publicación
 
 - [ ] Se agregó la entrada en `LISTA_DASHBOARDS` de `index.html`.
-- [ ] Se agregó el archivo en `dashboards_estado.json` (`true` = visible, `false` = en prueba).
+- [ ] Se agregó el archivo en `ApiDesposte/Datos/dashboards_estado.json` (o desde el portal con el PIN de administrador) (`true` = visible, `false` = en prueba).
 - [ ] Se probó desde otra PC de la red: `http://<SERVIDOR>:8080/<Dashboard>.html`.
 - [ ] Commit con un mensaje que describa el informe.

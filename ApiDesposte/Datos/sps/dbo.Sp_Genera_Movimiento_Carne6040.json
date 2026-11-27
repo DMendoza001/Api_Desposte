@@ -1,0 +1,172 @@
+﻿{
+  "NombreSP": "Sp_Genera_Movimiento_Carne6040",
+  "Esquema": "dbo",
+  "UltimaModificacionSQL": "2023-11-17T13:01:15.167",
+  "FechaGeneracion": "2026-11-27T11:11:14.7348981-05:00",
+  "Modelo": "DeepSeek \u00B7 deepseek-chat",
+  "Diagrama": {
+    "spName": "Sp_Genera_Movimiento_Carne6040",
+    "esquema": "Desposte.dbo",
+    "badge": "Desposte.dbo \u00B7 SKU 040508013 / 040508015",
+    "subtitulo": "Genera movimiento semanal de carne 6040 (fresco y congelado) por tipo, punto proceso y plantilla",
+    "ultimaModificacion": "2023-11-17T13:01:15",
+    "etapa1_fuentes": {
+      "titulo": "1. Fuentes de datos",
+      "tarjetas": [
+        {
+          "titulo": "Tabla10 (producci\u00F3n base)",
+          "estiloCabecera": "primary",
+          "joinLabel": "Filtro: grupopuntoproceso=1, plantilla NOT NULL, Fecha \u00B12 d\u00EDas",
+          "items": [
+            "Desposte.dbo.Tabla10 \u2192 #Produccion_Filtrada",
+            "Rango: @Fecha1-2 a @Fecha2\u002B2",
+            "Excluye registros sin plantilla",
+            "Solo grupo punto proceso 1"
+          ]
+        },
+        {
+          "titulo": "Fechas_OrdeProduccion (funci\u00F3n)",
+          "estiloCabecera": "primary",
+          "joinLabel": "JOIN: grupopuntoproceso, PuntoProceso, numero",
+          "items": [
+            "Desposte.dbo.Fechas_OrdeProduccion(@Fecha1,@Fecha2,1)",
+            "Aporta FechaOrden para calcular semana",
+            "Inner join con #Produccion_Filtrada"
+          ]
+        },
+        {
+          "titulo": "MenudoCamal (ingreso camal)",
+          "estiloCabecera": "secondary",
+          "joinLabel": "Filtro: Codigo=\u002705813\u0027, Fecha entre @FechaCorta1 y @FechaCorta2",
+          "items": [
+            "Desposte.dbo.MenudoCamal",
+            "Suma Peso como Kilos",
+            "Tipo 5, Ttra 0"
+          ]
+        },
+        {
+          "titulo": "Tabla01 (salidas embutidos)",
+          "estiloCabecera": "secondary",
+          "joinLabel": "Filtro: Producto=\u0027040508013\u0027, Destino IN (\u0027EMBUTIDOS\u0027,\u0027PREPARADOS\u0027,\u0027DESH. DE POLLO\u0027)",
+          "items": [
+            "Desposte.dbo.Tabla01",
+            "Rango @FechaCorta1 a @FechaCorta2",
+            "Tipo 6, Ttra 1"
+          ]
+        },
+        {
+          "titulo": "Ventas (Westphalia y venta)",
+          "estiloCabecera": "secondary",
+          "joinLabel": "Filtro: ClienteCodigo=899 (Westphalia) / \u003C\u003E899 (Venta)",
+          "items": [
+            "Desposte.dbo.Ventas",
+            "Codigo \u002705813\u0027 fresco y \u002705815\u0027 congelado",
+            "Tipo 7 (Westphalia) y Tipo 8 (Venta)"
+          ]
+        },
+        {
+          "titulo": "SalidasCongelado",
+          "estiloCabecera": "secondary",
+          "joinLabel": "Filtro: Codigo=\u002705815\u0027, Fecha entre @FechaCorta1 y @FechaCorta2",
+          "items": [
+            "Desposte.dbo.SalidasCongelado",
+            "Salidas embutidos congelado",
+            "Tipo 6, Ttra 1, Grupo CONG"
+          ]
+        }
+      ]
+    },
+    "etapa2_transformacion": {
+      "titulo": "2. Transformaci\u00F3n y bloques l\u00F3gicos",
+      "tarjetas": [
+        {
+          "titulo": "#Movimiento_Carne (acumulador)",
+          "subbloques": [
+            {
+              "subtitulo": "Bloques FRESCO (Producto 040508013)",
+              "bullets": [
+                "Tipo 1 L\u00EDneas: PuntoProceso IN (1018,1019), ttra=4",
+                "Tipo 1 Cabeza l\u00EDnea: PuntoProceso 1003, plantilla IN (3016)",
+                "Tipo 2 Deshuesado cabezas: PuntoProceso 1003, plantilla IN (1274,19)",
+                "Tipo 4 Otros: PuntoProceso NOT IN (1018,1019,1003,1011)",
+                "Tipo 4 resto 1003: plantilla NOT IN (3016,1274,19)",
+                "Tipo 5 Camal: MenudoCamal Codigo 05813",
+                "Tipo 6 Embutidos: Tabla01 destinos embutidos",
+                "Tipo 7 Westphalia: Ventas ClienteCodigo 899",
+                "Tipo 3 Congelado directo: PuntoProceso 1011, plantilla 505, ttra=13"
+              ]
+            },
+            {
+              "subtitulo": "Bloques CONG (Producto 040508015)",
+              "bullets": [
+                "Tipo 3 Congelado directo: PuntoProceso 1011, plantilla 505, ttra=4",
+                "Tipo 6 Embutidos: SalidasCongelado Codigo 05815",
+                "Tipo 7 Westphalia: Ventas ClienteCodigo 899, Codigo 05815",
+                "Tipo 8 Venta: Ventas ClienteCodigo \u003C\u003E899, Codigo 05815"
+              ]
+            },
+            {
+              "subtitulo": "C\u00E1lculos",
+              "bullets": [
+                "Semana = year(FechaOrden) \u002B FORMAT(week,\u00270#\u0027)",
+                "Unidades = SUM(cantidadunidades) / SUM(Unidades)",
+                "Kilos = SUM(cantidad) / SUM(Kilos) / SUM(Peso)",
+                "Ttra: 13=Origen/Insumo, 4=Resultado/Producci\u00F3n, 0/1 seg\u00FAn bloque"
+              ]
+            }
+          ]
+        }
+      ],
+      "nodoCentral": {
+        "titulo": "Acumulador #Movimiento_Carne",
+        "descripcion": "Tabla temporal que consolida todos los INSERT por Tipo, Ttra y Grupo (FRESCO/CONG)",
+        "formula": "Semana \u002B PuntoProceso \u002B plantilla \u002B Producto \u002B SUM(Unidades) \u002B SUM(Kilos) \u002B Tipo \u002B Ttra \u002B Grupo"
+      }
+    },
+    "etapa3_catalogos": {
+      "titulo": "3. Cat\u00E1logos y enriquecimiento",
+      "tituloTarjeta": "Cruces con maestros",
+      "pasos": [
+        {
+          "caja": "#Temp_Tipo",
+          "detalle": "Tipo \u2192 NTipo (LINEAS, DESHUESADO, CONGELADO, etc.)",
+          "tipoJoin": "LEFT JOIN"
+        },
+        {
+          "caja": "Desposte.dbo.PuntoProceso",
+          "detalle": "PuntoProceso.Codigo \u2192 Nombre (NPuntoProceso)",
+          "tipoJoin": "LEFT JOIN"
+        },
+        {
+          "caja": "Desposte.dbo.Plantillas",
+          "detalle": "Plantillas.Plantilla \u2192 NPlantilla",
+          "tipoJoin": "LEFT JOIN"
+        }
+      ],
+      "badges": [
+        "CAMAL",
+        "WESTPHALIA",
+        "PTA. EMBUTIDOS",
+        "VENTA"
+      ]
+    },
+    "etapa4_salida": {
+      "tituloTarjeta": "Resultado Final",
+      "columnas": [
+        "Semana",
+        "PuntoProceso",
+        "NPuntoProceso",
+        "plantilla",
+        "NPlantilla",
+        "Producto",
+        "Unidades",
+        "Kilos",
+        "Tipo",
+        "NTipo",
+        "Ttra",
+        "Grupo"
+      ],
+      "pieFiltro": "DELETE previo de Temp_Movimiento_Carne6040; INSERT del SELECT final con CASE para NPuntoProceso/NPlantilla; sin WHERE ni ORDER BY de cierre"
+    }
+  }
+}

@@ -19,7 +19,7 @@ namespace ApiDesposte.Controllers.Sql
         public ProdChuletasController(IConfiguration configuration)
         {
             _connectionString = configuration.GetConnectionString("SqlDesposte")
-                ?? throw new InvalidOperationException("No se encontró la cadena de conexión 'SqlDesposte' en appsettings.json");
+                ?? throw new InvalidOperationException("No se encontró la cadena de conexión 'SqlDesposte' (variable de entorno ConnectionStrings__SqlDesposte)");
         }
 
         private static (string f1, string f2) NormalizarFechas(string? fechaInicio, string? fechaFin)

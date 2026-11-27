@@ -7,7 +7,7 @@ Todos los archivos `.html` ubicados en `Docu_Paginas/` (o cualquier nuevo report
 ## 1. Principio del Patrón Responsive Híbrido
 
 Al igual que `config.js`, el diseño responsive opera de forma dual:
-1. **Hoja de Estilos Compartida (`responsive.css`):** Todo archivo `.html` en `Docu_Paginas/` debe enlazar en el `<head>` el archivo compartido `<link rel="stylesheet" href="responsive.css?v=3">`.
+1. **Hoja de Estilos Compartida (`responsive.css`):** Todo archivo `.html` en `Docu_Paginas/` debe enlazar en el `<head>` el archivo compartido `<link rel="stylesheet" href="Funciones/responsive.css?v=3">`.
 2. **Autonomía Individual (Inline `@media` en `<style>`):** Todo archivo `.html` debe contar también dentro de su propio `<style>` con las reglas esenciales de adaptación (`min-width: 0` en hijos de CSS Grid/Flexbox y `@media` queries para `1600px`, `1024px`/`980px` y `768px`) por si el archivo `.html` se comparte individualmente sin `responsive.css`.
 
 ---
@@ -16,8 +16,8 @@ Al igual que `config.js`, el diseño responsive opera de forma dual:
 
 ```html
 <!-- Configuración compartida de conexión a la API y diseño responsive -->
-<link rel="stylesheet" href="responsive.css?v=3">
-<script src="config.js"></script>
+<link rel="stylesheet" href="Funciones/responsive.css?v=3">
+<script src="Funciones/config.js"></script>
 ```
 
 ---

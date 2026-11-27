@@ -10,8 +10,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-    <script src="config.js"></script>
-    <link rel="stylesheet" href="responsive.css?v=3">
+    <script src="Funciones/config.js"></script>
+    <link rel="stylesheet" href="Funciones/responsive.css?v=3">
 
     <style>
         /* =========================================================
@@ -373,6 +373,9 @@
                 </button>
                 <button class="tab-btn" onclick="filtrarCategoria('COSTOS', this)">
                     Costos &amp; Presupuesto <span class="tab-count" id="countCostos">0</span>
+                </button>
+                <button class="tab-btn" onclick="filtrarCategoria('DOCUMENTACION', this)">
+                    Documentación <span class="tab-count" id="countDocumentacion">0</span>
                 </button>
             </nav>
             <div class="search-box">
@@ -759,6 +762,18 @@
                 descripcion: 'Módulo piloto Evolución de costos directos e indirectos de producción, costo unitario por kilogramo procesado y tendencias.'
             },
 
+            {
+                id: 'documentacion-sps',
+                titulo: 'Documentación de Stored Procedures (Diagramas de Flujo)',
+                archivo: 'Documentacion_SPs.html',
+                categoria: 'DOCUMENTACION',
+                categoriaNombre: 'Documentación',
+                categoriaClase: 'cat-documentacion',
+                icono: '🗺️',
+                endpoint: 'GET /api/Sps/lista · GET /api/Sps/diagrama',
+                descripcion: 'Catálogo en vivo de los SPs Sp_% de SQL Server con su diagrama de flujo (fuentes, transformación, catálogos y salida). Usa caché por fecha de modificación y genera los diagramas nuevos con Gemini.'
+            },
+
             // DASHBOARDS EN PRUEBA (DESHABILITADOS POR DEFECTO PARA USUARIOS)
             {
                 id: 'personal-prueba',
@@ -852,10 +867,10 @@
                 }
             });
 
-            // 1. Intentar cargar desde el endpoint del backend /api/portal/config
+            // 1. Intentar cargar desde el endpoint del backend /api/PortalConfig/config
             if (apiBaseActiva) {
                 try {
-                    const res = await fetchConTimeout(`${apiBaseActiva}/api/portal/config`, 3500);
+                    const res = await fetchConTimeout(`${apiBaseActiva}/api/PortalConfig/config`, 3500);
                     if (res.ok) {
                         const data = await res.json();
                         if (data && data.estados) {
@@ -869,22 +884,7 @@
                 }
             }
 
-            // 2. Fallback estático directo a dashboards_estado.json
-            try {
-                const resJson = await fetchConTimeout('dashboards_estado.json', 2500);
-                if (resJson.ok) {
-                    const jsonEstados = await resJson.json();
-                    if (jsonEstados) {
-                        Object.assign(estadosDashboards, jsonEstados);
-                        localStorage.setItem('portal_dashboards_estado', JSON.stringify(estadosDashboards));
-                        return;
-                    }
-                }
-            } catch (e) {
-                // Continuar a localStorage
-            }
-
-            // 3. Fallback a LocalStorage
+            // 2. Fallback a LocalStorage (el JSON vive en ApiDesposte/Datos, fuera de la web)
             try {
                 const guardadoLocal = localStorage.getItem('portal_dashboards_estado');
                 if (guardadoLocal) {
@@ -905,7 +905,7 @@
             }
 
             try {
-                const res = await fetch(`${apiBaseActiva}/api/portal/config`, {
+                const res = await fetch(`${apiBaseActiva}/api/PortalConfig/config`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -973,7 +973,7 @@
             // Validar con la API si está activa
             if (apiBaseActiva) {
                 try {
-                    const res = await fetch(`${apiBaseActiva}/api/portal/verificar-pin`, {
+                    const res = await fetch(`${apiBaseActiva}/api/PortalConfig/verificar-pin`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ pin: adminPin })
@@ -986,11 +986,12 @@
                         adminPin = '';
                     }
                 } catch {
-                    // Si la API falla pero ya tenía sesión guardada con contraseña válida, mantener
-                    esAdmin = (adminPin === 'Top1990@*' || adminPin === 'Top1900@*');
+                    // Sin respuesta de la API no se puede validar el PIN: se conserva guardado
+                    // para revalidarlo cuando la API vuelva, pero no se activa el modo admin
+                    esAdmin = false;
                 }
             } else {
-                esAdmin = (adminPin === 'Top1990@*' || adminPin === 'Top1900@*');
+                esAdmin = false;
             }
 
             actualizarUiSesionAdmin();
@@ -1042,27 +1043,25 @@
                 return;
             }
 
-            let valido = false;
+            // El PIN solo lo valida la API (el valor real vive en la variable de entorno del servidor)
+            if (!apiBaseActiva) {
+                err.innerText = 'No hay conexión con la API: no se puede validar el PIN.';
+                err.style.display = 'block';
+                return;
+            }
 
-            if (apiBaseActiva) {
-                try {
-                    const res = await fetch(`${apiBaseActiva}/api/portal/verificar-pin`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ pin: valorPin })
-                    });
-                    if (res.ok) {
-                        valido = true;
-                    } else if (res.status === 404) {
-                        // Si el endpoint aún no está cargado en el proceso actual de la API
-                        valido = (valorPin === 'Top1990@*' || valorPin === 'Top1900@*');
-                    }
-                } catch {
-                    valido = (valorPin === 'Top1990@*' || valorPin === 'Top1900@*');
-                }
-            } else {
-                // Fallback offline
-                valido = (valorPin === 'Top1990@*' || valorPin === 'Top1900@*');
+            let valido = false;
+            try {
+                const res = await fetch(`${apiBaseActiva}/api/PortalConfig/verificar-pin`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ pin: valorPin })
+                });
+                valido = res.ok;
+            } catch {
+                err.innerText = 'No se pudo contactar la API para validar el PIN. Intenta nuevamente.';
+                err.style.display = 'block';
+                return;
             }
 
             if (valido) {
@@ -1274,6 +1273,7 @@
             const countOperaciones = document.getElementById('countOperaciones');
             const countCumplimientos = document.getElementById('countCumplimientos');
             const countCostos = document.getElementById('countCostos');
+            const countDocumentacion = document.getElementById('countDocumentacion');
             const metricTotal = document.getElementById('metricTotalDashboards');
 
             // Filtrar dashboards visibles según rol
@@ -1282,6 +1282,7 @@
             if (countOperaciones) countOperaciones.innerText = visibles.filter(d => d.categoria === 'OPERACIONES').length;
             if (countCumplimientos) countCumplimientos.innerText = visibles.filter(d => d.categoria === 'CUMPLIMIENTOS').length;
             if (countCostos) countCostos.innerText = visibles.filter(d => d.categoria === 'COSTOS').length;
+            if (countDocumentacion) countDocumentacion.innerText = visibles.filter(d => d.categoria === 'DOCUMENTACION').length;
 
             if (metricTotal) {
                 if (esAdmin) {

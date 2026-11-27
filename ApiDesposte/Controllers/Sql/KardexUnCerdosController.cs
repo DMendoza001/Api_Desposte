@@ -1,8 +1,6 @@
-using Dapper;
+using ApiDesposte.Funciones.Fechas;
+using ApiDesposte.Funciones.Sql;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
-using System.Data;
-using System.Globalization;
 
 namespace ApiDesposte.Controllers.Sql
 {
@@ -21,7 +19,7 @@ namespace ApiDesposte.Controllers.Sql
         private const string SpPbc = "Desposte.dbo.SP_Kardex_UnCerdos_PBC";
 
         // Cache en memoria por (SP + rango de fechas) para evitar re-ejecutar el SP en cada consulta
-        private static readonly Dictionary<string, (DateTime Timestamp, List<dynamic> Items)> _cachePorRango = new(StringComparer.OrdinalIgnoreCase);
+        private static readonly Dictionary<string, (DateTime Timestamp, List<Dictionary<string, object?>> Items)> _cachePorRango = new(StringComparer.OrdinalIgnoreCase);
         private static readonly object _cacheLock = new();
         private static readonly TimeSpan CacheDuracion = TimeSpan.FromMinutes(15);
 
@@ -30,53 +28,19 @@ namespace ApiDesposte.Controllers.Sql
         public KardexUnCerdosController(IConfiguration configuration)
         {
             _connectionString = configuration.GetConnectionString("SqlDesposte")
-                ?? throw new InvalidOperationException("No se encontró la cadena de conexión 'SqlDesposte' en appsettings.json");
+                ?? throw new InvalidOperationException("No se encontró la cadena de conexión 'SqlDesposte' (variable de entorno ConnectionStrings__SqlDesposte)");
         }
 
         /// <summary>
-        /// Normaliza las fechas exactamente con el formato requerido por los SP:
-        ///   Fecha1 = "yyyy-MM-ddT00:00:00"
-        ///   Fecha2 = "yyyy-MM-ddT23:59:59"
+        /// Fechas con el formato requerido por los SP (Fecha1 = yyyy-MM-ddT00:00:00, Fecha2 = yyyy-MM-ddT23:59:59).
         /// Por defecto: del 01 de enero del año actual hasta hoy.
         /// </summary>
         private static (string f1, string f2) FormatearFechasSp(string? fecha1Raw, string? fecha2Raw)
         {
             DateTime hoy = DateTime.Today;
-            DateTime inicioDefault = new DateTime(hoy.Year, 1, 1);
-
-            string f1 = FormatearFechaIndividual(fecha1Raw, inicioDefault, esFechaFinal: false);
-            string f2 = FormatearFechaIndividual(fecha2Raw, hoy, esFechaFinal: true);
-
-            return (f1, f2);
-        }
-
-        private static string FormatearFechaIndividual(string? input, DateTime valorPorDefecto, bool esFechaFinal)
-        {
-            string sufijoHora = esFechaFinal ? "T23:59:59" : "T00:00:00";
-
-            if (string.IsNullOrWhiteSpace(input))
-            {
-                return $"{valorPorDefecto:yyyy-MM-dd}{sufijoHora}";
-            }
-
-            string limpio = input.Trim();
-
-            // Si ya viene con formato completo yyyy-MM-ddTHH:mm:ss, respetarlo
-            if (limpio.Contains('T') && limpio.Length >= 19)
-            {
-                return limpio;
-            }
-
-            // Intentar parsear formatos comunes (yyyy-MM-dd, dd/MM/yyyy, etc.)
-            string[] formatos = { "yyyy-MM-dd", "dd/MM/yyyy", "dd-MM-yyyy", "yyyy/MM/dd", "M/d/yyyy", "d/M/yyyy" };
-            if (DateTime.TryParseExact(limpio, formatos, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime fechaExacta) ||
-                DateTime.TryParse(limpio, new CultureInfo("es-PE"), DateTimeStyles.None, out fechaExacta) ||
-                DateTime.TryParse(limpio, CultureInfo.InvariantCulture, DateTimeStyles.None, out fechaExacta))
-            {
-                return $"{fechaExacta:yyyy-MM-dd}{sufijoHora}";
-            }
-
-            return $"{limpio}{sufijoHora}";
+            return (
+                ParametrosFecha.FormatearParaSp(fecha1Raw, new DateTime(hoy.Year, 1, 1), esFechaFinal: false),
+                ParametrosFecha.FormatearParaSp(fecha2Raw, hoy, esFechaFinal: true));
         }
 
         /// <summary>
@@ -101,14 +65,11 @@ namespace ApiDesposte.Controllers.Sql
                     }
                 }
 
-                using IDbConnection db = new SqlConnection(_connectionString);
-
-                string sql = $"EXEC {nombreSp} @Fecha1, @Fecha2";
-                var resultados = (await db.QueryAsync(
-                    sql,
+                var resultados = await EjecutorSql.EjecutarTalCualAsync(
+                    _connectionString,
+                    $"EXEC {nombreSp} @Fecha1, @Fecha2",
                     new { Fecha1 = f1, Fecha2 = f2 },
-                    commandTimeout: 2800
-                )).ToList();
+                    commandTimeout: 2800);
 
                 lock (_cacheLock)
                 {
@@ -142,10 +103,7 @@ namespace ApiDesposte.Controllers.Sql
             [FromQuery] string? fecha2 = null,
             [FromQuery] bool recargar = false)
         {
-            string? rawF1 = !string.IsNullOrWhiteSpace(fechaInicio) ? fechaInicio : fecha1;
-            string? rawF2 = !string.IsNullOrWhiteSpace(fechaFin) ? fechaFin : fecha2;
-
-            return EjecutarSpAsync(SpPtc, rawF1, rawF2, recargar);
+            return EjecutarSpAsync(SpPtc, ParametrosFecha.Primero(fechaInicio, fecha1), ParametrosFecha.Primero(fechaFin, fecha2), recargar);
         }
 
         /// <summary>
@@ -162,10 +120,7 @@ namespace ApiDesposte.Controllers.Sql
             [FromQuery] string? fecha2 = null,
             [FromQuery] bool recargar = false)
         {
-            string? rawF1 = !string.IsNullOrWhiteSpace(fechaInicio) ? fechaInicio : fecha1;
-            string? rawF2 = !string.IsNullOrWhiteSpace(fechaFin) ? fechaFin : fecha2;
-
-            return EjecutarSpAsync(SpPbc, rawF1, rawF2, recargar);
+            return EjecutarSpAsync(SpPbc, ParametrosFecha.Primero(fechaInicio, fecha1), ParametrosFecha.Primero(fechaFin, fecha2), recargar);
         }
     }
 }

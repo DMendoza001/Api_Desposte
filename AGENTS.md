@@ -6,7 +6,7 @@ Este repositorio contiene la API de Desposte en .NET y el conjunto de dashboards
 
 ### 1. Conexión Frontend -> API .NET (Regla Obligatoria)
 Todos los archivos `.html` deben seguir el estándar híbrido y resiliente de conexión establecido en [.agents/rules/api-connection.md](file:///.agents/rules/api-connection.md):
-- Importar `config.js` opcionalmente en el `<head>`: `<script src="config.js"></script>` (sin scripts inline en `<head>`).
+- Importar `config.js` opcionalmente en el `<head>`: `<script src="Funciones/config.js"></script>` (sin scripts inline en `<head>`).
 - Declarar el bloque estándar `APP_CONFIG` con fallback a `RAEVSALL001`, puertos `[8080, 5000]`, `controllerPath` y `timeoutMs`.
 - Utilizar `generarBasesApi()` para resolver URLs de la API.
 - Implementar `fetchConTimeout(url, timeoutMs)` y `detectarServidorApi()` con timeout adecuado (mínimo 3.5s) y fallback de ping a raíz (`/`).
@@ -26,7 +26,7 @@ Todo controlador en C# .NET (`ApiDesposte/Controllers/Excel/`) que consuma archi
 
 ### 4. Diseño Responsive Híbrido para Laptops, Tablets y Celulares (Regla Obligatoria)
 Todos los archivos `.html` en `Docu_Paginas/` deben seguir el estándar de diseño responsive definido en [.agents/rules/responsive-design.md](file:///.agents/rules/responsive-design.md):
-- Enlazar `<link rel="stylesheet" href="responsive.css?v=3">` en el `<head>` junto con un bloque `@media` autónomo en `<style>`.
+- Enlazar `<link rel="stylesheet" href="Funciones/responsive.css?v=3">` en el `<head>` junto con un bloque `@media` autónomo en `<style>`.
 - **Prohibido usar alturas fijas inline sin clase en contenedores de gráficos** (ej. `<div style="height:430px;">`); usar siempre clases estándar (`.chart-box`, `.chart-container`) con `position: relative; width: 100%; min-width: 0;`.
 - Aplicar `min-width: 0` tanto en hijos de **CSS Grid** como de **Flexbox** (`.dashboard-container > *`, `.kpi-card`, `.chart-card`, `.matrix-card`) para evitar que tablas anchas o gráficos desborden la pantalla.
 - Mantener las 4 tarjetas KPI en una sola fila en laptops (`repeat(4, minmax(0, 1fr))` o `minmax(185px, 1fr)`, nunca `minmax(260px, 1fr)`).
@@ -56,7 +56,7 @@ Todo dashboard en `Docu_Paginas/` cuya fuente de datos provenga de SQL Server (c
 - **Descarga estándar con SheetJS:** Implementar la función de exportación (`exportarDataPlanaSQL()`) convirtiendo los datos planos a hoja Excel con `XLSX.utils.json_to_sheet(rawSqlData)` y descargando el archivo `.xlsx` con nombre estandarizado `Data_Plana_SQL_<Modulo>_<RangoFechas>.xlsx`.
 
 ### 8. Uso Obligatorio de `LectorTablasExcel` y `CacheTablasExcel` en .NET (Regla Obligatoria)
-Todo controlador en C# .NET (`ApiDesposte/Controllers/Excel/`) que lea archivos Excel (`.xlsx`, `.xlsm`) debe delegar la apertura y lectura a la capa de infraestructura [ApiDesposte/Infraestructura/Excel/LectorTablasExcel.cs](file:///ApiDesposte/Infraestructura/Excel/LectorTablasExcel.cs), según lo detallado en [.agents/rules/conexion-excel-onedrive.md](file:///.agents/rules/conexion-excel-onedrive.md):
+Todo controlador en C# .NET (`ApiDesposte/Controllers/Excel/`) que lea archivos Excel (`.xlsx`, `.xlsm`) debe delegar la apertura y lectura a las funciones compartidas [ApiDesposte/Funciones/Excel/LectorTablasExcel.cs](file:///ApiDesposte/Funciones/Excel/LectorTablasExcel.cs), según lo detallado en [.agents/rules/conexion-excel-onedrive.md](file:///.agents/rules/conexion-excel-onedrive.md):
 - **Apertura y limpieza segura en memoria:** Usar exclusivamente `LectorTablasExcel.AbrirEnMemoria(rutaExcel)`. Queda estrictamente prohibido instanciar `FileStream`, `MemoryStream` o manipular paquetes `SpreadsheetDocument` de OpenXml directamente en los controladores.
 - **Lectura dinámica de tablas:** Usar `LectorTablasExcel.LeerTablaTalCual(workbook, nombreHoja, nombreTabla)` para extraer dinámicamente las columnas desde `HeadersRow()`, con tipado automático (`Dictionary<string, object?>`) y soporte de fallback a `RangeUsed()`.
 - **Caché en memoria concurrente:** Para endpoints que expongan colecciones de tablas completas, usar `CacheTablasExcel` (ej. `new CacheTablasExcel(TimeSpan.FromSeconds(60))`) llamando a `Cache.Obtener(rutaExcel, MapeoTablas, forzarRecarga)`.
@@ -68,6 +68,15 @@ Todo dashboard en `Docu_Paginas/` con vistas Diario / Semanal / Mensual debe seg
 - **Semanal:** selección múltiple de semanas, por defecto las **12 últimas semanas**.
 - **Mensual:** selección múltiple de años, por defecto el **último año**.
 - Cada vista conserva su propia selección; una nueva consulta o "Reestablecer" devuelve todas a su valor por defecto.
+
+### 10. Organización del Proyecto y Funciones Compartidas (Regla Obligatoria)
+Todo archivo nuevo o movido debe respetar la estructura descrita en [ESTRUCTURA_PROYECTO.md](ESTRUCTURA_PROYECTO.md):
+- **Código compartido en `Funciones/`, una carpeta por lado:** `ApiDesposte/Funciones/<Área>/` (C#, namespace `ApiDesposte.Funciones.<Área>`) y `Docu_Paginas/Funciones/` (JS/CSS). C# y JavaScript no comparten archivos.
+- **Controladores por fuente de datos:** `Controllers/Excel/`, `Controllers/Sql/`, `Controllers/Portal/`. Cada controlador es delgado: resuelve parámetros, llama a `Funciones/` y responde.
+- **SQL Server:** ejecutar SPs que devuelven filas tal cual con `EjecutorSql.EjecutarTalCualAsync(...)` y leer fechas de la query string con `ParametrosFecha` (`TryParsear` estricto o `FormatearParaSp` flexible). No repetir `new SqlConnection` ni parseo de fechas en cada controlador (salvo los que mapean a DTO tipado).
+- **Enlaces del frontend:** `<link rel="stylesheet" href="Funciones/responsive.css?v=3">` y `<script src="Funciones/config.js"></script>`.
+- **Datos de ejecución en `ApiDesposte/Datos/`** (ej. `Datos/dashboards_estado.json` y la caché de diagramas `Datos/sps/`): nunca dentro de `Docu_Paginas/` (se publicaría en la web). El `.csproj` los excluye de la compilación y la publicación.
+- **Secretos fuera del repositorio:** cadena de conexión, PIN y claves de API se leen de variables de entorno (`ConnectionStrings__SqlDesposte`, `AdminConfig__Pin`, `DEEPSEEK_API_KEY`, `GEMINI_API_KEY`); `appsettings.json` las deja vacías.
 
 ## Sincronización Obligatoria de Reglas (`AGENTS.md` y `CLAUDE.md`)
 

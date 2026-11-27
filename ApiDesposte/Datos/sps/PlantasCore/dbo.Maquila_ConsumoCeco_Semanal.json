@@ -1,0 +1,167 @@
+﻿{
+  "NombreSP": "Maquila_ConsumoCeco_Semanal",
+  "BaseDatos": "PlantasCore",
+  "Esquema": "dbo",
+  "UltimaModificacionSQL": "2026-02-19T17:02:35.96",
+  "FechaGeneracion": "2026-11-27T11:55:30.3037345-05:00",
+  "Modelo": "DeepSeek \u00B7 deepseek-chat",
+  "Diagrama": {
+    "spName": "Maquila_ConsumoCeco_Semanal",
+    "esquema": "PlantasCore.dbo",
+    "badge": "PlantasCore.dbo \u00B7 Maquila \u00B7 Consumo Ceco Semanal",
+    "subtitulo": "Consolida consumo semanal por centro de costo y producci\u00F3n origen/resultado por grupo",
+    "ultimaModificacion": "2026-02-19T17:02:35",
+    "etapa1_fuentes": {
+      "titulo": "1. Fuentes de datos",
+      "tarjetas": [
+        {
+          "titulo": "Maquila_ConsumosCentroCostos",
+          "estiloCabecera": "primary",
+          "joinLabel": "INNER JOIN Maquila_GrupoCeco ON CentroCosto \u00B7 INNER JOIN Maquila_Grupos ON IdGrupo",
+          "items": [
+            "Filtro: c.Estado = 1 (grupos activos)",
+            "Filtro: a.Fecha BETWEEN @Fecha1 AND @Fecha2",
+            "Agrupa por a\u00F1o, semana, rango fechas, IdGrupo, CentroCosto y art\u00EDculo",
+            "Suma Cantidad1 y Total1; Tipo = 3",
+            "ValidaMantto = 1 si LEFT(rc_CentroCosto,3) = \u0027310\u0027"
+          ]
+        },
+        {
+          "titulo": "Maquila_Produccion_Semanal",
+          "estiloCabecera": "secondary",
+          "joinLabel": "INNER JOIN Maquila_Grupos ON IdGrupo",
+          "items": [
+            "Filtro: b.Estado = 1",
+            "CROSS APPLY: KgOrigen \u2192 Tipo 1 (PROD. ORIGEN)",
+            "CROSS APPLY: kgRend \u2192 Tipo 2 (PROD. RESULTADO)",
+            "Inserta en #Consumo_Ceco_Semana con rc_CentroCosto y CodigoArticulo vac\u00EDos"
+          ]
+        },
+        {
+          "titulo": "#Consumo_Ceco_Semana",
+          "estiloCabecera": "dark",
+          "items": [
+            "Tabla temporal intermedia (SELECT INTO \u002B INSERT)",
+            "Almacena consumos por ceco y kilos origen/rendimiento",
+            "Se elimina si existe antes de recrearse"
+          ]
+        }
+      ]
+    },
+    "etapa2_transformacion": {
+      "titulo": "2. Transformaci\u00F3n",
+      "tarjetas": [
+        {
+          "titulo": "Bloque Consumo por Ceco",
+          "subbloques": [
+            {
+              "subtitulo": "Agregaci\u00F3n semanal",
+              "bullets": [
+                "Calcula A\u00F1oSem con FORMAT(datepart(week),\u00270#\u0027)",
+                "fecha_inicio y fecha_fin con DATEFIRST 1 (lunes-domingo)",
+                "Tipo = 3 para consumos de centro de costo",
+                "ValidaMantto marca cecos de mantenimiento (310)"
+              ]
+            }
+          ]
+        },
+        {
+          "titulo": "Bloque Producci\u00F3n Semanal",
+          "subbloques": [
+            {
+              "subtitulo": "Kilos origen y resultado",
+              "bullets": [
+                "Tipo 1 = KgOrigen (PROD. ORIGEN)",
+                "Tipo 2 = kgRend (PROD. RESULTADO)",
+                "Se desdobla una fila por cada m\u00E9trica v\u00EDa CROSS APPLY"
+              ]
+            }
+          ]
+        },
+        {
+          "titulo": "Resumen Final",
+          "subbloques": [
+            {
+              "subtitulo": "Clasificaci\u00F3n T_Tipo",
+              "bullets": [
+                "ValidaMantto=1 \u2192 MANTENIMIENTO",
+                "Tipo 1 o 2 \u2192 PRODUCCION",
+                "Art\u00EDculos 02-12-01/02/03/04/06/07 o 10-06/20 \u2192 Nombre de Clase",
+                "Art\u00EDculos 01 \u2192 INSUMOS",
+                "Familia COMEDOR o PRESTACIONES ALIMENTARIAS \u2192 SERV. DE ALIMENTACION",
+                "Familia ELECTRICIDAD \u2192 E. ELECTRICA",
+                "Resto \u2192 Nombre de Grupo"
+              ]
+            }
+          ]
+        }
+      ],
+      "nodoCentral": {
+        "titulo": "C\u00E1lculo Soles/Kg",
+        "descripcion": "Costo unitario por grupo y semana dividiendo el Total entre los kilos resultado (Tipo 2)",
+        "formula": "SolesKg = a.Total / NULLIF(SUM(CASE WHEN Tipo=2 THEN Total ELSE 0 END) OVER (PARTITION BY IdGrupo, A\u00F1oSem), 0)"
+      }
+    },
+    "etapa3_catalogos": {
+      "titulo": "3. Cat\u00E1logos",
+      "tituloTarjeta": "Cruces con maestros",
+      "pasos": [
+        {
+          "caja": "Desposte.dbo.Articulos",
+          "detalle": "LEFT JOIN por CodigoArticulo para obtener Nombre del art\u00EDculo",
+          "tipoJoin": "LEFT JOIN"
+        },
+        {
+          "caja": "PlantasCore.dbo.Maquila_Grupos",
+          "detalle": "LEFT JOIN por IdGrupo para NombreGrupo",
+          "tipoJoin": "LEFT JOIN"
+        },
+        {
+          "caja": "Desposte.dbo.Grupo",
+          "detalle": "LEFT JOIN LEFT(CodigoArticulo,2) = Codigo",
+          "tipoJoin": "LEFT JOIN"
+        },
+        {
+          "caja": "Desposte.dbo.Clase",
+          "detalle": "LEFT JOIN Grupo \u002B SUBSTRING(CodigoArticulo,3,2) = Codigo",
+          "tipoJoin": "LEFT JOIN"
+        },
+        {
+          "caja": "Desposte.dbo.Familia",
+          "detalle": "LEFT JOIN Grupo \u002B Clase \u002B SUBSTRING(CodigoArticulo,5,2) = Codigo",
+          "tipoJoin": "LEFT JOIN"
+        }
+      ],
+      "badges": [
+        "MANTENIMIENTO",
+        "PRODUCCION",
+        "INSUMOS",
+        "SERV. DE ALIMENTACION",
+        "E. ELECTRICA",
+        "Clase",
+        "Grupo"
+      ]
+    },
+    "etapa4_salida": {
+      "tituloTarjeta": "Resultado Final",
+      "columnas": [
+        "A\u00F1o",
+        "A\u00F1oSem",
+        "fecha_inicio",
+        "fecha_fin",
+        "IdGrupo",
+        "NombreGrupo",
+        "rc_CentroCosto",
+        "ValidaMantto",
+        "CodigoArticulo",
+        "Nombre",
+        "Cantidad",
+        "Total",
+        "Tipo",
+        "T_Tipo",
+        "SolesKg"
+      ],
+      "pieFiltro": "Sin WHERE ni ORDER BY final; filtros aplicados en fuentes (Estado=1 y rango @Fecha1-@Fecha2)"
+    }
+  }
+}
